@@ -40,22 +40,19 @@ final class LLMService: ObservableObject {
 
         isGenerating = true
 
-        // Capture the continuation synchronously — AsyncThrowingStream's closure
-        // is called during init, so this variable is set before we create the Task.
-        var capturedContinuation: AsyncThrowingStream<String, Error>.Continuation?
+        // nonisolated(unsafe): AsyncThrowingStream's init closure is @Sendable but
+        // always executes synchronously on the calling actor before returning.
+        // No concurrent access occurs — safe to suppress the Swift 6 strict concurrency error.
+        nonisolated(unsafe) var capturedContinuation: AsyncThrowingStream<String, Error>.Continuation?
         let stream = AsyncThrowingStream<String, Error> { capturedContinuation = $0 }
 
-        guard let continuation = capturedContinuation else {
-            // Unreachable: the closure above always executes synchronously.
-            isGenerating = false
-            return AsyncThrowingStream { $0.finish(throwing: LLMError.modelNotLoaded) }
-        }
+        // Force-unwrap is safe: the closure above always runs synchronously during stream init.
+        let continuation = capturedContinuation!
 
         let task = Task { [weak self] in
+            // defer only handles service state — NOT the continuation.
+            // Each branch below calls continuation.finish/finish(throwing:) exactly once.
             defer {
-                // Always finish the continuation so callers never await indefinitely,
-                // even if LLMService is deallocated mid-stream.
-                continuation.finish()
                 Task { @MainActor [weak self] in
                     self?.isGenerating = false
                     self?.currentTask = nil
@@ -63,18 +60,19 @@ final class LLMService: ObservableObject {
             }
             do {
                 for await token in llama.start(for: prompt) {
-                    if Task.isCancelled { return }
+                    if Task.isCancelled {
+                        continuation.finish()
+                        return
+                    }
                     continuation.yield(token)
                 }
+                continuation.finish()
             } catch {
                 continuation.finish(throwing: error)
             }
         }
 
-        // Synchronous assignment — no secondary Task, no race window where
-        // cancelGeneration() could miss the running task.
         currentTask = task
-
         return stream
     }
 

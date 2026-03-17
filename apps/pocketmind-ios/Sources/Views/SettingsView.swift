@@ -84,6 +84,8 @@ struct SettingsView: View {
                         viewModel.selectModel(model)
                         downloadViewModel.selectModel(model)  // cancels prior download, updates selection
                         Task { await downloadViewModel.loadModel() }
+                    } else {
+                        downloadViewModel.selectModel(model)  // pre-selects for the download flow
                     }
                 }
                 .swipeActions(edge: .trailing) {

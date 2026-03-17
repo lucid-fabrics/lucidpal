@@ -77,11 +77,19 @@ struct OnboardingView: View {
                             .font(.caption)
                             .foregroundStyle(.red)
                         Button("Delete Corrupted File & Retry") {
-                            downloadViewModel.deleteModel(downloadViewModel.selectedModel)
+                            // Clear error BEFORE delete to avoid a race where
+                            // deleteModel() triggers a state update while loadError is still set.
                             downloadViewModel.loadError = nil
+                            downloadViewModel.deleteModel(downloadViewModel.selectedModel)
                         }
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.orange)
+
+                        if let deleteError = downloadViewModel.deleteError {
+                            Text(deleteError)
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }

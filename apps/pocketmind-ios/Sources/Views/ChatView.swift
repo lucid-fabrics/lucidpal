@@ -80,10 +80,17 @@ struct ChatView: View {
                     inputFocused = false
                 }
             } label: {
-                Image(systemName: viewModel.isGenerating ? "stop.circle.fill" : "arrow.up.circle.fill")
-                    .font(.system(size: 32))
-                    .foregroundStyle(sendButtonColor)
+                if viewModel.isPreparing {
+                    Image(systemName: "hourglass.circle.fill")
+                        .font(.system(size: 32))
+                        .foregroundStyle(.orange)
+                } else {
+                    Image(systemName: viewModel.isGenerating ? "stop.circle.fill" : "arrow.up.circle.fill")
+                        .font(.system(size: 32))
+                        .foregroundStyle(sendButtonColor)
+                }
             }
+            .disabled(viewModel.isPreparing)
             .disabled(!viewModel.isModelLoaded && !viewModel.isGenerating)
             .disabled(
                 viewModel.inputText.trimmingCharacters(in: .whitespaces).isEmpty
