@@ -5,7 +5,7 @@ default_platform(:ios)
 SCHEME      = "PocketMind"
 PROJECT     = "PocketMind.xcodeproj"
 BUNDLE_ID   = "app.pocketmind"
-TEAM_ID     = "25YLHGUW42"
+TEAM_ID     = "KRPUAN3FFA"
 # Override via: export DEVICE_UDID=<your-udid>  (xcrun xctrace list devices)
 DEVICE_UDID = ENV["DEVICE_UDID"] || "00008150-000C08842604401C"
 
@@ -18,7 +18,7 @@ platform :ios do
   lane :generate do
     # __dir__ resolves to the fastlane/ directory regardless of cwd
     project_root = File.expand_path("..", __dir__)
-    sh("cd #{project_root} && xcodegen generate")
+    sh("cd #{project_root} && USER=$(id -un) /opt/homebrew/bin/xcodegen generate")
   end
 
   # ─────────────────────────────────────────────
@@ -26,40 +26,26 @@ platform :ios do
   # iOS requires one manual tap on the device to confirm Developer Mode.
   # After that first tap, this lane is fully silent on repeat runs.
   # ─────────────────────────────────────────────
-  desc "Enable Developer Mode on device and verify pairing"
+  desc "Enable Developer Mode on device and verify connectivity (USB or Wi-Fi)"
   lane :prepare do
-    UI.message("Checking device pairing...")
+    UI.message("Checking device connectivity...")
 
-    # Retry loop — keeps trying until user taps 'Trust' on the iPhone
-    paired = false
+    # Use xcrun xctrace — works over both USB and Wi-Fi (no libimobiledevice needed)
+    found = false
     10.times do |i|
-      result = sh("idevicepair pair --udid #{DEVICE_UDID} 2>&1", error_callback: ->(r) {}).strip
-      if result.include?("SUCCESS") || result.include?("already paired")
-        UI.success("Device paired")
-        paired = true
+      result = sh("xcrun xctrace list devices 2>&1", error_callback: ->(r) {})
+      if result.include?(DEVICE_UDID)
+        UI.success("Device found")
+        found = true
         break
       else
-        UI.important("[Attempt #{i+1}/10] Unlock iPhone and tap 'Trust This Computer'. Retrying in 5s...") if i == 0
+        UI.important("[Attempt #{i+1}/10] Unlock iPhone and ensure it's connected (USB or Wi-Fi). Retrying in 5s...") if i == 0
         sleep(5)
       end
     end
-    UI.shell_error!("Could not pair device after 10 attempts.") unless paired
+    UI.shell_error!("Device #{DEVICE_UDID} not found after 10 attempts.") unless found
 
-    UI.message("Enabling Developer Mode...")
-    dev_mode_result = sh(
-      "xcrun devicectl manage developerMode enable --device #{DEVICE_UDID} 2>&1",
-      error_callback: ->(r) {}
-    ).strip
-
-    if dev_mode_result.include?("already enabled") || dev_mode_result.include?("successfully")
-      UI.success("Developer Mode already enabled")
-    else
-      UI.important("If iPhone prompts 'Turn On Developer Mode' — tap it now.")
-      # Device may restart — wait for it to come back online
-      UI.message("Waiting 20s for device to be ready...")
-      sleep(20)
-    end
-
+    UI.important("Make sure Developer Mode is ON: Settings → Privacy & Security → Developer Mode")
     UI.success("Device ready for development")
   end
 
@@ -81,11 +67,11 @@ platform :ios do
       output_directory: "./build",
       output_name: "PocketMind-debug.ipa",
       clean: true,
-      xcargs: "DEVELOPMENT_TEAM=#{TEAM_ID} -allowProvisioningUpdates"
+      xcargs: "DEVELOPMENT_TEAM=#{TEAM_ID} -allowProvisioningUpdates -allowProvisioningDeviceRegistration"
     )
 
     install_on_device(
-      udid: DEVICE_UDID,
+      device_id: DEVICE_UDID,
       ipa: "./build/PocketMind-debug.ipa"
     )
 
