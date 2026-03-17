@@ -2,38 +2,37 @@ name: PocketMind
 options:
   bundleIdPrefix: app.pocketmind
   deploymentTarget:
-    iOS: "16.0"
+    iOS: "18.0"
   xcodeVersion: "16.0"
   swift: "6.0"
 
 packages:
-  SwiftLlama:
-    url: https://github.com/ShenghaiWang/SwiftLlama.git
-    from: 0.4.0
+  llama:
+    path: ./Packages/llama
 
 targets:
   PocketMind:
     type: application
     platform: iOS
-    deploymentTarget: "16.0"
+    deploymentTarget: "18.0"
     sources:
       - path: Sources
-    resources:
-      - path: Assets.xcassets
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.pocketmind
         SWIFT_VERSION: "6.0"
         INFOPLIST_FILE: Sources/App/Info.plist
         CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: ""
+        DEVELOPMENT_TEAM: "KRPUAN3FFA"
         ENABLE_HARDENED_RUNTIME: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
     dependencies:
-      - package: SwiftLlama
+      - package: llama
+        product: llama
     entitlements:
       path: Sources/App/PocketMind.entitlements
-      properties:
-        com.apple.developer.eventkit.calendars: true
+      properties: {}
 
 schemes:
   PocketMind:

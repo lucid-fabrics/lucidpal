@@ -7,6 +7,7 @@ final class ModelDownloadViewModel: ObservableObject {
     @Published var availableModels: [ModelInfo]
     @Published private(set) var downloadState: DownloadState = .idle
     @Published private(set) var isModelLoaded = false
+    @Published private(set) var isModelLoading = false
     @Published var loadError: String?
     @Published var deleteError: String?
 
@@ -21,13 +22,14 @@ final class ModelDownloadViewModel: ObservableObject {
 
         let ram = settings.deviceRAMGB
         let models = ModelInfo.available(physicalRAMGB: ram)
-        self.availableModels = models.isEmpty ? [.qwen3_1_7B] : models
+        self.availableModels = models.isEmpty ? [.qwen3_1B7] : models
         self.selectedModel = settings.selectedModel
         self.isModelLoaded = llmService.isLoaded
 
         // assign(to: &$property) uses weak self internally — no retain cycle.
         downloader.$state.assign(to: &$downloadState)
         llmService.$isLoaded.assign(to: &$isModelLoaded)
+        llmService.$isLoading.assign(to: &$isModelLoading)
 
         // Auto-load the previously selected model on launch if already on disk.
         // Task is enqueued after init completes — self is fully initialized when body runs.

@@ -20,11 +20,11 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
         FileManager.default.fileExists(atPath: localURL.path)
     }
 
-    static let qwen3_1_7B = ModelInfo(
+    static let qwen3_1B7 = ModelInfo(
         id: "qwen3-1.7b-q8",
-        displayName: "Qwen3 1.7B (Q8) · 1.8 GB",
-        downloadURL: knownURL("https://huggingface.co/Qwen/Qwen3-1.7B-GGUF/resolve/main/qwen3-1.7b-q8_0.gguf"),
-        filename: "qwen3-1.7b-q8_0.gguf",
+        displayName: "Qwen3 1.7B (Q8_0) · 1.83 GB",
+        downloadURL: knownURL("https://huggingface.co/Qwen/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q8_0.gguf"),
+        filename: "Qwen3-1.7B-Q8_0.gguf",
         fileSizeGB: 1.83,
         minimumRAMGB: 3
     )
@@ -32,18 +32,18 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
     static let qwen3_4B = ModelInfo(
         id: "qwen3-4b-q4",
         displayName: "Qwen3 4B (Q4_K_M) · 2.5 GB",
-        downloadURL: knownURL("https://huggingface.co/Qwen/Qwen3-4B-GGUF/resolve/main/qwen3-4b-q4_k_m.gguf"),
-        filename: "qwen3-4b-q4_k_m.gguf",
+        downloadURL: knownURL("https://huggingface.co/Qwen/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf"),
+        filename: "Qwen3-4B-Q4_K_M.gguf",
         fileSizeGB: 2.5,
         minimumRAMGB: 5
     )
 
     static func available(physicalRAMGB: Int) -> [ModelInfo] {
-        [.qwen3_1_7B, .qwen3_4B].filter { $0.minimumRAMGB <= physicalRAMGB }
+        [.qwen3_1B7, .qwen3_4B].filter { $0.minimumRAMGB <= physicalRAMGB }
     }
 
     static func recommended(physicalRAMGB: Int) -> ModelInfo {
-        physicalRAMGB >= 5 ? .qwen3_4B : .qwen3_1_7B
+        physicalRAMGB >= 5 ? .qwen3_4B : .qwen3_1B7
     }
 
     // Compile-time-constant URLs — preconditionFailure surfaces typos during development

@@ -68,6 +68,30 @@ extension ModelDownloader: URLSessionDownloadDelegate {
         didFinishDownloadingTo location: URL
     ) {
         guard let destination = destinationURL else { return }
+
+        // Validate HTTP status — HuggingFace can return 401/302→HTML on auth-gated models.
+        // URLSessionDownloadTask fires this delegate even on non-200, saving the error HTML as
+        // a file. Reject anything that isn't 200.
+        if let httpResponse = downloadTask.response as? HTTPURLResponse,
+           httpResponse.statusCode != 200 {
+            Task { @MainActor [weak self] in
+                self?.downloadTask = nil
+                self?.state = .failed(message: "Download failed: server returned HTTP \(httpResponse.statusCode). The model may require authentication.")
+            }
+            return
+        }
+
+        // Sanity-check file size: reject files under 10 MB (an HTML error page is a few KB).
+        let minExpectedBytes: Int64 = 10 * 1024 * 1024
+        let downloadedSize = (try? FileManager.default.attributesOfItem(atPath: location.path)[.size] as? Int64) ?? 0
+        guard downloadedSize >= minExpectedBytes else {
+            Task { @MainActor [weak self] in
+                self?.downloadTask = nil
+                self?.state = .failed(message: "Download appears corrupt (file too small: \(downloadedSize / 1024) KB). Check your connection and retry.")
+            }
+            return
+        }
+
         do {
             // Remove any pre-existing file (e.g. prior failed/partial download)
             if FileManager.default.fileExists(atPath: destination.path) {
@@ -76,19 +100,24 @@ extension ModelDownloader: URLSessionDownloadDelegate {
             try FileManager.default.moveItem(at: location, to: destination)
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
+                self?.session?.finishTasksAndInvalidate()
+                self?.session = nil
                 self?.state = .completed(url: destination)
             }
         } catch CocoaError.fileWriteOutOfSpace {
-            // Clean up partial file if it was created before disk ran out
             try? FileManager.default.removeItem(at: destination)
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
+                self?.session?.finishTasksAndInvalidate()
+                self?.session = nil
                 self?.state = .failed(message: "Not enough storage space. Free up space and try again.")
             }
         } catch {
             try? FileManager.default.removeItem(at: destination)
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
+                self?.session?.finishTasksAndInvalidate()
+                self?.session = nil
                 self?.state = .failed(message: error.localizedDescription)
             }
         }
