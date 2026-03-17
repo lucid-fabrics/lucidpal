@@ -2,14 +2,21 @@ import SwiftUI
 
 @main
 struct PocketMindApp: App {
+
+    // MARK: - Services
+
     private let settings = AppSettings()
     private let llmService = LLMService()
     private let calendarService = CalendarService()
     private let calendarActionController: CalendarActionController
 
+    // MARK: - ViewModels
+
     private let chatViewModel: ChatViewModel
     private let settingsViewModel: SettingsViewModel
     private let downloadViewModel: ModelDownloadViewModel
+
+    // MARK: - Initialization
 
     init() {
         let actionController = CalendarActionController(calendarService: calendarService)

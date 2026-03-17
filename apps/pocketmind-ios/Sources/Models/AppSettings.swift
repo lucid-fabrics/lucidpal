@@ -3,10 +3,15 @@ import SwiftUI
 
 @MainActor
 final class AppSettings: ObservableObject {
+
+    // MARK: - Stored Preferences
+
     @AppStorage("calendarAccessEnabled") var calendarAccessEnabled: Bool = false
     @AppStorage("selectedModelID") var selectedModelID: String = ModelInfo.qwen3_1B7.id
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
     @AppStorage("thinkingEnabled") var thinkingEnabled: Bool = true
+
+    // MARK: - Computed Properties
 
     var selectedModel: ModelInfo {
         switch selectedModelID {
@@ -16,7 +21,10 @@ final class AppSettings: ObservableObject {
     }
 
     var deviceRAMGB: Int {
-        let bytes = ProcessInfo.processInfo.physicalMemory
-        return Int(bytes / 1_073_741_824) // bytes → GB
+        Int(ProcessInfo.processInfo.physicalMemory / Self.bytesPerGB)
     }
+
+    // MARK: - Private Constants
+
+    private static let bytesPerGB: UInt64 = 1_073_741_824
 }
