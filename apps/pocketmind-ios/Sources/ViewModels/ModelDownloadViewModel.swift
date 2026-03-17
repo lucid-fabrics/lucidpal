@@ -13,7 +13,6 @@ final class ModelDownloadViewModel: ObservableObject {
     let downloader: ModelDownloader
     private let llmService: LLMService
     let settings: AppSettings
-    private var cancellables = Set<AnyCancellable>()
 
     init(llmService: LLMService, settings: AppSettings) {
         self.llmService = llmService
@@ -26,22 +25,22 @@ final class ModelDownloadViewModel: ObservableObject {
         self.selectedModel = settings.selectedModel
         self.isModelLoaded = llmService.isLoaded
 
-        // Bridge downloader state into this ViewModel so views update correctly
-        downloader.$state
-            .receive(on: RunLoop.main)
-            .assign(to: \.downloadState, on: self)
-            .store(in: &cancellables)
+        // assign(to: &$property) uses weak self internally — no retain cycle.
+        downloader.$state.assign(to: &$downloadState)
+        llmService.$isLoaded.assign(to: &$isModelLoaded)
 
-        // Mirror LLMService load state so views never observe the service directly
-        llmService.$isLoaded
-            .receive(on: RunLoop.main)
-            .assign(to: \.isModelLoaded, on: self)
-            .store(in: &cancellables)
-
-        // Auto-load the previously selected model on first launch if already downloaded
+        // Auto-load the previously selected model on launch if already on disk.
+        // Task is enqueued after init completes — self is fully initialized when body runs.
         if settings.selectedModel.isDownloaded && !llmService.isLoaded {
             Task { await self.loadModel() }
         }
+    }
+
+    /// Select a model. Cancels any in-flight download for the previous selection.
+    func selectModel(_ model: ModelInfo) {
+        guard model.id != selectedModel.id else { return }
+        cancelDownload()  // Clear stale progress from the previous model
+        selectedModel = model
     }
 
     func startDownload() {
@@ -58,6 +57,7 @@ final class ModelDownloadViewModel: ObservableObject {
         do {
             try await llmService.loadModel(at: selectedModel.localURL)
             settings.selectedModelID = selectedModel.id
+            downloader.state = .idle  // Reset download state — clears stale "Load Model" button
         } catch {
             loadError = error.localizedDescription
         }

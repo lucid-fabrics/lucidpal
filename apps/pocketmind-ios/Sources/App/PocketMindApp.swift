@@ -45,8 +45,11 @@ private struct RootView: View {
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
 
     var body: some View {
-        // Gate on downloadViewModel.isModelLoaded — never observe LLMService directly from a View
-        if settings.hasCompletedOnboarding && downloadViewModel.isModelLoaded {
+        // Gate only on hasCompletedOnboarding — not isModelLoaded.
+        // If the model unloads post-onboarding (memory pressure, delete), the user
+        // stays in ContentView where ChatView shows the "no model" banner + Settings
+        // link. Kicking back to Onboarding would orphan chat history.
+        if settings.hasCompletedOnboarding {
             ContentView(
                 chatViewModel: chatViewModel,
                 settingsViewModel: settingsViewModel,

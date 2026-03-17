@@ -82,7 +82,7 @@ struct SettingsView: View {
                 .onTapGesture {
                     if model.isDownloaded {
                         viewModel.selectModel(model)
-                        downloadViewModel.selectedModel = model
+                        downloadViewModel.selectModel(model)  // cancels prior download, updates selection
                         Task { await downloadViewModel.loadModel() }
                     }
                 }

@@ -3,10 +3,13 @@ import Foundation
 
 @MainActor
 final class CalendarService: ObservableObject {
-    private let store = EKEventStore()
+    // nonisolated(unsafe): EKEventStore is documented as thread-safe for read operations.
+    // Marking it nonisolated(unsafe) allows background query offloading below.
+    nonisolated(unsafe) private let store = EKEventStore()
+
     @Published private(set) var authorizationStatus: EKAuthorizationStatus = .notDetermined
 
-    // Reuse formatter across calls — DateFormatter is expensive to construct
+    // Reuse formatter — DateFormatter is expensive to construct
     private static let eventFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateStyle = .medium
@@ -42,24 +45,31 @@ final class CalendarService: ObservableObject {
     }
 
     /// Fetches events and formats them as a prompt-ready string.
-    /// Refreshes authorization status on every call to detect runtime revocation.
-    /// Caps at 50 events to prevent LLM context overflow.
+    /// - Refreshes authorization status on every call to detect runtime revocation.
+    /// - Caps at 50 events to prevent LLM context overflow.
+    /// - Runs the EKEventStore query on a background thread (EKEventStore is thread-safe).
     func fetchEvents(from start: Date = .now, days: Int = 7) async -> String {
-        // Re-check auth in case user revoked access in Settings while app was running
         authorizationStatus = EKEventStore.authorizationStatus(for: .event)
         guard isAuthorized else { return "" }
 
         let end = Calendar.current.date(byAdding: .day, value: days, to: start) ?? start
         let predicate = store.predicateForEvents(withStart: start, end: end, calendars: nil)
-        let events = store.events(matching: predicate)
-            .sorted { $0.startDate < $1.startDate }
-            .prefix(50)
 
-        guard !events.isEmpty else {
-            return "No events in the next \(days) days."
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async { [store, predicate, days] in
+                let events = store.events(matching: predicate)
+                    .sorted { $0.startDate < $1.startDate }
+                    .prefix(50)
+
+                let result: String
+                if events.isEmpty {
+                    result = "No events in the next \(days) days."
+                } else {
+                    result = events.map { CalendarService.formatEvent($0) }.joined(separator: "\n")
+                }
+                continuation.resume(returning: result)
+            }
         }
-
-        return events.map { Self.formatEvent($0) }.joined(separator: "\n")
     }
 
     private static func formatEvent(_ event: EKEvent) -> String {

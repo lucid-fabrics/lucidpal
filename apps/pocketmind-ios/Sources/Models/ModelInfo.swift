@@ -1,6 +1,6 @@
 import Foundation
 
-struct ModelInfo: Identifiable, Hashable {
+struct ModelInfo: Identifiable, Hashable, Sendable {
     let id: String
     let displayName: String
     let downloadURL: URL

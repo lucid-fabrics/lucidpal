@@ -69,6 +69,22 @@ struct OnboardingView: View {
             } else {
                 ModelDownloadView(viewModel: downloadViewModel)
                     .padding(.horizontal, -8)
+
+                // Corrupted model recovery — shown when loadModel() fails after auto-load
+                if let error = downloadViewModel.loadError {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                        Button("Delete Corrupted File & Retry") {
+                            downloadViewModel.deleteModel(downloadViewModel.selectedModel)
+                            downloadViewModel.loadError = nil
+                        }
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.orange)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
         }
         .padding(16)

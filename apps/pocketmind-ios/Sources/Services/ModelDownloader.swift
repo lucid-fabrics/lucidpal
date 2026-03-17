@@ -1,6 +1,6 @@
 import Foundation
 
-enum DownloadState: Equatable {
+enum DownloadState: Equatable, Sendable {
     case idle
     case downloading(progress: Double)
     case completed(url: URL)

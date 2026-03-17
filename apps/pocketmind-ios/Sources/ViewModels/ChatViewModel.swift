@@ -12,7 +12,6 @@ final class ChatViewModel: ObservableObject {
     private let llmService: LLMService
     private let calendarService: CalendarService
     private let settings: AppSettings
-    private var cancellables = Set<AnyCancellable>()
 
     init(llmService: LLMService, calendarService: CalendarService, settings: AppSettings) {
         self.llmService = llmService
@@ -20,16 +19,9 @@ final class ChatViewModel: ObservableObject {
         self.settings = settings
         self.isModelLoaded = llmService.isLoaded
 
-        // Mirror LLMService state so views never observe the service directly
-        llmService.$isLoaded
-            .receive(on: RunLoop.main)
-            .assign(to: \.isModelLoaded, on: self)
-            .store(in: &cancellables)
-
-        llmService.$isGenerating
-            .receive(on: RunLoop.main)
-            .assign(to: \.isGenerating, on: self)
-            .store(in: &cancellables)
+        // assign(to: &$property) uses weak self internally — no retain cycle.
+        llmService.$isLoaded.assign(to: &$isModelLoaded)
+        llmService.$isGenerating.assign(to: &$isGenerating)
     }
 
     func sendMessage() async {
@@ -38,21 +30,25 @@ final class ChatViewModel: ObservableObject {
 
         inputText = ""
         messages.append(ChatMessage(role: .user, content: text))
+        errorMessage = nil
+
+        // Build system prompt before showing the assistant placeholder —
+        // prevents a visible empty bubble during the calendar fetch.
+        let systemPrompt = await buildSystemPrompt()
 
         let assistantMsg = ChatMessage(role: .assistant, content: "")
         messages.append(assistantMsg)
         let assistantID = assistantMsg.id  // Capture ID — safe against clearHistory() mid-stream
 
-        errorMessage = nil
-
-        let systemPrompt = await buildSystemPrompt()
-        // Snapshot history before the empty assistant placeholder
-        let historySnapshot = messages.dropLast()
-        let prompt = LLMService.buildPrompt(messages: Array(historySnapshot), systemPrompt: systemPrompt)
+        // Snapshot history without the empty assistant placeholder
+        let prompt = LLMService.buildPrompt(
+            messages: Array(messages.dropLast()),
+            systemPrompt: systemPrompt
+        )
 
         do {
             for try await token in llmService.generate(prompt: prompt) {
-                // Look up by ID each iteration — nil-safe if clearHistory() was called
+                // ID-based lookup — nil-safe if clearHistory() wipes messages during streaming
                 guard let idx = messages.firstIndex(where: { $0.id == assistantID }) else { break }
                 messages[idx].content += token
             }

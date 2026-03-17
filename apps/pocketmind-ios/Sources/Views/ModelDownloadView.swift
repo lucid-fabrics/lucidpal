@@ -33,7 +33,7 @@ struct ModelDownloadView: View {
         VStack(spacing: 8) {
             ForEach(viewModel.availableModels) { model in
                 Button {
-                    viewModel.selectedModel = model
+                    viewModel.selectModel(model)
                 } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {

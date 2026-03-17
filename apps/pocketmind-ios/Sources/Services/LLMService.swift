@@ -31,7 +31,6 @@ final class LLMService: ObservableObject {
     }
 
     func generate(prompt: String) -> AsyncThrowingStream<String, Error> {
-        // Guard concurrent calls before creating the stream
         guard !isGenerating else {
             return AsyncThrowingStream { $0.finish(throwing: LLMError.generationInProgress) }
         }
@@ -41,32 +40,42 @@ final class LLMService: ObservableObject {
 
         isGenerating = true
 
-        return AsyncThrowingStream { [weak self] continuation in
-            let task = Task { [weak self] in
-                defer {
-                    Task { @MainActor [weak self] in
-                        self?.isGenerating = false
-                        self?.currentTask = nil
-                    }
-                }
-                do {
-                    for await token in llama.start(for: prompt) {
-                        if Task.isCancelled {
-                            continuation.finish()
-                            return
-                        }
-                        continuation.yield(token)
-                    }
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
+        // Capture the continuation synchronously — AsyncThrowingStream's closure
+        // is called during init, so this variable is set before we create the Task.
+        var capturedContinuation: AsyncThrowingStream<String, Error>.Continuation?
+        let stream = AsyncThrowingStream<String, Error> { capturedContinuation = $0 }
+
+        guard let continuation = capturedContinuation else {
+            // Unreachable: the closure above always executes synchronously.
+            isGenerating = false
+            return AsyncThrowingStream { $0.finish(throwing: LLMError.modelNotLoaded) }
+        }
+
+        let task = Task { [weak self] in
+            defer {
+                // Always finish the continuation so callers never await indefinitely,
+                // even if LLMService is deallocated mid-stream.
+                continuation.finish()
+                Task { @MainActor [weak self] in
+                    self?.isGenerating = false
+                    self?.currentTask = nil
                 }
             }
-            // Store task reference on MainActor for cancellation
-            Task { @MainActor [weak self] in
-                self?.currentTask = task
+            do {
+                for await token in llama.start(for: prompt) {
+                    if Task.isCancelled { return }
+                    continuation.yield(token)
+                }
+            } catch {
+                continuation.finish(throwing: error)
             }
         }
+
+        // Synchronous assignment — no secondary Task, no race window where
+        // cancelGeneration() could miss the running task.
+        currentTask = task
+
+        return stream
     }
 
     // MARK: - Qwen3 chat template
