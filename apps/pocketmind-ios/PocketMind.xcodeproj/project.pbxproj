@@ -173,7 +173,7 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					1D0CA2ECB46D2B4FDA80A257 = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = 25YLHGUW42;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -234,7 +234,7 @@
 				CODE_SIGN_ENTITLEMENTS = Sources/App/PocketMind.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 25YLHGUW42;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Sources/App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -375,7 +375,7 @@
 				CODE_SIGN_ENTITLEMENTS = Sources/App/PocketMind.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 25YLHGUW42;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Sources/App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
