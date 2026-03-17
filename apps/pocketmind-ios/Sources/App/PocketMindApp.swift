@@ -16,6 +16,10 @@ struct PocketMindApp: App {
     private let settingsViewModel: SettingsViewModel
     private let downloadViewModel: ModelDownloadViewModel
 
+    // MARK: - Environment
+
+    @Environment(\.scenePhase) private var scenePhase
+
     // MARK: - Initialization
 
     init() {
@@ -35,7 +39,19 @@ struct PocketMindApp: App {
             llmService: llmService,
             settings: settings
         )
+
+        // Cancel LLM generation on memory pressure to avoid Jetsam crash
+        let service = llmService
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            Task { @MainActor in service.cancelGeneration() }
+        }
     }
+
+    // MARK: - Body
 
     var body: some Scene {
         WindowGroup {
@@ -46,6 +62,19 @@ struct PocketMindApp: App {
                 downloadViewModel: downloadViewModel
             )
         }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            consumePendingSiriQuery()
+        }
+    }
+
+    // MARK: - Siri Integration
+
+    private func consumePendingSiriQuery() {
+        guard let query = UserDefaults.standard.string(forKey: "pm_siri_pending_query"),
+              !query.isEmpty else { return }
+        UserDefaults.standard.removeObject(forKey: "pm_siri_pending_query")
+        chatViewModel.handleSiriQuery(query)
     }
 }
 
