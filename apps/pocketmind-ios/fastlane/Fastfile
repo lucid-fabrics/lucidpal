@@ -30,30 +30,34 @@ platform :ios do
   lane :prepare do
     UI.message("Checking device pairing...")
 
-    # Verify device is trusted (user must have tapped 'Trust' on iPhone once)
-    paired = sh("idevicepair pair --udid #{DEVICE_UDID} 2>&1", error_callback: ->(r) {}).strip
-    if paired.include?("SUCCESS") || paired.include?("already paired")
-      UI.success("Device is paired")
-    else
-      UI.important("Unlock your iPhone and tap 'Trust This Computer', then press Enter...")
-      STDIN.gets
-      sh("idevicepair pair --udid #{DEVICE_UDID}")
+    # Retry loop — keeps trying until user taps 'Trust' on the iPhone
+    paired = false
+    10.times do |i|
+      result = sh("idevicepair pair --udid #{DEVICE_UDID} 2>&1", error_callback: ->(r) {}).strip
+      if result.include?("SUCCESS") || result.include?("already paired")
+        UI.success("Device paired")
+        paired = true
+        break
+      else
+        UI.important("[Attempt #{i+1}/10] Unlock iPhone and tap 'Trust This Computer'. Retrying in 5s...") if i == 0
+        sleep(5)
+      end
     end
+    UI.shell_error!("Could not pair device after 10 attempts.") unless paired
 
-    UI.message("Enabling Developer Mode (you may need to tap 'Turn On' on the iPhone)...")
+    UI.message("Enabling Developer Mode...")
     dev_mode_result = sh(
       "xcrun devicectl manage developerMode enable --device #{DEVICE_UDID} 2>&1",
       error_callback: ->(r) {}
     ).strip
 
-    if dev_mode_result.include?("already enabled") || dev_mode_result.include?("success")
+    if dev_mode_result.include?("already enabled") || dev_mode_result.include?("successfully")
       UI.success("Developer Mode already enabled")
     else
-      UI.important("Tap 'Turn On' on your iPhone if prompted, then press Enter...")
-      STDIN.gets
-      # Device restarts after enabling — wait for it to come back
-      UI.message("Waiting for device to restart...")
-      sleep(15)
+      UI.important("If iPhone prompts 'Turn On Developer Mode' — tap it now.")
+      # Device may restart — wait for it to come back online
+      UI.message("Waiting 20s for device to be ready...")
+      sleep(20)
     end
 
     UI.success("Device ready for development")
