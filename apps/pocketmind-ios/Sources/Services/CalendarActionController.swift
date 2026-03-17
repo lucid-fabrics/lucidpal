@@ -106,9 +106,11 @@ final class CalendarActionController {
             return .failure("⚠️ No search title provided for update.")
         }
         do {
-            // Search ±3 days around the target date
-            let windowStart = Calendar.current.date(byAdding: .day, value: -3, to: p.start) ?? p.start
-            let windowEnd   = Calendar.current.date(byAdding: .day, value:  3, to: p.end)   ?? p.end
+            // Search a 60-day window centred on today rather than on the LLM-emitted date.
+            // This avoids missing the original event when the user asks to rename/move it
+            // to a date far from its current position.
+            let windowStart = Calendar.current.date(byAdding: .day, value: -30, to: .now) ?? .now
+            let windowEnd   = Calendar.current.date(byAdding: .day, value:  30, to: .now) ?? .now
             let predicate = calendarService.store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: nil)
             let events = calendarService.store.events(matching: predicate)
             guard let event = events.first(where: { ($0.title ?? "").localizedCaseInsensitiveContains(searchTitle) }) else {

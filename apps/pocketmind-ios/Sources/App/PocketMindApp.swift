@@ -74,6 +74,10 @@ struct PocketMindApp: App {
         guard let query = UserDefaults.standard.string(forKey: "pm_siri_pending_query"),
               !query.isEmpty else { return }
         UserDefaults.standard.removeObject(forKey: "pm_siri_pending_query")
+        guard chatViewModel.isModelLoaded else {
+            chatViewModel.errorMessage = "Model not ready — please wait for it to load, then ask again."
+            return
+        }
         chatViewModel.handleSiriQuery(query)
     }
 }

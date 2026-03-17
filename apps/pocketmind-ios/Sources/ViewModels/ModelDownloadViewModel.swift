@@ -62,6 +62,7 @@ final class ModelDownloadViewModel: ObservableObject {
             downloader.resetState()  // Reset download state — clears stale "Load Model" button
         } catch {
             loadError = error.localizedDescription
+            downloader.resetState()  // Reset download UI — don't leave it stuck in "Load Model" state
         }
     }
 
