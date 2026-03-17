@@ -36,8 +36,10 @@ final class ChatViewModel: ObservableObject {
         // Build system prompt before showing the assistant placeholder —
         // prevents a visible empty bubble during the calendar fetch.
         isPreparing = true
+        // defer guarantees isPreparing resets even if buildSystemPrompt() is extended
+        // in the future to be throwing or if Swift runtime unwinds this frame.
+        defer { isPreparing = false }
         let systemPrompt = await buildSystemPrompt()
-        isPreparing = false
 
         let assistantMsg = ChatMessage(role: .assistant, content: "")
         messages.append(assistantMsg)
