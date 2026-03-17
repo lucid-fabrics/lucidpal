@@ -12,9 +12,11 @@ struct SettingsView: View {
             Form {
                 calendarSection
                 modelSection
+                inferenceSection
                 aboutSection
             }
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.large)
             .alert("Delete Error", isPresented: .constant(downloadViewModel.deleteError != nil)) {
                 Button("OK") { downloadViewModel.deleteError = nil }
             } message: {
@@ -35,7 +37,7 @@ struct SettingsView: View {
                 Button("Allow Calendar Access") {
                     Task { await viewModel.requestCalendarAccess() }
                 }
-                .foregroundStyle(.accent)
+                .foregroundStyle(Color.accentColor)
             } else {
                 Toggle("Use calendar in chat", isOn: Binding(
                     get: { viewModel.settings.calendarAccessEnabled },
@@ -64,7 +66,7 @@ struct SettingsView: View {
 
     private var modelSection: some View {
         Section {
-            ForEach(downloadViewModel.availableModels) { model in
+            ForEach(downloadViewModel.availableModels, id: \.id) { model in
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(model.displayName)
@@ -76,7 +78,7 @@ struct SettingsView: View {
                     Spacer()
                     if viewModel.settings.selectedModelID == model.id && downloadViewModel.isModelLoaded {
                         Image(systemName: "checkmark")
-                            .foregroundStyle(.accent)
+                            .foregroundStyle(Color.accentColor)
                     }
                 }
                 .contentShape(Rectangle())
@@ -105,6 +107,21 @@ struct SettingsView: View {
             Text("Model")
         } footer: {
             Text("Device RAM: \(viewModel.settings.deviceRAMGB) GB")
+        }
+    }
+
+    private var inferenceSection: some View {
+        Section {
+            Toggle(isOn: Binding(
+                get: { viewModel.settings.thinkingEnabled },
+                set: { viewModel.settings.thinkingEnabled = $0 }
+            )) {
+                Label("Thinking Mode", systemImage: "brain")
+            }
+        } header: {
+            Text("Inference")
+        } footer: {
+            Text("When on, the model reasons before answering (slower but more accurate). Turn off for instant replies.")
         }
     }
 
