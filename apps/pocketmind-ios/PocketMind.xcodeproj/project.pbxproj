@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		22DD8B453E83D972404B1141 /* SpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17BC5ED3E99AB927128B538 /* SpeechService.swift */; };
 		29AF9C1644EB1DBA9EC822A5 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F8CCE8E6FB28347D93C869 /* OnboardingView.swift */; };
 		4A58AC0F867DF8A7A811A85D /* PocketMindApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78BF7EEADC2A6E48DB74F5E9 /* PocketMindApp.swift */; };
 		4D9A3A3F26324F74BA3105A3 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E71755F4423670B08C5890 /* ChatView.swift */; };
@@ -18,11 +19,13 @@
 		6E71EBE2DE405A9C62CDC87A /* ModelInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF981EFA6472ACC7A4EAC6E /* ModelInfo.swift */; };
 		90F821364EC9DE5B6091C8A6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 979CF042BA43DF068D6BA427 /* ContentView.swift */; };
 		99FB9CEA9C09175E57859FF1 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C57AFE47F91EB40164B843F /* AppSettings.swift */; };
-		A1AA0FDDE97BCF0CB6F1AE80 /* SwiftLlama in Frameworks */ = {isa = PBXBuildFile; productRef = 6381A5AF522A904CD72D2B0C /* SwiftLlama */; };
+		A1AA0FDDE97BCF0CB6F1AE80 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = B668BB645B31666F0197D789 /* llama */; };
 		A49F828336DE087919543E16 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95AC9C8A5BA25C38328688EB /* SettingsViewModel.swift */; };
 		A5C77BCA78790115E658B337 /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EAA5A7FB227DCCA6BACB25C /* CalendarService.swift */; };
 		C033C2F0B82EDB5CEC33DC7B /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3BF69D3177D4BBE17CC1D1F /* ChatViewModel.swift */; };
+		C527E8CB5A979BDF1B29A51B /* CalendarActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0635F653727C5FC7632B651 /* CalendarActionController.swift */; };
 		D8AA6370CAF98BE9F55733A3 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 929E991CDFEEBC85C42D0EC6 /* SettingsView.swift */; };
+		F53FB960C47B3F9085D694D2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 79D226E65D59DA01784FEC0C /* Assets.xcassets */; };
 		F9484C88F0637E07F846649D /* MessageBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 003B25C43CBE913DF321F18A /* MessageBubbleView.swift */; };
 /* End PBXBuildFile section */
 
@@ -35,17 +38,21 @@
 		49E04EAFE1FBCE1DC1F74067 /* PocketMind.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PocketMind.entitlements; sourceTree = "<group>"; };
 		571F2AB04B35CA5F7570E1CD /* ModelDownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadView.swift; sourceTree = "<group>"; };
 		78BF7EEADC2A6E48DB74F5E9 /* PocketMindApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PocketMindApp.swift; sourceTree = "<group>"; };
+		79D226E65D59DA01784FEC0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7C57AFE47F91EB40164B843F /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		929E991CDFEEBC85C42D0EC6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		95AC9C8A5BA25C38328688EB /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		979CF042BA43DF068D6BA427 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		9EAA5A7FB227DCCA6BACB25C /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
+		A17BC5ED3E99AB927128B538 /* SpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechService.swift; sourceTree = "<group>"; };
+		A4B0F3E8F8E1E64ABEA02380 /* llama */ = {isa = PBXFileReference; lastKnownFileType = folder; name = llama; path = Packages/llama; sourceTree = SOURCE_ROOT; };
 		AC62D105304C003E0302B09B /* PocketMind.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PocketMind.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B1037B4EA77CF451D9319998 /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
 		B3BF69D3177D4BBE17CC1D1F /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
 		B4F8CCE8E6FB28347D93C869 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		CBA7D82AF887DCB8B5DD5FD6 /* ModelDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloader.swift; sourceTree = "<group>"; };
 		CEF981EFA6472ACC7A4EAC6E /* ModelInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInfo.swift; sourceTree = "<group>"; };
+		F0635F653727C5FC7632B651 /* CalendarActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,13 +60,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1AA0FDDE97BCF0CB6F1AE80 /* SwiftLlama in Frameworks */,
+				A1AA0FDDE97BCF0CB6F1AE80 /* llama in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0A48CC053D6CA75C57D4094D /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				A4B0F3E8F8E1E64ABEA02380 /* llama */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
 		38B25B0EF8375FC325BBA43F /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -71,6 +86,7 @@
 		546DECE501C8E6EAFE45121D /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				79D226E65D59DA01784FEC0C /* Assets.xcassets */,
 				7CE9164A8F29CBDADB3424B1 /* App */,
 				C47944E80F82BD4C105EADE5 /* Models */,
 				69D8FC4E84C106F99609AEB7 /* Services */,
@@ -83,9 +99,11 @@
 		69D8FC4E84C106F99609AEB7 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				F0635F653727C5FC7632B651 /* CalendarActionController.swift */,
 				9EAA5A7FB227DCCA6BACB25C /* CalendarService.swift */,
 				B1037B4EA77CF451D9319998 /* LLMService.swift */,
 				CBA7D82AF887DCB8B5DD5FD6 /* ModelDownloader.swift */,
+				A17BC5ED3E99AB927128B538 /* SpeechService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -136,6 +154,7 @@
 		E1655B2260A05B42271CDFC3 = {
 			isa = PBXGroup;
 			children = (
+				0A48CC053D6CA75C57D4094D /* Packages */,
 				546DECE501C8E6EAFE45121D /* Sources */,
 				38B25B0EF8375FC325BBA43F /* Products */,
 			);
@@ -149,6 +168,7 @@
 			buildConfigurationList = 0454AEED2E5303BEEF577B80 /* Build configuration list for PBXNativeTarget "PocketMind" */;
 			buildPhases = (
 				C1D58995A726578962E8A5E8 /* Sources */,
+				29DEBFBE883BBD5B67306C0E /* Resources */,
 				35179A794DF841764282CE7A /* Frameworks */,
 			);
 			buildRules = (
@@ -157,7 +177,7 @@
 			);
 			name = PocketMind;
 			packageProductDependencies = (
-				6381A5AF522A904CD72D2B0C /* SwiftLlama */,
+				B668BB645B31666F0197D789 /* llama */,
 			);
 			productName = PocketMind;
 			productReference = AC62D105304C003E0302B09B /* PocketMind.app */;
@@ -173,7 +193,7 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					1D0CA2ECB46D2B4FDA80A257 = {
-						DevelopmentTeam = 25YLHGUW42;
+						DevelopmentTeam = KRPUAN3FFA;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -188,7 +208,7 @@
 			mainGroup = E1655B2260A05B42271CDFC3;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				1E22A528FD04539C42090D1A /* XCRemoteSwiftPackageReference "SwiftLlama" */,
+				7CC70F680DA36D242BBE7468 /* XCLocalSwiftPackageReference "Packages/llama" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 38B25B0EF8375FC325BBA43F /* Products */;
@@ -200,12 +220,24 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		29DEBFBE883BBD5B67306C0E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F53FB960C47B3F9085D694D2 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		C1D58995A726578962E8A5E8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				99FB9CEA9C09175E57859FF1 /* AppSettings.swift in Sources */,
+				C527E8CB5A979BDF1B29A51B /* CalendarActionController.swift in Sources */,
 				A5C77BCA78790115E658B337 /* CalendarService.swift in Sources */,
 				573DE30FB5E1F48175825B86 /* ChatMessage.swift in Sources */,
 				4D9A3A3F26324F74BA3105A3 /* ChatView.swift in Sources */,
@@ -221,6 +253,7 @@
 				4A58AC0F867DF8A7A811A85D /* PocketMindApp.swift in Sources */,
 				D8AA6370CAF98BE9F55733A3 /* SettingsView.swift in Sources */,
 				A49F828336DE087919543E16 /* SettingsViewModel.swift in Sources */,
+				22DD8B453E83D972404B1141 /* SpeechService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,13 +264,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Sources/App/PocketMind.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 25YLHGUW42;
+				DEVELOPMENT_TEAM = KRPUAN3FFA;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Sources/App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -294,7 +328,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -356,7 +390,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -372,13 +406,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Sources/App/PocketMind.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 25YLHGUW42;
+				DEVELOPMENT_TEAM = KRPUAN3FFA;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Sources/App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -413,22 +448,17 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		1E22A528FD04539C42090D1A /* XCRemoteSwiftPackageReference "SwiftLlama" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ShenghaiWang/SwiftLlama.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.4.0;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		7CC70F680DA36D242BBE7468 /* XCLocalSwiftPackageReference "Packages/llama" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/llama;
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		6381A5AF522A904CD72D2B0C /* SwiftLlama */ = {
+		B668BB645B31666F0197D789 /* llama */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 1E22A528FD04539C42090D1A /* XCRemoteSwiftPackageReference "SwiftLlama" */;
-			productName = SwiftLlama;
+			productName = llama;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
