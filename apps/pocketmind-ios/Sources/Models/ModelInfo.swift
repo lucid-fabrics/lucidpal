@@ -1,6 +1,9 @@
 import Foundation
 
 struct ModelInfo: Identifiable, Hashable, Sendable {
+
+    // MARK: - Properties
+
     let id: String
     let displayName: String
     let downloadURL: URL
@@ -9,16 +12,18 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
     let minimumRAMGB: Int
 
     var localURL: URL {
-        guard let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            // documentDirectory is always available in a sandboxed iOS app — this path is unreachable
-            preconditionFailure("Documents directory unavailable")
-        }
+        // documentDirectory is guaranteed in a sandboxed iOS app; fall back to tmp only as a
+        // last resort so callers never receive nil and the app never crashes.
+        let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
         return dir.appendingPathComponent(filename)
     }
 
     var isDownloaded: Bool {
         FileManager.default.fileExists(atPath: localURL.path)
     }
+
+    // MARK: - Available Models
 
     static let qwen3_1B7 = ModelInfo(
         id: "qwen3-1.7b-q8",
@@ -45,6 +50,8 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
     static func recommended(physicalRAMGB: Int) -> ModelInfo {
         physicalRAMGB >= 5 ? .qwen3_4B : .qwen3_1B7
     }
+
+    // MARK: - Private Helpers
 
     // Compile-time-constant URLs — preconditionFailure surfaces typos during development
     private static func knownURL(_ string: String) -> URL {

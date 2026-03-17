@@ -1,9 +1,14 @@
 import SwiftUI
 
 struct ContentView: View {
+
+    // MARK: - Dependencies
+
     @ObservedObject var chatViewModel: ChatViewModel
     @ObservedObject var settingsViewModel: SettingsViewModel
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
+
+    // MARK: - Body
 
     var body: some View {
         TabView {
