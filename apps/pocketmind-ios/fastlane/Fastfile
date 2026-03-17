@@ -22,12 +22,50 @@ platform :ios do
   end
 
   # ─────────────────────────────────────────────
-  # Build debug IPA and install on connected device
-  # Run once manually in Xcode first to prepare device support files.
-  # After that: fastlane ios device
+  # Prepare device: enable Developer Mode + verify trust
+  # iOS requires one manual tap on the device to confirm Developer Mode.
+  # After that first tap, this lane is fully silent on repeat runs.
   # ─────────────────────────────────────────────
-  desc "Build debug build and install on connected iPhone"
+  desc "Enable Developer Mode on device and verify pairing"
+  lane :prepare do
+    UI.message("Checking device pairing...")
+
+    # Verify device is trusted (user must have tapped 'Trust' on iPhone once)
+    paired = sh("idevicepair pair --udid #{DEVICE_UDID} 2>&1", error_callback: ->(r) {}).strip
+    if paired.include?("SUCCESS") || paired.include?("already paired")
+      UI.success("Device is paired")
+    else
+      UI.important("Unlock your iPhone and tap 'Trust This Computer', then press Enter...")
+      STDIN.gets
+      sh("idevicepair pair --udid #{DEVICE_UDID}")
+    end
+
+    UI.message("Enabling Developer Mode (you may need to tap 'Turn On' on the iPhone)...")
+    dev_mode_result = sh(
+      "xcrun devicectl manage developerMode enable --device #{DEVICE_UDID} 2>&1",
+      error_callback: ->(r) {}
+    ).strip
+
+    if dev_mode_result.include?("already enabled") || dev_mode_result.include?("success")
+      UI.success("Developer Mode already enabled")
+    else
+      UI.important("Tap 'Turn On' on your iPhone if prompted, then press Enter...")
+      STDIN.gets
+      # Device restarts after enabling — wait for it to come back
+      UI.message("Waiting for device to restart...")
+      sleep(15)
+    end
+
+    UI.success("Device ready for development")
+  end
+
+  # ─────────────────────────────────────────────
+  # Build debug IPA and install on connected device
+  # fastlane ios device
+  # ─────────────────────────────────────────────
+  desc "Prepare device, build debug build, and install on connected iPhone"
   lane :device do
+    prepare
     generate
 
     build_app(
