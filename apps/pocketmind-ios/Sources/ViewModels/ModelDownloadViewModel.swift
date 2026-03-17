@@ -57,7 +57,7 @@ final class ModelDownloadViewModel: ObservableObject {
         do {
             try await llmService.loadModel(at: selectedModel.localURL)
             settings.selectedModelID = selectedModel.id
-            downloader.state = .idle  // Reset download state — clears stale "Load Model" button
+            downloader.resetState()  // Reset download state — clears stale "Load Model" button
         } catch {
             loadError = error.localizedDescription
         }
