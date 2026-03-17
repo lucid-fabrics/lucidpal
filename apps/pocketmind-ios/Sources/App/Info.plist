@@ -20,6 +20,10 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>PocketMind uses the microphone to let you dictate messages. Audio is processed on-device and never sent anywhere.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>PocketMind uses on-device speech recognition to convert your voice to text. Nothing leaves your device.</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>PocketMind reads your calendar events to answer questions about your schedule. All processing happens on-device.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
