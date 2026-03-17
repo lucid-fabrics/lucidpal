@@ -1,0 +1,436 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		29AF9C1644EB1DBA9EC822A5 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F8CCE8E6FB28347D93C869 /* OnboardingView.swift */; };
+		4A58AC0F867DF8A7A811A85D /* PocketMindApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78BF7EEADC2A6E48DB74F5E9 /* PocketMindApp.swift */; };
+		4D9A3A3F26324F74BA3105A3 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E71755F4423670B08C5890 /* ChatView.swift */; };
+		573DE30FB5E1F48175825B86 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101B77275AB89E3FA4DE37C9 /* ChatMessage.swift */; };
+		57DDE7836359DA32F1BFF161 /* ModelDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 571F2AB04B35CA5F7570E1CD /* ModelDownloadView.swift */; };
+		5A174F4502C64FC6535170A2 /* ModelDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBA7D82AF887DCB8B5DD5FD6 /* ModelDownloader.swift */; };
+		68EFEE10CA6D6CAF754FD74A /* ModelDownloadViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A715E93E5DD1F8CC56C896 /* ModelDownloadViewModel.swift */; };
+		6A132CF41A20258F746B8CD5 /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1037B4EA77CF451D9319998 /* LLMService.swift */; };
+		6E71EBE2DE405A9C62CDC87A /* ModelInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF981EFA6472ACC7A4EAC6E /* ModelInfo.swift */; };
+		90F821364EC9DE5B6091C8A6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 979CF042BA43DF068D6BA427 /* ContentView.swift */; };
+		99FB9CEA9C09175E57859FF1 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C57AFE47F91EB40164B843F /* AppSettings.swift */; };
+		A1AA0FDDE97BCF0CB6F1AE80 /* SwiftLlama in Frameworks */ = {isa = PBXBuildFile; productRef = 6381A5AF522A904CD72D2B0C /* SwiftLlama */; };
+		A49F828336DE087919543E16 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95AC9C8A5BA25C38328688EB /* SettingsViewModel.swift */; };
+		A5C77BCA78790115E658B337 /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EAA5A7FB227DCCA6BACB25C /* CalendarService.swift */; };
+		C033C2F0B82EDB5CEC33DC7B /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3BF69D3177D4BBE17CC1D1F /* ChatViewModel.swift */; };
+		D8AA6370CAF98BE9F55733A3 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 929E991CDFEEBC85C42D0EC6 /* SettingsView.swift */; };
+		F9484C88F0637E07F846649D /* MessageBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 003B25C43CBE913DF321F18A /* MessageBubbleView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		003B25C43CBE913DF321F18A /* MessageBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageBubbleView.swift; sourceTree = "<group>"; };
+		101B77275AB89E3FA4DE37C9 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
+		20D1938C8D8FEC836DF1C154 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		23E71755F4423670B08C5890 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		48A715E93E5DD1F8CC56C896 /* ModelDownloadViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadViewModel.swift; sourceTree = "<group>"; };
+		49E04EAFE1FBCE1DC1F74067 /* PocketMind.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PocketMind.entitlements; sourceTree = "<group>"; };
+		571F2AB04B35CA5F7570E1CD /* ModelDownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadView.swift; sourceTree = "<group>"; };
+		78BF7EEADC2A6E48DB74F5E9 /* PocketMindApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PocketMindApp.swift; sourceTree = "<group>"; };
+		7C57AFE47F91EB40164B843F /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		929E991CDFEEBC85C42D0EC6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		95AC9C8A5BA25C38328688EB /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		979CF042BA43DF068D6BA427 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		9EAA5A7FB227DCCA6BACB25C /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
+		AC62D105304C003E0302B09B /* PocketMind.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PocketMind.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1037B4EA77CF451D9319998 /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
+		B3BF69D3177D4BBE17CC1D1F /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
+		B4F8CCE8E6FB28347D93C869 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		CBA7D82AF887DCB8B5DD5FD6 /* ModelDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloader.swift; sourceTree = "<group>"; };
+		CEF981EFA6472ACC7A4EAC6E /* ModelInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInfo.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		35179A794DF841764282CE7A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1AA0FDDE97BCF0CB6F1AE80 /* SwiftLlama in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		38B25B0EF8375FC325BBA43F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AC62D105304C003E0302B09B /* PocketMind.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		546DECE501C8E6EAFE45121D /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				7CE9164A8F29CBDADB3424B1 /* App */,
+				C47944E80F82BD4C105EADE5 /* Models */,
+				69D8FC4E84C106F99609AEB7 /* Services */,
+				E0F487E0CB185CC6A2389E88 /* ViewModels */,
+				9917BE9AF71E65193EC9734A /* Views */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		69D8FC4E84C106F99609AEB7 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				9EAA5A7FB227DCCA6BACB25C /* CalendarService.swift */,
+				B1037B4EA77CF451D9319998 /* LLMService.swift */,
+				CBA7D82AF887DCB8B5DD5FD6 /* ModelDownloader.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		7CE9164A8F29CBDADB3424B1 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				979CF042BA43DF068D6BA427 /* ContentView.swift */,
+				20D1938C8D8FEC836DF1C154 /* Info.plist */,
+				49E04EAFE1FBCE1DC1F74067 /* PocketMind.entitlements */,
+				78BF7EEADC2A6E48DB74F5E9 /* PocketMindApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		9917BE9AF71E65193EC9734A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				23E71755F4423670B08C5890 /* ChatView.swift */,
+				003B25C43CBE913DF321F18A /* MessageBubbleView.swift */,
+				571F2AB04B35CA5F7570E1CD /* ModelDownloadView.swift */,
+				B4F8CCE8E6FB28347D93C869 /* OnboardingView.swift */,
+				929E991CDFEEBC85C42D0EC6 /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		C47944E80F82BD4C105EADE5 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				7C57AFE47F91EB40164B843F /* AppSettings.swift */,
+				101B77275AB89E3FA4DE37C9 /* ChatMessage.swift */,
+				CEF981EFA6472ACC7A4EAC6E /* ModelInfo.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		E0F487E0CB185CC6A2389E88 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				B3BF69D3177D4BBE17CC1D1F /* ChatViewModel.swift */,
+				48A715E93E5DD1F8CC56C896 /* ModelDownloadViewModel.swift */,
+				95AC9C8A5BA25C38328688EB /* SettingsViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		E1655B2260A05B42271CDFC3 = {
+			isa = PBXGroup;
+			children = (
+				546DECE501C8E6EAFE45121D /* Sources */,
+				38B25B0EF8375FC325BBA43F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1D0CA2ECB46D2B4FDA80A257 /* PocketMind */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0454AEED2E5303BEEF577B80 /* Build configuration list for PBXNativeTarget "PocketMind" */;
+			buildPhases = (
+				C1D58995A726578962E8A5E8 /* Sources */,
+				35179A794DF841764282CE7A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PocketMind;
+			packageProductDependencies = (
+				6381A5AF522A904CD72D2B0C /* SwiftLlama */,
+			);
+			productName = PocketMind;
+			productReference = AC62D105304C003E0302B09B /* PocketMind.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6D1E71B52054D88B58BBE3A8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					1D0CA2ECB46D2B4FDA80A257 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 03AF380065B3222D502B9B57 /* Build configuration list for PBXProject "PocketMind" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = E1655B2260A05B42271CDFC3;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1E22A528FD04539C42090D1A /* XCRemoteSwiftPackageReference "SwiftLlama" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 38B25B0EF8375FC325BBA43F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1D0CA2ECB46D2B4FDA80A257 /* PocketMind */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C1D58995A726578962E8A5E8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				99FB9CEA9C09175E57859FF1 /* AppSettings.swift in Sources */,
+				A5C77BCA78790115E658B337 /* CalendarService.swift in Sources */,
+				573DE30FB5E1F48175825B86 /* ChatMessage.swift in Sources */,
+				4D9A3A3F26324F74BA3105A3 /* ChatView.swift in Sources */,
+				C033C2F0B82EDB5CEC33DC7B /* ChatViewModel.swift in Sources */,
+				90F821364EC9DE5B6091C8A6 /* ContentView.swift in Sources */,
+				6A132CF41A20258F746B8CD5 /* LLMService.swift in Sources */,
+				F9484C88F0637E07F846649D /* MessageBubbleView.swift in Sources */,
+				57DDE7836359DA32F1BFF161 /* ModelDownloadView.swift in Sources */,
+				68EFEE10CA6D6CAF754FD74A /* ModelDownloadViewModel.swift in Sources */,
+				5A174F4502C64FC6535170A2 /* ModelDownloader.swift in Sources */,
+				6E71EBE2DE405A9C62CDC87A /* ModelInfo.swift in Sources */,
+				29AF9C1644EB1DBA9EC822A5 /* OnboardingView.swift in Sources */,
+				4A58AC0F867DF8A7A811A85D /* PocketMindApp.swift in Sources */,
+				D8AA6370CAF98BE9F55733A3 /* SettingsView.swift in Sources */,
+				A49F828336DE087919543E16 /* SettingsViewModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		3C0B0B1AFDFE411FF771668B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/App/PocketMind.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
+				INFOPLIST_FILE = Sources/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.pocketmind;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		8B214DF00E0750B6F2FEEEE2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		ADD0A54FFC4065638F3D408E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		BC21EE0DBE224777F0D4BD93 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/App/PocketMind.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
+				INFOPLIST_FILE = Sources/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.pocketmind;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		03AF380065B3222D502B9B57 /* Build configuration list for PBXProject "PocketMind" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ADD0A54FFC4065638F3D408E /* Debug */,
+				8B214DF00E0750B6F2FEEEE2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		0454AEED2E5303BEEF577B80 /* Build configuration list for PBXNativeTarget "PocketMind" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC21EE0DBE224777F0D4BD93 /* Debug */,
+				3C0B0B1AFDFE411FF771668B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1E22A528FD04539C42090D1A /* XCRemoteSwiftPackageReference "SwiftLlama" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ShenghaiWang/SwiftLlama.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6381A5AF522A904CD72D2B0C /* SwiftLlama */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1E22A528FD04539C42090D1A /* XCRemoteSwiftPackageReference "SwiftLlama" */;
+			productName = SwiftLlama;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 6D1E71B52054D88B58BBE3A8 /* Project object */;
+}

@@ -1,0 +1,18 @@
+# Xcode
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# SPM
+.build/
+*.resolved
+
+# macOS
+.DS_Store
+
+# Models (large binaries — downloaded at runtime)
+apps/pocketmind-ios/**/*.gguf

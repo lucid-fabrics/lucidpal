@@ -1,0 +1,52 @@
+name: PocketMind
+options:
+  bundleIdPrefix: app.pocketmind
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "16.0"
+  swift: "6.0"
+
+packages:
+  SwiftLlama:
+    url: https://github.com/ShenghaiWang/SwiftLlama.git
+    from: 0.4.0
+
+targets:
+  PocketMind:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: Sources
+    resources:
+      - path: Assets.xcassets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.pocketmind
+        SWIFT_VERSION: "6.0"
+        INFOPLIST_FILE: Sources/App/Info.plist
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: ""
+        ENABLE_HARDENED_RUNTIME: NO
+    dependencies:
+      - package: SwiftLlama
+    entitlements:
+      path: Sources/App/PocketMind.entitlements
+      properties:
+        com.apple.developer.eventkit.calendars: true
+
+schemes:
+  PocketMind:
+    build:
+      targets:
+        PocketMind: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
