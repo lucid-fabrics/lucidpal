@@ -16,3 +16,6 @@ DerivedData/
 
 # Models (large binaries — downloaded at runtime)
 apps/pocketmind-ios/**/*.gguf
+
+# Fastlane build artifacts
+**/fastlane/report.xml
