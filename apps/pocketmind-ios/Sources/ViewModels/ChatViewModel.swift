@@ -147,7 +147,10 @@ final class ChatViewModel: ObservableObject {
 
     // MARK: - Calendar action dispatch
 
-    private static let actionPattern = #"\[CALENDAR_ACTION:(\{[^\]]+\})\]"#
+    // Matches [CALENDAR_ACTION:{...}] — uses negative lookahead \}(?!\]) so that
+    // `}` characters inside JSON string values (e.g. notes, title) are allowed,
+    // while still correctly terminating at the closing `}]` sequence.
+    private static let actionPattern = #"\[CALENDAR_ACTION:(\{(?:[^}]|\}(?!\]))*\})\]"#
 
     private func executeCalendarActions(in text: String) async -> (content: String, previews: [CalendarEventPreview]) {
         guard let regex = try? NSRegularExpression(pattern: Self.actionPattern, options: [.dotMatchesLineSeparators]) else { return (text, []) }

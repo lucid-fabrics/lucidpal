@@ -45,25 +45,34 @@ final class SpeechService: ObservableObject {
         guard isAuthorized, let recognizer, !isRecording else { return }
 
         let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.record, mode: .measurement, options: .duckOthers)
-        try session.setActive(true, options: .notifyOthersOnDeactivation)
+        do {
+            try session.setCategory(.record, mode: .measurement, options: .duckOthers)
+            try session.setActive(true, options: .notifyOthersOnDeactivation)
 
-        let req = SFSpeechAudioBufferRecognitionRequest()
-        req.shouldReportPartialResults = true
-        req.requiresOnDeviceRecognition = true
-        request = req
+            let req = SFSpeechAudioBufferRecognitionRequest()
+            req.shouldReportPartialResults = true
+            req.requiresOnDeviceRecognition = true
+            request = req
 
-        let node = audioEngine.inputNode
-        node.installTap(onBus: 0, bufferSize: 1024, format: node.outputFormat(forBus: 0)) { [weak self] buf, _ in
-            self?.request?.append(buf)
+            let node = audioEngine.inputNode
+            node.installTap(onBus: 0, bufferSize: 1024, format: node.outputFormat(forBus: 0)) { [weak self] buf, _ in
+                self?.request?.append(buf)
+            }
+
+            audioEngine.prepare()
+            try audioEngine.start()
+        } catch {
+            // Clean up any partial state so the session doesn't stay locked in .record mode
+            audioEngine.inputNode.removeTap(onBus: 0)
+            request = nil
+            try? session.setActive(false, options: .notifyOthersOnDeactivation)
+            throw error
         }
 
-        audioEngine.prepare()
-        try audioEngine.start()
         transcript = ""
         isRecording = true
 
-        task = recognizer.recognitionTask(with: req) { [weak self] result, error in
+        task = recognizer.recognitionTask(with: req!) { [weak self] result, error in
             guard let self else { return }
             if let result {
                 Task { @MainActor in

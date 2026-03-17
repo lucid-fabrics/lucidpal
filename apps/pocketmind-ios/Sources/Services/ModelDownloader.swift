@@ -22,6 +22,10 @@ final class ModelDownloader: NSObject {
     // write/read. nonisolated(unsafe) is the correct annotation for this pattern.
     nonisolated(unsafe) private var destinationURL: URL?
 
+    // Tracks explicit user cancellation so we can distinguish it from a system-initiated
+    // NSURLErrorCancelled (e.g. cellular blocked by allowsCellularAccess=false).
+    nonisolated(unsafe) private var userCancelled = false
+
     func download(model: ModelInfo) {
         // Idempotency guard — prevent double-download race condition
         guard downloadTask == nil else { return }
@@ -40,6 +44,7 @@ final class ModelDownloader: NSObject {
     }
 
     func cancel() {
+        userCancelled = true
         downloadTask?.cancel()
         downloadTask = nil
         session?.invalidateAndCancel()
@@ -142,10 +147,24 @@ extension ModelDownloader: URLSessionDownloadDelegate {
         task: URLSessionTask,
         didCompleteWithError error: Error?
     ) {
-        guard let error, (error as NSError).code != NSURLErrorCancelled else { return }
+        guard let error else { return }
+        let nsError = error as NSError
+
+        // NSURLErrorCancelled fires for both user cancellation and cellular restriction
+        // (allowsCellularAccess=false with no WiFi). Suppress only explicit user cancels.
+        if nsError.code == NSURLErrorCancelled {
+            let wasUserCancelled = userCancelled
+            userCancelled = false
+            guard !wasUserCancelled else { return }
+        }
+
+        let message = nsError.code == NSURLErrorCancelled
+            ? "WiFi required to download models. Please connect to WiFi and try again."
+            : error.localizedDescription
+
         Task { @MainActor [weak self] in
             self?.downloadTask = nil
-            self?.state = .failed(message: error.localizedDescription)
+            self?.state = .failed(message: message)
         }
     }
 }
