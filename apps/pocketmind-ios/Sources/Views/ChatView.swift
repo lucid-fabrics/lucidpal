@@ -63,6 +63,16 @@ struct ChatView: View {
 
     private var inputBar: some View {
         HStack(spacing: 10) {
+            if viewModel.isSpeechAvailable {
+                Button {
+                    viewModel.toggleSpeech()
+                } label: {
+                    Image(systemName: viewModel.isSpeechRecording ? "mic.fill" : "mic")
+                        .font(.system(size: 22))
+                        .foregroundStyle(viewModel.isSpeechRecording ? .red : Color(.systemGray))
+                }
+            }
+
             TextField("Ask about your schedule…", text: $viewModel.inputText, axis: .vertical)
                 .textFieldStyle(.plain)
                 .lineLimit(1...5)
@@ -76,6 +86,7 @@ struct ChatView: View {
                 if viewModel.isGenerating {
                     viewModel.cancelGeneration()
                 } else {
+                    if viewModel.isSpeechRecording { viewModel.toggleSpeech() }
                     Task { await viewModel.sendMessage() }
                     inputFocused = false
                 }

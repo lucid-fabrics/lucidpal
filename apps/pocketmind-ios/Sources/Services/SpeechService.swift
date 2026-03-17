@@ -1,0 +1,90 @@
+import AVFoundation
+import Foundation
+import Speech
+
+@MainActor
+final class SpeechService: ObservableObject {
+    @Published private(set) var isRecording = false
+    @Published private(set) var isAuthorized = false
+    @Published private(set) var transcript = ""
+
+    private var recognizer: SFSpeechRecognizer?
+    private var audioEngine = AVAudioEngine()
+    private var request: SFSpeechAudioBufferRecognitionRequest?
+    private var task: SFSpeechRecognitionTask?
+
+    func requestAuthorization() async {
+        let micGranted = await Self.askMicrophonePermission()
+        guard micGranted else { return }
+
+        let speechStatus = await Self.askSpeechPermission()
+        guard speechStatus == .authorized else { return }
+
+        recognizer = SFSpeechRecognizer()
+        isAuthorized = recognizer?.isAvailable == true
+    }
+
+    // nonisolated: closures defined here are NOT @MainActor-isolated.
+    // The TCC/XPC callbacks fire on background threads — if the closure carries @MainActor
+    // isolation the Swift 6 runtime thunk asserts the wrong queue and crashes (EXC_BREAKPOINT).
+    // Keeping these nonisolated lets CheckedContinuation.resume() be called from any thread.
+
+    nonisolated private static func askMicrophonePermission() async -> Bool {
+        await withCheckedContinuation { cont in
+            AVAudioSession.sharedInstance().requestRecordPermission { cont.resume(returning: $0) }
+        }
+    }
+
+    nonisolated private static func askSpeechPermission() async -> SFSpeechRecognizerAuthorizationStatus {
+        await withCheckedContinuation { cont in
+            SFSpeechRecognizer.requestAuthorization { cont.resume(returning: $0) }
+        }
+    }
+
+    func startRecording() throws {
+        guard isAuthorized, let recognizer, !isRecording else { return }
+
+        let session = AVAudioSession.sharedInstance()
+        try session.setCategory(.record, mode: .measurement, options: .duckOthers)
+        try session.setActive(true, options: .notifyOthersOnDeactivation)
+
+        let req = SFSpeechAudioBufferRecognitionRequest()
+        req.shouldReportPartialResults = true
+        req.requiresOnDeviceRecognition = true
+        request = req
+
+        let node = audioEngine.inputNode
+        node.installTap(onBus: 0, bufferSize: 1024, format: node.outputFormat(forBus: 0)) { [weak self] buf, _ in
+            self?.request?.append(buf)
+        }
+
+        audioEngine.prepare()
+        try audioEngine.start()
+        transcript = ""
+        isRecording = true
+
+        task = recognizer.recognitionTask(with: req) { [weak self] result, error in
+            guard let self else { return }
+            if let result {
+                Task { @MainActor in
+                    self.transcript = result.bestTranscription.formattedString
+                }
+            }
+            if error != nil || result?.isFinal == true {
+                Task { @MainActor in self.stopRecording() }
+            }
+        }
+    }
+
+    func stopRecording() {
+        guard isRecording else { return }
+        audioEngine.stop()
+        audioEngine.inputNode.removeTap(onBus: 0)
+        request?.endAudio()
+        request = nil
+        task?.finish()
+        task = nil
+        isRecording = false
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    }
+}
