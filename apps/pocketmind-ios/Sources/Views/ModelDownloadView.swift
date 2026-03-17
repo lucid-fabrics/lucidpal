@@ -7,7 +7,7 @@ struct ModelDownloadView: View {
         VStack(spacing: 24) {
             Image(systemName: "brain.head.profile")
                 .font(.system(size: 56))
-                .foregroundStyle(.accent)
+                .foregroundStyle(Color.accentColor)
 
             Text("Choose a Model")
                 .font(.title2.bold())
@@ -31,7 +31,7 @@ struct ModelDownloadView: View {
 
     private var modelPicker: some View {
         VStack(spacing: 8) {
-            ForEach(viewModel.availableModels) { model in
+            ForEach(viewModel.availableModels, id: \.id) { model in
                 Button {
                     viewModel.selectModel(model)
                 } label: {
@@ -53,7 +53,7 @@ struct ModelDownloadView: View {
                         Spacer()
                         if viewModel.selectedModel.id == model.id {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.accent)
+                                .foregroundStyle(Color.accentColor)
                         } else {
                             Image(systemName: "circle")
                                 .foregroundStyle(.secondary)
@@ -87,10 +87,20 @@ struct ModelDownloadView: View {
                     .foregroundStyle(.green)
                     .font(.subheadline.weight(.medium))
             } else if viewModel.selectedModel.isDownloaded {
-                Button("Load Model") {
+                Button {
                     Task { await viewModel.loadModel() }
+                } label: {
+                    if viewModel.isModelLoading {
+                        HStack(spacing: 8) {
+                            ProgressView().tint(.white)
+                            Text("Loading…")
+                        }
+                    } else {
+                        Text("Load Model")
+                    }
                 }
                 .buttonStyle(.borderedProminent)
+                .disabled(viewModel.isModelLoading)
             } else {
                 Button("Download") {
                     viewModel.startDownload()

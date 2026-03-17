@@ -28,7 +28,7 @@ struct OnboardingView: View {
         VStack(spacing: 8) {
             Image(systemName: "brain.head.profile")
                 .font(.system(size: 64))
-                .foregroundStyle(.accent)
+                .foregroundStyle(Color.accentColor)
             Text("PocketMind")
                 .font(.largeTitle.bold())
             Text("Your on-device AI calendar assistant")
