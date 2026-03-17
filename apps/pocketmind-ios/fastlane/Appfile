@@ -1,0 +1,3 @@
+app_identifier("app.pocketmind")
+apple_id("wassim@alchemi-data.com")  # Update if personal Apple ID differs
+team_id("25YLHGUW42")
