@@ -1,0 +1,33 @@
+#!/bin/sh
+
+echo "🔍 Running pre-push checks..."
+
+# Block AI attribution in commits
+AI_IN_COMMITS=$(git log origin/$(git branch --show-current 2>/dev/null || echo main)..HEAD --pretty=format:"%s%n%b" 2>/dev/null | \
+  grep -E "(🤖|Generated with.*Claude|Co-Authored-By: Claude|noreply@anthropic\.com)" || true)
+
+if [ -n "$AI_IN_COMMITS" ]; then
+  echo "❌ PUSH BLOCKED: AI attribution in commits"
+  echo "$AI_IN_COMMITS" | head -5
+  exit 1
+fi
+
+# Block hardcoded secrets in diff
+CHANGED_FILES=$(git diff --name-only origin/$(git branch --show-current 2>/dev/null || echo main)...HEAD --diff-filter=ACM 2>/dev/null | \
+  grep -v "\.spec\." || true)
+
+if [ -n "$CHANGED_FILES" ]; then
+  SECRET_MATCHES=$(echo "$CHANGED_FILES" | xargs git diff origin/$(git branch --show-current 2>/dev/null || echo main)...HEAD -- 2>/dev/null | \
+    grep "^+" | \
+    grep -iE "(password|api.?key|secret|token)\s*=\s*['\"][^'\"]{8,}['\"]" | \
+    grep -v '\${\|\\$\|\$[A-Z_]\|EXAMPLE\|getItem\|setItem' || true)
+
+  if [ -n "$SECRET_MATCHES" ]; then
+    echo "❌ PUSH BLOCKED: Potential hardcoded secrets detected"
+    echo "$SECRET_MATCHES" | head -5
+    exit 1
+  fi
+fi
+
+echo "✅ Pre-push checks passed"
+exit 0

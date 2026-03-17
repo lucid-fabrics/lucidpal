@@ -1,0 +1,14 @@
+#!/bin/sh
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Block AI attribution
+if echo "$COMMIT_MSG" | grep -qiE "(🤖|claude|chatgpt|copilot|gemini|openai|anthropic|gpt-[0-9]|generated (with|by|using)|co-authored-by:.*ai)"; then
+  echo "❌ COMMIT BLOCKED: AI tool reference detected in commit message"
+  echo "$COMMIT_MSG" | grep -iE "(🤖|claude|chatgpt|copilot|gemini|openai|anthropic|gpt-[0-9]|generated (with|by|using)|co-authored-by:.*ai)"
+  exit 1
+fi
+
+# Validate conventional commit format
+npx --no -- commitlint --edit "$COMMIT_MSG_FILE"

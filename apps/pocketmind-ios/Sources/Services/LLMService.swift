@@ -3,49 +3,74 @@ import SwiftLlama
 
 @MainActor
 final class LLMService: ObservableObject {
-    @Published var isLoaded = false
-    @Published var isGenerating = false
+    @Published private(set) var isLoaded = false
+    @Published private(set) var isGenerating = false
 
     private var llama: SwiftLlama?
+    private var currentTask: Task<Void, Never>?
 
     func loadModel(at url: URL) async throws {
-        llama = try SwiftLlama(modelPath: url.path)
-        isLoaded = true
+        do {
+            llama = try SwiftLlama(modelPath: url.path)
+            isLoaded = true
+        } catch {
+            throw LLMError.loadFailed(underlying: error)
+        }
     }
 
     func unloadModel() {
+        cancelGeneration()
         llama = nil
         isLoaded = false
     }
 
-    /// Generates tokens from a fully-formatted Qwen3 prompt string.
-    /// Caller is responsible for building the `<|im_start|>...<|im_end|>` template.
+    func cancelGeneration() {
+        currentTask?.cancel()
+        currentTask = nil
+        isGenerating = false
+    }
+
     func generate(prompt: String) -> AsyncThrowingStream<String, Error> {
-        AsyncThrowingStream { continuation in
-            guard let llama else {
-                continuation.finish(throwing: LLMError.modelNotLoaded)
-                return
-            }
-            Task {
+        // Guard concurrent calls before creating the stream
+        guard !isGenerating else {
+            return AsyncThrowingStream { $0.finish(throwing: LLMError.generationInProgress) }
+        }
+        guard let llama else {
+            return AsyncThrowingStream { $0.finish(throwing: LLMError.modelNotLoaded) }
+        }
+
+        isGenerating = true
+
+        return AsyncThrowingStream { [weak self] continuation in
+            let task = Task { [weak self] in
+                defer {
+                    Task { @MainActor [weak self] in
+                        self?.isGenerating = false
+                        self?.currentTask = nil
+                    }
+                }
                 do {
-                    isGenerating = true
-                    let stream = llama.start(for: prompt)
-                    for await token in stream {
+                    for await token in llama.start(for: prompt) {
+                        if Task.isCancelled {
+                            continuation.finish()
+                            return
+                        }
                         continuation.yield(token)
                     }
-                    isGenerating = false
                     continuation.finish()
                 } catch {
-                    isGenerating = false
                     continuation.finish(throwing: error)
                 }
+            }
+            // Store task reference on MainActor for cancellation
+            Task { @MainActor [weak self] in
+                self?.currentTask = task
             }
         }
     }
 
     // MARK: - Qwen3 chat template
 
-    /// Builds a Qwen3-format prompt from a message history + optional system block.
     static func buildPrompt(messages: [ChatMessage], systemPrompt: String? = nil) -> String {
         var parts: [String] = []
 
@@ -65,10 +90,17 @@ final class LLMService: ObservableObject {
 
 enum LLMError: LocalizedError {
     case modelNotLoaded
+    case generationInProgress
+    case loadFailed(underlying: Error)
 
     var errorDescription: String? {
         switch self {
-        case .modelNotLoaded: return "No model is loaded. Please download and select a model."
+        case .modelNotLoaded:
+            return "No model loaded. Go to Settings to download one."
+        case .generationInProgress:
+            return "A response is already being generated."
+        case .loadFailed(let underlying):
+            return "Failed to load model: \(underlying.localizedDescription). The file may be corrupted — try deleting and re-downloading."
         }
     }
 }

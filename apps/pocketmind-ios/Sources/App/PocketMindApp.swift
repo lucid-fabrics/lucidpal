@@ -2,12 +2,10 @@ import SwiftUI
 
 @main
 struct PocketMindApp: App {
-    // Services — created once for the app lifetime
     private let settings = AppSettings()
     private let llmService = LLMService()
     private let calendarService = CalendarService()
 
-    // ViewModels wired to real services
     private let chatViewModel: ChatViewModel
     private let settingsViewModel: SettingsViewModel
     private let downloadViewModel: ModelDownloadViewModel
@@ -32,7 +30,6 @@ struct PocketMindApp: App {
         WindowGroup {
             RootView(
                 settings: settings,
-                llmService: llmService,
                 chatViewModel: chatViewModel,
                 settingsViewModel: settingsViewModel,
                 downloadViewModel: downloadViewModel
@@ -43,24 +40,22 @@ struct PocketMindApp: App {
 
 private struct RootView: View {
     @ObservedObject var settings: AppSettings
-    @ObservedObject var llmService: LLMService
     @ObservedObject var chatViewModel: ChatViewModel
     @ObservedObject var settingsViewModel: SettingsViewModel
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
 
     var body: some View {
-        if settings.hasCompletedOnboarding && llmService.isLoaded {
+        // Gate on downloadViewModel.isModelLoaded — never observe LLMService directly from a View
+        if settings.hasCompletedOnboarding && downloadViewModel.isModelLoaded {
             ContentView(
                 chatViewModel: chatViewModel,
                 settingsViewModel: settingsViewModel,
-                downloadViewModel: downloadViewModel,
-                llmService: llmService
+                downloadViewModel: downloadViewModel
             )
         } else {
             OnboardingView(
                 downloadViewModel: downloadViewModel,
                 settingsViewModel: settingsViewModel,
-                llmService: llmService,
                 hasCompletedOnboarding: Binding(
                     get: { settings.hasCompletedOnboarding },
                     set: { settings.hasCompletedOnboarding = $0 }

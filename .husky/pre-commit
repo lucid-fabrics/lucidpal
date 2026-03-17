@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# Block direct commits to main
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$CURRENT_BRANCH" = "main" ]; then
+  echo "❌ COMMIT BLOCKED: Direct commits to main are forbidden"
+  echo "   git checkout -b feat/your-feature-name"
+  exit 1
+fi
+
+# Block AI attribution in staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -v "\.husky/" || true)
+if [ -n "$STAGED_FILES" ]; then
+  AI_ATTRIBUTION=$(echo "$STAGED_FILES" | xargs git diff --cached 2>/dev/null | \
+    grep -E "^\+.*(🤖|Generated with.*Claude|Co-Authored-By: Claude|anthropic\.com|noreply@anthropic)" | \
+    grep -v "\.husky/" || true)
+
+  if [ -n "$AI_ATTRIBUTION" ]; then
+    echo "❌ COMMIT BLOCKED: AI attribution detected in staged files"
+    echo "$AI_ATTRIBUTION" | head -5
+    exit 1
+  fi
+fi
+
+# Block hardcoded secrets
+STAGED_SAFE=$(git diff --cached --name-only --diff-filter=ACM | grep -v "\.sh$" || true)
+if [ -n "$STAGED_SAFE" ]; then
+  SECRET_MATCHES=$(echo "$STAGED_SAFE" | xargs git diff --cached 2>/dev/null | \
+    grep -E "^\+.*password\s*=\s*['\"][^'\"]+['\"]|^\+.*api.*key\s*=\s*['\"][^'\"]+['\"]|^\+.*secret\s*=\s*['\"][^'\"]+['\"]" | \
+    grep -v "interface\|type\|\.env\|EXAMPLE\|\.spec\." || true)
+
+  if [ -n "$SECRET_MATCHES" ]; then
+    echo "❌ COMMIT BLOCKED: Hardcoded secrets detected"
+    echo "$SECRET_MATCHES" | head -5
+    exit 1
+  fi
+fi
+
+# Run lint-staged
+npx lint-staged
+
+exit 0

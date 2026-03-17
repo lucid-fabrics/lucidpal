@@ -3,7 +3,6 @@ import SwiftUI
 struct OnboardingView: View {
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
     @ObservedObject var settingsViewModel: SettingsViewModel
-    @ObservedObject var llmService: LLMService
 
     @Binding var hasCompletedOnboarding: Bool
 
@@ -60,7 +59,7 @@ struct OnboardingView: View {
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            if llmService.isLoaded {
+            if downloadViewModel.isModelLoaded {
                 HStack {
                     Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
                     Text("Model loaded and ready.")
@@ -114,7 +113,7 @@ struct OnboardingView: View {
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
         .frame(maxWidth: .infinity)
-        .disabled(!llmService.isLoaded)
+        .disabled(!downloadViewModel.isModelLoaded)
     }
 }
 

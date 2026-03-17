@@ -2,18 +2,15 @@ import SwiftUI
 
 struct ChatView: View {
     @ObservedObject var viewModel: ChatViewModel
-    @ObservedObject var llmService: LLMService
 
     @FocusState private var inputFocused: Bool
-    @State private var scrollProxy: ScrollViewProxy?
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if !llmService.isLoaded {
+                if !viewModel.isModelLoaded {
                     modelNotLoadedBanner
                 }
-
                 messageList
                 inputBar
             }
@@ -55,7 +52,6 @@ struct ChatView: View {
                 }
                 .padding(.vertical, 12)
             }
-            .onAppear { scrollProxy = proxy }
             .onChange(of: viewModel.messages.count, perform: { _ in
                 scrollToBottom(proxy: proxy)
             })
@@ -77,29 +73,33 @@ struct ChatView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
 
             Button {
-                Task { await viewModel.sendMessage() }
-                inputFocused = false
+                if viewModel.isGenerating {
+                    viewModel.cancelGeneration()
+                } else {
+                    Task { await viewModel.sendMessage() }
+                    inputFocused = false
+                }
             } label: {
-                Image(systemName: viewModel.isGenerating ? "stop.fill" : "arrow.up.circle.fill")
+                Image(systemName: viewModel.isGenerating ? "stop.circle.fill" : "arrow.up.circle.fill")
                     .font(.system(size: 32))
-                    .foregroundStyle(
-                        viewModel.inputText.trimmingCharacters(in: .whitespaces).isEmpty && !viewModel.isGenerating
-                        ? Color(.systemGray3)
-                        : Color.accentColor
-                    )
+                    .foregroundStyle(sendButtonColor)
             }
+            .disabled(!viewModel.isModelLoaded && !viewModel.isGenerating)
             .disabled(
                 viewModel.inputText.trimmingCharacters(in: .whitespaces).isEmpty
                 && !viewModel.isGenerating
             )
-            .disabled(!llmService.isLoaded)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(Color(.systemBackground))
-        .overlay(alignment: .top) {
-            Divider()
-        }
+        .overlay(alignment: .top) { Divider() }
+    }
+
+    private var sendButtonColor: Color {
+        if viewModel.isGenerating { return .red }
+        if viewModel.inputText.trimmingCharacters(in: .whitespaces).isEmpty { return Color(.systemGray3) }
+        return .accentColor
     }
 
     private func scrollToBottom(proxy: ScrollViewProxy) {

@@ -1,6 +1,6 @@
-import Foundation
+import Combine
 import EventKit
-import SwiftUI
+import Foundation
 
 @MainActor
 final class SettingsViewModel: ObservableObject {

@@ -14,14 +14,20 @@ final class ModelDownloader: NSObject, ObservableObject {
     private var session: URLSession?
     private var downloadTask: URLSessionDownloadTask?
 
-    // nonisolated(unsafe) lets delegate callbacks write without actor hopping
+    // Safety: destinationURL is written on @MainActor before the download task starts,
+    // and only read in URLSession delegate callbacks (which fire after the task resumes).
+    // URLSession serialises delegate calls on its own queue so there is no concurrent
+    // write/read. nonisolated(unsafe) is the correct annotation for this pattern.
     nonisolated(unsafe) private var destinationURL: URL?
 
     func download(model: ModelInfo) {
+        // Idempotency guard — prevent double-download race condition
+        guard downloadTask == nil else { return }
+
         destinationURL = model.localURL
 
         let config = URLSessionConfiguration.default
-        config.allowsCellularAccess = false  // WiFi-only by default
+        config.allowsCellularAccess = false  // WiFi-only; expose as user toggle in v2
         let session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
         self.session = session
 
@@ -34,6 +40,8 @@ final class ModelDownloader: NSObject, ObservableObject {
     func cancel() {
         downloadTask?.cancel()
         downloadTask = nil
+        session?.invalidateAndCancel()
+        session = nil
         state = .idle
     }
 
@@ -52,15 +60,26 @@ extension ModelDownloader: URLSessionDownloadDelegate {
     ) {
         guard let destination = destinationURL else { return }
         do {
+            // Remove any pre-existing file (e.g. prior failed/partial download)
             if FileManager.default.fileExists(atPath: destination.path) {
                 try FileManager.default.removeItem(at: destination)
             }
             try FileManager.default.moveItem(at: location, to: destination)
             Task { @MainActor [weak self] in
+                self?.downloadTask = nil
                 self?.state = .completed(url: destination)
             }
-        } catch {
+        } catch CocoaError.fileWriteOutOfSpace {
+            // Clean up partial file if it was created before disk ran out
+            try? FileManager.default.removeItem(at: destination)
             Task { @MainActor [weak self] in
+                self?.downloadTask = nil
+                self?.state = .failed(message: "Not enough storage space. Free up space and try again.")
+            }
+        } catch {
+            try? FileManager.default.removeItem(at: destination)
+            Task { @MainActor [weak self] in
+                self?.downloadTask = nil
                 self?.state = .failed(message: error.localizedDescription)
             }
         }
@@ -87,6 +106,7 @@ extension ModelDownloader: URLSessionDownloadDelegate {
     ) {
         guard let error, (error as NSError).code != NSURLErrorCancelled else { return }
         Task { @MainActor [weak self] in
+            self?.downloadTask = nil
             self?.state = .failed(message: error.localizedDescription)
         }
     }

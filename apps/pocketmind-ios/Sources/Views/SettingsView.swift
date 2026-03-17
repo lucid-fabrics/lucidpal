@@ -1,9 +1,10 @@
 import SwiftUI
-import EventKit
 
 struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
+
+    private static let sourceURL = URL(string: "https://github.com/wassimmehanna/pocketmind")!
 
     var body: some View {
         NavigationStack {
@@ -13,6 +14,11 @@ struct SettingsView: View {
                 aboutSection
             }
             .navigationTitle("Settings")
+            .alert("Delete Error", isPresented: .constant(downloadViewModel.deleteError != nil)) {
+                Button("OK") { downloadViewModel.deleteError = nil }
+            } message: {
+                Text(downloadViewModel.deleteError ?? "")
+            }
         }
     }
 
@@ -67,7 +73,7 @@ struct SettingsView: View {
                             .foregroundStyle(model.isDownloaded ? .green : .secondary)
                     }
                     Spacer()
-                    if viewModel.settings.selectedModelID == model.id {
+                    if viewModel.settings.selectedModelID == model.id && downloadViewModel.isModelLoaded {
                         Image(systemName: "checkmark")
                             .foregroundStyle(.accent)
                     }
@@ -76,6 +82,7 @@ struct SettingsView: View {
                 .onTapGesture {
                     if model.isDownloaded {
                         viewModel.selectModel(model)
+                        downloadViewModel.selectedModel = model
                         Task { await downloadViewModel.loadModel() }
                     }
                 }
@@ -102,7 +109,7 @@ struct SettingsView: View {
         Section("About") {
             LabeledContent("Version", value: "1.0.0")
             LabeledContent("Inference", value: "On-device (llama.cpp)")
-            Link("Source Code", destination: URL(string: "https://github.com/wassimmehanna/pocketmind")!)
+            Link("Source Code", destination: Self.sourceURL)
         }
     }
 }
