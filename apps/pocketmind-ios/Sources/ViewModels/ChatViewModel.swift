@@ -134,6 +134,12 @@ final class ChatViewModel: ObservableObject {
         llmService.cancelGeneration()
     }
 
+    /// Receives a query from Siri and sends it as if the user typed it.
+    func handleSiriQuery(_ text: String) {
+        inputText = text
+        Task { await sendMessage() }
+    }
+
     func clearHistory() {
         llmService.cancelGeneration()
         messages = []

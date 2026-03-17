@@ -35,6 +35,9 @@ final class CalendarService {
             authorizationStatus = EKEventStore.authorizationStatus(for: .event)
             return granted
         } catch {
+            #if DEBUG
+            print("[CalendarService] requestAccess failed: \(error)")
+            #endif
             return false
         }
     }

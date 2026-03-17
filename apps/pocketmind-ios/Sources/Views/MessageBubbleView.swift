@@ -123,12 +123,14 @@ private struct CalendarEventCard: View {
 
     private var monthText: String {
         let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "MMM"
         return f.string(from: preview.start).uppercased()
     }
 
     private var dayText: String {
         let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "d"
         return f.string(from: preview.start)
     }

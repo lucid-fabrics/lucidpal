@@ -14,10 +14,9 @@ final class AppSettings: ObservableObject {
     // MARK: - Computed Properties
 
     var selectedModel: ModelInfo {
-        switch selectedModelID {
-        case ModelInfo.qwen3_4B.id: return .qwen3_4B
-        default: return .qwen3_1B7
-        }
+        // Array lookup — adding new models requires no changes here
+        [ModelInfo.qwen3_1B7, ModelInfo.qwen3_4B]
+            .first { $0.id == selectedModelID } ?? .qwen3_1B7
     }
 
     var deviceRAMGB: Int {

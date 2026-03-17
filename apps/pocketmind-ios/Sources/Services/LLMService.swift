@@ -158,7 +158,7 @@ actor LlamaActor {
         batch.token   [i] = id
         batch.pos     [i] = pos
         batch.n_seq_id[i] = 1
-        batch.seq_id  [i]![0] = seqId
+        if let ptr = batch.seq_id[i] { ptr[0] = seqId }  // Guard: seq_id[i] should always be non-nil after llama_batch_init
         batch.logits  [i] = logits ? 1 : 0
         batch.n_tokens += 1
     }
@@ -183,8 +183,11 @@ actor LlamaActor {
         var buf = [CChar](repeating: 0, count: 8)
         let n = llama_token_to_piece(vocab, token, &buf, 8, 0, false)
         if n < 0 {
-            var big = [CChar](repeating: 0, count: Int(-n))
-            let n2 = llama_token_to_piece(vocab, token, &big, Int32(-n), 0, false)
+            // Cast to Int before negating to avoid Int32 overflow when n == Int32.min
+            let bufSize = Int(-Int(n))
+            guard bufSize <= 65_536 else { return [] }  // Sanity: no token piece > 64 KB
+            var big = [CChar](repeating: 0, count: bufSize)
+            let n2 = llama_token_to_piece(vocab, token, &big, Int32(bufSize), 0, false)
             return Array(big.prefix(Int(n2)))
         }
         return Array(buf.prefix(Int(n)))
