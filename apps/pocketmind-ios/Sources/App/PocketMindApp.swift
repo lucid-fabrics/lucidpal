@@ -5,15 +5,19 @@ struct PocketMindApp: App {
     private let settings = AppSettings()
     private let llmService = LLMService()
     private let calendarService = CalendarService()
+    private let calendarActionController: CalendarActionController
 
     private let chatViewModel: ChatViewModel
     private let settingsViewModel: SettingsViewModel
     private let downloadViewModel: ModelDownloadViewModel
 
     init() {
+        let actionController = CalendarActionController(calendarService: calendarService)
+        calendarActionController = actionController
         chatViewModel = ChatViewModel(
             llmService: llmService,
             calendarService: calendarService,
+            calendarActionController: actionController,
             settings: settings
         )
         settingsViewModel = SettingsViewModel(

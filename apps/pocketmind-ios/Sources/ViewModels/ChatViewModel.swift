@@ -10,19 +10,47 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isModelLoaded = false
     @Published var errorMessage: String?
 
+    @Published private(set) var isSpeechRecording = false
+    @Published private(set) var isSpeechAvailable = false
+
     private let llmService: LLMService
     private let calendarService: CalendarService
+    private let calendarActionController: CalendarActionController
     private let settings: AppSettings
+    private let speechService = SpeechService()
 
-    init(llmService: LLMService, calendarService: CalendarService, settings: AppSettings) {
+    init(llmService: LLMService, calendarService: CalendarService, calendarActionController: CalendarActionController, settings: AppSettings) {
         self.llmService = llmService
         self.calendarService = calendarService
+        self.calendarActionController = calendarActionController
         self.settings = settings
         self.isModelLoaded = llmService.isLoaded
 
         // assign(to: &$property) uses weak self internally — no retain cycle.
         llmService.$isLoaded.assign(to: &$isModelLoaded)
         llmService.$isGenerating.assign(to: &$isGenerating)
+        speechService.$isRecording.assign(to: &$isSpeechRecording)
+        speechService.$isAuthorized.assign(to: &$isSpeechAvailable)
+
+        // Forward live transcript into the input field while recording
+        speechService.$transcript
+            .filter { !$0.isEmpty }
+            .assign(to: &$inputText)
+
+        // Request speech permissions on launch
+        Task { await speechService.requestAuthorization() }
+    }
+
+    func toggleSpeech() {
+        if speechService.isRecording {
+            speechService.stopRecording()
+        } else {
+            do {
+                try speechService.startRecording()
+            } catch {
+                errorMessage = "Microphone error: \(error.localizedDescription)"
+            }
+        }
     }
 
     func sendMessage() async {
@@ -46,16 +74,43 @@ final class ChatViewModel: ObservableObject {
         let assistantID = assistantMsg.id  // Capture ID — safe against clearHistory() mid-stream
 
         // Snapshot history without the empty assistant placeholder
-        let prompt = LLMService.buildPrompt(
-            messages: Array(messages.dropLast()),
-            systemPrompt: systemPrompt
-        )
+        let historyMessages = Array(messages.dropLast())
 
         do {
-            for try await token in llmService.generate(prompt: prompt) {
-                // ID-based lookup — nil-safe if clearHistory() wipes messages during streaming
+            var raw = ""           // full accumulated raw output
+            var thinkDone = false  // have we seen </think> yet?
+            let showThinking = settings.thinkingEnabled  // snapshot at send time
+
+            for try await token in llmService.generate(systemPrompt: systemPrompt, messages: historyMessages, thinkingEnabled: showThinking) {
                 guard let idx = messages.firstIndex(where: { $0.id == assistantID }) else { break }
-                messages[idx].content += token
+                raw += token
+
+                if thinkDone {
+                    messages[idx].content += token
+                } else if raw.hasPrefix("<think>") {
+                    if let closeRange = raw.range(of: "</think>") {
+                        let thinkText = String(raw[raw.index(raw.startIndex, offsetBy: "<think>".count) ..< closeRange.lowerBound])
+                        let response  = String(raw[closeRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+                        if showThinking {
+                            messages[idx].thinkingContent = thinkText.trimmingCharacters(in: .whitespacesAndNewlines)
+                        }
+                        messages[idx].isThinking = false
+                        messages[idx].content = response
+                        thinkDone = true
+                    } else {
+                        // Still inside <think>
+                        if showThinking {
+                            messages[idx].isThinking = true
+                            messages[idx].thinkingContent = String(raw.dropFirst("<think>".count))
+                        }
+                        // When thinking is off: buffer silently, show nothing
+                    }
+                } else if "<think>".hasPrefix(raw) {
+                    // Still buffering opening tag — don't display yet
+                } else {
+                    thinkDone = true
+                    messages[idx].content = raw
+                }
             }
         } catch is CancellationError {
             // User cancelled — leave partial content visible
@@ -64,6 +119,14 @@ final class ChatViewModel: ObservableObject {
                 messages[idx].content = "Error: \(error.localizedDescription)"
             }
             errorMessage = error.localizedDescription
+        }
+
+        // After streaming, execute calendar actions (thinking already extracted live)
+        if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
+            messages[idx].isThinking = false
+            let (content, previews) = await executeCalendarActions(in: messages[idx].content)
+            messages[idx].content = content
+            messages[idx].calendarEventPreviews = previews
         }
     }
 
@@ -76,15 +139,60 @@ final class ChatViewModel: ObservableObject {
         messages = []
     }
 
+    // MARK: - Calendar action dispatch
+
+    private static let actionPattern = #"\[CALENDAR_ACTION:(\{[^\]]+\})\]"#
+
+    private func executeCalendarActions(in text: String) async -> (content: String, previews: [CalendarEventPreview]) {
+        guard let regex = try? NSRegularExpression(pattern: Self.actionPattern, options: [.dotMatchesLineSeparators]) else { return (text, []) }
+        let range = NSRange(text.startIndex..., in: text)
+        let matches = regex.matches(in: text, range: range)
+        guard !matches.isEmpty else { return (text, []) }
+
+        var result = text
+        var previews: [CalendarEventPreview] = []
+        for match in matches.reversed() {
+            let fullRange = Range(match.range, in: result)!
+            let jsonRange = Range(match.range(at: 1), in: result)!
+            let json = String(result[jsonRange])
+
+            let actionResult = await calendarActionController.execute(json: json)
+            let replacement: String
+            switch actionResult {
+            case .success(let msg, let preview):
+                replacement = msg
+                previews.append(preview)
+            case .failure(let msg):
+                replacement = msg
+            }
+            result = result.replacingCharacters(in: fullRange, with: replacement)
+        }
+        return (result, previews)
+    }
+
     private func buildSystemPrompt() async -> String {
+        let today = formattedToday()
         var parts: [String] = [
-            "You are PocketMind, a helpful AI calendar assistant running entirely on-device.",
-            "Today is \(formattedToday()).",
-            "Be concise. Use plain text, no markdown."
+            """
+            You are PocketMind, an on-device AI assistant with direct read and write access to the user's iOS calendar.
+            Today is \(today).
+            Be concise. Use plain text, no markdown.
+            """,
+            """
+            CALENDAR TOOL — you can create or update real calendar events by outputting one of these blocks:
+            Create: [CALENDAR_ACTION:{"action":"create","title":"TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":""}]
+            Update/rename: [CALENDAR_ACTION:{"action":"update","search":"EXISTING TITLE","title":"NEW TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":""}]
+            Rules:
+            - Dates: ISO8601, no timezone (e.g. 2026-03-18T14:00:00). Default duration: 1 hour.
+            - For rename/update: set action to "update" and search to the current event title.
+            - Output the block first, then a short confirmation sentence.
+            - NEVER tell the user to add/edit manually. The block executes automatically.
+            - NEVER skip the block when a create or update is requested.
+            """
         ]
 
         if settings.calendarAccessEnabled {
-            let events = await calendarService.fetchEvents(from: .now, days: 7)
+            let events = calendarService.fetchEvents(from: .now, days: 7)
             // Sync revocation: if OS denied access between the setting toggle and now, disable the toggle.
             if !calendarService.isAuthorized {
                 settings.calendarAccessEnabled = false
