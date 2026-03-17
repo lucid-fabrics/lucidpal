@@ -6,6 +6,7 @@ final class ChatViewModel: ObservableObject {
     @Published var messages: [ChatMessage] = []
     @Published var inputText: String = ""
     @Published private(set) var isGenerating = false
+    @Published private(set) var isPreparing = false
     @Published private(set) var isModelLoaded = false
     @Published var errorMessage: String?
 
@@ -34,7 +35,9 @@ final class ChatViewModel: ObservableObject {
 
         // Build system prompt before showing the assistant placeholder —
         // prevents a visible empty bubble during the calendar fetch.
+        isPreparing = true
         let systemPrompt = await buildSystemPrompt()
+        isPreparing = false
 
         let assistantMsg = ChatMessage(role: .assistant, content: "")
         messages.append(assistantMsg)
@@ -80,7 +83,10 @@ final class ChatViewModel: ObservableObject {
 
         if settings.calendarAccessEnabled {
             let events = await calendarService.fetchEvents(from: .now, days: 7)
-            if !events.isEmpty {
+            // Sync revocation: if OS denied access between the setting toggle and now, disable the toggle.
+            if !calendarService.isAuthorized {
+                settings.calendarAccessEnabled = false
+            } else if !events.isEmpty {
                 parts.append("\nUser's upcoming events (next 7 days):\n\(events)")
             }
         }

@@ -82,7 +82,11 @@ struct ModelDownloadView: View {
     private var actionButton: some View {
         switch viewModel.downloadState {
         case .idle:
-            if viewModel.selectedModel.isDownloaded {
+            if viewModel.isModelLoaded && viewModel.settings.selectedModelID == viewModel.selectedModel.id {
+                Label("Loaded", systemImage: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .font(.subheadline.weight(.medium))
+            } else if viewModel.selectedModel.isDownloaded {
                 Button("Load Model") {
                     Task { await viewModel.loadModel() }
                 }
