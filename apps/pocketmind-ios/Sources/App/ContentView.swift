@@ -9,13 +9,32 @@ struct ContentView: View {
         TabView {
             ChatView(viewModel: chatViewModel)
                 .tabItem {
-                    Label("Chat", systemImage: "bubble.left.and.bubble.right")
+                    Label(Tab.chat.title, systemImage: Tab.chat.icon)
                 }
 
             SettingsView(viewModel: settingsViewModel, downloadViewModel: downloadViewModel)
                 .tabItem {
-                    Label("Settings", systemImage: "gear")
+                    Label(Tab.settings.title, systemImage: Tab.settings.icon)
                 }
+        }
+    }
+}
+
+private enum Tab {
+    case chat
+    case settings
+
+    var title: String {
+        switch self {
+        case .chat: return "Chat"
+        case .settings: return "Settings"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .chat: return "bubble.left.and.bubble.right"
+        case .settings: return "gear"
         }
     }
 }

@@ -7,8 +7,10 @@ enum DownloadState: Equatable, Sendable {
     case failed(message: String)
 }
 
+// @Published is kept (without ObservableObject) so downloader.$state publisher
+// works for assign(to: &$downloadState) in ModelDownloadViewModel.
 @MainActor
-final class ModelDownloader: NSObject, ObservableObject {
+final class ModelDownloader: NSObject {
     @Published var state: DownloadState = .idle
 
     private var session: URLSession?
@@ -42,6 +44,13 @@ final class ModelDownloader: NSObject, ObservableObject {
         downloadTask = nil
         session?.invalidateAndCancel()
         session = nil
+        state = .idle
+    }
+
+    /// Resets the download state machine to idle. Called by the ViewModel after a
+    /// successful model load to clear the stale "completed" state without bypassing
+    /// the service's own state machine.
+    func resetState() {
         state = .idle
     }
 

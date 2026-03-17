@@ -1,13 +1,16 @@
 import EventKit
 import Foundation
 
+// CalendarService is a pure data-access service — it holds no observable UI state.
+// SettingsViewModel owns @Published calendarAuthStatus and syncs it manually after
+// requestAccess() returns, keeping the observable layer entirely in ViewModels.
 @MainActor
-final class CalendarService: ObservableObject {
+final class CalendarService {
     // nonisolated(unsafe): EKEventStore is documented as thread-safe for read operations.
     // Marking it nonisolated(unsafe) allows background query offloading below.
     nonisolated(unsafe) private let store = EKEventStore()
 
-    @Published private(set) var authorizationStatus: EKAuthorizationStatus = .notDetermined
+    private(set) var authorizationStatus: EKAuthorizationStatus = .notDetermined
 
     // Reuse formatter — DateFormatter is expensive to construct
     private static let eventFormatter: DateFormatter = {
