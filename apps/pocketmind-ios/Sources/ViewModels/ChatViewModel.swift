@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import UIKit
 
 @MainActor
 final class ChatViewModel: ObservableObject {
@@ -19,6 +20,8 @@ final class ChatViewModel: ObservableObject {
     private let settings: AppSettings
     private let speechService = SpeechService()
     private var cancellables = Set<AnyCancellable>()
+    // Prevents auto-submit when the user manually taps the mic button to stop recording
+    private var suppressSpeechAutoSend = false
 
     nonisolated(unsafe) private static let historyURL: URL = {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -66,16 +69,37 @@ final class ChatViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
+        // Auto-submit when speech recognition ends naturally (final result / silence timeout).
+        // If the user manually tapped the mic button to stop, suppressSpeechAutoSend is set
+        // in toggleSpeech() and the observer skips the send.
+        speechService.$isRecording
+            .removeDuplicates()
+            .filter { !$0 }
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                if self.suppressSpeechAutoSend {
+                    self.suppressSpeechAutoSend = false
+                    return
+                }
+                guard !self.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+                Task { await self.sendMessage() }
+            }
+            .store(in: &cancellables)
+
         // Request speech permissions on launch
         Task { await speechService.requestAuthorization() }
     }
 
     func toggleSpeech() {
         if speechService.isRecording {
+            // Manual stop — don't auto-submit; user controls sending themselves
+            suppressSpeechAutoSend = true
             speechService.stopRecording()
         } else {
             do {
                 try speechService.startRecording()
+                Self.impact(.light)
             } catch {
                 errorMessage = "Microphone error: \(error.localizedDescription)"
             }
@@ -86,6 +110,7 @@ final class ChatViewModel: ObservableObject {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isGenerating, isModelLoaded else { return }
 
+        Self.impact(.light)
         inputText = ""
         messages.append(ChatMessage(role: .user, content: text))
         errorMessage = nil
@@ -173,6 +198,7 @@ final class ChatViewModel: ObservableObject {
         do {
             try calendarService.deleteEvent(identifier: identifier)
             messages[msgIdx].calendarEventPreviews[previewIdx].state = .deleted
+            Self.notifySuccess()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -196,6 +222,7 @@ final class ChatViewModel: ObservableObject {
               let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID })
         else { return }
         messages[msgIdx].calendarEventPreviews[previewIdx].state = .deletionCancelled
+        Self.impact(.light)
     }
 
     func confirmAllDeletions(messageID: UUID) async {
@@ -217,7 +244,9 @@ final class ChatViewModel: ObservableObject {
                 failures.append(messages[msgIdx].calendarEventPreviews[idx].title)
             }
         }
-        if !failures.isEmpty {
+        if failures.isEmpty {
+            Self.notifySuccess()
+        } else {
             errorMessage = "Couldn't delete: \(failures.joined(separator: ", "))"
         }
     }
@@ -229,6 +258,7 @@ final class ChatViewModel: ObservableObject {
                 messages[msgIdx].calendarEventPreviews[idx].state = .deletionCancelled
             }
         }
+        Self.impact(.light)
     }
 
     func confirmUpdate(messageID: UUID, previewID: UUID) async {
@@ -241,6 +271,7 @@ final class ChatViewModel: ObservableObject {
             let newState = try calendarService.applyUpdate(pending, to: identifier)
             messages[msgIdx].calendarEventPreviews[previewIdx].state = newState
             messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate = nil
+            Self.notifySuccess()
         } catch CalendarError.eventNotFound {
             // Event was deleted externally — dismiss the card rather than leaving it stuck.
             messages[msgIdx].calendarEventPreviews[previewIdx].state = .updateCancelled
@@ -257,6 +288,7 @@ final class ChatViewModel: ObservableObject {
         else { return }
         messages[msgIdx].calendarEventPreviews[previewIdx].state = .updateCancelled
         messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate = nil
+        Self.impact(.light)
     }
 
     /// Receives a query from Siri and sends it as if the user typed it.
@@ -439,5 +471,15 @@ final class ChatViewModel: ObservableObject {
         formatter.dateStyle = .full
         formatter.timeStyle = .short
         return formatter.string(from: .now)
+    }
+
+    // MARK: - Haptics
+
+    private static func impact(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
+        UIImpactFeedbackGenerator(style: style).impactOccurred()
+    }
+
+    private static func notifySuccess() {
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 }

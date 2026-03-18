@@ -144,9 +144,15 @@ struct SettingsView: View {
 
     private var aboutSection: some View {
         Section("About") {
-            LabeledContent("Version", value: "1.0.0")
+            LabeledContent("Version", value: Self.appVersion)
             LabeledContent("Inference", value: "On-device (llama.cpp)")
             Link("Source Code", destination: Self.sourceURL)
         }
+    }
+
+    private static var appVersion: String {
+        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        return "\(v) (\(b))"
     }
 }
