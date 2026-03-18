@@ -4,6 +4,7 @@ struct ChatView: View {
     @ObservedObject var viewModel: ChatViewModel
 
     @FocusState private var inputFocused: Bool
+    @State private var errorDismissTask: Task<Void, Never>?
 
     var body: some View {
         NavigationStack {
@@ -11,6 +12,8 @@ struct ChatView: View {
                 if !viewModel.isModelLoaded {
                     modelNotLoadedBanner
                 }
+                errorBanner
+                    .animation(.easeInOut(duration: 0.2), value: viewModel.errorMessage)
                 messageList
                 inputBar
             }
@@ -24,6 +27,41 @@ struct ChatView: View {
                     }
                 }
             }
+            .onChange(of: viewModel.errorMessage) { _, msg in
+                errorDismissTask?.cancel()
+                guard msg != nil else { return }
+                errorDismissTask = Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(5))
+                    viewModel.errorMessage = nil
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var errorBanner: some View {
+        if let error = viewModel.errorMessage {
+            HStack(spacing: 10) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.red)
+                Text(error)
+                    .font(.caption)
+                    .foregroundStyle(.primary)
+                    .lineLimit(3)
+                Spacer()
+                Button {
+                    viewModel.errorMessage = nil
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(Color(.systemGray6))
+            .overlay(alignment: .bottom) { Divider() }
+            .transition(.move(edge: .top).combined(with: .opacity))
         }
     }
 
