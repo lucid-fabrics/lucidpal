@@ -129,8 +129,11 @@ final class ChatViewModel: ObservableObject {
         let assistantID = assistantMsg.id  // Capture ID — safe against clearHistory() mid-stream
 
         // Snapshot history without the empty assistant placeholder.
-        // Cap at 30 messages (15 exchanges) to stay within model context window.
-        let historyMessages = Array(messages.dropLast().suffix(30))
+        // Cap based on device RAM: 8 K context devices get more history (50 msgs ≈ 5000 tokens),
+        // 4 K context devices use 20 msgs ≈ 2000 tokens, leaving headroom for system prompt + reply.
+        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / 1_073_741_824)
+        let historyLimit = ramGB >= 6 ? 50 : 20
+        let historyMessages = Array(messages.dropLast().suffix(historyLimit))
 
         do {
             var raw = ""           // full accumulated raw output
