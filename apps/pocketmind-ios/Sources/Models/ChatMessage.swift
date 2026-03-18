@@ -1,5 +1,16 @@
 import Foundation
 
+/// Snapshot of proposed changes before a user-confirmed update.
+struct PendingCalendarUpdate: Codable, Equatable, Sendable {
+    var title: String?
+    var start: Date?
+    var end: Date?
+    var location: String?
+    var notes: String?
+    var reminderMinutes: Int?
+    var isAllDay: Bool?
+}
+
 struct CalendarEventPreview: Codable, Equatable, Sendable {
     enum PreviewState: String, Codable, Sendable {
         case created
@@ -9,6 +20,8 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
         case deleted
         case deletionCancelled
         case restored
+        case pendingUpdate
+        case updateCancelled
     }
 
     let id: UUID
@@ -21,6 +34,10 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
     var eventIdentifier: String?
     /// Minutes before event for reminder alarm (nil = no alarm).
     let reminderMinutes: Int?
+    let isAllDay: Bool
+    let recurrence: String?
+    /// Proposed changes for pendingUpdate state.
+    var pendingUpdate: PendingCalendarUpdate?
 
     init(
         id: UUID = UUID(),
@@ -30,7 +47,9 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
         calendarName: String?,
         state: PreviewState = .created,
         eventIdentifier: String? = nil,
-        reminderMinutes: Int? = nil
+        reminderMinutes: Int? = nil,
+        isAllDay: Bool = false,
+        recurrence: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -40,6 +59,9 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
         self.state = state
         self.eventIdentifier = eventIdentifier
         self.reminderMinutes = reminderMinutes
+        self.isAllDay = isAllDay
+        self.recurrence = recurrence
+        self.pendingUpdate = nil
     }
 }
 

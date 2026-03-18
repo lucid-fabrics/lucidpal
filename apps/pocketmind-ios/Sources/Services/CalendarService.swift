@@ -114,15 +114,19 @@ final class CalendarService {
         location: String? = nil,
         notes: String? = nil,
         reminderMinutes: Int? = nil,
-        calendarIdentifier: String? = nil
+        calendarIdentifier: String? = nil,
+        isAllDay: Bool = false,
+        recurrence: String? = nil,
+        recurrenceEnd: Date? = nil
     ) throws -> String {
         authorizationStatus = EKEventStore.authorizationStatus(for: .event)
         guard isAuthorized else { throw CalendarError.notAuthorized }
 
         let event = EKEvent(eventStore: store)
         event.title = title
+        event.isAllDay = isAllDay
         event.startDate = start
-        event.endDate = end
+        event.endDate = isAllDay ? start : end
         if let location, !location.isEmpty { event.location = location }
         if let notes, !notes.isEmpty { event.notes = notes }
         if let minutes = reminderMinutes {
@@ -132,6 +136,21 @@ final class CalendarService {
             event.calendar = cal
         } else {
             event.calendar = store.defaultCalendarForNewEvents
+        }
+        if let recurrence {
+            let freq: EKRecurrenceFrequency
+            switch recurrence.lowercased() {
+            case "daily":   freq = .daily
+            case "weekly":  freq = .weekly
+            case "monthly": freq = .monthly
+            default:        freq = .yearly
+            }
+            let end = recurrenceEnd.map { EKRecurrenceEnd(end: $0) }
+            event.recurrenceRules = [EKRecurrenceRule(
+                recurrenceWith: freq,
+                interval: 1,
+                end: end
+            )]
         }
 
         try store.save(event, span: .thisEvent)

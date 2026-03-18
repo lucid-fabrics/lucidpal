@@ -7,6 +7,7 @@ struct CalendarActionPayload: Decodable {
         case create
         case update
         case delete
+        case query
     }
 
     // Optional — small models often omit it; default to .create
@@ -18,6 +19,10 @@ struct CalendarActionPayload: Decodable {
     let location: String?
     let notes: String?
     let reminderMinutes: Int?  // minutes before event to trigger alarm
+    let isAllDay: Bool?        // true for all-day events (holidays, birthdays)
+    let recurrence: String?    // "daily" | "weekly" | "monthly" | "yearly"
+    let recurrenceEnd: Date?   // optional end date for recurrence
+    let durationMinutes: Int?  // for query: desired free slot length in minutes
 }
 
 // MARK: - Result
@@ -25,6 +30,7 @@ struct CalendarActionPayload: Decodable {
 enum CalendarActionResult {
     case success(String, CalendarEventPreview)
     case bulkPending([CalendarEventPreview])   // multiple pending-deletion cards
+    case queryResult(String)                   // free slot query — plain text answer
     case failure(String)
 }
 
@@ -107,6 +113,8 @@ final class CalendarActionController {
                 return await bulkFindEventsForDeletion(payload)
             }
             return await findEventForDeletion(payload)
+        case .query:
+            return await findFreeSlots(payload)
         }
     }
 
@@ -116,43 +124,37 @@ final class CalendarActionController {
         guard let searchTitle = p.search, !searchTitle.isEmpty else {
             return .failure("(No event title provided for update.)")
         }
-        guard p.title != nil || p.start != nil || p.end != nil || p.location != nil || p.notes != nil else {
+        guard p.title != nil || p.start != nil || p.end != nil || p.location != nil || p.notes != nil || p.reminderMinutes != nil else {
             return .failure("(No fields to update were provided.)")
         }
-        do {
-            let windowStart = Calendar.current.date(byAdding: .day, value: -30, to: .now) ?? .now
-            let windowEnd   = Calendar.current.date(byAdding: .day, value:  30, to: .now) ?? .now
-            let predicate = calendarService.store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: nil)
-            let events = calendarService.store.events(matching: predicate)
-            guard let event = events.first(where: { ($0.title ?? "").localizedCaseInsensitiveContains(searchTitle) }) else {
-                return .failure("(Couldn't find an event called \"\(searchTitle)\" — please specify the exact name.)")
-            }
-
-            // Determine what changed BEFORE applying (used for state selection)
-            let titleChanged = p.title != nil && p.title != event.title
-            let datesChanged = p.start != nil || p.end != nil
-
-            if let newTitle = p.title    { event.title = newTitle }
-            if let newStart = p.start    { event.startDate = newStart }
-            if let newEnd = p.end        { event.endDate = newEnd }
-            if let loc = p.location, !loc.isEmpty   { event.location = loc }
-            if let notes = p.notes, !notes.isEmpty  { event.notes = notes }
-
-            try calendarService.store.save(event, span: .thisEvent)
-
-            let state: CalendarEventPreview.PreviewState = datesChanged && !titleChanged ? .rescheduled : .updated
-            let preview = CalendarEventPreview(
-                title: event.title ?? searchTitle,
-                start: event.startDate,
-                end: event.endDate,
-                calendarName: event.calendar?.title,
-                state: state
-            )
-            let verb = state == .rescheduled ? "Rescheduled" : "Updated"
-            return .success("\(verb) \"\(searchTitle)\".", preview)
-        } catch {
-            return .failure("(Couldn't update event: \(error.localizedDescription))")
+        let windowStart = Calendar.current.date(byAdding: .day, value: -30, to: .now) ?? .now
+        let windowEnd   = Calendar.current.date(byAdding: .day, value:  30, to: .now) ?? .now
+        let predicate = calendarService.store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: nil)
+        let events = calendarService.store.events(matching: predicate)
+        guard let event = events.first(where: { ($0.title ?? "").localizedCaseInsensitiveContains(searchTitle) }) else {
+            return .failure("(Couldn't find an event called \"\(searchTitle)\" — please specify the exact name.)")
         }
+
+        // Build pending snapshot — let user confirm before applying
+        var pending = PendingCalendarUpdate()
+        if let t = p.title    { pending.title = t }
+        if let s = p.start    { pending.start = s }
+        if let e = p.end      { pending.end = e }
+        if let l = p.location, !l.isEmpty { pending.location = l }
+        if let n = p.notes, !n.isEmpty    { pending.notes = n }
+        if let m = p.reminderMinutes      { pending.reminderMinutes = m }
+        if let a = p.isAllDay             { pending.isAllDay = a }
+
+        var preview = CalendarEventPreview(
+            title: event.title ?? searchTitle,
+            start: event.startDate,
+            end: event.endDate,
+            calendarName: event.calendar?.title,
+            state: .pendingUpdate,
+            eventIdentifier: event.eventIdentifier
+        )
+        preview.pendingUpdate = pending
+        return .success("", preview)
     }
 
     private func findEventForDeletion(_ p: CalendarActionPayload) async -> CalendarActionResult {
@@ -211,7 +213,10 @@ final class CalendarActionController {
                 location: p.location,
                 notes: p.notes,
                 reminderMinutes: p.reminderMinutes,
-                calendarIdentifier: calID
+                calendarIdentifier: calID,
+                isAllDay: p.isAllDay ?? false,
+                recurrence: p.recurrence,
+                recurrenceEnd: p.recurrenceEnd
             )
             let calendarName = calendarService.store.event(withIdentifier: identifier)?.calendar?.title
                 ?? calendarService.store.defaultCalendarForNewEvents?.title
@@ -220,12 +225,76 @@ final class CalendarActionController {
                 start: start,
                 end: end,
                 calendarName: calendarName,
-                reminderMinutes: p.reminderMinutes
+                reminderMinutes: p.reminderMinutes,
+                isAllDay: p.isAllDay ?? false,
+                recurrence: p.recurrence
             )
             return .success("Added \"\(title)\" to your calendar.\(conflictNote)", preview)
         } catch {
             return .failure("(Couldn't save event: \(error.localizedDescription))")
         }
+    }
+
+    private func findFreeSlots(_ p: CalendarActionPayload) async -> CalendarActionResult {
+        guard let rangeStart = p.start, let rangeEnd = p.end else {
+            return .failure("(Free slot query requires start and end range.)")
+        }
+        let duration = TimeInterval((p.durationMinutes ?? 60) * 60)
+        let events = calendarService.events(in: rangeStart, end: rangeEnd)
+            .sorted { $0.startDate < $1.startDate }
+
+        // Collect and merge overlapping busy windows (unwrap EKEvent's implicitly-unwrapped dates)
+        var merged: [(Date, Date)] = []
+        for window in events.compactMap({ ev -> (Date, Date)? in
+            guard let s = ev.startDate else { return nil }
+            return (s, ev.endDate ?? s)
+        }) {
+            if let last = merged.last, window.0 < last.1 {
+                merged[merged.count - 1] = (last.0, max(last.1, window.1))
+            } else {
+                merged.append(window)
+            }
+        }
+
+        // Find gaps ≥ duration within working hours (8am–8pm)
+        let cal = Calendar.current
+        var slots: [String] = []
+        var cursor = rangeStart
+
+        // Clamp cursor to next 8am if before
+        func nextWorkStart(_ from: Date) -> Date {
+            var comps = cal.dateComponents([.year, .month, .day], from: from)
+            comps.hour = 8; comps.minute = 0; comps.second = 0
+            let day8am = cal.date(from: comps) ?? from
+            return day8am < from ? cal.date(byAdding: .day, value: 1, to: day8am) ?? from : day8am
+        }
+        func dayEnd(_ from: Date) -> Date {
+            var comps = cal.dateComponents([.year, .month, .day], from: from)
+            comps.hour = 20; comps.minute = 0; comps.second = 0
+            return cal.date(from: comps) ?? from
+        }
+
+        cursor = nextWorkStart(cursor)
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+
+        for window in merged + [(rangeEnd, rangeEnd)] {
+            let freeEnd = min(window.0, dayEnd(cursor))
+            if freeEnd > cursor && freeEnd.timeIntervalSince(cursor) >= duration {
+                slots.append("• \(formatter.string(from: cursor)) – \(formatter.string(from: freeEnd))")
+                if slots.count == 3 { break }
+            }
+            let afterBusy = window.1
+            cursor = max(afterBusy, nextWorkStart(afterBusy))
+            if cursor >= rangeEnd { break }
+        }
+
+        if slots.isEmpty {
+            return .queryResult("No free slots of \(p.durationMinutes ?? 60) minutes found in that range.")
+        }
+        let label = p.durationMinutes.map { "\($0)-minute" } ?? "1-hour"
+        return .queryResult("Free \(label) slots:\n" + slots.joined(separator: "\n"))
     }
 
     private func bulkFindEventsForDeletion(_ p: CalendarActionPayload) async -> CalendarActionResult {

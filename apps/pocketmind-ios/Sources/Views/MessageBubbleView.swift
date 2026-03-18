@@ -6,7 +6,15 @@ struct MessageBubbleView: View {
     var onConfirmDeletion: ((UUID) -> Void)? = nil
     var onCancelDeletion: ((UUID) -> Void)? = nil
     var onUndoDeletion: ((UUID) -> Void)? = nil
+    var onConfirmUpdate: ((UUID) -> Void)? = nil
+    var onCancelUpdate: ((UUID) -> Void)? = nil
+    var onConfirmAllDeletions: (() -> Void)? = nil
+    var onCancelAllDeletions: (() -> Void)? = nil
     @State private var thinkingExpanded = false
+
+    private var pendingDeletionCount: Int {
+        message.calendarEventPreviews.filter { $0.state == .pendingDeletion }.count
+    }
 
     // Strip [CALENDAR_ACTION:...] from visible text — shown as a pill instead
     private var displayContent: String {
@@ -79,9 +87,20 @@ struct MessageBubbleView: View {
                 ForEach(message.calendarEventPreviews, id: \.id) { preview in
                     CalendarEventCard(
                         preview: preview,
-                        onConfirm: { onConfirmDeletion?(preview.id) },
-                        onCancel:  { onCancelDeletion?(preview.id) },
-                        onUndo:    { onUndoDeletion?(preview.id) }
+                        onConfirm:        { onConfirmDeletion?(preview.id) },
+                        onCancel:         { onCancelDeletion?(preview.id) },
+                        onUndo:           { onUndoDeletion?(preview.id) },
+                        onConfirmUpdate:  { onConfirmUpdate?(preview.id) },
+                        onCancelUpdate:   { onCancelUpdate?(preview.id) }
+                    )
+                }
+
+                // Bulk action bar when ≥2 pending deletions
+                if pendingDeletionCount >= 2 {
+                    BulkDeletionBar(
+                        count: pendingDeletionCount,
+                        onDeleteAll: { onConfirmAllDeletions?() },
+                        onKeepAll:   { onCancelAllDeletions?() }
                     )
                 }
 
@@ -104,6 +123,8 @@ private struct CalendarEventCard: View {
     let onConfirm: () -> Void
     let onCancel: () -> Void
     let onUndo: () -> Void
+    let onConfirmUpdate: () -> Void
+    let onCancelUpdate: () -> Void
 
     private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -120,6 +141,10 @@ private struct CalendarEventCard: View {
             deletedCard
         case .deletionCancelled:
             statusCard(icon: "xmark.circle", label: "Deletion cancelled", color: .secondary)
+        case .pendingUpdate:
+            pendingUpdateCard
+        case .updateCancelled:
+            statusCard(icon: "xmark.circle", label: "Update cancelled", color: .secondary)
         case .created, .updated, .rescheduled, .restored:
             tappableCard
         }
@@ -168,6 +193,56 @@ private struct CalendarEventCard: View {
         .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.red.opacity(0.3), lineWidth: 1))
     }
 
+    private var pendingUpdateCard: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            cardContent(titleColor: .primary, dimmed: false)
+            if let p = preview.pendingUpdate {
+                VStack(alignment: .leading, spacing: 3) {
+                    if let t = p.title { changeRow(label: "Title", value: t) }
+                    if let s = p.start { changeRow(label: "Start", value: Self.timeFormatter.string(from: s)) }
+                    if let e = p.end   { changeRow(label: "End",   value: Self.timeFormatter.string(from: e)) }
+                    if let l = p.location { changeRow(label: "Location", value: l) }
+                    if let m = p.reminderMinutes { changeRow(label: "Reminder", value: reminderLabel(m)) }
+                }
+                .padding(.horizontal, 10)
+                .padding(.bottom, 8)
+            }
+            Divider().padding(.horizontal, 10)
+            HStack(spacing: 0) {
+                Button(action: onCancelUpdate) {
+                    Text("Cancel")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                }
+                Divider().frame(height: 36)
+                Button(action: onConfirmUpdate) {
+                    Text("Apply")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.accentColor)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                }
+            }
+            .buttonStyle(.plain)
+        }
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.accentColor.opacity(0.3), lineWidth: 1))
+    }
+
+    private func changeRow(label: String, value: String) -> some View {
+        HStack(spacing: 4) {
+            Text("\(label):")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.caption2)
+                .foregroundStyle(.primary)
+        }
+    }
+
     private var deletedCard: some View {
         HStack(spacing: 10) {
             dateBadge(dimmed: true)
@@ -177,7 +252,7 @@ private struct CalendarEventCard: View {
                     .foregroundStyle(.secondary)
                     .strikethrough(true, color: .secondary)
                     .lineLimit(1)
-                Text("\(Self.timeFormatter.string(from: preview.start)) – \(Self.timeFormatter.string(from: preview.end))")
+                Text(timeText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -205,7 +280,7 @@ private struct CalendarEventCard: View {
                     .foregroundStyle(.secondary)
                     .strikethrough(preview.state == .deleted, color: .secondary)
                     .lineLimit(1)
-                Text("\(Self.timeFormatter.string(from: preview.start)) – \(Self.timeFormatter.string(from: preview.end))")
+                Text(timeText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -238,7 +313,7 @@ private struct CalendarEventCard: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-                Text("\(Self.timeFormatter.string(from: preview.start)) – \(Self.timeFormatter.string(from: preview.end))")
+                Text(timeText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 if let cal = preview.calendarName {
@@ -251,6 +326,15 @@ private struct CalendarEventCard: View {
                         Image(systemName: "bell.fill")
                             .font(.system(size: 8))
                         Text(reminderLabel(minutes))
+                            .font(.caption2)
+                    }
+                    .foregroundStyle(.secondary)
+                }
+                if let rec = preview.recurrence {
+                    HStack(spacing: 3) {
+                        Image(systemName: "repeat")
+                            .font(.system(size: 8))
+                        Text(rec.capitalized)
                             .font(.caption2)
                     }
                     .foregroundStyle(.secondary)
@@ -299,6 +383,10 @@ private struct CalendarEventCard: View {
         return f.string(from: preview.start)
     }
 
+    private var timeText: String {
+        preview.isAllDay ? "All day" : "\(Self.timeFormatter.string(from: preview.start)) – \(Self.timeFormatter.string(from: preview.end))"
+    }
+
     private func reminderLabel(_ minutes: Int) -> String {
         if minutes < 60 { return "\(minutes)m before" }
         let h = minutes / 60
@@ -310,6 +398,38 @@ private struct CalendarEventCard: View {
         if let url = URL(string: "calshow://") {
             UIApplication.shared.open(url)
         }
+    }
+}
+
+// MARK: - Bulk deletion bar
+
+private struct BulkDeletionBar: View {
+    let count: Int
+    let onDeleteAll: () -> Void
+    let onKeepAll: () -> Void
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Button(action: onKeepAll) {
+                Text("Keep All")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+            }
+            Divider().frame(height: 36)
+            Button(action: onDeleteAll) {
+                Text("Delete All (\(count))")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+            }
+        }
+        .buttonStyle(.plain)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.red.opacity(0.3), lineWidth: 1))
     }
 }
 
