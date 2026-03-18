@@ -91,10 +91,11 @@ final class ModelDownloadViewModelTests: XCTestCase {
         XCTAssertEqual(mockDownloader.deletedModels.first?.id, model.id)
     }
 
-    func testDeleteModelSetsDeleteErrorOnFailure() {
+    func testDeleteModelSetsDeleteErrorOnFailure() throws {
         mockDownloader.shouldThrowOnDelete = true
         viewModel.deleteModel(viewModel.selectedModel)
-        XCTAssertNotNil(viewModel.deleteError)
+        let err = try XCTUnwrap(viewModel.deleteError)
+        XCTAssertTrue(err.hasPrefix("Could not delete model:"))
     }
 
     func testDeleteLoadedModelUnloadsLLM() {

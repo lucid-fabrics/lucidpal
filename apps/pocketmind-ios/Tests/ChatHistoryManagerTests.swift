@@ -74,4 +74,10 @@ final class ChatHistoryManagerTests: XCTestCase {
         XCTAssertEqual(loaded[0].role, .user)
         XCTAssertEqual(loaded[1].role, .assistant)
     }
+
+    func testLoadReturnsFallbackWhenFileMalformed() throws {
+        try "not valid json {{{".data(using: .utf8)!.write(to: ChatHistoryManager.historyURL)
+        let messages = manager.load()
+        XCTAssertTrue(messages.isEmpty)
+    }
 }
