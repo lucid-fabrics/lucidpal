@@ -3,6 +3,8 @@ import UIKit
 
 struct MessageBubbleView: View {
     let message: ChatMessage
+    var onConfirmDeletion: ((UUID) -> Void)? = nil
+    var onCancelDeletion: ((UUID) -> Void)? = nil
     @State private var thinkingExpanded = false
 
     var body: some View {
@@ -36,8 +38,12 @@ struct MessageBubbleView: View {
                     }
 
                 // Calendar event cards
-                ForEach(message.calendarEventPreviews, id: \.title) { preview in
-                    CalendarEventCard(preview: preview)
+                ForEach(message.calendarEventPreviews, id: \.id) { preview in
+                    CalendarEventCard(
+                        preview: preview,
+                        onConfirm: { onConfirmDeletion?(preview.id) },
+                        onCancel:  { onCancelDeletion?(preview.id) }
+                    )
                 }
 
                 Text(message.timestamp, style: .time)
@@ -56,13 +62,8 @@ struct MessageBubbleView: View {
 
 private struct CalendarEventCard: View {
     let preview: CalendarEventPreview
-
-    private static let dateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateStyle = .medium
-        f.timeStyle = .short
-        return f
-    }()
+    let onConfirm: () -> Void
+    let onCancel: () -> Void
 
     private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -72,54 +73,133 @@ private struct CalendarEventCard: View {
     }()
 
     var body: some View {
+        switch preview.state {
+        case .pendingDeletion:
+            pendingDeletionCard
+        case .deleted:
+            statusCard(icon: "trash.fill", label: "Deleted from calendar", color: .red)
+        case .deletionCancelled:
+            statusCard(icon: "xmark.circle", label: "Deletion cancelled", color: .secondary)
+        case .created, .updated:
+            tappableCard
+        }
+    }
+
+    // MARK: - Card variants
+
+    private var tappableCard: some View {
         Button(action: openInCalendar) {
-            HStack(spacing: 12) {
-                // Calendar icon badge
-                VStack(spacing: 1) {
-                    Text(monthText)
-                        .font(.system(size: 9, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 2)
-                        .background(Color.red)
-                    Text(dayText)
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundStyle(.primary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.bottom, 4)
-                }
-                .frame(width: 44)
-                .background(Color(.systemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Color(.systemGray4), lineWidth: 0.5))
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(preview.title)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
-                    Text("\(Self.timeFormatter.string(from: preview.start)) – \(Self.timeFormatter.string(from: preview.end))")
-                        .font(.caption)
+            cardContent(titleColor: .primary, dimmed: false)
+                .overlay(alignment: .trailing) {
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
-                    if let cal = preview.calendarName {
-                        Text(cal)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
+                        .padding(.trailing, 10)
                 }
-
-                Spacer()
-
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-            }
-            .padding(10)
-            .background(Color(.systemGray6))
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .buttonStyle(.plain)
     }
+
+    private var pendingDeletionCard: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            cardContent(titleColor: .primary, dimmed: false)
+            Divider().padding(.horizontal, 10)
+            HStack(spacing: 0) {
+                Button(action: onCancel) {
+                    Text("Keep")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                }
+                Divider().frame(height: 36)
+                Button(action: onConfirm) {
+                    Text("Delete")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.red)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                }
+            }
+            .buttonStyle(.plain)
+        }
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.red.opacity(0.3), lineWidth: 1))
+    }
+
+    private func statusCard(icon: String, label: String, color: Color) -> some View {
+        HStack(spacing: 10) {
+            dateBadge(dimmed: true)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(preview.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .strikethrough(preview.state == .deleted, color: .secondary)
+                    .lineLimit(1)
+                Text("\(Self.timeFormatter.string(from: preview.start)) – \(Self.timeFormatter.string(from: preview.end))")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Image(systemName: icon)
+                .font(.caption)
+                .foregroundStyle(color)
+                .padding(.trailing, 10)
+        }
+        .padding(10)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .opacity(0.6)
+    }
+
+    // MARK: - Shared sub-views
+
+    private func cardContent(titleColor: Color, dimmed: Bool) -> some View {
+        HStack(spacing: 12) {
+            dateBadge(dimmed: dimmed)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(preview.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(titleColor)
+                    .lineLimit(1)
+                Text("\(Self.timeFormatter.string(from: preview.start)) – \(Self.timeFormatter.string(from: preview.end))")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                if let cal = preview.calendarName {
+                    Text(cal)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+        }
+        .padding(10)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private func dateBadge(dimmed: Bool) -> some View {
+        VStack(spacing: 1) {
+            Text(monthText)
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 2)
+                .background(dimmed ? Color.gray : Color.red)
+            Text(dayText)
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(dimmed ? .secondary : .primary)
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 4)
+        }
+        .frame(width: 44)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Color(.systemGray4), lineWidth: 0.5))
+    }
+
+    // MARK: - Helpers
 
     private var monthText: String {
         let f = DateFormatter()
@@ -136,7 +216,6 @@ private struct CalendarEventCard: View {
     }
 
     private func openInCalendar() {
-        // Opens Calendar app to today (iOS 18 ignores specific timestamps in calshow://)
         if let url = URL(string: "calshow://") {
             UIApplication.shared.open(url)
         }

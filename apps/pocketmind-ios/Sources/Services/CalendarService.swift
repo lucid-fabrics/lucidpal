@@ -78,6 +78,16 @@ final class CalendarService {
         return "- \(title)\(location): \(start) → \(end) [\(cal)]"
     }
 
+    /// Deletes the event with the given EKEvent identifier.
+    func deleteEvent(identifier: String) throws {
+        authorizationStatus = EKEventStore.authorizationStatus(for: .event)
+        guard isAuthorized else { throw CalendarError.notAuthorized }
+        guard let event = store.event(withIdentifier: identifier) else {
+            throw CalendarError.eventNotFound
+        }
+        try store.remove(event, span: .thisEvent)
+    }
+
     /// Creates and saves a calendar event. Returns the event identifier on success.
     @discardableResult
     func createEvent(title: String, start: Date, end: Date, location: String? = nil, notes: String? = nil) throws -> String {
@@ -101,8 +111,12 @@ final class CalendarService {
 
 enum CalendarError: LocalizedError {
     case notAuthorized
+    case eventNotFound
 
     var errorDescription: String? {
-        "Calendar access is not authorized. Enable it in Settings."
+        switch self {
+        case .notAuthorized: return "Calendar access is not authorized. Enable it in Settings."
+        case .eventNotFound: return "The event could not be found in your calendar."
+        }
     }
 }

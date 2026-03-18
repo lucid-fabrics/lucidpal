@@ -134,6 +134,28 @@ final class ChatViewModel: ObservableObject {
         llmService.cancelGeneration()
     }
 
+    // MARK: - Calendar deletion confirmation
+
+    func confirmDeletion(messageID: UUID, previewID: UUID) async {
+        guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }),
+              let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID }),
+              let identifier = messages[msgIdx].calendarEventPreviews[previewIdx].eventIdentifier
+        else { return }
+        do {
+            try calendarService.deleteEvent(identifier: identifier)
+            messages[msgIdx].calendarEventPreviews[previewIdx].state = .deleted
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func cancelDeletion(messageID: UUID, previewID: UUID) {
+        guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }),
+              let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID })
+        else { return }
+        messages[msgIdx].calendarEventPreviews[previewIdx].state = .deletionCancelled
+    }
+
     /// Receives a query from Siri and sends it as if the user typed it.
     func handleSiriQuery(_ text: String) {
         inputText = text
@@ -188,15 +210,17 @@ final class ChatViewModel: ObservableObject {
             Be concise. Use plain text, no markdown.
             """,
             """
-            CALENDAR TOOL — you can create or update real calendar events by outputting one of these blocks:
+            CALENDAR TOOL — you can create, update, or delete real calendar events by outputting one of these blocks:
             Create: [CALENDAR_ACTION:{"action":"create","title":"TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":""}]
             Update/rename: [CALENDAR_ACTION:{"action":"update","search":"EXISTING TITLE","title":"NEW TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":""}]
+            Delete: [CALENDAR_ACTION:{"action":"delete","search":"EXISTING TITLE"}]
             Rules:
             - Dates: ISO8601, no timezone (e.g. 2026-03-18T14:00:00). Default duration: 1 hour.
             - For rename/update: set action to "update" and search to the current event title.
+            - For delete: set action to "delete" and search to the event title. The user will confirm before it executes.
             - Output the block first, then a short confirmation sentence.
             - NEVER tell the user to add/edit manually. The block executes automatically.
-            - NEVER skip the block when a create or update is requested.
+            - NEVER skip the block when a create, update, or delete is requested.
             """
         ]
 
