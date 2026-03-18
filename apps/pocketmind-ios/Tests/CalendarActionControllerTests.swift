@@ -250,9 +250,7 @@ final class CalendarActionControllerTests: XCTestCase {
     }
 
     func testQueryWithEventsReturnsReducedSlots() async {
-        // Busy all day → no free slots
-        mock.stubbedEvents = [makeEvent(title: "All Day")]
-        // Override event times to cover entire window
+        // Window is 1h but we need 2h — no free slots regardless of events
         let json = #"{"action":"query","start":"2026-06-01T08:00:00","end":"2026-06-01T09:00:00","durationMinutes":120}"#
         let result = await controller.execute(json: json)
         guard case .queryResult(let answer) = result else {

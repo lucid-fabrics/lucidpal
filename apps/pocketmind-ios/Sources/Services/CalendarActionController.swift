@@ -293,7 +293,7 @@ final class CalendarActionController: CalendarActionControllerProtocol {
                 if slots.count == 3 { break }
             }
             let afterBusy = window.1
-            cursor = max(afterBusy, nextWorkStart(afterBusy))
+            cursor = max(cursor, max(afterBusy, nextWorkStart(afterBusy)))
         }
 
         if slots.isEmpty {

@@ -54,11 +54,8 @@ final class ChatViewModel: ObservableObject {
         self.history = historyManager
         self.isModelLoaded = llmService.isLoaded
 
-        // Load persisted history asynchronously — avoids blocking the main thread on launch.
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            self.messages = self.history.load()
-        }
+        // Load persisted history synchronously — load() is a fast local disk read.
+        self.messages = historyManager.load()
 
         // Publishers — sink used instead of assign(to:) because existentials can't project @Published.
         llmService.isLoadedPublisher

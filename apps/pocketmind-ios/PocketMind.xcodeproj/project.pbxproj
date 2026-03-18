@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		017190099DE2F81C3A1BB925 /* ModelInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 421B7828BBD2ABDEC4FE49DE /* ModelInfoTests.swift */; };
 		0D85BD28C66B4AD418A1E85A /* SpeechServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 579BB15D96E1C547EF35CC3D /* SpeechServiceProtocol.swift */; };
 		1634999F0F030CDEFE9A206C /* CalendarActionControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30F66EB8E67D9C99294EEFC4 /* CalendarActionControllerTests.swift */; };
 		20BAF5E20E31B5A67A76066E /* MockCalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94023D4777FF38FC1EEDE46E /* MockCalendarService.swift */; };
@@ -19,32 +20,40 @@
 		4A58AC0F867DF8A7A811A85D /* PocketMindApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78BF7EEADC2A6E48DB74F5E9 /* PocketMindApp.swift */; };
 		4D49FAA4655A3B1CB99DBF76 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 085CE14DBB4AE5EE7F561219 /* AppDelegate.swift */; };
 		4D9A3A3F26324F74BA3105A3 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23E71755F4423670B08C5890 /* ChatView.swift */; };
+		53DE1688C46CF73D276726AF /* MockModelDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D3166E60D4B3CF0051EEE08 /* MockModelDownloader.swift */; };
+		554C40156A320AC04E291AEE /* CalendarDomainTypesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BCC2F0FDB961A8C83EF65C6 /* CalendarDomainTypesTests.swift */; };
 		573DE30FB5E1F48175825B86 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101B77275AB89E3FA4DE37C9 /* ChatMessage.swift */; };
 		57DDE7836359DA32F1BFF161 /* ModelDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 571F2AB04B35CA5F7570E1CD /* ModelDownloadView.swift */; };
 		5A174F4502C64FC6535170A2 /* ModelDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBA7D82AF887DCB8B5DD5FD6 /* ModelDownloader.swift */; };
 		5CE3EEF4B7967FEF6D0CDE0F /* ModelDownloadViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F85334EDFEC8E4B15028C3A /* ModelDownloadViewModelTests.swift */; };
 		601AAD971476A146EA5E10D5 /* ChatHistoryManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67BC9AE3151EB8450507B61C /* ChatHistoryManagerTests.swift */; };
+		6763616F470DA3FF5A2DAEFF /* ChatMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7E8187D2E299E73374D3166 /* ChatMessageTests.swift */; };
 		68EFEE10CA6D6CAF754FD74A /* ModelDownloadViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A715E93E5DD1F8CC56C896 /* ModelDownloadViewModel.swift */; };
 		6A132CF41A20258F746B8CD5 /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1037B4EA77CF451D9319998 /* LLMService.swift */; };
+		6D98D3562341380303569896 /* ChatViewModel+SystemPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21310A093FE63A08D3D1314E /* ChatViewModel+SystemPrompt.swift */; };
 		6E71EBE2DE405A9C62CDC87A /* ModelInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF981EFA6472ACC7A4EAC6E /* ModelInfo.swift */; };
 		7189EF0A399097DCFF16C0F6 /* MockLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99DFD84F401E95BCFA8FA710 /* MockLLMService.swift */; };
 		7FD1A8EB03C6602E234B46A7 /* AppSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E52E3FBE9B7F8FB587B81E07 /* AppSettingsTests.swift */; };
 		81424EB1A8D27DE59BDA6711 /* CalendarServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FE470DBD0E3313C49495D23 /* CalendarServiceProtocol.swift */; };
+		8EDF62074A60DDCB037EFC53 /* ChatViewModel+CalendarConfirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F6F18037F7D32711DD9812B /* ChatViewModel+CalendarConfirmation.swift */; };
 		90F821364EC9DE5B6091C8A6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 979CF042BA43DF068D6BA427 /* ContentView.swift */; };
 		99FB9CEA9C09175E57859FF1 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C57AFE47F91EB40164B843F /* AppSettings.swift */; };
 		A1AA0FDDE97BCF0CB6F1AE80 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = B668BB645B31666F0197D789 /* llama */; };
 		A49F828336DE087919543E16 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95AC9C8A5BA25C38328688EB /* SettingsViewModel.swift */; };
 		A5C77BCA78790115E658B337 /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EAA5A7FB227DCCA6BACB25C /* CalendarService.swift */; };
+		B7ECE3E7A8DDB6246FA44134 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89223E5E2E51426BF499376F /* HapticService.swift */; };
 		BB116DAEF827E61A46D747E5 /* SettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 592DDB922C3872F1E5FE3E2F /* SettingsViewModelTests.swift */; };
 		C033C2F0B82EDB5CEC33DC7B /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3BF69D3177D4BBE17CC1D1F /* ChatViewModel.swift */; };
 		C527E8CB5A979BDF1B29A51B /* CalendarActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0635F653727C5FC7632B651 /* CalendarActionController.swift */; };
 		D8AA6370CAF98BE9F55733A3 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 929E991CDFEEBC85C42D0EC6 /* SettingsView.swift */; };
 		DCD7844CFE3F3C559225633C /* ChatHistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16BCD27C5A1EDDD649A3DF5C /* ChatHistoryManager.swift */; };
 		E42449B54D7950415655003F /* ChatViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DC3E33EC485EEECF12DB8B /* ChatViewModelTests.swift */; };
+		E8E19CC42B403C1212B1DB15 /* MockCalendarActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF5B7A052A7A4BC30FCA13DE /* MockCalendarActionController.swift */; };
 		EB26AEB1E89D0B19172AC92E /* PendingCalendarUpdateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C841C5C8E45A829724806E0B /* PendingCalendarUpdateTests.swift */; };
 		F53FB960C47B3F9085D694D2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 79D226E65D59DA01784FEC0C /* Assets.xcassets */; };
 		F56928345943FBAED3001A0B /* MockSpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C64AD4CE1465131B306ABDD /* MockSpeechService.swift */; };
 		F9484C88F0637E07F846649D /* MessageBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 003B25C43CBE913DF321F18A /* MessageBubbleView.swift */; };
+		FB2281032EBDBDD8B8D8E193 /* MockChatHistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17D791390BF749084622EDDB /* MockChatHistoryManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,15 +72,21 @@
 		100196F990B4C26BC3C25D3F /* PocketMindShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PocketMindShortcuts.swift; sourceTree = "<group>"; };
 		101B77275AB89E3FA4DE37C9 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		16BCD27C5A1EDDD649A3DF5C /* ChatHistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHistoryManager.swift; sourceTree = "<group>"; };
+		17D791390BF749084622EDDB /* MockChatHistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockChatHistoryManager.swift; sourceTree = "<group>"; };
+		1BCC2F0FDB961A8C83EF65C6 /* CalendarDomainTypesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarDomainTypesTests.swift; sourceTree = "<group>"; };
+		1F6F18037F7D32711DD9812B /* ChatViewModel+CalendarConfirmation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatViewModel+CalendarConfirmation.swift"; sourceTree = "<group>"; };
 		1F85334EDFEC8E4B15028C3A /* ModelDownloadViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadViewModelTests.swift; sourceTree = "<group>"; };
 		20D1938C8D8FEC836DF1C154 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		21310A093FE63A08D3D1314E /* ChatViewModel+SystemPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatViewModel+SystemPrompt.swift"; sourceTree = "<group>"; };
 		23E71755F4423670B08C5890 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		2C64AD4CE1465131B306ABDD /* MockSpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSpeechService.swift; sourceTree = "<group>"; };
 		30F66EB8E67D9C99294EEFC4 /* CalendarActionControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionControllerTests.swift; sourceTree = "<group>"; };
+		421B7828BBD2ABDEC4FE49DE /* ModelInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInfoTests.swift; sourceTree = "<group>"; };
 		48A715E93E5DD1F8CC56C896 /* ModelDownloadViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadViewModel.swift; sourceTree = "<group>"; };
 		48DC3E33EC485EEECF12DB8B /* ChatViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelTests.swift; sourceTree = "<group>"; };
 		496CEA815F3CE084AE84F4DB /* PocketMindTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PocketMindTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		49E04EAFE1FBCE1DC1F74067 /* PocketMind.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PocketMind.entitlements; sourceTree = "<group>"; };
+		4D3166E60D4B3CF0051EEE08 /* MockModelDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockModelDownloader.swift; sourceTree = "<group>"; };
 		571F2AB04B35CA5F7570E1CD /* ModelDownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadView.swift; sourceTree = "<group>"; };
 		579BB15D96E1C547EF35CC3D /* SpeechServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechServiceProtocol.swift; sourceTree = "<group>"; };
 		592DDB922C3872F1E5FE3E2F /* SettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModelTests.swift; sourceTree = "<group>"; };
@@ -83,6 +98,7 @@
 		79D226E65D59DA01784FEC0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7C57AFE47F91EB40164B843F /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		7FE470DBD0E3313C49495D23 /* CalendarServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarServiceProtocol.swift; sourceTree = "<group>"; };
+		89223E5E2E51426BF499376F /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticService.swift; sourceTree = "<group>"; };
 		929E991CDFEEBC85C42D0EC6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		94023D4777FF38FC1EEDE46E /* MockCalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCalendarService.swift; sourceTree = "<group>"; };
 		95AC9C8A5BA25C38328688EB /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
@@ -99,7 +115,9 @@
 		CBA7D82AF887DCB8B5DD5FD6 /* ModelDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloader.swift; sourceTree = "<group>"; };
 		CEF981EFA6472ACC7A4EAC6E /* ModelInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInfo.swift; sourceTree = "<group>"; };
 		E52E3FBE9B7F8FB587B81E07 /* AppSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsTests.swift; sourceTree = "<group>"; };
+		E7E8187D2E299E73374D3166 /* ChatMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessageTests.swift; sourceTree = "<group>"; };
 		F0635F653727C5FC7632B651 /* CalendarActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionController.swift; sourceTree = "<group>"; };
+		FF5B7A052A7A4BC30FCA13DE /* MockCalendarActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCalendarActionController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,6 +170,7 @@
 				9EAA5A7FB227DCCA6BACB25C /* CalendarService.swift */,
 				7FE470DBD0E3313C49495D23 /* CalendarServiceProtocol.swift */,
 				16BCD27C5A1EDDD649A3DF5C /* ChatHistoryManager.swift */,
+				89223E5E2E51426BF499376F /* HapticService.swift */,
 				B1037B4EA77CF451D9319998 /* LLMService.swift */,
 				6D4ADCAA29604B5AC274F060 /* LLMServiceProtocol.swift */,
 				CBA7D82AF887DCB8B5DD5FD6 /* ModelDownloader.swift */,
@@ -178,12 +197,18 @@
 			children = (
 				E52E3FBE9B7F8FB587B81E07 /* AppSettingsTests.swift */,
 				30F66EB8E67D9C99294EEFC4 /* CalendarActionControllerTests.swift */,
+				1BCC2F0FDB961A8C83EF65C6 /* CalendarDomainTypesTests.swift */,
 				67BC9AE3151EB8450507B61C /* ChatHistoryManagerTests.swift */,
+				E7E8187D2E299E73374D3166 /* ChatMessageTests.swift */,
 				48DC3E33EC485EEECF12DB8B /* ChatViewModelTests.swift */,
+				FF5B7A052A7A4BC30FCA13DE /* MockCalendarActionController.swift */,
 				94023D4777FF38FC1EEDE46E /* MockCalendarService.swift */,
+				17D791390BF749084622EDDB /* MockChatHistoryManager.swift */,
 				99DFD84F401E95BCFA8FA710 /* MockLLMService.swift */,
+				4D3166E60D4B3CF0051EEE08 /* MockModelDownloader.swift */,
 				2C64AD4CE1465131B306ABDD /* MockSpeechService.swift */,
 				1F85334EDFEC8E4B15028C3A /* ModelDownloadViewModelTests.swift */,
+				421B7828BBD2ABDEC4FE49DE /* ModelInfoTests.swift */,
 				C841C5C8E45A829724806E0B /* PendingCalendarUpdateTests.swift */,
 				592DDB922C3872F1E5FE3E2F /* SettingsViewModelTests.swift */,
 			);
@@ -226,6 +251,8 @@
 			isa = PBXGroup;
 			children = (
 				B3BF69D3177D4BBE17CC1D1F /* ChatViewModel.swift */,
+				1F6F18037F7D32711DD9812B /* ChatViewModel+CalendarConfirmation.swift */,
+				21310A093FE63A08D3D1314E /* ChatViewModel+SystemPrompt.swift */,
 				48A715E93E5DD1F8CC56C896 /* ModelDownloadViewModel.swift */,
 				95AC9C8A5BA25C38328688EB /* SettingsViewModel.swift */,
 			);
@@ -296,6 +323,10 @@
 						DevelopmentTeam = KRPUAN3FFA;
 						ProvisioningStyle = Automatic;
 					};
+					CD9E3C191D564FBF4E88DFCC = {
+						DevelopmentTeam = KRPUAN3FFA;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 03AF380065B3222D502B9B57 /* Build configuration list for PBXProject "PocketMind" */;
@@ -339,12 +370,18 @@
 			files = (
 				7FD1A8EB03C6602E234B46A7 /* AppSettingsTests.swift in Sources */,
 				1634999F0F030CDEFE9A206C /* CalendarActionControllerTests.swift in Sources */,
+				554C40156A320AC04E291AEE /* CalendarDomainTypesTests.swift in Sources */,
 				601AAD971476A146EA5E10D5 /* ChatHistoryManagerTests.swift in Sources */,
+				6763616F470DA3FF5A2DAEFF /* ChatMessageTests.swift in Sources */,
 				E42449B54D7950415655003F /* ChatViewModelTests.swift in Sources */,
+				E8E19CC42B403C1212B1DB15 /* MockCalendarActionController.swift in Sources */,
 				20BAF5E20E31B5A67A76066E /* MockCalendarService.swift in Sources */,
+				FB2281032EBDBDD8B8D8E193 /* MockChatHistoryManager.swift in Sources */,
 				7189EF0A399097DCFF16C0F6 /* MockLLMService.swift in Sources */,
+				53DE1688C46CF73D276726AF /* MockModelDownloader.swift in Sources */,
 				F56928345943FBAED3001A0B /* MockSpeechService.swift in Sources */,
 				5CE3EEF4B7967FEF6D0CDE0F /* ModelDownloadViewModelTests.swift in Sources */,
+				017190099DE2F81C3A1BB925 /* ModelInfoTests.swift in Sources */,
 				EB26AEB1E89D0B19172AC92E /* PendingCalendarUpdateTests.swift in Sources */,
 				BB116DAEF827E61A46D747E5 /* SettingsViewModelTests.swift in Sources */,
 			);
@@ -364,8 +401,11 @@
 				DCD7844CFE3F3C559225633C /* ChatHistoryManager.swift in Sources */,
 				573DE30FB5E1F48175825B86 /* ChatMessage.swift in Sources */,
 				4D9A3A3F26324F74BA3105A3 /* ChatView.swift in Sources */,
+				8EDF62074A60DDCB037EFC53 /* ChatViewModel+CalendarConfirmation.swift in Sources */,
+				6D98D3562341380303569896 /* ChatViewModel+SystemPrompt.swift in Sources */,
 				C033C2F0B82EDB5CEC33DC7B /* ChatViewModel.swift in Sources */,
 				90F821364EC9DE5B6091C8A6 /* ContentView.swift in Sources */,
+				B7ECE3E7A8DDB6246FA44134 /* HapticService.swift in Sources */,
 				6A132CF41A20258F746B8CD5 /* LLMService.swift in Sources */,
 				38613A4E38E15A30F0E15449 /* LLMServiceProtocol.swift in Sources */,
 				F9484C88F0637E07F846649D /* MessageBubbleView.swift in Sources */,
@@ -421,6 +461,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KRPUAN3FFA;
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -581,6 +624,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KRPUAN3FFA;
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
