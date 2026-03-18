@@ -50,8 +50,10 @@ actor LlamaActor {
         }
 
         let nThreads = Int32(max(1, min(8, ProcessInfo.processInfo.processorCount - 2)))
+        // Use 8 K context on devices with ≥6 GB RAM (4B model tier); 4 K otherwise.
+        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / 1_073_741_824)
         var cp = llama_context_default_params()
-        cp.n_ctx           = 4096
+        cp.n_ctx           = ramGB >= 6 ? 8192 : 4096
         cp.n_threads       = nThreads
         cp.n_threads_batch = nThreads
 
@@ -68,7 +70,9 @@ actor LlamaActor {
 
         let sparams = llama_sampler_chain_default_params()
         let s = llama_sampler_chain_init(sparams)
-        llama_sampler_chain_add(s, llama_sampler_init_temp(0.7))
+        // Lower temperature for a calendar assistant: reduces hallucinated JSON fields
+        // and date/time errors. 0.35 keeps variety in prose while keeping actions precise.
+        llama_sampler_chain_add(s, llama_sampler_init_temp(0.35))
         llama_sampler_chain_add(s, llama_sampler_init_dist(UInt32.random(in: 0...UInt32.max)))
         sampler = s
     }
