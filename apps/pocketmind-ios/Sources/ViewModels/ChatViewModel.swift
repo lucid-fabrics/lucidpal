@@ -128,8 +128,9 @@ final class ChatViewModel: ObservableObject {
         messages.append(assistantMsg)
         let assistantID = assistantMsg.id  // Capture ID — safe against clearHistory() mid-stream
 
-        // Snapshot history without the empty assistant placeholder
-        let historyMessages = Array(messages.dropLast())
+        // Snapshot history without the empty assistant placeholder.
+        // Cap at 30 messages (15 exchanges) to stay within model context window.
+        let historyMessages = Array(messages.dropLast().suffix(30))
 
         do {
             var raw = ""           // full accumulated raw output
@@ -278,6 +279,12 @@ final class ChatViewModel: ObservableObject {
         else { return }
         do {
             let newState = try calendarService.applyUpdate(pending, to: identifier)
+            // Mirror applied changes onto the preview so the card shows the updated values
+            if let t = pending.title    { messages[msgIdx].calendarEventPreviews[previewIdx].title = t }
+            if let s = pending.start    { messages[msgIdx].calendarEventPreviews[previewIdx].start = s }
+            if let e = pending.end      { messages[msgIdx].calendarEventPreviews[previewIdx].end = e }
+            if let a = pending.isAllDay { messages[msgIdx].calendarEventPreviews[previewIdx].isAllDay = a }
+            if let m = pending.reminderMinutes { messages[msgIdx].calendarEventPreviews[previewIdx].reminderMinutes = m }
             messages[msgIdx].calendarEventPreviews[previewIdx].state = newState
             messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate = nil
             Self.notifySuccess()

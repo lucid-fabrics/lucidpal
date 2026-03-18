@@ -25,17 +25,17 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
     }
 
     let id: UUID
-    let title: String
-    let start: Date
-    let end: Date
+    var title: String
+    var start: Date
+    var end: Date
     let calendarName: String?
     var state: PreviewState
     /// EKEvent.eventIdentifier — stored so confirmed deletion can locate the event.
     var eventIdentifier: String?
     /// Minutes before event for reminder alarm (nil = no alarm).
-    let reminderMinutes: Int?
-    let isAllDay: Bool
-    let recurrence: String?
+    var reminderMinutes: Int?
+    var isAllDay: Bool
+    var recurrence: String?
     /// Proposed changes for pendingUpdate state.
     var pendingUpdate: PendingCalendarUpdate?
 
