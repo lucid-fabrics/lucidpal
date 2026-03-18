@@ -120,7 +120,7 @@ private struct CalendarEventCard: View {
             deletedCard
         case .deletionCancelled:
             statusCard(icon: "xmark.circle", label: "Deletion cancelled", color: .secondary)
-        case .created, .updated, .restored:
+        case .created, .updated, .rescheduled, .restored:
             tappableCard
         }
     }
@@ -227,10 +227,17 @@ private struct CalendarEventCard: View {
         HStack(spacing: 12) {
             dateBadge(dimmed: dimmed)
             VStack(alignment: .leading, spacing: 3) {
-                Text(preview.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(titleColor)
-                    .lineLimit(1)
+                HStack(spacing: 5) {
+                    Text(preview.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(titleColor)
+                        .lineLimit(1)
+                    if preview.state == .rescheduled {
+                        Image(systemName: "clock.arrow.2.circlepath")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 Text("\(Self.timeFormatter.string(from: preview.start)) – \(Self.timeFormatter.string(from: preview.end))")
                     .font(.caption)
                     .foregroundStyle(.secondary)

@@ -108,13 +108,10 @@ final class CalendarActionController {
         guard let searchTitle = p.search, !searchTitle.isEmpty else {
             return .failure("(No event title provided for update.)")
         }
-        guard let newTitle = p.title, let newStart = p.start, let newEnd = p.end else {
-            return .failure("(Update requires title, start, and end.)")
+        guard p.title != nil || p.start != nil || p.end != nil || p.location != nil || p.notes != nil else {
+            return .failure("(No fields to update were provided.)")
         }
         do {
-            // Search a 60-day window centred on today rather than on the LLM-emitted date.
-            // This avoids missing the original event when the user asks to rename/move it
-            // to a date far from its current position.
             let windowStart = Calendar.current.date(byAdding: .day, value: -30, to: .now) ?? .now
             let windowEnd   = Calendar.current.date(byAdding: .day, value:  30, to: .now) ?? .now
             let predicate = calendarService.store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: nil)
@@ -122,16 +119,31 @@ final class CalendarActionController {
             guard let event = events.first(where: { ($0.title ?? "").localizedCaseInsensitiveContains(searchTitle) }) else {
                 return .failure("(Couldn't find an event called \"\(searchTitle)\" — please specify the exact name.)")
             }
-            event.title = newTitle
-            event.startDate = newStart
-            event.endDate = newEnd
-            if let loc = p.location, !loc.isEmpty { event.location = loc }
-            if let notes = p.notes, !notes.isEmpty { event.notes = notes }
+
+            // Determine what changed BEFORE applying (used for state selection)
+            let titleChanged = p.title != nil && p.title != event.title
+            let datesChanged = p.start != nil || p.end != nil
+
+            if let newTitle = p.title    { event.title = newTitle }
+            if let newStart = p.start    { event.startDate = newStart }
+            if let newEnd = p.end        { event.endDate = newEnd }
+            if let loc = p.location, !loc.isEmpty   { event.location = loc }
+            if let notes = p.notes, !notes.isEmpty  { event.notes = notes }
+
             try calendarService.store.save(event, span: .thisEvent)
-            let preview = CalendarEventPreview(title: newTitle, start: newStart, end: newEnd, calendarName: event.calendar?.title)
-            return .success("Updated \"\(searchTitle)\" → \"\(newTitle)\".", preview)
+
+            let state: CalendarEventPreview.PreviewState = datesChanged && !titleChanged ? .rescheduled : .updated
+            let preview = CalendarEventPreview(
+                title: event.title ?? searchTitle,
+                start: event.startDate,
+                end: event.endDate,
+                calendarName: event.calendar?.title,
+                state: state
+            )
+            let verb = state == .rescheduled ? "Rescheduled" : "Updated"
+            return .success("\(verb) \"\(searchTitle)\".", preview)
         } catch {
-            return .failure("⚠️ Couldn't update event: \(error.localizedDescription)")
+            return .failure("(Couldn't update event: \(error.localizedDescription))")
         }
     }
 

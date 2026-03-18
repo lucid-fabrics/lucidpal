@@ -4,6 +4,7 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
     enum PreviewState: String, Codable, Sendable {
         case created
         case updated
+        case rescheduled
         case pendingDeletion
         case deleted
         case deletionCancelled
