@@ -105,6 +105,10 @@ final class SpeechService: ObservableObject {
         task?.finish()
         task = nil
         isRecording = false
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        do {
+            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("[SpeechService] Failed to deactivate audio session: \(error)")
+        }
     }
 }

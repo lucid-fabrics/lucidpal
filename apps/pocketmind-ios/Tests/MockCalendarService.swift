@@ -7,6 +7,8 @@ import Foundation
 @MainActor
 final class MockCalendarService: CalendarServiceProtocol {
     var isAuthorized: Bool = true
+    var authorizationStatus: EKAuthorizationStatus = .authorized
+    var requestAccessResult: Bool = true
     var stubbedEvents: [EKEvent] = []
     var stubbedConflicts: [EKEvent] = []
     var stubbedFetchEvents: String = ""
@@ -15,6 +17,16 @@ final class MockCalendarService: CalendarServiceProtocol {
     var appliedUpdates: [(PendingCalendarUpdate, String)] = []
     var shouldThrowOnDelete = false
     var shouldThrowOnApplyUpdate = false
+
+    func requestAccess() async -> Bool {
+        isAuthorized = requestAccessResult
+        authorizationStatus = requestAccessResult ? .authorized : .denied
+        return requestAccessResult
+    }
+
+    func writableCalendars() -> [CalendarInfo] {
+        [CalendarInfo(id: "default", title: "Calendar")]
+    }
 
     func fetchEvents(from start: Date, days: Int) -> String {
         stubbedFetchEvents

@@ -42,6 +42,7 @@ struct ChatView: View {
                     viewModel.errorMessage = nil
                 }
             }
+            .onDisappear { errorDismissTask?.cancel() }
         }
     }
 
