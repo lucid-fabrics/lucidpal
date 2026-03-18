@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 // MARK: - Calendar event card
 
@@ -10,6 +9,8 @@ struct CalendarEventCard: View {
     let onUndo: () -> Void
     let onConfirmUpdate: () -> Void
     let onCancelUpdate: () -> Void
+
+    @Environment(\.openURL) private var openURL
 
     private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -293,6 +294,6 @@ struct CalendarEventCard: View {
         // calshow:<NSTimeInterval> opens Calendar scrolled to the event's date/time.
         let interval = preview.start.timeIntervalSinceReferenceDate
         guard let url = URL(string: "calshow:\(Int(interval))") ?? URL(string: "calshow://") else { return }
-        UIApplication.shared.open(url)
+        openURL(url)
     }
 }
