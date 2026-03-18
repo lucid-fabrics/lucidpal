@@ -8,10 +8,12 @@ struct PocketMindShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: AskPocketMindIntent(),
+            // String parameters are not supported in AppShortcut phrases (only AppEntity/AppEnum).
+            // Siri will prompt "What would you like to ask?" via requestValueDialog after activation.
             phrases: [
-                "Ask \(.applicationName) \(\.$query)",
-                "Ask \(.applicationName) to \(\.$query)",
-                "Tell \(.applicationName) \(\.$query)"
+                "Ask \(.applicationName)",
+                "Open \(.applicationName) and ask a question",
+                "Ask my \(.applicationName) assistant"
             ],
             shortTitle: "Ask PocketMind",
             systemImageName: "brain"
