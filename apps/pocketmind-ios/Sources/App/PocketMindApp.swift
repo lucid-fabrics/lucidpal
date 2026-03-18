@@ -11,6 +11,7 @@ struct PocketMindApp: App {
     private let llmService = LLMService()
     private let calendarService = CalendarService()
     private let speechService = SpeechService()
+    private let modelDownloader = ModelDownloader()
     private let calendarActionController: CalendarActionController
 
     // MARK: - ViewModels
@@ -41,7 +42,8 @@ struct PocketMindApp: App {
         )
         downloadViewModel = ModelDownloadViewModel(
             llmService: llmService,
-            settings: settings
+            settings: settings,
+            downloader: modelDownloader
         )
 
         // Cancel LLM generation on memory pressure to avoid Jetsam crash
