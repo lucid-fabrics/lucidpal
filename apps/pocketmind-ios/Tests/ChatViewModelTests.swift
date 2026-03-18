@@ -398,4 +398,81 @@ final class ChatViewModelTests: XCTestCase {
         let msg = ChatMessage(role: .assistant, content: content)
         XCTAssertEqual(msg.displayContent, "All done.")
     }
+
+    // MARK: - applyStreamToken
+
+    /// Helper: appends a blank assistant message and returns its index.
+    private func appendAssistantMessage() -> Int {
+        viewModel.messages.append(ChatMessage(role: .assistant, content: ""))
+        return viewModel.messages.count - 1
+    }
+
+    func testApplyStreamTokenAfterThinkDoneAppendsDirectly() {
+        let idx = appendAssistantMessage()
+        viewModel.messages[idx].content = "hello"
+        var raw = "hello"
+        var thinkDone = true
+        viewModel.applyStreamToken(" world", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: false, idx: idx)
+        XCTAssertEqual(viewModel.messages[idx].content, "hello world")
+        XCTAssertTrue(thinkDone)
+    }
+
+    func testApplyStreamTokenCompletesThinkBlock() {
+        let idx = appendAssistantMessage()
+        var raw = ""
+        var thinkDone = false
+        viewModel.applyStreamToken("<think>reasoning</think>response", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: true, idx: idx)
+        XCTAssertTrue(thinkDone)
+        XCTAssertFalse(viewModel.messages[idx].isThinking)
+        XCTAssertEqual(viewModel.messages[idx].thinkingContent, "reasoning")
+        XCTAssertEqual(viewModel.messages[idx].content, "response")
+    }
+
+    func testApplyStreamTokenInsideThinkBlockSetsIsThinking() {
+        let idx = appendAssistantMessage()
+        var raw = ""
+        var thinkDone = false
+        viewModel.applyStreamToken("<think>partial", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: true, idx: idx)
+        XCTAssertFalse(thinkDone)
+        XCTAssertTrue(viewModel.messages[idx].isThinking)
+        XCTAssertEqual(viewModel.messages[idx].thinkingContent, "partial")
+    }
+
+    func testApplyStreamTokenInsideThinkBlockHiddenWhenShowThinkingFalse() {
+        let idx = appendAssistantMessage()
+        var raw = ""
+        var thinkDone = false
+        viewModel.applyStreamToken("<think>partial", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: false, idx: idx)
+        XCTAssertFalse(thinkDone)
+        XCTAssertFalse(viewModel.messages[idx].isThinking)
+        XCTAssertNil(viewModel.messages[idx].thinkingContent)
+    }
+
+    func testApplyStreamTokenBuffersPartialOpenTag() {
+        let idx = appendAssistantMessage()
+        var raw = ""
+        var thinkDone = false
+        // "<thi" is a valid prefix of "<think>" — must not display anything
+        viewModel.applyStreamToken("<thi", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: false, idx: idx)
+        XCTAssertFalse(thinkDone)
+        XCTAssertTrue(viewModel.messages[idx].content.isEmpty)
+    }
+
+    func testApplyStreamTokenNonThinkTokenSetsContentDirectly() {
+        let idx = appendAssistantMessage()
+        var raw = ""
+        var thinkDone = false
+        viewModel.applyStreamToken("Hello", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: false, idx: idx)
+        XCTAssertTrue(thinkDone)
+        XCTAssertEqual(viewModel.messages[idx].content, "Hello")
+    }
+
+    func testApplyStreamTokenThinkBlockWithNoResponseTrimsWhitespace() {
+        let idx = appendAssistantMessage()
+        var raw = ""
+        var thinkDone = false
+        viewModel.applyStreamToken("<think>thinking</think>  ", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: false, idx: idx)
+        XCTAssertTrue(thinkDone)
+        XCTAssertTrue(viewModel.messages[idx].content.isEmpty)
+    }
 }
