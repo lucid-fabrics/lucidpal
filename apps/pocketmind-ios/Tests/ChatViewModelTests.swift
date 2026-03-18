@@ -5,7 +5,7 @@ import XCTest
 final class ChatViewModelTests: XCTestCase {
     var mock: MockCalendarService!
     var settings: AppSettings!
-    var controller: CalendarActionController!
+    var controller: MockCalendarActionController!
     var llm: MockLLMService!
     var viewModel: ChatViewModel!
 
@@ -13,7 +13,7 @@ final class ChatViewModelTests: XCTestCase {
         super.setUp()
         mock = MockCalendarService()
         settings = AppSettings()
-        controller = CalendarActionController(calendarService: mock, settings: settings)
+        controller = MockCalendarActionController()
         llm = MockLLMService()
         viewModel = ChatViewModel(
             llmService: llm,
@@ -270,7 +270,7 @@ final class ChatViewModelTests: XCTestCase {
         let vm = ChatViewModel(
             llmService: llm,
             calendarService: mock,
-            calendarActionController: controller,
+            calendarActionController: MockCalendarActionController(),
             settings: settings,
             speechService: speech
         )

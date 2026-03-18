@@ -92,4 +92,11 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
     }
 
     var isUser: Bool { role == .user }
+
+    /// True while the LLM is still streaming a [CALENDAR_ACTION:...] block
+    /// and previews have not yet been populated. Used by the bubble View
+    /// to show the animated "Updating calendar…" pill.
+    var isStreamingAction: Bool {
+        calendarEventPreviews.isEmpty && content.contains("[CALENDAR_ACTION:")
+    }
 }

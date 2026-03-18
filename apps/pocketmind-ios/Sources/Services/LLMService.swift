@@ -257,7 +257,8 @@ final class LLMService: ObservableObject {
 
     func unloadModel() {
         cancelGeneration()
-        Task { await llama.unload() }
+        let actor = llama  // capture actor reference directly — avoids extending LLMService lifetime
+        Task { await actor.unload() }
         isLoaded = false
     }
 
