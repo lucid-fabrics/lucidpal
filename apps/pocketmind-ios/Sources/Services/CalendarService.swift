@@ -78,6 +78,23 @@ final class CalendarService {
         return "- \(title)\(location): \(start) → \(end) [\(cal)]"
     }
 
+    /// Returns events that overlap with the given time window, optionally excluding one event by identifier.
+    func findConflicts(start: Date, end: Date, excludingIdentifier: String? = nil) -> [EKEvent] {
+        guard isAuthorized else { return [] }
+        let predicate = store.predicateForEvents(withStart: start, end: end, calendars: nil)
+        return store.events(matching: predicate).filter { event in
+            if let id = excludingIdentifier, event.eventIdentifier == id { return false }
+            return event.startDate < end && event.endDate > start
+        }
+    }
+
+    /// Returns events in a date range — used for bulk operations.
+    func events(in start: Date, end: Date) -> [EKEvent] {
+        guard isAuthorized else { return [] }
+        let predicate = store.predicateForEvents(withStart: start, end: end, calendars: nil)
+        return store.events(matching: predicate).sorted { $0.startDate < $1.startDate }
+    }
+
     /// Deletes the event with the given EKEvent identifier.
     func deleteEvent(identifier: String) throws {
         authorizationStatus = EKEventStore.authorizationStatus(for: .event)
@@ -90,11 +107,17 @@ final class CalendarService {
 
     /// Creates and saves a calendar event. Returns the event identifier on success.
     @discardableResult
-    func createEvent(title: String, start: Date, end: Date, location: String? = nil, notes: String? = nil) throws -> String {
+    func createEvent(
+        title: String,
+        start: Date,
+        end: Date,
+        location: String? = nil,
+        notes: String? = nil,
+        reminderMinutes: Int? = nil,
+        calendarIdentifier: String? = nil
+    ) throws -> String {
         authorizationStatus = EKEventStore.authorizationStatus(for: .event)
-        guard isAuthorized else {
-            throw CalendarError.notAuthorized
-        }
+        guard isAuthorized else { throw CalendarError.notAuthorized }
 
         let event = EKEvent(eventStore: store)
         event.title = title
@@ -102,7 +125,14 @@ final class CalendarService {
         event.endDate = end
         if let location, !location.isEmpty { event.location = location }
         if let notes, !notes.isEmpty { event.notes = notes }
-        event.calendar = store.defaultCalendarForNewEvents
+        if let minutes = reminderMinutes {
+            event.addAlarm(EKAlarm(relativeOffset: -TimeInterval(minutes * 60)))
+        }
+        if let id = calendarIdentifier, let cal = store.calendar(withIdentifier: id) {
+            event.calendar = cal
+        } else {
+            event.calendar = store.defaultCalendarForNewEvents
+        }
 
         try store.save(event, span: .thisEvent)
         return event.eventIdentifier ?? ""

@@ -206,6 +206,9 @@ final class ChatViewModel: ObservableObject {
             case .success(let msg, let preview):
                 replacement = msg
                 previews.append(preview)
+            case .bulkPending(let pending):
+                replacement = ""
+                previews.append(contentsOf: pending)
             case .failure(let msg):
                 replacement = msg
             }
@@ -227,9 +230,10 @@ final class ChatViewModel: ObservableObject {
             When the user wants to create, update, or delete an event, you MUST output a [CALENDAR_ACTION:...] block. The block is mandatory — without it the action does not execute.
 
             Block formats:
-            Create:  [CALENDAR_ACTION:{"action":"create","title":"TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":""}]
+            Create:  [CALENDAR_ACTION:{"action":"create","title":"TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":"","reminderMinutes":15}]
             Update:  [CALENDAR_ACTION:{"action":"update","search":"CURRENT TITLE","title":"NEW TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":""}]
-            Delete:  [CALENDAR_ACTION:{"action":"delete","search":"EXACT EVENT TITLE"}]
+            Delete one: [CALENDAR_ACTION:{"action":"delete","search":"EXACT EVENT TITLE"}]
+            Delete range: [CALENDAR_ACTION:{"action":"delete","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS"}]
 
             Output format — block first, one short sentence after:
             [CALENDAR_ACTION:{...}]
@@ -247,6 +251,11 @@ final class ChatViewModel: ObservableObject {
             You: [CALENDAR_ACTION:{"action":"create","title":"Meeting","start":"2026-03-18T15:00:00","end":"2026-03-18T16:00:00","location":"","notes":""}]
             Added to your calendar.
 
+            Example — create with reminder:
+            User: add dentist Friday 10am, remind me 30 minutes before
+            You: [CALENDAR_ACTION:{"action":"create","title":"Dentist","start":"2026-03-20T10:00:00","end":"2026-03-20T11:00:00","reminderMinutes":30}]
+            Added with a 30-minute reminder.
+
             Example — reschedule (move to new time):
             User: move my dentist to Friday at 2pm
             You: [CALENDAR_ACTION:{"action":"update","search":"Dentist","start":"2026-03-20T14:00:00","end":"2026-03-20T15:00:00"}]
@@ -257,10 +266,16 @@ final class ChatViewModel: ObservableObject {
             You: [CALENDAR_ACTION:{"action":"update","search":"Standup","notes":"https://zoom.us/j/123456"}]
             Notes added.
 
+            Example — delete all events in a date range:
+            User: clear my schedule for next Monday
+            You: [CALENDAR_ACTION:{"action":"delete","start":"2026-03-23T00:00:00","end":"2026-03-23T23:59:59"}]
+            Tap Delete on each card to confirm removal.
+
             Rules:
             - Dates: ISO8601, no timezone. Default duration: 1 hour.
             - For update: only include the fields you want to change. Omit title if not renaming. Omit start/end if not rescheduling.
             - Delete: search must match the exact event title from the calendar list. Do NOT say it was deleted — deletion requires the user to tap the confirm button.
+            - reminderMinutes: only include when user explicitly asks for a reminder. Omit otherwise.
             - NEVER skip the block. NEVER output text-only when an action is requested.
             - NEVER tell the user to make changes manually.
             """
