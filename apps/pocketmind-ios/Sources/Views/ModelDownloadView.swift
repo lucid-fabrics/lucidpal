@@ -102,10 +102,15 @@ struct ModelDownloadView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(viewModel.isModelLoading)
             } else {
-                Button("Download") {
-                    viewModel.startDownload()
+                VStack(spacing: 8) {
+                    Button("Download") {
+                        viewModel.startDownload()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Label("WiFi required", systemImage: "wifi")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
-                .buttonStyle(.borderedProminent)
             }
 
         case .downloading(let progress):

@@ -5,6 +5,7 @@ struct ChatView: View {
 
     @FocusState private var inputFocused: Bool
     @State private var errorDismissTask: Task<Void, Never>?
+    @State private var showClearConfirm = false
 
     var body: some View {
         NavigationStack {
@@ -22,10 +23,16 @@ struct ChatView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     if !viewModel.messages.isEmpty {
-                        Button("Clear") { viewModel.clearHistory() }
+                        Button("Clear") { showClearConfirm = true }
                             .foregroundStyle(.secondary)
                     }
                 }
+            }
+            .confirmationDialog("Clear chat history?", isPresented: $showClearConfirm, titleVisibility: .visible) {
+                Button("Clear History", role: .destructive) { viewModel.clearHistory() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will permanently delete all messages. This cannot be undone.")
             }
             .onChange(of: viewModel.errorMessage) { _, msg in
                 errorDismissTask?.cancel()
