@@ -120,7 +120,11 @@ final class CalendarActionControllerTests: XCTestCase {
         guard case .success(_, let preview) = result else {
             return XCTFail("Expected .success")
         }
-        XCTAssertNotNil(preview.pendingUpdate?.start)
+        guard let pendingStart = preview.pendingUpdate?.start else {
+            return XCTFail("Expected pendingUpdate.start to be set")
+        }
+        XCTAssertEqual(Calendar.current.component(.hour, from: pendingStart), 14)
+        XCTAssertEqual(Calendar.current.component(.minute, from: pendingStart), 0)
     }
 
     func testUpdateNoFieldsFails() async {

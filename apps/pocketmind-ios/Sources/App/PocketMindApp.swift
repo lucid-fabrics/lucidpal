@@ -10,6 +10,7 @@ struct PocketMindApp: App {
     private let settings = AppSettings()
     private let llmService = LLMService()
     private let calendarService = CalendarService()
+    private let speechService = SpeechService()
     private let calendarActionController: CalendarActionController
 
     // MARK: - ViewModels
@@ -31,7 +32,8 @@ struct PocketMindApp: App {
             llmService: llmService,
             calendarService: calendarService,
             calendarActionController: actionController,
-            settings: settings
+            settings: settings,
+            speechService: speechService
         )
         settingsViewModel = SettingsViewModel(
             settings: settings,

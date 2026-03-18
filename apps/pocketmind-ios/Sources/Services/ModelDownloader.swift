@@ -1,5 +1,4 @@
 import Foundation
-import UIKit
 
 enum DownloadState: Equatable, Sendable {
     case idle
@@ -26,6 +25,11 @@ final class ModelDownloader: NSObject {
     // Tracks explicit user cancellation so we can distinguish it from a system-initiated
     // NSURLErrorCancelled (e.g. cellular blocked by allowsCellularAccess=false).
     nonisolated(unsafe) private var userCancelled = false
+
+    // Set by AppDelegate when the OS wakes the app for a completed background session.
+    // Called in urlSessionDidFinishEvents to signal the OS that processing is complete.
+    // nonisolated(unsafe): written once from AppDelegate before concurrent URLSession callbacks begin.
+    nonisolated(unsafe) static var backgroundSessionCompletion: (() -> Void)?
 
     func download(model: ModelInfo) {
         // Idempotency guard — prevent double-download race condition
@@ -115,7 +119,11 @@ extension ModelDownloader: URLSessionDownloadDelegate {
                 self?.state = .completed(url: destination)
             }
         } catch CocoaError.fileWriteOutOfSpace {
-            try? FileManager.default.removeItem(at: destination)
+            do {
+                try FileManager.default.removeItem(at: destination)
+            } catch {
+                print("[ModelDownloader] Cleanup failed after disk-full error: \(error)")
+            }
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
                 self?.session?.finishTasksAndInvalidate()
@@ -123,7 +131,11 @@ extension ModelDownloader: URLSessionDownloadDelegate {
                 self?.state = .failed(message: "Not enough storage space. Free up space and try again.")
             }
         } catch {
-            try? FileManager.default.removeItem(at: destination)
+            do {
+                try FileManager.default.removeItem(at: destination)
+            } catch {
+                print("[ModelDownloader] Cleanup failed: \(error)")
+            }
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
                 self?.session?.finishTasksAndInvalidate()
@@ -150,12 +162,9 @@ extension ModelDownloader: URLSessionDownloadDelegate {
     /// Called after all background-session events have been delivered.
     /// Calls the stored completion handler so the OS knows we're done.
     nonisolated func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
-        Task { @MainActor in
-            if let delegate = UIApplication.shared.delegate as? AppDelegate {
-                delegate.backgroundSessionCompletionHandler?()
-                delegate.backgroundSessionCompletionHandler = nil
-            }
-        }
+        let handler = ModelDownloader.backgroundSessionCompletion
+        ModelDownloader.backgroundSessionCompletion = nil
+        Task { @MainActor in handler?() }
     }
 
     nonisolated func urlSession(
