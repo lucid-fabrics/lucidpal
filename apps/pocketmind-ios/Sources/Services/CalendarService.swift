@@ -33,12 +33,7 @@ final class CalendarService {
 
     func requestAccess() async -> Bool {
         do {
-            let granted: Bool
-            if #available(iOS 17.0, *) {
-                granted = try await store.requestFullAccessToEvents()
-            } else {
-                granted = try await store.requestAccess(to: .event)
-            }
+            let granted = try await store.requestFullAccessToEvents()
             authorizationStatus = EKEventStore.authorizationStatus(for: .event)
             return granted
         } catch {
@@ -50,11 +45,7 @@ final class CalendarService {
     }
 
     var isAuthorized: Bool {
-        if #available(iOS 17.0, *) {
-            return authorizationStatus == .fullAccess
-        } else {
-            return authorizationStatus == .authorized
-        }
+        authorizationStatus == .fullAccess
     }
 
     // MARK: - Calendar metadata
@@ -101,7 +92,9 @@ final class CalendarService {
     }
 
     /// Searches for events within a ±windowDays window around today.
-    func findEvents(matching title: String, windowDays: Int = 30) -> [EKEvent] {
+    /// Default is 180 days (±6 months) to cover typical planning horizons —
+    /// e.g. "delete my summer vacation" needs to reach events months away.
+    func findEvents(matching title: String, windowDays: Int = 180) -> [EKEvent] {
         guard isAuthorized else { return [] }
         let windowStart = Calendar.current.date(byAdding: .day, value: -windowDays, to: .now) ?? .now
         let windowEnd   = Calendar.current.date(byAdding: .day, value:  windowDays, to: .now) ?? .now
