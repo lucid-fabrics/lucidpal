@@ -15,7 +15,7 @@ final class SettingsViewModelTests: XCTestCase {
     }
 
     func testInitSetsCalendarAuthStatus() {
-        XCTAssertEqual(viewModel.calendarAuthStatus, mockCalendar.authorizationStatus)
+        XCTAssertEqual(viewModel.calendarAuthStatus, .fullAccess)
     }
 
     func testIsCalendarAuthorizedReflectsService() {
@@ -29,7 +29,7 @@ final class SettingsViewModelTests: XCTestCase {
         mockCalendar.requestAccessResult = true
         await viewModel.requestCalendarAccess()
         XCTAssertTrue(settings.calendarAccessEnabled)
-        XCTAssertEqual(viewModel.calendarAuthStatus, .authorized)
+        XCTAssertEqual(viewModel.calendarAuthStatus, .fullAccess)
     }
 
     func testRequestCalendarAccessDeniedDisablesToggle() async {

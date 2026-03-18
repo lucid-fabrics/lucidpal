@@ -7,6 +7,25 @@ struct CalendarInfo: Identifiable, Hashable, Sendable {
     let title: String
 }
 
+/// Domain type replacing EKAuthorizationStatus — removes EventKit dependency from SettingsViewModel and the protocol.
+enum CalendarAuthorizationStatus: Equatable, Sendable {
+    case notDetermined
+    case restricted
+    case denied
+    case fullAccess
+    case writeOnly
+}
+
+/// Lightweight domain model for calendar events — prevents EKEvent from leaking into upper layers.
+struct CalendarEventInfo: Sendable {
+    let eventIdentifier: String?
+    let title: String?
+    let startDate: Date
+    let endDate: Date
+    let isAllDay: Bool
+    let calendarTitle: String?
+}
+
 // CalendarService is a pure data-access service — it holds no observable UI state.
 // SettingsViewModel owns @Published calendarAuthStatus and syncs it manually after
 // requestAccess() returns, keeping the observable layer entirely in ViewModels.
@@ -16,7 +35,7 @@ final class CalendarService {
     // Private — no layer above CalendarService should access EKEventStore directly.
     nonisolated(unsafe) private let store = EKEventStore()
 
-    private(set) var authorizationStatus: EKAuthorizationStatus = .notDetermined
+    private(set) var authorizationStatus: CalendarAuthorizationStatus = .notDetermined
 
     private static let eventFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -26,7 +45,29 @@ final class CalendarService {
     }()
 
     init() {
-        authorizationStatus = EKEventStore.authorizationStatus(for: .event)
+        authorizationStatus = Self.mapStatus(EKEventStore.authorizationStatus(for: .event))
+    }
+
+    private static func mapStatus(_ s: EKAuthorizationStatus) -> CalendarAuthorizationStatus {
+        switch s {
+        case .notDetermined: return .notDetermined
+        case .restricted:    return .restricted
+        case .denied:        return .denied
+        case .fullAccess:    return .fullAccess
+        case .writeOnly:     return .writeOnly
+        @unknown default:    return .notDetermined
+        }
+    }
+
+    private static func mapEvent(_ event: EKEvent) -> CalendarEventInfo {
+        CalendarEventInfo(
+            eventIdentifier: event.eventIdentifier,
+            title: event.title,
+            startDate: event.startDate,
+            endDate: event.endDate,
+            isAllDay: event.isAllDay,
+            calendarTitle: event.calendar?.title
+        )
     }
 
     // MARK: - Authorization
@@ -34,7 +75,7 @@ final class CalendarService {
     func requestAccess() async -> Bool {
         do {
             let granted = try await store.requestFullAccessToEvents()
-            authorizationStatus = EKEventStore.authorizationStatus(for: .event)
+            authorizationStatus = Self.mapStatus(EKEventStore.authorizationStatus(for: .event))
             return granted
         } catch {
             #if DEBUG
@@ -76,7 +117,7 @@ final class CalendarService {
     /// Refreshes authorization status on every call to detect runtime revocation.
     /// Caps at 50 events to prevent LLM context overflow.
     func fetchEvents(from start: Date = .now, days: Int = 7) -> String {
-        authorizationStatus = EKEventStore.authorizationStatus(for: .event)
+        authorizationStatus = Self.mapStatus(EKEventStore.authorizationStatus(for: .event))
         guard isAuthorized else { return "" }
 
         let end = Calendar.current.date(byAdding: .day, value: days, to: start) ?? start
@@ -94,12 +135,12 @@ final class CalendarService {
     /// Searches for events within a ±windowDays window around today.
     /// Default is 180 days (±6 months) to cover typical planning horizons —
     /// e.g. "delete my summer vacation" needs to reach events months away.
-    func findEvents(matching title: String, windowDays: Int = 180) -> [EKEvent] {
+    func findEvents(matching title: String, windowDays: Int = 180) -> [CalendarEventInfo] {
         guard isAuthorized else { return [] }
         let windowStart = Calendar.current.date(byAdding: .day, value: -windowDays, to: .now) ?? .now
         let windowEnd   = Calendar.current.date(byAdding: .day, value:  windowDays, to: .now) ?? .now
         let predicate = store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: nil)
-        return store.events(matching: predicate)
+        return store.events(matching: predicate).map(Self.mapEvent)
     }
 
     private static func formatEvent(_ event: EKEvent) -> String {
@@ -112,27 +153,29 @@ final class CalendarService {
     }
 
     /// Returns events overlapping the given window, optionally excluding one by identifier.
-    func findConflicts(start: Date, end: Date, excludingIdentifier: String? = nil) -> [EKEvent] {
+    func findConflicts(start: Date, end: Date, excludingIdentifier: String? = nil) -> [CalendarEventInfo] {
         guard isAuthorized else { return [] }
         let predicate = store.predicateForEvents(withStart: start, end: end, calendars: nil)
         return store.events(matching: predicate).filter { event in
             if let id = excludingIdentifier, event.eventIdentifier == id { return false }
             return event.startDate < end && event.endDate > start
-        }
+        }.map(Self.mapEvent)
     }
 
     /// Returns events in a date range — used for bulk operations.
-    func events(in start: Date, end: Date) -> [EKEvent] {
+    func events(in start: Date, end: Date) -> [CalendarEventInfo] {
         guard isAuthorized else { return [] }
         let predicate = store.predicateForEvents(withStart: start, end: end, calendars: nil)
-        return store.events(matching: predicate).sorted { $0.startDate < $1.startDate }
+        return store.events(matching: predicate)
+            .sorted { $0.startDate < $1.startDate }
+            .map(Self.mapEvent)
     }
 
     // MARK: - Mutations
 
     /// Deletes the event with the given identifier.
     func deleteEvent(identifier: String) throws {
-        authorizationStatus = EKEventStore.authorizationStatus(for: .event)
+        authorizationStatus = Self.mapStatus(EKEventStore.authorizationStatus(for: .event))
         guard isAuthorized else { throw CalendarError.notAuthorized }
         guard let event = store.event(withIdentifier: identifier) else {
             throw CalendarError.eventNotFound
@@ -143,7 +186,7 @@ final class CalendarService {
 
     /// Applies a PendingCalendarUpdate to an existing event. Returns the resulting preview state.
     func applyUpdate(_ update: PendingCalendarUpdate, to identifier: String) throws -> CalendarEventPreview.PreviewState {
-        authorizationStatus = EKEventStore.authorizationStatus(for: .event)
+        authorizationStatus = Self.mapStatus(EKEventStore.authorizationStatus(for: .event))
         guard isAuthorized else { throw CalendarError.notAuthorized }
         guard let event = store.event(withIdentifier: identifier) else {
             throw CalendarError.eventNotFound
@@ -191,7 +234,7 @@ final class CalendarService {
         recurrence: String? = nil,
         recurrenceEnd: Date? = nil
     ) throws -> String {
-        authorizationStatus = EKEventStore.authorizationStatus(for: .event)
+        authorizationStatus = Self.mapStatus(EKEventStore.authorizationStatus(for: .event))
         guard isAuthorized else { throw CalendarError.notAuthorized }
 
         let event = EKEvent(eventStore: store)

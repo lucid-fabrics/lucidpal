@@ -1,10 +1,9 @@
 import Combine
-import EventKit
 import Foundation
 
 @MainActor
 final class SettingsViewModel: ObservableObject {
-    @Published var calendarAuthStatus: EKAuthorizationStatus = .notDetermined
+    @Published var calendarAuthStatus: CalendarAuthorizationStatus = .notDetermined
     @Published var availableModels: [ModelInfo] = []
 
     let settings: AppSettings

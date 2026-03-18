@@ -3,7 +3,7 @@ import Foundation
 import Speech
 
 @MainActor
-final class SpeechService: ObservableObject {
+final class SpeechService {
     @Published private(set) var isRecording = false
     @Published private(set) var isAuthorized = false
     @Published private(set) var transcript = ""
