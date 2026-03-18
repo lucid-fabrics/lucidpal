@@ -1,6 +1,21 @@
 import Combine
 import Foundation
 
+// MARK: - Constants
+
+private enum ChatConstants {
+    /// RAM threshold (GB) for selecting higher history/context limits.
+    static let largeContextRAMThresholdGB = 6
+    /// Max messages fed into the prompt on high-RAM devices.
+    static let largeHistoryLimit = 50
+    /// Max messages fed into the prompt on low-RAM devices.
+    static let smallHistoryLimit = 20
+    /// Seconds to debounce before persisting messages to disk.
+    static let persistenceDebounceSeconds: Double = 3
+    /// Seconds before auto-dismissing the error banner.
+    static let errorAutoDismissSeconds: Double = 5
+}
+
 @MainActor
 final class ChatViewModel: ObservableObject {
     @Published var messages: [ChatMessage] = []
@@ -13,29 +28,79 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isSpeechRecording = false
     @Published private(set) var isSpeechAvailable = false
 
-    private let llmService: LLMService
-    private let calendarService: CalendarService
-    private let calendarActionController: CalendarActionController
-    private let settings: AppSettings
-    private let speechService = SpeechService()
+    let llmService: any LLMServiceProtocol
+    let calendarService: any CalendarServiceProtocol
+    let calendarActionController: any CalendarActionControllerProtocol
+    let settings: AppSettings
+    let speechService: any SpeechServiceProtocol
+    let history: any ChatHistoryManagerProtocol
+    var cancellables = Set<AnyCancellable>()
+    // Prevents auto-submit when the user manually taps the mic button to stop recording
+    var suppressSpeechAutoSend = false
 
-    init(llmService: LLMService, calendarService: CalendarService, calendarActionController: CalendarActionController, settings: AppSettings) {
+    init(
+        llmService: any LLMServiceProtocol,
+        calendarService: any CalendarServiceProtocol,
+        calendarActionController: any CalendarActionControllerProtocol,
+        settings: AppSettings,
+        speechService: any SpeechServiceProtocol,
+        historyManager: any ChatHistoryManagerProtocol = ChatHistoryManager()
+    ) {
         self.llmService = llmService
         self.calendarService = calendarService
         self.calendarActionController = calendarActionController
         self.settings = settings
+        self.speechService = speechService
+        self.history = historyManager
         self.isModelLoaded = llmService.isLoaded
 
-        // assign(to: &$property) uses weak self internally — no retain cycle.
-        llmService.$isLoaded.assign(to: &$isModelLoaded)
-        llmService.$isGenerating.assign(to: &$isGenerating)
-        speechService.$isRecording.assign(to: &$isSpeechRecording)
-        speechService.$isAuthorized.assign(to: &$isSpeechAvailable)
+        // Load persisted history synchronously — load() is a fast local disk read.
+        self.messages = historyManager.load()
+
+        // Publishers — sink used instead of assign(to:) because existentials can't project @Published.
+        llmService.isLoadedPublisher
+            .sink { [weak self] in self?.isModelLoaded = $0 }
+            .store(in: &cancellables)
+        llmService.isGeneratingPublisher
+            .sink { [weak self] in self?.isGenerating = $0 }
+            .store(in: &cancellables)
+        speechService.isRecordingPublisher
+            .sink { [weak self] in self?.isSpeechRecording = $0 }
+            .store(in: &cancellables)
+        speechService.isAuthorizedPublisher
+            .sink { [weak self] in self?.isSpeechAvailable = $0 }
+            .store(in: &cancellables)
 
         // Forward live transcript into the input field while recording
-        speechService.$transcript
+        speechService.transcriptPublisher
             .filter { !$0.isEmpty }
-            .assign(to: &$inputText)
+            .sink { [weak self] in self?.inputText = $0 }
+            .store(in: &cancellables)
+
+        // Persist messages on change — debounced on MainActor, disk write offloaded to background.
+        $messages
+            .debounce(for: .seconds(ChatConstants.persistenceDebounceSeconds), scheduler: RunLoop.main)
+            .sink { [weak self] msgs in self?.history.save(msgs) }
+            .store(in: &cancellables)
+
+        // Auto-submit when speech recognition ends naturally (final result / silence timeout).
+        // If the user manually tapped the mic button to stop, suppressSpeechAutoSend is set
+        // in toggleSpeech() and the observer skips the send.
+        speechService.isRecordingPublisher
+            .removeDuplicates()
+            .filter { !$0 }
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                if self.suppressSpeechAutoSend {
+                    self.suppressSpeechAutoSend = false
+                    return
+                }
+                guard self.settings.speechAutoSendEnabled else { return }
+                guard !self.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+                Task { [weak self] in await self?.sendMessage() }
+            }
+            .store(in: &cancellables)
 
         // Request speech permissions on launch
         Task { await speechService.requestAuthorization() }
@@ -43,10 +108,13 @@ final class ChatViewModel: ObservableObject {
 
     func toggleSpeech() {
         if speechService.isRecording {
+            // Manual stop — don't auto-submit; user controls sending themselves
+            suppressSpeechAutoSend = true
             speechService.stopRecording()
         } else {
             do {
                 try speechService.startRecording()
+                HapticService.impact(.light)
             } catch {
                 errorMessage = "Microphone error: \(error.localizedDescription)"
             }
@@ -57,6 +125,7 @@ final class ChatViewModel: ObservableObject {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isGenerating, isModelLoaded else { return }
 
+        HapticService.impact(.light)
         inputText = ""
         messages.append(ChatMessage(role: .user, content: text))
         errorMessage = nil
@@ -73,8 +142,12 @@ final class ChatViewModel: ObservableObject {
         messages.append(assistantMsg)
         let assistantID = assistantMsg.id  // Capture ID — safe against clearHistory() mid-stream
 
-        // Snapshot history without the empty assistant placeholder
-        let historyMessages = Array(messages.dropLast())
+        // Snapshot history without the empty assistant placeholder.
+        // Cap based on device RAM: 8 K context devices get more history (50 msgs ≈ 5000 tokens),
+        // 4 K context devices use 20 msgs ≈ 2000 tokens, leaving headroom for system prompt + reply.
+        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / 1_073_741_824)
+        let historyLimit = ramGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeHistoryLimit : ChatConstants.smallHistoryLimit
+        let historyMessages = Array(messages.dropLast().suffix(historyLimit))
 
         do {
             var raw = ""           // full accumulated raw output
@@ -83,34 +156,7 @@ final class ChatViewModel: ObservableObject {
 
             for try await token in llmService.generate(systemPrompt: systemPrompt, messages: historyMessages, thinkingEnabled: showThinking) {
                 guard let idx = messages.firstIndex(where: { $0.id == assistantID }) else { break }
-                raw += token
-
-                if thinkDone {
-                    messages[idx].content += token
-                } else if raw.hasPrefix("<think>") {
-                    if let closeRange = raw.range(of: "</think>") {
-                        let thinkText = String(raw[raw.index(raw.startIndex, offsetBy: "<think>".count) ..< closeRange.lowerBound])
-                        let response  = String(raw[closeRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
-                        if showThinking {
-                            messages[idx].thinkingContent = thinkText.trimmingCharacters(in: .whitespacesAndNewlines)
-                        }
-                        messages[idx].isThinking = false
-                        messages[idx].content = response
-                        thinkDone = true
-                    } else {
-                        // Still inside <think>
-                        if showThinking {
-                            messages[idx].isThinking = true
-                            messages[idx].thinkingContent = String(raw.dropFirst("<think>".count))
-                        }
-                        // When thinking is off: buffer silently, show nothing
-                    }
-                } else if "<think>".hasPrefix(raw) {
-                    // Still buffering opening tag — don't display yet
-                } else {
-                    thinkDone = true
-                    messages[idx].content = raw
-                }
+                applyStreamToken(token, rawBuffer: &raw, thinkDone: &thinkDone, showThinking: showThinking, idx: idx)
             }
         } catch is CancellationError {
             // User cancelled — leave partial content visible
@@ -134,28 +180,6 @@ final class ChatViewModel: ObservableObject {
         llmService.cancelGeneration()
     }
 
-    // MARK: - Calendar deletion confirmation
-
-    func confirmDeletion(messageID: UUID, previewID: UUID) async {
-        guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }),
-              let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID }),
-              let identifier = messages[msgIdx].calendarEventPreviews[previewIdx].eventIdentifier
-        else { return }
-        do {
-            try calendarService.deleteEvent(identifier: identifier)
-            messages[msgIdx].calendarEventPreviews[previewIdx].state = .deleted
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-    }
-
-    func cancelDeletion(messageID: UUID, previewID: UUID) {
-        guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }),
-              let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID })
-        else { return }
-        messages[msgIdx].calendarEventPreviews[previewIdx].state = .deletionCancelled
-    }
-
     /// Receives a query from Siri and sends it as if the user typed it.
     func handleSiriQuery(_ text: String) {
         inputText = text
@@ -165,82 +189,50 @@ final class ChatViewModel: ObservableObject {
     func clearHistory() {
         llmService.cancelGeneration()
         messages = []
+        history.clear()
     }
 
-    // MARK: - Calendar action dispatch
+    /// Immediately writes current messages to disk — call when app enters background.
+    func flushPersistence() {
+        history.save(messages)
+    }
 
-    // Matches [CALENDAR_ACTION:{...}] — uses negative lookahead \}(?!\]) so that
-    // `}` characters inside JSON string values (e.g. notes, title) are allowed,
-    // while still correctly terminating at the closing `}]` sequence.
-    private static let actionPattern = #"\[CALENDAR_ACTION:(\{(?:[^}]|\}(?!\]))*\})\]"#
+    // MARK: - Token streaming
 
-    private func executeCalendarActions(in text: String) async -> (content: String, previews: [CalendarEventPreview]) {
-        guard let regex = try? NSRegularExpression(pattern: Self.actionPattern, options: [.dotMatchesLineSeparators]) else { return (text, []) }
-        let range = NSRange(text.startIndex..., in: text)
-        let matches = regex.matches(in: text, range: range)
-        guard !matches.isEmpty else { return (text, []) }
-
-        var result = text
-        var previews: [CalendarEventPreview] = []
-        for match in matches.reversed() {
-            let fullRange = Range(match.range, in: result)!
-            let jsonRange = Range(match.range(at: 1), in: result)!
-            let json = String(result[jsonRange])
-
-            let actionResult = await calendarActionController.execute(json: json)
-            let replacement: String
-            switch actionResult {
-            case .success(let msg, let preview):
-                replacement = msg
-                previews.append(preview)
-            case .failure(let msg):
-                replacement = msg
+    /// Applies one streamed token to the assistant message at `idx`, handling
+    /// the <think>...</think> wrapper that Qwen3 emits before its response.
+    func applyStreamToken(
+        _ token: String,
+        rawBuffer: inout String,
+        thinkDone: inout Bool,
+        showThinking: Bool,
+        idx: Int
+    ) {
+        rawBuffer += token
+        if thinkDone {
+            messages[idx].content += token
+        } else if rawBuffer.hasPrefix("<think>") {
+            if let closeRange = rawBuffer.range(of: "</think>") {
+                let thinkText = String(rawBuffer[rawBuffer.index(rawBuffer.startIndex, offsetBy: "<think>".count) ..< closeRange.lowerBound])
+                let response  = String(rawBuffer[closeRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+                if showThinking {
+                    messages[idx].thinkingContent = thinkText.trimmingCharacters(in: .whitespacesAndNewlines)
+                }
+                messages[idx].isThinking = false
+                messages[idx].content = response
+                thinkDone = true
+            } else {
+                // Still inside <think> — buffer or show depending on setting
+                if showThinking {
+                    messages[idx].isThinking = true
+                    messages[idx].thinkingContent = String(rawBuffer.dropFirst("<think>".count))
+                }
             }
-            result = result.replacingCharacters(in: fullRange, with: replacement)
+        } else if "<think>".hasPrefix(rawBuffer) {
+            // Still buffering opening tag — don't display yet
+        } else {
+            thinkDone = true
+            messages[idx].content = rawBuffer
         }
-        return (result, previews)
-    }
-
-    private func buildSystemPrompt() async -> String {
-        let today = formattedToday()
-        var parts: [String] = [
-            """
-            You are PocketMind, an on-device AI assistant with direct read and write access to the user's iOS calendar.
-            Today is \(today).
-            Be concise. Use plain text, no markdown.
-            """,
-            """
-            CALENDAR TOOL — you can create, update, or delete real calendar events by outputting one of these blocks:
-            Create: [CALENDAR_ACTION:{"action":"create","title":"TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":""}]
-            Update/rename: [CALENDAR_ACTION:{"action":"update","search":"EXISTING TITLE","title":"NEW TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":""}]
-            Delete: [CALENDAR_ACTION:{"action":"delete","search":"EXISTING TITLE"}]
-            Rules:
-            - Dates: ISO8601, no timezone (e.g. 2026-03-18T14:00:00). Default duration: 1 hour.
-            - For rename/update: set action to "update" and search to the current event title.
-            - For delete: set action to "delete" and search to the event title. The user will confirm before it executes.
-            - Output the block first, then a short confirmation sentence.
-            - NEVER tell the user to add/edit manually. The block executes automatically.
-            - NEVER skip the block when a create, update, or delete is requested.
-            """
-        ]
-
-        if settings.calendarAccessEnabled {
-            let events = calendarService.fetchEvents(from: .now, days: 7)
-            // Sync revocation: if OS denied access between the setting toggle and now, disable the toggle.
-            if !calendarService.isAuthorized {
-                settings.calendarAccessEnabled = false
-            } else if !events.isEmpty {
-                parts.append("\nUser's upcoming events (next 7 days):\n\(events)")
-            }
-        }
-
-        return parts.joined(separator: " ")
-    }
-
-    private func formattedToday() -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .full
-        formatter.timeStyle = .short
-        return formatter.string(from: .now)
     }
 }

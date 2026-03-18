@@ -9,12 +9,35 @@ import llama
 /// C pointer properties are marked `nonisolated(unsafe)` so `deinit` (which is
 /// nonisolated in Swift 6) can free them. All *writes* happen exclusively from
 /// actor-isolated methods, so there is no concurrent access in practice.
+// MARK: - Constants
+
+private enum LLMConstants {
+    /// Token capacity for the llama batch (matches max context size).
+    static let batchCapacity: Int32 = 4096
+    /// Context size for devices with < 6 GB RAM.
+    static let smallContextSize: UInt32 = 4096
+    /// Context size for devices with ≥ 6 GB RAM (4B model tier).
+    static let largeContextSize: UInt32 = 8192
+    /// RAM threshold (GB) for selecting the larger context window.
+    static let largeContextRAMThresholdGB = 6
+    /// Maximum thread count offered to llama.cpp.
+    static let maxThreadCount: Int32 = 8
+    /// Tokens reserved for generation — subtracted from context to size the prompt budget.
+    static let generationReserveTokens = 512
+    /// Maximum tokens to generate per response.
+    static let maxNewTokens: Int32 = 768
+    /// Sampler temperature: lower = more deterministic, fewer hallucinated fields.
+    static let samplerTemperature: Float = 0.35
+}
+
 actor LlamaActor {
-    nonisolated(unsafe) private var model:   OpaquePointer?
-    nonisolated(unsafe) private var ctx:     OpaquePointer?
-    nonisolated(unsafe) private var vocab:   OpaquePointer?
-    nonisolated(unsafe) private var sampler: UnsafeMutablePointer<llama_sampler>?
-    nonisolated(unsafe) private var batch:   llama_batch
+    // nonisolated(unsafe): deinit is nonisolated in Swift 6 — must free C pointers there.
+    // All writes happen exclusively from actor-isolated methods; no concurrent access.
+    nonisolated(unsafe) private var model:   OpaquePointer?   // freed in deinit
+    nonisolated(unsafe) private var ctx:     OpaquePointer?   // freed in deinit
+    nonisolated(unsafe) private var vocab:   OpaquePointer?   // freed in deinit (via model)
+    nonisolated(unsafe) private var sampler: UnsafeMutablePointer<llama_sampler>? // freed in deinit
+    nonisolated(unsafe) private var batch:   llama_batch      // freed in deinit via llama_batch_free
 
     private var pendingCChars: [CChar] = []
     private var nCur: Int32 = 0
@@ -23,7 +46,7 @@ actor LlamaActor {
 
     init() {
         llama_backend_init()
-        batch = llama_batch_init(4096, 0, 1)
+        batch = llama_batch_init(LLMConstants.batchCapacity, 0, 1)
     }
 
     deinit {
@@ -49,9 +72,11 @@ actor LlamaActor {
                 userInfo: [NSLocalizedDescriptionKey: "llama_model_load_from_file returned nil — file may be unsupported or corrupted."]))
         }
 
-        let nThreads = Int32(max(1, min(8, ProcessInfo.processInfo.processorCount - 2)))
+        let nThreads = max(1, min(LLMConstants.maxThreadCount, Int32(ProcessInfo.processInfo.processorCount - 2)))
+        // Use 8 K context on devices with ≥6 GB RAM (4B model tier); 4 K otherwise.
+        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / 1_073_741_824)
         var cp = llama_context_default_params()
-        cp.n_ctx           = 4096
+        cp.n_ctx           = ramGB >= LLMConstants.largeContextRAMThresholdGB ? LLMConstants.largeContextSize : LLMConstants.smallContextSize
         cp.n_threads       = nThreads
         cp.n_threads_batch = nThreads
 
@@ -68,7 +93,9 @@ actor LlamaActor {
 
         let sparams = llama_sampler_chain_default_params()
         let s = llama_sampler_chain_init(sparams)
-        llama_sampler_chain_add(s, llama_sampler_init_temp(0.7))
+        // Lower temperature for a calendar assistant: reduces hallucinated JSON fields
+        // and date/time errors. 0.35 keeps variety in prose while keeping actions precise.
+        llama_sampler_chain_add(s, llama_sampler_init_temp(LLMConstants.samplerTemperature))
         llama_sampler_chain_add(s, llama_sampler_init_dist(UInt32.random(in: 0...UInt32.max)))
         sampler = s
     }
@@ -96,8 +123,7 @@ actor LlamaActor {
         }
 
         // Guard against context overflow — truncate from the front, keeping the most recent tokens.
-        // Reserve 512 for new generation; ctx was created with n_ctx=4096.
-        let maxPromptTokens = 4096 - 512
+        let maxPromptTokens = Int(LLMConstants.smallContextSize) - LLMConstants.generationReserveTokens
         if tokens.count > maxPromptTokens {
             tokens = Array(tokens.suffix(maxPromptTokens))
         }
@@ -121,7 +147,7 @@ actor LlamaActor {
         nCur = batch.n_tokens
 
         // Generation loop
-        let maxNew: Int32 = 512
+        let maxNew: Int32 = LLMConstants.maxNewTokens
         while nCur - Int32(tokens.count) < maxNew {
             if Task.isCancelled { break }
 
@@ -212,8 +238,11 @@ actor LlamaActor {
 
 // MARK: - LLMService
 
+// ObservableObject intentionally omitted — LLMService is not observed directly
+// by any View. State is surfaced to ViewModels via the protocol's AnyPublisher
+// properties (isLoadedPublisher, isGeneratingPublisher, isLoadingPublisher).
 @MainActor
-final class LLMService: ObservableObject {
+final class LLMService {
     @Published private(set) var isLoaded    = false
     @Published private(set) var isLoading   = false
     @Published private(set) var isGenerating = false
@@ -231,7 +260,8 @@ final class LLMService: ObservableObject {
 
     func unloadModel() {
         cancelGeneration()
-        Task { await llama.unload() }
+        let actor = llama  // capture actor reference directly — avoids extending LLMService lifetime
+        Task { await actor.unload() }
         isLoaded = false
     }
 
@@ -252,23 +282,24 @@ final class LLMService: ObservableObject {
         isGenerating = true
 
         let prompt = Self.buildPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
-
-        nonisolated(unsafe) var capturedCont: AsyncThrowingStream<String, Error>.Continuation?
-        let stream = AsyncThrowingStream<String, Error> { capturedCont = $0 }
-        let cont = capturedCont!
-
         let llamaRef = llama
-        let task = Task {
-            defer {
-                Task { @MainActor [weak self] in
-                    self?.isGenerating = false
-                    self?.currentTask  = nil
+
+        // AsyncThrowingStream closure runs synchronously on @MainActor (generate() is @MainActor-isolated),
+        // so MainActor.assumeIsolated is safe for assigning currentTask.
+        return AsyncThrowingStream { continuation in
+            let task = Task {
+                defer {
+                    Task { @MainActor [weak self] in
+                        self?.isGenerating = false
+                        self?.currentTask  = nil
+                    }
                 }
+                await llamaRef.generate(prompt: prompt, continuation: continuation)
             }
-            await llamaRef.generate(prompt: prompt, continuation: cont)
+            MainActor.assumeIsolated { [weak self] in self?.currentTask = task }
+            // Cancel inflight generation when caller drops the stream.
+            continuation.onTermination = { _ in task.cancel() }
         }
-        currentTask = task
-        return stream
     }
 
     // MARK: - Prompt builder (Qwen3 ChatML)

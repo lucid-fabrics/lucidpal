@@ -2,12 +2,16 @@ import SwiftUI
 
 @main
 struct PocketMindApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
 
     // MARK: - Services
 
     private let settings = AppSettings()
     private let llmService = LLMService()
     private let calendarService = CalendarService()
+    private let speechService = SpeechService()
+    private let modelDownloader = ModelDownloader()
     private let calendarActionController: CalendarActionController
 
     // MARK: - ViewModels
@@ -23,13 +27,14 @@ struct PocketMindApp: App {
     // MARK: - Initialization
 
     init() {
-        let actionController = CalendarActionController(calendarService: calendarService)
+        let actionController = CalendarActionController(calendarService: calendarService, settings: settings)
         calendarActionController = actionController
         chatViewModel = ChatViewModel(
             llmService: llmService,
             calendarService: calendarService,
             calendarActionController: actionController,
-            settings: settings
+            settings: settings,
+            speechService: speechService
         )
         settingsViewModel = SettingsViewModel(
             settings: settings,
@@ -37,7 +42,8 @@ struct PocketMindApp: App {
         )
         downloadViewModel = ModelDownloadViewModel(
             llmService: llmService,
-            settings: settings
+            settings: settings,
+            downloader: modelDownloader
         )
 
         // Cancel LLM generation on memory pressure to avoid Jetsam crash
@@ -63,8 +69,14 @@ struct PocketMindApp: App {
             )
         }
         .onChange(of: scenePhase) { _, phase in
-            guard phase == .active else { return }
-            consumePendingSiriQuery()
+            switch phase {
+            case .active:
+                consumePendingSiriQuery()
+            case .background:
+                chatViewModel.flushPersistence()
+            default:
+                break
+            }
         }
     }
 

@@ -10,6 +10,8 @@ final class AppSettings: ObservableObject {
     @AppStorage("selectedModelID") var selectedModelID: String = ModelInfo.qwen3_1B7.id
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
     @AppStorage("thinkingEnabled") var thinkingEnabled: Bool = true
+    @AppStorage("defaultCalendarIdentifier") var defaultCalendarIdentifier: String = ""
+    @AppStorage("speechAutoSendEnabled") var speechAutoSendEnabled: Bool = true
 
     // MARK: - Computed Properties
 

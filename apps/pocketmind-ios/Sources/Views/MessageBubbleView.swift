@@ -5,7 +5,16 @@ struct MessageBubbleView: View {
     let message: ChatMessage
     var onConfirmDeletion: ((UUID) -> Void)? = nil
     var onCancelDeletion: ((UUID) -> Void)? = nil
+    var onUndoDeletion: ((UUID) -> Void)? = nil
+    var onConfirmUpdate: ((UUID) -> Void)? = nil
+    var onCancelUpdate: ((UUID) -> Void)? = nil
+    var onConfirmAllDeletions: (() -> Void)? = nil
+    var onCancelAllDeletions: (() -> Void)? = nil
     @State private var thinkingExpanded = false
+
+    private var pendingDeletionCount: Int {
+        message.calendarEventPreviews.filter { $0.state == .pendingDeletion }.count
+    }
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
@@ -20,29 +29,57 @@ struct MessageBubbleView: View {
                     ThinkingDisclosure(content: "", isThinking: true, isExpanded: $thinkingExpanded)
                 }
 
-                // Main bubble
-                Text(message.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "…" : message.content.trimmingCharacters(in: .whitespacesAndNewlines))
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(message.isUser ? Color.accentColor : Color(.systemGray5))
-                    .foregroundStyle(message.isUser ? .white : .primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    .contextMenu {
-                        if !message.content.isEmpty {
-                            Button {
-                                UIPasteboard.general.string = message.content
-                            } label: {
-                                Label("Copy", systemImage: "doc.on.doc")
+                // Main bubble — action block stripped; shown as pill below
+                let bubbleText = message.displayContent
+                if !bubbleText.isEmpty {
+                    Text(bubbleText)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(message.isUser ? Color.accentColor : Color(.systemGray5))
+                        .foregroundStyle(message.isUser ? .white : .primary)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .contextMenu {
+                            if !message.content.isEmpty {
+                                Button {
+                                    UIPasteboard.general.string = message.content
+                                } label: {
+                                    Label("Copy", systemImage: "doc.on.doc")
+                                }
                             }
                         }
-                    }
+                } else if !message.isUser && !message.isStreamingAction && message.calendarEventPreviews.isEmpty {
+                    // Bubble with placeholder while non-action content streams in
+                    Text("…")
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(Color(.systemGray5))
+                        .foregroundStyle(.primary)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                }
+
+                // Animated pill while action block is streaming
+                if message.isStreamingAction {
+                    CalendarActionPill()
+                }
 
                 // Calendar event cards
                 ForEach(message.calendarEventPreviews, id: \.id) { preview in
                     CalendarEventCard(
                         preview: preview,
-                        onConfirm: { onConfirmDeletion?(preview.id) },
-                        onCancel:  { onCancelDeletion?(preview.id) }
+                        onConfirm:        { onConfirmDeletion?(preview.id) },
+                        onCancel:         { onCancelDeletion?(preview.id) },
+                        onUndo:           { onUndoDeletion?(preview.id) },
+                        onConfirmUpdate:  { onConfirmUpdate?(preview.id) },
+                        onCancelUpdate:   { onCancelUpdate?(preview.id) }
+                    )
+                }
+
+                // Bulk action bar when ≥2 pending deletions
+                if pendingDeletionCount >= 2 {
+                    BulkDeletionBar(
+                        count: pendingDeletionCount,
+                        onDeleteAll: { onConfirmAllDeletions?() },
+                        onKeepAll:   { onCancelAllDeletions?() }
                     )
                 }
 
@@ -58,167 +95,59 @@ struct MessageBubbleView: View {
     }
 }
 
-// MARK: - Calendar event card
+// MARK: - Bulk deletion bar
 
-private struct CalendarEventCard: View {
-    let preview: CalendarEventPreview
-    let onConfirm: () -> Void
-    let onCancel: () -> Void
-
-    private static let timeFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateStyle = .none
-        f.timeStyle = .short
-        return f
-    }()
+private struct BulkDeletionBar: View {
+    let count: Int
+    let onDeleteAll: () -> Void
+    let onKeepAll: () -> Void
 
     var body: some View {
-        switch preview.state {
-        case .pendingDeletion:
-            pendingDeletionCard
-        case .deleted:
-            statusCard(icon: "trash.fill", label: "Deleted from calendar", color: .red)
-        case .deletionCancelled:
-            statusCard(icon: "xmark.circle", label: "Deletion cancelled", color: .secondary)
-        case .created, .updated:
-            tappableCard
-        }
-    }
-
-    // MARK: - Card variants
-
-    private var tappableCard: some View {
-        Button(action: openInCalendar) {
-            cardContent(titleColor: .primary, dimmed: false)
-                .overlay(alignment: .trailing) {
-                    Image(systemName: "chevron.right")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .padding(.trailing, 10)
-                }
+        HStack(spacing: 0) {
+            Button(action: onKeepAll) {
+                Text("Keep All")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+            }
+            Divider().frame(height: 36)
+            Button(action: onDeleteAll) {
+                Text("Delete All (\(count))")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.red)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+            }
         }
         .buttonStyle(.plain)
-    }
-
-    private var pendingDeletionCard: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            cardContent(titleColor: .primary, dimmed: false)
-            Divider().padding(.horizontal, 10)
-            HStack(spacing: 0) {
-                Button(action: onCancel) {
-                    Text("Keep")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                }
-                Divider().frame(height: 36)
-                Button(action: onConfirm) {
-                    Text("Delete")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.red)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                }
-            }
-            .buttonStyle(.plain)
-        }
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.red.opacity(0.3), lineWidth: 1))
     }
+}
 
-    private func statusCard(icon: String, label: String, color: Color) -> some View {
-        HStack(spacing: 10) {
-            dateBadge(dimmed: true)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(preview.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .strikethrough(preview.state == .deleted, color: .secondary)
-                    .lineLimit(1)
-                Text("\(Self.timeFormatter.string(from: preview.start)) – \(Self.timeFormatter.string(from: preview.end))")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            Image(systemName: icon)
+// MARK: - Calendar action streaming pill
+
+private struct CalendarActionPill: View {
+    @State private var pulse = false
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "calendar.badge.clock")
                 .font(.caption)
-                .foregroundStyle(color)
-                .padding(.trailing, 10)
-        }
-        .padding(10)
-        .background(Color(.systemGray6))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .opacity(0.6)
-    }
-
-    // MARK: - Shared sub-views
-
-    private func cardContent(titleColor: Color, dimmed: Bool) -> some View {
-        HStack(spacing: 12) {
-            dateBadge(dimmed: dimmed)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(preview.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(titleColor)
-                    .lineLimit(1)
-                Text("\(Self.timeFormatter.string(from: preview.start)) – \(Self.timeFormatter.string(from: preview.end))")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                if let cal = preview.calendarName {
-                    Text(cal)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            }
+                .opacity(pulse ? 0.3 : 1.0)
+                .animation(.easeInOut(duration: 0.7).repeatForever(), value: pulse)
+            Text("Updating calendar…")
+                .font(.caption)
             Spacer()
         }
-        .padding(10)
+        .foregroundStyle(.secondary)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-    }
-
-    private func dateBadge(dimmed: Bool) -> some View {
-        VStack(spacing: 1) {
-            Text(monthText)
-                .font(.system(size: 9, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 2)
-                .background(dimmed ? Color.gray : Color.red)
-            Text(dayText)
-                .font(.system(size: 20, weight: .bold))
-                .foregroundStyle(dimmed ? .secondary : .primary)
-                .frame(maxWidth: .infinity)
-                .padding(.bottom, 4)
-        }
-        .frame(width: 44)
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Color(.systemGray4), lineWidth: 0.5))
-    }
-
-    // MARK: - Helpers
-
-    private var monthText: String {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "MMM"
-        return f.string(from: preview.start).uppercased()
-    }
-
-    private var dayText: String {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "d"
-        return f.string(from: preview.start)
-    }
-
-    private func openInCalendar() {
-        if let url = URL(string: "calshow://") {
-            UIApplication.shared.open(url)
-        }
+        .onAppear { pulse = true }
     }
 }
 

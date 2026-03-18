@@ -102,10 +102,15 @@ struct ModelDownloadView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(viewModel.isModelLoading)
             } else {
-                Button("Download") {
-                    viewModel.startDownload()
+                VStack(spacing: 8) {
+                    Button("Download") {
+                        viewModel.startDownload()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Label("WiFi required", systemImage: "wifi")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
-                .buttonStyle(.borderedProminent)
             }
 
         case .downloading(let progress):
@@ -122,10 +127,16 @@ struct ModelDownloadView: View {
             }
 
         case .completed:
-            Button("Load Model") {
-                Task { await viewModel.loadModel() }
+            // Auto-load fires immediately via Combine — show spinner instead of a tappable button.
+            HStack(spacing: 8) {
+                ProgressView().tint(.white)
+                Text("Loading…")
             }
-            .buttonStyle(.borderedProminent)
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
         case .failed:
             Button("Retry") {

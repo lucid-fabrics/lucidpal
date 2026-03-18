@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 enum DownloadState: Equatable, Sendable {
@@ -5,6 +6,17 @@ enum DownloadState: Equatable, Sendable {
     case downloading(progress: Double)
     case completed(url: URL)
     case failed(message: String)
+}
+
+/// Protocol abstraction for ModelDownloader — enables injection and mocking in unit tests.
+@MainActor
+protocol ModelDownloaderProtocol: AnyObject {
+    var state: DownloadState { get }
+    var statePublisher: AnyPublisher<DownloadState, Never> { get }
+    func download(model: ModelInfo)
+    func cancel()
+    func resetState()
+    func deleteModel(_ model: ModelInfo) throws
 }
 
 // @Published is kept (without ObservableObject) so downloader.$state publisher
@@ -26,14 +38,23 @@ final class ModelDownloader: NSObject {
     // NSURLErrorCancelled (e.g. cellular blocked by allowsCellularAccess=false).
     nonisolated(unsafe) private var userCancelled = false
 
+    // Set by AppDelegate when the OS wakes the app for a completed background session.
+    // Called in urlSessionDidFinishEvents to signal the OS that processing is complete.
+    // nonisolated(unsafe): written once from AppDelegate before concurrent URLSession callbacks begin.
+    nonisolated(unsafe) static var backgroundSessionCompletion: (() -> Void)?
+
     func download(model: ModelInfo) {
         // Idempotency guard — prevent double-download race condition
         guard downloadTask == nil else { return }
 
         destinationURL = model.localURL
 
-        let config = URLSessionConfiguration.default
-        config.allowsCellularAccess = false  // WiFi-only; expose as user toggle in v2
+        // Background session: download continues even when the app is suspended.
+        // The same identifier is used across launches so the system can reconnect.
+        let config = URLSessionConfiguration.background(withIdentifier: "app.pocketmind.model-download")
+        config.allowsCellularAccess = false
+        config.isDiscretionary = false       // User-initiated — don't defer to low-power windows
+        config.sessionSendsLaunchEvents = true
         let session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
         self.session = session
 
@@ -63,6 +84,12 @@ final class ModelDownloader: NSObject {
         if FileManager.default.fileExists(atPath: model.localURL.path) {
             try FileManager.default.removeItem(at: model.localURL)
         }
+    }
+}
+
+extension ModelDownloader: ModelDownloaderProtocol {
+    var statePublisher: AnyPublisher<DownloadState, Never> {
+        $state.eraseToAnyPublisher()
     }
 }
 
@@ -110,7 +137,11 @@ extension ModelDownloader: URLSessionDownloadDelegate {
                 self?.state = .completed(url: destination)
             }
         } catch CocoaError.fileWriteOutOfSpace {
-            try? FileManager.default.removeItem(at: destination)
+            do {
+                try FileManager.default.removeItem(at: destination)
+            } catch {
+                print("[ModelDownloader] Cleanup failed after disk-full error: \(error)")
+            }
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
                 self?.session?.finishTasksAndInvalidate()
@@ -118,7 +149,11 @@ extension ModelDownloader: URLSessionDownloadDelegate {
                 self?.state = .failed(message: "Not enough storage space. Free up space and try again.")
             }
         } catch {
-            try? FileManager.default.removeItem(at: destination)
+            do {
+                try FileManager.default.removeItem(at: destination)
+            } catch {
+                print("[ModelDownloader] Cleanup failed: \(error)")
+            }
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
                 self?.session?.finishTasksAndInvalidate()
@@ -140,6 +175,14 @@ extension ModelDownloader: URLSessionDownloadDelegate {
         Task { @MainActor [weak self] in
             self?.state = .downloading(progress: progress)
         }
+    }
+
+    /// Called after all background-session events have been delivered.
+    /// Calls the stored completion handler so the OS knows we're done.
+    nonisolated func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
+        let handler = ModelDownloader.backgroundSessionCompletion
+        ModelDownloader.backgroundSessionCompletion = nil
+        Task { @MainActor in handler?() }
     }
 
     nonisolated func urlSession(
