@@ -135,10 +135,16 @@ struct SettingsView: View {
             )) {
                 Label("Thinking Mode", systemImage: "brain")
             }
+            Toggle(isOn: Binding(
+                get: { viewModel.settings.speechAutoSendEnabled },
+                set: { viewModel.settings.speechAutoSendEnabled = $0 }
+            )) {
+                Label("Auto-send after speech", systemImage: "mic.badge.auto")
+            }
         } header: {
             Text("Inference")
         } footer: {
-            Text("When on, the model reasons before answering (slower but more accurate). Turn off for instant replies.")
+            Text("Thinking mode reasons before answering (slower but more accurate). Auto-send submits voice input automatically when speech recognition finishes.")
         }
     }
 
