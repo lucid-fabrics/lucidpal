@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 enum DownloadState: Equatable, Sendable {
@@ -5,6 +6,17 @@ enum DownloadState: Equatable, Sendable {
     case downloading(progress: Double)
     case completed(url: URL)
     case failed(message: String)
+}
+
+/// Protocol abstraction for ModelDownloader — enables injection and mocking in unit tests.
+@MainActor
+protocol ModelDownloaderProtocol: AnyObject {
+    var state: DownloadState { get }
+    var statePublisher: AnyPublisher<DownloadState, Never> { get }
+    func download(model: ModelInfo)
+    func cancel()
+    func resetState()
+    func deleteModel(_ model: ModelInfo) throws
 }
 
 // @Published is kept (without ObservableObject) so downloader.$state publisher
@@ -72,6 +84,12 @@ final class ModelDownloader: NSObject {
         if FileManager.default.fileExists(atPath: model.localURL.path) {
             try FileManager.default.removeItem(at: model.localURL)
         }
+    }
+}
+
+extension ModelDownloader: ModelDownloaderProtocol {
+    nonisolated var statePublisher: AnyPublisher<DownloadState, Never> {
+        MainActor.assumeIsolated { $state.eraseToAnyPublisher() }
     }
 }
 
