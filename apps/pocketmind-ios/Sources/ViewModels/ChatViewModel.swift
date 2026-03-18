@@ -31,7 +31,7 @@ final class ChatViewModel: ObservableObject {
 
     private let llmService: any LLMServiceProtocol
     private let calendarService: any CalendarServiceProtocol
-    private let calendarActionController: CalendarActionController
+    private let calendarActionController: any CalendarActionControllerProtocol
     private let settings: AppSettings
     private let speechService: any SpeechServiceProtocol
     private let history: any ChatHistoryManagerProtocol
@@ -42,7 +42,7 @@ final class ChatViewModel: ObservableObject {
     init(
         llmService: any LLMServiceProtocol,
         calendarService: any CalendarServiceProtocol,
-        calendarActionController: CalendarActionController,
+        calendarActionController: any CalendarActionControllerProtocol,
         settings: AppSettings,
         speechService: any SpeechServiceProtocol,
         historyManager: any ChatHistoryManagerProtocol = ChatHistoryManager()

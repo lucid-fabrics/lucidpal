@@ -32,11 +32,6 @@ struct MessageBubbleView: View {
         return text.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    // True while the action block is streaming but previews not yet populated
-    private var isStreamingAction: Bool {
-        message.calendarEventPreviews.isEmpty && message.content.contains("[CALENDAR_ACTION:")
-    }
-
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
             if message.isUser { Spacer(minLength: 60) }
@@ -68,7 +63,7 @@ struct MessageBubbleView: View {
                                 }
                             }
                         }
-                } else if !message.isUser && !isStreamingAction && message.calendarEventPreviews.isEmpty {
+                } else if !message.isUser && !message.isStreamingAction && message.calendarEventPreviews.isEmpty {
                     // Bubble with placeholder while non-action content streams in
                     Text("…")
                         .padding(.horizontal, 14)
@@ -79,7 +74,7 @@ struct MessageBubbleView: View {
                 }
 
                 // Animated pill while action block is streaming
-                if isStreamingAction {
+                if message.isStreamingAction {
                     CalendarActionPill()
                 }
 

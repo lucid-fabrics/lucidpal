@@ -101,6 +101,25 @@ final class ChatMessageTests: XCTestCase {
         XCTAssertNil(decoded.end)
     }
 
+    // MARK: - isStreamingAction
+
+    func testIsStreamingActionTrueWhileStreaming() {
+        let msg = ChatMessage(role: .assistant, content: "Here [CALENDAR_ACTION:{\"action\":\"create\"}]")
+        XCTAssertTrue(msg.isStreamingAction)
+    }
+
+    func testIsStreamingActionFalseWhenPreviewsPopulated() {
+        var msg = ChatMessage(role: .assistant, content: "[CALENDAR_ACTION:{\"action\":\"create\"}]")
+        let preview = CalendarEventPreview(title: "X", start: .now, end: .now, calendarName: nil, state: .created)
+        msg.calendarEventPreviews = [preview]
+        XCTAssertFalse(msg.isStreamingAction)
+    }
+
+    func testIsStreamingActionFalseForNormalContent() {
+        let msg = ChatMessage(role: .assistant, content: "Hello, no action here")
+        XCTAssertFalse(msg.isStreamingAction)
+    }
+
     func testPendingCalendarUpdateEquality() {
         var a = PendingCalendarUpdate()
         a.title = "X"

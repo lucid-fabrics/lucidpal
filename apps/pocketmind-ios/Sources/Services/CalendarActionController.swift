@@ -34,12 +34,21 @@ enum CalendarActionResult {
     case failure(String)
 }
 
+// MARK: - Protocol
+
+/// Abstraction for executing LLM-emitted calendar action JSON.
+/// Inject via `any CalendarActionControllerProtocol` in ChatViewModel for testability.
+@MainActor
+protocol CalendarActionControllerProtocol: AnyObject {
+    func execute(json: String) async -> CalendarActionResult
+}
+
 // MARK: - Controller
 
 /// Receives a JSON payload emitted by the LLM and dispatches to CalendarService.
 /// Add new action types here without touching ChatViewModel.
 @MainActor
-final class CalendarActionController {
+final class CalendarActionController: CalendarActionControllerProtocol {
     private let calendarService: any CalendarServiceProtocol
     private let settings: AppSettings
 
