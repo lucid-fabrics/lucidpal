@@ -19,7 +19,8 @@ final class ChatViewModelTests: XCTestCase {
             llmService: llm,
             calendarService: mock,
             calendarActionController: controller,
-            settings: settings
+            settings: settings,
+            speechService: MockSpeechService()
         )
     }
 
@@ -99,13 +100,14 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(Set(mock.deletedIdentifiers), ["id-1", "id-2"])
     }
 
-    func testConfirmAllDeletionsPartialFailureSetsErrorMessage() async {
+    func testConfirmAllDeletionsPartialFailureSetsErrorMessage() async throws {
         mock.shouldThrowOnDelete = true
         let (msgID, _) = insertMessage(state: .pendingDeletion)
         await viewModel.confirmAllDeletions(messageID: msgID)
         let state = viewModel.messages.first?.calendarEventPreviews.first?.state
         XCTAssertEqual(state, .deletionCancelled)
-        XCTAssertNotNil(viewModel.errorMessage)
+        let errorMsg = try XCTUnwrap(viewModel.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
     }
 
     func testCancelAllDeletionsSetsAllToCancelled() {
@@ -140,13 +142,13 @@ final class ChatViewModelTests: XCTestCase {
 
         let preview = viewModel.messages.first?.calendarEventPreviews.first
         XCTAssertEqual(preview?.title, "Renamed")
-        XCTAssertNotNil(preview?.start)
+        XCTAssertEqual(preview?.start, pending.start)
         XCTAssertTrue(preview?.state == .updated || preview?.state == .rescheduled)
         XCTAssertNil(preview?.pendingUpdate)
         XCTAssertEqual(mock.appliedUpdates.count, 1)
     }
 
-    func testConfirmUpdateEventNotFoundSetsErrorMessage() async {
+    func testConfirmUpdateEventNotFoundSetsErrorMessage() async throws {
         mock.shouldThrowOnApplyUpdate = true
         var pending = PendingCalendarUpdate()
         pending.title = "Oops"
@@ -156,7 +158,8 @@ final class ChatViewModelTests: XCTestCase {
 
         let state = viewModel.messages.first?.calendarEventPreviews.first?.state
         XCTAssertEqual(state, .updateCancelled)
-        XCTAssertNotNil(viewModel.errorMessage)
+        let errorMsg = try XCTUnwrap(viewModel.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
     }
 
     func testCancelUpdateSetsStateToCancelledAndClearsPending() {

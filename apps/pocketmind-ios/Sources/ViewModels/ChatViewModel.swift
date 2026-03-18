@@ -34,7 +34,7 @@ final class ChatViewModel: ObservableObject {
     private let calendarActionController: CalendarActionController
     private let settings: AppSettings
     private let speechService: any SpeechServiceProtocol
-    private let history = ChatHistoryManager()
+    private let history: any ChatHistoryManagerProtocol
     private var cancellables = Set<AnyCancellable>()
     // Prevents auto-submit when the user manually taps the mic button to stop recording
     private var suppressSpeechAutoSend = false
@@ -44,13 +44,15 @@ final class ChatViewModel: ObservableObject {
         calendarService: any CalendarServiceProtocol,
         calendarActionController: CalendarActionController,
         settings: AppSettings,
-        speechService: any SpeechServiceProtocol = SpeechService()
+        speechService: any SpeechServiceProtocol,
+        historyManager: any ChatHistoryManagerProtocol = ChatHistoryManager()
     ) {
         self.llmService = llmService
         self.calendarService = calendarService
         self.calendarActionController = calendarActionController
         self.settings = settings
         self.speechService = speechService
+        self.history = historyManager
         self.isModelLoaded = llmService.isLoaded
 
         // Load persisted history asynchronously — avoids blocking the main thread on launch.
@@ -100,7 +102,7 @@ final class ChatViewModel: ObservableObject {
                 }
                 guard self.settings.speechAutoSendEnabled else { return }
                 guard !self.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-                Task { await self.sendMessage() }
+                Task { [weak self] in await self?.sendMessage() }
             }
             .store(in: &cancellables)
 

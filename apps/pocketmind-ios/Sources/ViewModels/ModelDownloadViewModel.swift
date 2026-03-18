@@ -49,15 +49,14 @@ final class ModelDownloadViewModel: ObservableObject {
                 return nil
             }
             .sink { [weak self] _ in
-                guard let self else { return }
-                Task { await self.loadModel() }
+                Task { [weak self] in await self?.loadModel() }
             }
             .store(in: &cancellables)
 
         // Auto-load the previously selected model on launch if already on disk.
         // Task is enqueued after init completes — self is fully initialized when body runs.
         if settings.selectedModel.isDownloaded && !llmService.isLoaded {
-            Task { await self.loadModel() }
+            Task { [weak self] in await self?.loadModel() }
         }
     }
 

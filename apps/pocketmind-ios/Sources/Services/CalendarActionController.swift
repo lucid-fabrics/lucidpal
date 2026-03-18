@@ -109,7 +109,7 @@ final class CalendarActionController {
             return await updateEvent(payload)
         case .delete:
             // Bulk delete: no search title but date range provided
-            if (payload.search == nil || payload.search!.isEmpty), payload.start != nil, payload.end != nil {
+            if payload.search?.isEmpty ?? true, payload.start != nil, payload.end != nil {
                 return await bulkFindEventsForDeletion(payload)
             }
             return await findEventForDeletion(payload)

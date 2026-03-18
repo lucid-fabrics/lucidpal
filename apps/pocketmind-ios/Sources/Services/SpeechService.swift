@@ -82,14 +82,14 @@ final class SpeechService: ObservableObject {
 
         guard let request else { return }
         task = recognizer.recognitionTask(with: request) { [weak self] result, error in
-            guard let self else { return }
+            guard self != nil else { return }
             if let result {
-                Task { @MainActor in
-                    self.transcript = result.bestTranscription.formattedString
+                Task { @MainActor [weak self] in
+                    self?.transcript = result.bestTranscription.formattedString
                 }
             }
             if error != nil || result?.isFinal == true {
-                Task { @MainActor in self.stopRecording() }
+                Task { @MainActor [weak self] in self?.stopRecording() }
             }
         }
     }
