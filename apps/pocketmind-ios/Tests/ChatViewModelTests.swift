@@ -309,12 +309,13 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertTrue(vm.messages.isEmpty)
     }
 
-    func testSendMessageSetsErrorOnLLMFailure() async {
+    func testSendMessageSetsErrorOnLLMFailure() async throws {
         let (vm, llm, _) = makeLoadedViewModel()
         llm.shouldThrowOnGenerate = NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "model error"])
         vm.inputText = "hi"
         await vm.sendMessage()
-        XCTAssertNotNil(vm.errorMessage)
+        let msg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertTrue(msg.contains("model error"))
     }
 
     // MARK: - toggleSpeech
@@ -333,10 +334,22 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertTrue(speech.stopCalled)
     }
 
-    func testToggleSpeechSetsErrorMessageOnStartFailure() {
+    func testToggleSpeechSetsErrorMessageOnStartFailure() throws {
         let (vm, _, speech) = makeLoadedViewModel()
         speech.shouldThrowOnStart = NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "mic error"])
         vm.toggleSpeech()
-        XCTAssertNotNil(vm.errorMessage)
+        let msg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertTrue(msg.contains("mic error"))
+    }
+
+    // MARK: - sendMessage edge cases
+
+    func testSendMessageEmptyTokenStreamLeavesBlankAssistantMessage() async {
+        let (vm, _, _) = makeLoadedViewModel(tokens: [])
+        vm.inputText = "hi"
+        await vm.sendMessage()
+        XCTAssertEqual(vm.messages.count, 2)
+        XCTAssertEqual(vm.messages[1].role, .assistant)
+        XCTAssertTrue(vm.messages[1].content.isEmpty)
     }
 }

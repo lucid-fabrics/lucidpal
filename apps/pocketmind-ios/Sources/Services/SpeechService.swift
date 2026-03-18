@@ -77,7 +77,7 @@ final class SpeechService {
 
         // Safety net: if isFinal never fires (e.g. silence, locale unsupported), auto-stop.
         silenceTimer = Timer.scheduledTimer(withTimeInterval: Self.silenceTimeoutSeconds, repeats: false) { [weak self] _ in
-            Task { @MainActor in self?.stopRecording() }
+            Task { @MainActor [weak self] in self?.stopRecording() }
         }
 
         guard let request else { return }

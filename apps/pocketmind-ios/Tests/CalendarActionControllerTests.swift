@@ -262,6 +262,25 @@ final class CalendarActionControllerTests: XCTestCase {
         XCTAssertTrue(answer.contains("No free"))
     }
 
+    // MARK: - Date edge cases
+
+    func testCreateInvalidDateStringReturnsFailed() async {
+        let json = #"{"action":"create","title":"Test","start":"not-a-date","end":"also-not-a-date"}"#
+        let result = await controller.execute(json: json)
+        guard case .failure = result else {
+            return XCTFail("Expected .failure for invalid date strings, got \(result)")
+        }
+    }
+
+    func testCreateExtremeYearSucceeds() async {
+        let json = #"{"action":"create","title":"FarFuture","start":"2099-12-31T23:00:00","end":"2099-12-31T23:59:00"}"#
+        let result = await controller.execute(json: json)
+        guard case .success(_, let preview) = result else {
+            return XCTFail("Expected .success for extreme future date, got \(result)")
+        }
+        XCTAssertEqual(preview.title, "FarFuture")
+    }
+
     // MARK: - Helpers
 
     private func makeEvent(title: String) -> CalendarEventInfo {
