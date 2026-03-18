@@ -414,11 +414,23 @@ final class ChatViewModel: ObservableObject {
     }
 
     /// The CALENDAR TOOL instruction block injected into the system prompt.
+    /// Assembled from three focused helpers to keep each section under 60 lines.
     private func calendarToolInstructions() -> String {
         """
             CALENDAR TOOL
             When the user wants to create, update, or delete an event, you MUST output a [CALENDAR_ACTION:...] block. The block is mandatory — without it the action does not execute.
 
+            \(calendarBlockFormats())
+
+            \(calendarActionExamples())
+
+            \(calendarActionRules())
+            """
+    }
+
+    /// Defines the supported [CALENDAR_ACTION:...] block formats and output structure.
+    private func calendarBlockFormats() -> String {
+        """
             Block formats:
             Create:       [CALENDAR_ACTION:{"action":"create","title":"TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":"","reminderMinutes":15}]
             Create all-day: [CALENDAR_ACTION:{"action":"create","title":"TITLE","start":"YYYY-MM-DDT00:00:00","end":"YYYY-MM-DDT00:00:00","isAllDay":true}]
@@ -430,7 +442,12 @@ final class ChatViewModel: ObservableObject {
             Output format — block first, one short sentence after:
             [CALENDAR_ACTION:{...}]
             One sentence here.
+            """
+    }
 
+    /// Few-shot examples covering all action types for in-context learning.
+    private func calendarActionExamples() -> String {
+        """
             Example — delete request (event "Dentist" is in the calendar list):
             User: delete my dentist appointment
             You: [CALENDAR_ACTION:{"action":"delete","search":"Dentist"}]
@@ -493,7 +510,12 @@ final class ChatViewModel: ObservableObject {
             User: clear my schedule for next Monday
             You: [CALENDAR_ACTION:{"action":"delete","start":"2026-03-23T00:00:00","end":"2026-03-23T23:59:59"}]
             Tap Delete on each card to confirm removal.
+            """
+    }
 
+    /// Hard rules that govern all calendar action output.
+    private func calendarActionRules() -> String {
+        """
             Rules:
             - Dates: ISO8601, no timezone. Default duration: 1 hour.
             - For update: only include the fields you want to change. Omit title if not renaming. Omit start/end if not rescheduling.
