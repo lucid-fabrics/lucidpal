@@ -148,7 +148,7 @@ private struct CalendarEventCard: View {
             Button(action: onUndo) {
                 Text("Undo")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.accentColor)
+                    .foregroundStyle(Color.accentColor)
             }
             .buttonStyle(.plain)
             .padding(.trailing, 4)
