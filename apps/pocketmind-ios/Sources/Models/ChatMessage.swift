@@ -7,6 +7,7 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
         case pendingDeletion
         case deleted
         case deletionCancelled
+        case restored
     }
 
     let id: UUID

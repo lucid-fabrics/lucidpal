@@ -53,6 +53,9 @@ struct ChatView: View {
                             },
                             onCancelDeletion: { previewID in
                                 viewModel.cancelDeletion(messageID: message.id, previewID: previewID)
+                            },
+                            onUndoDeletion: { previewID in
+                                Task { await viewModel.undoDeletion(messageID: message.id, previewID: previewID) }
                             }
                         )
                         .id(message.id)

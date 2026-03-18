@@ -149,6 +149,19 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
+    func undoDeletion(messageID: UUID, previewID: UUID) async {
+        guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }),
+              let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID })
+        else { return }
+        let preview = messages[msgIdx].calendarEventPreviews[previewIdx]
+        do {
+            try calendarService.createEvent(title: preview.title, start: preview.start, end: preview.end, location: nil, notes: nil)
+            messages[msgIdx].calendarEventPreviews[previewIdx].state = .restored
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func cancelDeletion(messageID: UUID, previewID: UUID) {
         guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }),
               let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID })
