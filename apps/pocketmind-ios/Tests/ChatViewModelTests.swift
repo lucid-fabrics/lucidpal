@@ -20,7 +20,8 @@ final class ChatViewModelTests: XCTestCase {
             calendarService: mock,
             calendarActionController: controller,
             settings: settings,
-            speechService: MockSpeechService()
+            speechService: MockSpeechService(),
+            historyManager: MockChatHistoryManager()
         )
     }
 
