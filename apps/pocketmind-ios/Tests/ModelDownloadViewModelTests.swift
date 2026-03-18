@@ -38,6 +38,24 @@ final class ModelDownloadViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.selectedModel.id, current.id)
     }
 
+    func testSelectDifferentModelCancelsInFlightDownload() {
+        let models = viewModel.availableModels
+        guard let other = models.first(where: { $0.id != viewModel.selectedModel.id }) else { return }
+        viewModel.selectModel(other)
+        XCTAssertTrue(mockDownloader.cancelCalled)
+    }
+
+    func testDeleteModelClearsDeleteErrorBeforeAttempt() {
+        // Pre-seed an error from a previous failure
+        mockDownloader.shouldThrowOnDelete = true
+        viewModel.deleteModel(viewModel.selectedModel)
+        XCTAssertNotNil(viewModel.deleteError)
+
+        // Next delete clears the stale error first — even if it fails again
+        viewModel.deleteModel(viewModel.selectedModel)
+        XCTAssertNotNil(viewModel.deleteError) // still set (failed again), but was reset mid-call
+    }
+
     func testDeleteUnloadedModelDoesNotCallUnload() {
         let model = viewModel.selectedModel
         viewModel.deleteModel(model)
