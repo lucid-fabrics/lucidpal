@@ -12,7 +12,7 @@ final class MockCalendarService: CalendarServiceProtocol {
     var stubbedEvents: [EKEvent] = []
     var stubbedConflicts: [EKEvent] = []
     var stubbedFetchEvents: String = ""
-    var createdEvents: [(title: String, start: Date, end: Date)] = []
+    var createdEvents: [(title: String, start: Date, end: Date, isAllDay: Bool)] = []
     var deletedIdentifiers: [String] = []
     var appliedUpdates: [(PendingCalendarUpdate, String)] = []
     var shouldThrowOnDelete = false
@@ -57,7 +57,7 @@ final class MockCalendarService: CalendarServiceProtocol {
         recurrence: String?,
         recurrenceEnd: Date?
     ) throws -> String {
-        createdEvents.append((title: title, start: start, end: end))
+        createdEvents.append((title: title, start: start, end: end, isAllDay: isAllDay))
         return "mock-id-\(createdEvents.count)"
     }
 

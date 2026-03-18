@@ -34,6 +34,8 @@ final class CalendarActionControllerTests: XCTestCase {
             return XCTFail("Expected .success")
         }
         XCTAssertTrue(preview.isAllDay)
+        XCTAssertEqual(mock.createdEvents.first?.isAllDay, true)
+        XCTAssertEqual(mock.createdEvents.first?.title, "Holiday")
     }
 
     func testCreateEventWithReminder() async {
