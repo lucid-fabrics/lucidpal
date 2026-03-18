@@ -22,14 +22,12 @@ final class ChatHistoryManagerTests: XCTestCase {
         XCTAssertTrue(messages.isEmpty)
     }
 
-    func testSaveAndLoadRoundTrip() async throws {
+    func testSaveAndLoadRoundTrip() async {
         let messages = [
             ChatMessage(role: .user, content: "hello"),
             ChatMessage(role: .assistant, content: "hi there"),
         ]
-        manager.save(messages)
-        // Allow the detached utility-priority task to complete
-        try await Task.sleep(for: .milliseconds(500))
+        await manager.save(messages).value
 
         let loaded = manager.load()
         XCTAssertEqual(loaded.count, 2)
@@ -37,44 +35,40 @@ final class ChatHistoryManagerTests: XCTestCase {
         XCTAssertEqual(loaded[1].content, "hi there")
     }
 
-    func testSaveFiltersSystemMessages() async throws {
+    func testSaveFiltersSystemMessages() async {
         let messages = [
             ChatMessage(role: .system, content: "system prompt"),
             ChatMessage(role: .user, content: "user message"),
         ]
-        manager.save(messages)
-        try await Task.sleep(for: .milliseconds(500))
+        await manager.save(messages).value
 
         let loaded = manager.load()
         XCTAssertEqual(loaded.count, 1)
         XCTAssertEqual(loaded.first?.role, .user)
     }
 
-    func testClearRemovesPersistedMessages() async throws {
+    func testClearRemovesPersistedMessages() async {
         let messages = [ChatMessage(role: .user, content: "test")]
-        manager.save(messages)
-        try await Task.sleep(for: .milliseconds(500))
+        await manager.save(messages).value
 
         manager.clear()
         let loaded = manager.load()
         XCTAssertTrue(loaded.isEmpty)
     }
 
-    func testSaveEmptyArrayProducesEmptyLoad() async throws {
-        manager.save([])
-        try await Task.sleep(for: .milliseconds(500))
+    func testSaveEmptyArrayProducesEmptyLoad() async {
+        await manager.save([]).value
 
         let loaded = manager.load()
         XCTAssertTrue(loaded.isEmpty)
     }
 
-    func testLoadPreservesMessageRoles() async throws {
+    func testLoadPreservesMessageRoles() async {
         let messages = [
             ChatMessage(role: .user, content: "q"),
             ChatMessage(role: .assistant, content: "a"),
         ]
-        manager.save(messages)
-        try await Task.sleep(for: .milliseconds(500))
+        await manager.save(messages).value
 
         let loaded = manager.load()
         XCTAssertEqual(loaded[0].role, .user)
