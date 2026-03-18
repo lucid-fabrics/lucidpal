@@ -8,6 +8,27 @@ struct MessageBubbleView: View {
     var onUndoDeletion: ((UUID) -> Void)? = nil
     @State private var thinkingExpanded = false
 
+    // Strip [CALENDAR_ACTION:...] from visible text — shown as a pill instead
+    private var displayContent: String {
+        var text = message.content
+        // Remove complete blocks
+        if let regex = try? NSRegularExpression(pattern: #"\[CALENDAR_ACTION:\{(?:[^}]|\}(?!\]))*\}\]"#,
+                                                options: .dotMatchesLineSeparators) {
+            let ns = NSRange(text.startIndex..., in: text)
+            text = regex.stringByReplacingMatches(in: text, range: ns, withTemplate: "")
+        }
+        // Remove partial block still streaming (no closing ])
+        if let start = text.range(of: "[CALENDAR_ACTION:") {
+            text = String(text[..<start.lowerBound])
+        }
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    // True while the action block is streaming but previews not yet populated
+    private var isStreamingAction: Bool {
+        message.calendarEventPreviews.isEmpty && message.content.contains("[CALENDAR_ACTION:")
+    }
+
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
             if message.isUser { Spacer(minLength: 60) }
@@ -21,22 +42,38 @@ struct MessageBubbleView: View {
                     ThinkingDisclosure(content: "", isThinking: true, isExpanded: $thinkingExpanded)
                 }
 
-                // Main bubble
-                Text(message.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "…" : message.content.trimmingCharacters(in: .whitespacesAndNewlines))
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(message.isUser ? Color.accentColor : Color(.systemGray5))
-                    .foregroundStyle(message.isUser ? .white : .primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    .contextMenu {
-                        if !message.content.isEmpty {
-                            Button {
-                                UIPasteboard.general.string = message.content
-                            } label: {
-                                Label("Copy", systemImage: "doc.on.doc")
+                // Main bubble — action block stripped; shown as pill below
+                let bubbleText = displayContent
+                if !bubbleText.isEmpty {
+                    Text(bubbleText)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(message.isUser ? Color.accentColor : Color(.systemGray5))
+                        .foregroundStyle(message.isUser ? .white : .primary)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .contextMenu {
+                            if !message.content.isEmpty {
+                                Button {
+                                    UIPasteboard.general.string = message.content
+                                } label: {
+                                    Label("Copy", systemImage: "doc.on.doc")
+                                }
                             }
                         }
-                    }
+                } else if !message.isUser && !isStreamingAction && message.calendarEventPreviews.isEmpty {
+                    // Bubble with placeholder while non-action content streams in
+                    Text("…")
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(Color(.systemGray5))
+                        .foregroundStyle(.primary)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                }
+
+                // Animated pill while action block is streaming
+                if isStreamingAction {
+                    CalendarActionPill()
+                }
 
                 // Calendar event cards
                 ForEach(message.calendarEventPreviews, id: \.id) { preview in
@@ -250,6 +287,30 @@ private struct CalendarEventCard: View {
         if let url = URL(string: "calshow://") {
             UIApplication.shared.open(url)
         }
+    }
+}
+
+// MARK: - Calendar action streaming pill
+
+private struct CalendarActionPill: View {
+    @State private var pulse = false
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "calendar.badge.clock")
+                .font(.caption)
+                .opacity(pulse ? 0.3 : 1.0)
+                .animation(.easeInOut(duration: 0.7).repeatForever(), value: pulse)
+            Text("Updating calendar…")
+                .font(.caption)
+            Spacer()
+        }
+        .foregroundStyle(.secondary)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .onAppear { pulse = true }
     }
 }
 
