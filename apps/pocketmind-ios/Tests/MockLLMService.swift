@@ -19,14 +19,14 @@ final class MockLLMService: LLMServiceProtocol {
     private let isLoadingSubject    = CurrentValueSubject<Bool, Never>(false)
     private let isGeneratingSubject = CurrentValueSubject<Bool, Never>(false)
 
-    nonisolated var isLoadedPublisher: AnyPublisher<Bool, Never> {
-        MainActor.assumeIsolated { isLoadedSubject.eraseToAnyPublisher() }
+    var isLoadedPublisher: AnyPublisher<Bool, Never> {
+        isLoadedSubject.eraseToAnyPublisher()
     }
-    nonisolated var isLoadingPublisher: AnyPublisher<Bool, Never> {
-        MainActor.assumeIsolated { isLoadingSubject.eraseToAnyPublisher() }
+    var isLoadingPublisher: AnyPublisher<Bool, Never> {
+        isLoadingSubject.eraseToAnyPublisher()
     }
-    nonisolated var isGeneratingPublisher: AnyPublisher<Bool, Never> {
-        MainActor.assumeIsolated { isGeneratingSubject.eraseToAnyPublisher() }
+    var isGeneratingPublisher: AnyPublisher<Bool, Never> {
+        isGeneratingSubject.eraseToAnyPublisher()
     }
 
     var stubbedTokens: [String] = []

@@ -21,13 +21,13 @@ protocol SpeechServiceProtocol: AnyObject {
 }
 
 extension SpeechService: SpeechServiceProtocol {
-    nonisolated var isRecordingPublisher: AnyPublisher<Bool, Never> {
-        MainActor.assumeIsolated { $isRecording.eraseToAnyPublisher() }
+    var isRecordingPublisher: AnyPublisher<Bool, Never> {
+        $isRecording.eraseToAnyPublisher()
     }
-    nonisolated var isAuthorizedPublisher: AnyPublisher<Bool, Never> {
-        MainActor.assumeIsolated { $isAuthorized.eraseToAnyPublisher() }
+    var isAuthorizedPublisher: AnyPublisher<Bool, Never> {
+        $isAuthorized.eraseToAnyPublisher()
     }
-    nonisolated var transcriptPublisher: AnyPublisher<String, Never> {
-        MainActor.assumeIsolated { $transcript.eraseToAnyPublisher() }
+    var transcriptPublisher: AnyPublisher<String, Never> {
+        $transcript.eraseToAnyPublisher()
     }
 }

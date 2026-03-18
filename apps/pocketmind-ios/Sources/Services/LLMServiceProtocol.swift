@@ -22,13 +22,13 @@ protocol LLMServiceProtocol: AnyObject {
 }
 
 extension LLMService: LLMServiceProtocol {
-    nonisolated var isLoadedPublisher: AnyPublisher<Bool, Never> {
-        MainActor.assumeIsolated { $isLoaded.eraseToAnyPublisher() }
+    var isLoadedPublisher: AnyPublisher<Bool, Never> {
+        $isLoaded.eraseToAnyPublisher()
     }
-    nonisolated var isLoadingPublisher: AnyPublisher<Bool, Never> {
-        MainActor.assumeIsolated { $isLoading.eraseToAnyPublisher() }
+    var isLoadingPublisher: AnyPublisher<Bool, Never> {
+        $isLoading.eraseToAnyPublisher()
     }
-    nonisolated var isGeneratingPublisher: AnyPublisher<Bool, Never> {
-        MainActor.assumeIsolated { $isGenerating.eraseToAnyPublisher() }
+    var isGeneratingPublisher: AnyPublisher<Bool, Never> {
+        $isGenerating.eraseToAnyPublisher()
     }
 }

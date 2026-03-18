@@ -88,8 +88,8 @@ final class ModelDownloader: NSObject {
 }
 
 extension ModelDownloader: ModelDownloaderProtocol {
-    nonisolated var statePublisher: AnyPublisher<DownloadState, Never> {
-        MainActor.assumeIsolated { $state.eraseToAnyPublisher() }
+    var statePublisher: AnyPublisher<DownloadState, Never> {
+        $state.eraseToAnyPublisher()
     }
 }
 
