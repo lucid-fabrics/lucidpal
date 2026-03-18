@@ -11,15 +11,19 @@ final class ModelDownloadViewModel: ObservableObject {
     @Published var loadError: String?
     @Published var deleteError: String?
 
-    let downloader: ModelDownloader
+    let downloader: any ModelDownloaderProtocol
     private let llmService: any LLMServiceProtocol
     let settings: AppSettings
     private var cancellables = Set<AnyCancellable>()
 
-    init(llmService: any LLMServiceProtocol, settings: AppSettings) {
+    init(
+        llmService: any LLMServiceProtocol,
+        settings: AppSettings,
+        downloader: any ModelDownloaderProtocol = ModelDownloader()
+    ) {
         self.llmService = llmService
         self.settings = settings
-        self.downloader = ModelDownloader()
+        self.downloader = downloader
 
         let ram = settings.deviceRAMGB
         let models = ModelInfo.available(physicalRAMGB: ram)
@@ -34,7 +38,7 @@ final class ModelDownloadViewModel: ObservableObject {
         self.isModelLoaded = llmService.isLoaded
 
         // assign(to: &$property) uses weak self internally — no retain cycle.
-        downloader.$state.assign(to: &$downloadState)
+        downloader.statePublisher.assign(to: &$downloadState)
         llmService.isLoadedPublisher
             .sink { [weak self] in self?.isModelLoaded = $0 }
             .store(in: &cancellables)
@@ -43,7 +47,7 @@ final class ModelDownloadViewModel: ObservableObject {
             .store(in: &cancellables)
 
         // Auto-load immediately when download finishes — removes the need for a "Load Model" tap.
-        downloader.$state
+        downloader.statePublisher
             .compactMap { state -> URL? in
                 if case .completed(let url) = state { return url }
                 return nil

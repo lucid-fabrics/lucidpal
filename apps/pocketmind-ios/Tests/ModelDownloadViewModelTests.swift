@@ -4,14 +4,16 @@ import XCTest
 @MainActor
 final class ModelDownloadViewModelTests: XCTestCase {
     var mockLLM: MockLLMService!
+    var mockDownloader: MockModelDownloader!
     var settings: AppSettings!
     var viewModel: ModelDownloadViewModel!
 
     override func setUp() {
         super.setUp()
         mockLLM = MockLLMService()
+        mockDownloader = MockModelDownloader()
         settings = AppSettings()
-        viewModel = ModelDownloadViewModel(llmService: mockLLM, settings: settings)
+        viewModel = ModelDownloadViewModel(llmService: mockLLM, settings: settings, downloader: mockDownloader)
     }
 
     func testInitDownloadStateIsIdle() {
@@ -58,5 +60,48 @@ final class ModelDownloadViewModelTests: XCTestCase {
     func testCancelDownloadResetsStateToIdle() {
         viewModel.cancelDownload()
         XCTAssertEqual(viewModel.downloadState, .idle)
+    }
+
+    // MARK: - Download / cancel via mock
+
+    func testStartDownloadCallsDownloader() {
+        viewModel.startDownload()
+        XCTAssertTrue(mockDownloader.downloadCalled)
+    }
+
+    func testCancelDownloadCallsDownloader() {
+        viewModel.cancelDownload()
+        XCTAssertTrue(mockDownloader.cancelCalled)
+    }
+
+    // MARK: - loadModel
+
+    func testLoadModelDoesNothingWhenModelNotOnDisk() async {
+        // selectedModel.isDownloaded is false in test env (no file on disk)
+        await viewModel.loadModel()
+        XCTAssertFalse(viewModel.isModelLoaded)
+        XCTAssertNil(viewModel.loadError)
+    }
+
+    // MARK: - deleteModel
+
+    func testDeleteModelCallsDownloaderDelete() {
+        let model = viewModel.selectedModel
+        viewModel.deleteModel(model)
+        XCTAssertEqual(mockDownloader.deletedModels.first?.id, model.id)
+    }
+
+    func testDeleteModelSetsDeleteErrorOnFailure() {
+        mockDownloader.shouldThrowOnDelete = true
+        viewModel.deleteModel(viewModel.selectedModel)
+        XCTAssertNotNil(viewModel.deleteError)
+    }
+
+    func testDeleteLoadedModelUnloadsLLM() {
+        let model = viewModel.selectedModel
+        mockLLM.isLoaded = true
+        settings.selectedModelID = model.id
+        viewModel.deleteModel(model)
+        XCTAssertTrue(mockLLM.unloadCalled)
     }
 }

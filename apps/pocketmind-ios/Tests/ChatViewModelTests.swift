@@ -235,4 +235,84 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.messages.first?.calendarEventPreviews[0].state, .deleted)
         XCTAssertEqual(viewModel.messages.first?.calendarEventPreviews[1].state, .deletionCancelled)
     }
+
+    // MARK: - sendMessage
+
+    private func makeLoadedViewModel(tokens: [String] = []) -> (ChatViewModel, MockLLMService, MockSpeechService) {
+        let llm = MockLLMService()
+        llm.isLoaded = true
+        llm.stubbedTokens = tokens
+        let speech = MockSpeechService()
+        let vm = ChatViewModel(
+            llmService: llm,
+            calendarService: mock,
+            calendarActionController: controller,
+            settings: settings,
+            speechService: speech
+        )
+        return (vm, llm, speech)
+    }
+
+    func testSendMessageAppendsUserAndAssistantMessages() async {
+        let (vm, _, _) = makeLoadedViewModel(tokens: ["Hello", " world"])
+        vm.inputText = "hi"
+        await vm.sendMessage()
+        XCTAssertEqual(vm.messages.count, 2)
+        XCTAssertEqual(vm.messages[0].role, .user)
+        XCTAssertEqual(vm.messages[0].content, "hi")
+        XCTAssertEqual(vm.messages[1].role, .assistant)
+        XCTAssertEqual(vm.messages[1].content, "Hello world")
+    }
+
+    func testSendMessageClearsInputText() async {
+        let (vm, _, _) = makeLoadedViewModel(tokens: ["ok"])
+        vm.inputText = "test"
+        await vm.sendMessage()
+        XCTAssertEqual(vm.inputText, "")
+    }
+
+    func testSendMessageDoesNothingWhenModelNotLoaded() async {
+        // llm.isLoaded = false (default in setUp)
+        viewModel.inputText = "test"
+        await viewModel.sendMessage()
+        XCTAssertTrue(viewModel.messages.isEmpty)
+    }
+
+    func testSendMessageDoesNothingForEmptyInput() async {
+        let (vm, _, _) = makeLoadedViewModel()
+        vm.inputText = "   "
+        await vm.sendMessage()
+        XCTAssertTrue(vm.messages.isEmpty)
+    }
+
+    func testSendMessageSetsErrorOnLLMFailure() async {
+        let (vm, llm, _) = makeLoadedViewModel()
+        llm.shouldThrowOnGenerate = NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "model error"])
+        vm.inputText = "hi"
+        await vm.sendMessage()
+        XCTAssertNotNil(vm.errorMessage)
+    }
+
+    // MARK: - toggleSpeech
+
+    func testToggleSpeechStartsRecordingWhenNotRecording() {
+        let (vm, _, speech) = makeLoadedViewModel()
+        speech.isAuthorized = true
+        vm.toggleSpeech()
+        XCTAssertTrue(speech.startCalled)
+    }
+
+    func testToggleSpeechStopsRecordingWhenAlreadyRecording() {
+        let (vm, _, speech) = makeLoadedViewModel()
+        speech.isRecording = true
+        vm.toggleSpeech()
+        XCTAssertTrue(speech.stopCalled)
+    }
+
+    func testToggleSpeechSetsErrorMessageOnStartFailure() {
+        let (vm, _, speech) = makeLoadedViewModel()
+        speech.shouldThrowOnStart = NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "mic error"])
+        vm.toggleSpeech()
+        XCTAssertNotNil(vm.errorMessage)
+    }
 }
