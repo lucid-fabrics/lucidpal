@@ -82,6 +82,7 @@ final class ChatViewModel: ObservableObject {
                     self.suppressSpeechAutoSend = false
                     return
                 }
+                guard self.settings.speechAutoSendEnabled else { return }
                 guard !self.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
                 Task { await self.sendMessage() }
             }
@@ -210,8 +211,16 @@ final class ChatViewModel: ObservableObject {
         else { return }
         let preview = messages[msgIdx].calendarEventPreviews[previewIdx]
         do {
-            try calendarService.createEvent(title: preview.title, start: preview.start, end: preview.end, location: nil, notes: nil)
+            try calendarService.createEvent(
+                title: preview.title,
+                start: preview.start,
+                end: preview.end,
+                reminderMinutes: preview.reminderMinutes,
+                isAllDay: preview.isAllDay,
+                recurrence: preview.recurrence
+            )
             messages[msgIdx].calendarEventPreviews[previewIdx].state = .restored
+            Self.notifySuccess()
         } catch {
             errorMessage = error.localizedDescription
         }

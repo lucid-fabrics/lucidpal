@@ -11,6 +11,7 @@ final class AppSettings: ObservableObject {
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
     @AppStorage("thinkingEnabled") var thinkingEnabled: Bool = true
     @AppStorage("defaultCalendarIdentifier") var defaultCalendarIdentifier: String = ""
+    @AppStorage("speechAutoSendEnabled") var speechAutoSendEnabled: Bool = true
 
     // MARK: - Computed Properties
 
