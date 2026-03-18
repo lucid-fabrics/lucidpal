@@ -106,10 +106,10 @@ final class CalendarActionController {
 
     private func updateEvent(_ p: CalendarActionPayload) async -> CalendarActionResult {
         guard let searchTitle = p.search, !searchTitle.isEmpty else {
-            return .failure("⚠️ No search title provided for update.")
+            return .failure("(No event title provided for update.)")
         }
         guard let newTitle = p.title, let newStart = p.start, let newEnd = p.end else {
-            return .failure("⚠️ Update requires title, start, and end.")
+            return .failure("(Update requires title, start, and end.)")
         }
         do {
             // Search a 60-day window centred on today rather than on the LLM-emitted date.
@@ -120,7 +120,7 @@ final class CalendarActionController {
             let predicate = calendarService.store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: nil)
             let events = calendarService.store.events(matching: predicate)
             guard let event = events.first(where: { ($0.title ?? "").localizedCaseInsensitiveContains(searchTitle) }) else {
-                return .failure("⚠️ Could not find event matching \"\(searchTitle)\".")
+                return .failure("(Couldn't find an event called \"\(searchTitle)\" — please specify the exact name.)")
             }
             event.title = newTitle
             event.startDate = newStart
@@ -137,14 +137,30 @@ final class CalendarActionController {
 
     private func findEventForDeletion(_ p: CalendarActionPayload) async -> CalendarActionResult {
         guard let searchTitle = p.search, !searchTitle.isEmpty else {
-            return .failure("⚠️ No search title provided for deletion.")
+            return .failure("(No event title provided for deletion.)")
         }
         let windowStart = Calendar.current.date(byAdding: .day, value: -30, to: .now) ?? .now
         let windowEnd   = Calendar.current.date(byAdding: .day, value:  30, to: .now) ?? .now
         let predicate = calendarService.store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: nil)
         let events = calendarService.store.events(matching: predicate)
-        guard let event = events.first(where: { ($0.title ?? "").localizedCaseInsensitiveContains(searchTitle) }) else {
-            return .failure("⚠️ Could not find event matching \"\(searchTitle)\".")
+        let lower = searchTitle.lowercased()
+
+        // 1. Exact substring match
+        var event = events.first(where: { ($0.title ?? "").lowercased().contains(lower) })
+
+        // 2. Word-based fallback: any meaningful word (>3 chars) from search appears in event title or vice versa
+        if event == nil {
+            let searchWords = lower.split(separator: " ").map(String.init).filter { $0.count > 3 }
+            event = events.first(where: { ev in
+                let t = (ev.title ?? "").lowercased()
+                let titleWords = t.split(separator: " ").map(String.init).filter { $0.count > 3 }
+                return searchWords.contains(where: { t.contains($0) })
+                    || titleWords.contains(where: { lower.contains($0) })
+            })
+        }
+
+        guard let event else {
+            return .failure("(Couldn't find an event called \"\(searchTitle)\" — please specify the exact name.)")
         }
         let preview = CalendarEventPreview(
             title: event.title ?? searchTitle,
