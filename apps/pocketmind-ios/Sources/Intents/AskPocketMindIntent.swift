@@ -21,11 +21,11 @@ struct AskPocketMindIntent: AppIntent {
 
     // MARK: - Metadata
 
-    static var title: LocalizedStringResource = "Ask PocketMind"
-    static var description = IntentDescription("Ask your on-device AI assistant a question")
+    static let title: LocalizedStringResource = "Ask PocketMind"
+    static let description = IntentDescription("Ask your on-device AI assistant a question")
 
     /// iOS opens the app after perform() returns.
-    static var openAppWhenRun: Bool = true
+    static let openAppWhenRun: Bool = true
 
     // MARK: - Parameters
 
