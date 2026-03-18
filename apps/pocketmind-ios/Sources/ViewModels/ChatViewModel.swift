@@ -196,9 +196,16 @@ final class ChatViewModel: ObservableObject {
 
     // MARK: - Calendar deletion confirmation
 
-    func confirmDeletion(messageID: UUID, previewID: UUID) async {
+    /// Returns (messageIndex, previewIndex) if both IDs resolve — DRYs out all confirmation methods.
+    private func indices(messageID: UUID, previewID: UUID) -> (Int, Int)? {
         guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }),
-              let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID }),
+              let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID })
+        else { return nil }
+        return (msgIdx, previewIdx)
+    }
+
+    func confirmDeletion(messageID: UUID, previewID: UUID) async {
+        guard let (msgIdx, previewIdx) = indices(messageID: messageID, previewID: previewID),
               let identifier = messages[msgIdx].calendarEventPreviews[previewIdx].eventIdentifier
         else { return }
         do {
@@ -211,9 +218,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     func undoDeletion(messageID: UUID, previewID: UUID) async {
-        guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }),
-              let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID })
-        else { return }
+        guard let (msgIdx, previewIdx) = indices(messageID: messageID, previewID: previewID) else { return }
         let preview = messages[msgIdx].calendarEventPreviews[previewIdx]
         do {
             try calendarService.createEvent(
@@ -236,9 +241,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     func cancelDeletion(messageID: UUID, previewID: UUID) {
-        guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }),
-              let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID })
-        else { return }
+        guard let (msgIdx, previewIdx) = indices(messageID: messageID, previewID: previewID) else { return }
         messages[msgIdx].calendarEventPreviews[previewIdx].state = .deletionCancelled
         Self.impact(.light)
     }
@@ -280,8 +283,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     func confirmUpdate(messageID: UUID, previewID: UUID) async {
-        guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }),
-              let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID }),
+        guard let (msgIdx, previewIdx) = indices(messageID: messageID, previewID: previewID),
               let identifier = messages[msgIdx].calendarEventPreviews[previewIdx].eventIdentifier,
               let pending = messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate
         else { return }
@@ -307,9 +309,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     func cancelUpdate(messageID: UUID, previewID: UUID) {
-        guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }),
-              let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID })
-        else { return }
+        guard let (msgIdx, previewIdx) = indices(messageID: messageID, previewID: previewID) else { return }
         messages[msgIdx].calendarEventPreviews[previewIdx].state = .updateCancelled
         messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate = nil
         Self.impact(.light)
@@ -381,9 +381,14 @@ final class ChatViewModel: ObservableObject {
             Be concise. Use plain text, no markdown.
             """,
         ]
+        if calendarEnabled { parts.append(calendarToolInstructions()) }
+        if calendarEnabled, let ctx = calendarContext() { parts.append(ctx) }
+        return parts.joined(separator: " ")
+    }
 
-        if calendarEnabled {
-            parts.append("""
+    /// The CALENDAR TOOL instruction block injected into the system prompt.
+    private func calendarToolInstructions() -> String {
+        """
             CALENDAR TOOL
             When the user wants to create, update, or delete an event, you MUST output a [CALENDAR_ACTION:...] block. The block is mandatory — without it the action does not execute.
 
@@ -472,21 +477,21 @@ final class ChatViewModel: ObservableObject {
             - recurrenceEnd: ISO8601 date when recurrence stops. Omit for indefinite.
             - NEVER skip the block. NEVER output text-only when an action is requested.
             - NEVER tell the user to make changes manually.
-            """)
-        }
+            """
+    }
 
-        if calendarEnabled {
-            let windowStart = Calendar.current.date(byAdding: .day, value: -2, to: .now) ?? .now
-            let events = calendarService.fetchEvents(from: windowStart, days: 16)
-            // Sync revocation: if OS denied access between the setting toggle and now, disable the toggle.
-            if !calendarService.isAuthorized {
-                settings.calendarAccessEnabled = false
-            } else if !events.isEmpty {
-                parts.append("\nUser's calendar (2 days back, 14 days ahead):\n\(events)")
-            }
+    /// Fetches the user's calendar events for the prompt context.
+    /// Returns nil if calendar access was revoked or there are no events.
+    private func calendarContext() -> String? {
+        let windowStart = Calendar.current.date(byAdding: .day, value: -2, to: .now) ?? .now
+        let events = calendarService.fetchEvents(from: windowStart, days: 16)
+        // Sync revocation: if OS denied access between toggle and now, disable the setting.
+        guard calendarService.isAuthorized else {
+            settings.calendarAccessEnabled = false
+            return nil
         }
-
-        return parts.joined(separator: " ")
+        guard !events.isEmpty else { return nil }
+        return "\nUser's calendar (2 days back, 14 days ahead):\n\(events)"
     }
 
     private func formattedToday() -> String {
