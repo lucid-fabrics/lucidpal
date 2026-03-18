@@ -31,11 +31,13 @@ private enum LLMConstants {
 }
 
 actor LlamaActor {
-    nonisolated(unsafe) private var model:   OpaquePointer?
-    nonisolated(unsafe) private var ctx:     OpaquePointer?
-    nonisolated(unsafe) private var vocab:   OpaquePointer?
-    nonisolated(unsafe) private var sampler: UnsafeMutablePointer<llama_sampler>?
-    nonisolated(unsafe) private var batch:   llama_batch
+    // nonisolated(unsafe): deinit is nonisolated in Swift 6 — must free C pointers there.
+    // All writes happen exclusively from actor-isolated methods; no concurrent access.
+    nonisolated(unsafe) private var model:   OpaquePointer?   // freed in deinit
+    nonisolated(unsafe) private var ctx:     OpaquePointer?   // freed in deinit
+    nonisolated(unsafe) private var vocab:   OpaquePointer?   // freed in deinit (via model)
+    nonisolated(unsafe) private var sampler: UnsafeMutablePointer<llama_sampler>? // freed in deinit
+    nonisolated(unsafe) private var batch:   llama_batch      // freed in deinit via llama_batch_free
 
     private var pendingCChars: [CChar] = []
     private var nCur: Int32 = 0
