@@ -235,10 +235,12 @@ final class ChatViewModel: ObservableObject {
             [CALENDAR_ACTION:{...}]
             One sentence here.
 
-            Example — delete request:
+            Example — delete request (event "Dentist" is in the calendar list):
             User: delete my dentist appointment
             You: [CALENDAR_ACTION:{"action":"delete","search":"Dentist"}]
             Deletion queued — tap Delete on the card to confirm.
+
+            IMPORTANT for delete and update: the "search" field must be the EXACT title of the event as it appears in the calendar list below. Never invent a generic name like "Appointment" — look at the user's actual events and use the exact title.
 
             Example — create request:
             User: add a meeting tomorrow at 3pm
