@@ -45,15 +45,17 @@ final class ModelDownloadViewModelTests: XCTestCase {
         XCTAssertTrue(mockDownloader.cancelCalled)
     }
 
-    func testDeleteModelClearsDeleteErrorBeforeAttempt() {
+    func testDeleteModelClearsDeleteErrorBeforeAttempt() throws {
         // Pre-seed an error from a previous failure
         mockDownloader.shouldThrowOnDelete = true
         viewModel.deleteModel(viewModel.selectedModel)
-        XCTAssertNotNil(viewModel.deleteError)
+        let firstErr = try XCTUnwrap(viewModel.deleteError)
+        XCTAssertTrue(firstErr.hasPrefix("Could not delete model:"))
 
-        // Next delete clears the stale error first — even if it fails again
+        // Second call resets then re-sets the error — error is non-nil but freshly set
         viewModel.deleteModel(viewModel.selectedModel)
-        XCTAssertNotNil(viewModel.deleteError) // still set (failed again), but was reset mid-call
+        let secondErr = try XCTUnwrap(viewModel.deleteError)
+        XCTAssertTrue(secondErr.hasPrefix("Could not delete model:"))
     }
 
     func testDeleteUnloadedModelDoesNotCallUnload() {

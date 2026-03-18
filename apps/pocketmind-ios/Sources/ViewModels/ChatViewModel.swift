@@ -1,6 +1,5 @@
 import Combine
 import Foundation
-import UIKit
 
 // MARK: - Constants
 
@@ -118,7 +117,7 @@ final class ChatViewModel: ObservableObject {
         } else {
             do {
                 try speechService.startRecording()
-                Self.impact(.light)
+                HapticService.impact(.light)
             } catch {
                 errorMessage = "Microphone error: \(error.localizedDescription)"
             }
@@ -129,7 +128,7 @@ final class ChatViewModel: ObservableObject {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isGenerating, isModelLoaded else { return }
 
-        Self.impact(.light)
+        HapticService.impact(.light)
         inputText = ""
         messages.append(ChatMessage(role: .user, content: text))
         errorMessage = nil
@@ -201,7 +200,7 @@ final class ChatViewModel: ObservableObject {
         do {
             try calendarService.deleteEvent(identifier: identifier)
             messages[msgIdx].calendarEventPreviews[previewIdx].state = .deleted
-            Self.notifySuccess()
+            HapticService.notifySuccess()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -224,7 +223,7 @@ final class ChatViewModel: ObservableObject {
                 recurrenceEnd: nil
             )
             messages[msgIdx].calendarEventPreviews[previewIdx].state = .restored
-            Self.notifySuccess()
+            HapticService.notifySuccess()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -233,7 +232,7 @@ final class ChatViewModel: ObservableObject {
     func cancelDeletion(messageID: UUID, previewID: UUID) {
         guard let (msgIdx, previewIdx) = indices(messageID: messageID, previewID: previewID) else { return }
         messages[msgIdx].calendarEventPreviews[previewIdx].state = .deletionCancelled
-        Self.impact(.light)
+        HapticService.impact(.light)
     }
 
     func confirmAllDeletions(messageID: UUID) async {
@@ -256,7 +255,7 @@ final class ChatViewModel: ObservableObject {
             }
         }
         if failures.isEmpty {
-            Self.notifySuccess()
+            HapticService.notifySuccess()
         } else {
             errorMessage = "Couldn't delete: \(failures.joined(separator: ", "))"
         }
@@ -269,7 +268,7 @@ final class ChatViewModel: ObservableObject {
                 messages[msgIdx].calendarEventPreviews[idx].state = .deletionCancelled
             }
         }
-        Self.impact(.light)
+        HapticService.impact(.light)
     }
 
     func confirmUpdate(messageID: UUID, previewID: UUID) async {
@@ -287,7 +286,7 @@ final class ChatViewModel: ObservableObject {
             if let m = pending.reminderMinutes { messages[msgIdx].calendarEventPreviews[previewIdx].reminderMinutes = m }
             messages[msgIdx].calendarEventPreviews[previewIdx].state = newState
             messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate = nil
-            Self.notifySuccess()
+            HapticService.notifySuccess()
         } catch CalendarError.eventNotFound {
             // Event was deleted externally — dismiss the card rather than leaving it stuck.
             messages[msgIdx].calendarEventPreviews[previewIdx].state = .updateCancelled
@@ -302,7 +301,7 @@ final class ChatViewModel: ObservableObject {
         guard let (msgIdx, previewIdx) = indices(messageID: messageID, previewID: previewID) else { return }
         messages[msgIdx].calendarEventPreviews[previewIdx].state = .updateCancelled
         messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate = nil
-        Self.impact(.light)
+        HapticService.impact(.light)
     }
 
     /// Receives a query from Siri and sends it as if the user typed it.
@@ -550,13 +549,4 @@ final class ChatViewModel: ObservableObject {
         return formatter.string(from: .now)
     }
 
-    // MARK: - Haptics
-
-    private static func impact(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
-        UIImpactFeedbackGenerator(style: style).impactOccurred()
-    }
-
-    private static func notifySuccess() {
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-    }
 }
