@@ -362,4 +362,29 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(vm.messages[1].role, .assistant)
         XCTAssertTrue(vm.messages[1].content.isEmpty)
     }
+
+    // MARK: - clearHistory edge cases
+
+    func testClearHistoryDuringGenerationCancelsLLM() {
+        let (vm, llm, _) = makeLoadedViewModel(tokens: ["a", "b"])
+        llm.isGenerating = true
+        vm.clearHistory()
+        XCTAssertTrue(vm.messages.isEmpty)
+        XCTAssertTrue(llm.cancelCalled)
+    }
+
+    // MARK: - CalendarAction regex edge cases
+
+    func testDisplayContentHandlesNestedBracesInJSON() {
+        // JSON value containing `}` inside a string must not prematurely close the block
+        let content = #"[CALENDAR_ACTION:{"action":"create","notes":"Room {A}"}]Done."#
+        let msg = ChatMessage(role: .assistant, content: content)
+        XCTAssertEqual(msg.displayContent, "Done.")
+    }
+
+    func testDisplayContentHandlesMultipleActionBlocks() {
+        let content = "[CALENDAR_ACTION:{\"action\":\"delete\",\"search\":\"A\"}]\n[CALENDAR_ACTION:{\"action\":\"create\",\"title\":\"B\"}]\nAll done."
+        let msg = ChatMessage(role: .assistant, content: content)
+        XCTAssertEqual(msg.displayContent, "All done.")
+    }
 }
