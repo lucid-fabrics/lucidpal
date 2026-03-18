@@ -247,21 +247,33 @@ final class ChatViewModel: ObservableObject {
             You: [CALENDAR_ACTION:{"action":"create","title":"Meeting","start":"2026-03-18T15:00:00","end":"2026-03-18T16:00:00","location":"","notes":""}]
             Added to your calendar.
 
+            Example — reschedule (move to new time):
+            User: move my dentist to Friday at 2pm
+            You: [CALENDAR_ACTION:{"action":"update","search":"Dentist","start":"2026-03-20T14:00:00","end":"2026-03-20T15:00:00"}]
+            Rescheduled.
+
+            Example — add notes or location to existing event (omit title/start/end if not changing them):
+            User: add Zoom link to my standup
+            You: [CALENDAR_ACTION:{"action":"update","search":"Standup","notes":"https://zoom.us/j/123456"}]
+            Notes added.
+
             Rules:
             - Dates: ISO8601, no timezone. Default duration: 1 hour.
-            - Delete: search must match the exact event title. Do NOT say it was deleted — deletion requires the user to tap the confirm button.
+            - For update: only include the fields you want to change. Omit title if not renaming. Omit start/end if not rescheduling.
+            - Delete: search must match the exact event title from the calendar list. Do NOT say it was deleted — deletion requires the user to tap the confirm button.
             - NEVER skip the block. NEVER output text-only when an action is requested.
             - NEVER tell the user to make changes manually.
             """
         ]
 
         if settings.calendarAccessEnabled {
-            let events = calendarService.fetchEvents(from: .now, days: 7)
+            let windowStart = Calendar.current.date(byAdding: .day, value: -2, to: .now) ?? .now
+            let events = calendarService.fetchEvents(from: windowStart, days: 16)
             // Sync revocation: if OS denied access between the setting toggle and now, disable the toggle.
             if !calendarService.isAuthorized {
                 settings.calendarAccessEnabled = false
             } else if !events.isEmpty {
-                parts.append("\nUser's upcoming events (next 7 days):\n\(events)")
+                parts.append("\nUser's calendar (2 days back, 14 days ahead):\n\(events)")
             }
         }
 
