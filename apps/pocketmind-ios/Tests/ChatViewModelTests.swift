@@ -131,7 +131,7 @@ final class ChatViewModelTests: XCTestCase {
 
     // MARK: - Update
 
-    func testConfirmUpdateMirrorsFieldsAndSetsState() async {
+    func testConfirmUpdateMirrorsFieldsAndClearsPending() async {
         var pending = PendingCalendarUpdate()
         pending.title = "Renamed"
         pending.start = Date(timeIntervalSinceNow: 7200)
@@ -143,9 +143,20 @@ final class ChatViewModelTests: XCTestCase {
         let preview = viewModel.messages.first?.calendarEventPreviews.first
         XCTAssertEqual(preview?.title, "Renamed")
         XCTAssertEqual(preview?.start, pending.start)
-        XCTAssertTrue(preview?.state == .updated || preview?.state == .rescheduled)
         XCTAssertNil(preview?.pendingUpdate)
         XCTAssertEqual(mock.appliedUpdates.count, 1)
+    }
+
+    func testConfirmUpdateSetsTerminalState() async {
+        var pending = PendingCalendarUpdate()
+        pending.title = "Renamed"
+        let (msgID, previewID) = insertMessage(state: .pendingUpdate, pendingUpdate: pending)
+
+        await viewModel.confirmUpdate(messageID: msgID, previewID: previewID)
+
+        let state = viewModel.messages.first?.calendarEventPreviews.first?.state
+        XCTAssertTrue(state == .updated || state == .rescheduled,
+                      "Expected .updated or .rescheduled, got \(String(describing: state))")
     }
 
     func testConfirmUpdateEventNotFoundSetsErrorMessage() async throws {
