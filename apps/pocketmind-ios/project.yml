@@ -60,6 +60,8 @@ schemes:
       config: Debug
     test:
       config: Debug
+      targets:
+        - PocketMindTests
     profile:
       config: Release
     analyze:
