@@ -101,6 +101,23 @@ final class ChatMessageTests: XCTestCase {
         XCTAssertNil(decoded.end)
     }
 
+    // MARK: - displayContent
+
+    func testDisplayContentStripsCompleteActionBlock() {
+        let msg = ChatMessage(role: .assistant, content: "[CALENDAR_ACTION:{\"action\":\"create\"}]\nAdded.")
+        XCTAssertEqual(msg.displayContent, "Added.")
+    }
+
+    func testDisplayContentStripsPartialActionBlock() {
+        let msg = ChatMessage(role: .assistant, content: "Sure [CALENDAR_ACTION:{\"action\":")
+        XCTAssertEqual(msg.displayContent, "Sure")
+    }
+
+    func testDisplayContentPassesThroughPlainText() {
+        let msg = ChatMessage(role: .assistant, content: "Hello there!")
+        XCTAssertEqual(msg.displayContent, "Hello there!")
+    }
+
     // MARK: - isStreamingAction
 
     func testIsStreamingActionTrueWhileStreaming() {

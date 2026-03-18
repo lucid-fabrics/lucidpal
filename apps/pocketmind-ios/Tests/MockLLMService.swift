@@ -4,12 +4,19 @@ import Foundation
 
 @MainActor
 final class MockLLMService: LLMServiceProtocol {
-    var isLoaded: Bool = false
-    var isLoading: Bool = false
-    var isGenerating: Bool = false
+    var isLoaded: Bool = false {
+        didSet { isLoadedSubject.send(isLoaded) }
+    }
+    var isLoading: Bool = false {
+        didSet { isLoadingSubject.send(isLoading) }
+    }
+    // didSet keeps isGeneratingPublisher in sync so ChatViewModel's guard fires correctly.
+    var isGenerating: Bool = false {
+        didSet { isGeneratingSubject.send(isGenerating) }
+    }
 
-    private let isLoadedSubject    = CurrentValueSubject<Bool, Never>(false)
-    private let isLoadingSubject   = CurrentValueSubject<Bool, Never>(false)
+    private let isLoadedSubject     = CurrentValueSubject<Bool, Never>(false)
+    private let isLoadingSubject    = CurrentValueSubject<Bool, Never>(false)
     private let isGeneratingSubject = CurrentValueSubject<Bool, Never>(false)
 
     nonisolated var isLoadedPublisher: AnyPublisher<Bool, Never> {
@@ -43,18 +50,16 @@ final class MockLLMService: LLMServiceProtocol {
 
     func loadModel(at url: URL) async throws {
         loadedURL = url
-        isLoaded = true
-        isLoadedSubject.send(true)
+        isLoaded = true  // didSet fires isLoadedSubject
     }
 
     func cancelGeneration() {
         cancelCalled = true
-        isGenerating = false
+        isGenerating = false  // didSet fires isGeneratingSubject
     }
 
     func unloadModel() {
         unloadCalled = true
-        isLoaded = false
-        isLoadedSubject.send(false)
+        isLoaded = false  // didSet fires isLoadedSubject
     }
 }

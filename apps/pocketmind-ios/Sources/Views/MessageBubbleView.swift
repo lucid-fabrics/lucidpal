@@ -16,22 +16,6 @@ struct MessageBubbleView: View {
         message.calendarEventPreviews.filter { $0.state == .pendingDeletion }.count
     }
 
-    // Strip [CALENDAR_ACTION:...] from visible text — shown as a pill instead
-    private var displayContent: String {
-        var text = message.content
-        // Remove complete blocks
-        if let regex = try? NSRegularExpression(pattern: #"\[CALENDAR_ACTION:\{(?:[^}]|\}(?!\]))*\}\]"#,
-                                                options: .dotMatchesLineSeparators) {
-            let ns = NSRange(text.startIndex..., in: text)
-            text = regex.stringByReplacingMatches(in: text, range: ns, withTemplate: "")
-        }
-        // Remove partial block still streaming (no closing ])
-        if let start = text.range(of: "[CALENDAR_ACTION:") {
-            text = String(text[..<start.lowerBound])
-        }
-        return text.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
             if message.isUser { Spacer(minLength: 60) }
@@ -46,7 +30,7 @@ struct MessageBubbleView: View {
                 }
 
                 // Main bubble — action block stripped; shown as pill below
-                let bubbleText = displayContent
+                let bubbleText = message.displayContent
                 if !bubbleText.isEmpty {
                     Text(bubbleText)
                         .padding(.horizontal, 14)

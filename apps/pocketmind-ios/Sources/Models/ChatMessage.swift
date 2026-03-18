@@ -99,4 +99,25 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
     var isStreamingAction: Bool {
         calendarEventPreviews.isEmpty && content.contains("[CALENDAR_ACTION:")
     }
+
+    // Compiled once — NSRegularExpression is thread-safe for matching.
+    private static let actionBlockRegex: NSRegularExpression? = try? NSRegularExpression(
+        pattern: #"\[CALENDAR_ACTION:\{(?:[^}]|\}(?!\]))*\}\]"#,
+        options: .dotMatchesLineSeparators
+    )
+
+    /// Content with [CALENDAR_ACTION:...] blocks stripped for display.
+    /// Removes complete blocks via regex and partial blocks still mid-stream.
+    var displayContent: String {
+        var text = content
+        if let regex = Self.actionBlockRegex {
+            let ns = NSRange(text.startIndex..., in: text)
+            text = regex.stringByReplacingMatches(in: text, range: ns, withTemplate: "")
+        }
+        // Remove any partial block still streaming (no closing ])
+        if let start = text.range(of: "[CALENDAR_ACTION:") {
+            text = String(text[..<start.lowerBound])
+        }
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 }
