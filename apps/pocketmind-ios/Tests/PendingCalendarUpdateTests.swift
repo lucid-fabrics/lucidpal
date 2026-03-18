@@ -1,6 +1,7 @@
 import XCTest
 @testable import PocketMind
 
+@MainActor
 final class PendingCalendarUpdateTests: XCTestCase {
 
     func testEmptyUpdateEncodesAndDecodes() throws {

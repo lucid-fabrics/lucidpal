@@ -2,7 +2,7 @@ import Foundation
 
 protocol ChatHistoryManagerProtocol {
     func load() -> [ChatMessage]
-    func save(_ messages: [ChatMessage])
+    @discardableResult func save(_ messages: [ChatMessage]) -> Task<Void, Never>
     func clear()
 }
 
@@ -26,9 +26,11 @@ final class ChatHistoryManager: ChatHistoryManagerProtocol {
     }
 
     /// Persists messages to disk on a background thread. System roles are excluded.
-    func save(_ messages: [ChatMessage]) {
+    /// Returns the underlying Task — callers can await it in tests to avoid sleep-based timing.
+    @discardableResult
+    func save(_ messages: [ChatMessage]) -> Task<Void, Never> {
         let filtered = messages.filter { $0.role != .system }
-        Task.detached(priority: .utility) {
+        return Task.detached(priority: .utility) {
             guard let data = try? JSONEncoder().encode(filtered) else { return }
             do {
                 try data.write(to: ChatHistoryManager.historyURL, options: .atomic)
