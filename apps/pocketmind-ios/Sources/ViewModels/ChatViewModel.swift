@@ -223,17 +223,32 @@ final class ChatViewModel: ObservableObject {
             Be concise. Use plain text, no markdown.
             """,
             """
-            CALENDAR TOOL — output exactly one block per action, then one sentence. Do NOT include any label before the block.
-            To create: [CALENDAR_ACTION:{"action":"create","title":"TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":""}]
-            To update: [CALENDAR_ACTION:{"action":"update","search":"EXISTING TITLE","title":"NEW TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":""}]
-            To delete: [CALENDAR_ACTION:{"action":"delete","search":"EXISTING TITLE"}]
+            CALENDAR TOOL
+            When the user wants to create, update, or delete an event, you MUST output a [CALENDAR_ACTION:...] block. The block is mandatory — without it the action does not execute.
+
+            Block formats:
+            Create:  [CALENDAR_ACTION:{"action":"create","title":"TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":""}]
+            Update:  [CALENDAR_ACTION:{"action":"update","search":"CURRENT TITLE","title":"NEW TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":""}]
+            Delete:  [CALENDAR_ACTION:{"action":"delete","search":"EXACT EVENT TITLE"}]
+
+            Output format — block first, one short sentence after:
+            [CALENDAR_ACTION:{...}]
+            One sentence here.
+
+            Example — delete request:
+            User: delete my dentist appointment
+            You: [CALENDAR_ACTION:{"action":"delete","search":"Dentist"}]
+            Deletion queued — tap Delete on the card to confirm.
+
+            Example — create request:
+            User: add a meeting tomorrow at 3pm
+            You: [CALENDAR_ACTION:{"action":"create","title":"Meeting","start":"2026-03-18T15:00:00","end":"2026-03-18T16:00:00","location":"","notes":""}]
+            Added to your calendar.
+
             Rules:
-            - Dates: ISO8601, no timezone (e.g. 2026-03-18T14:00:00). Default duration: 1 hour.
-            - For update: set action to "update", search to the current title, title to the new title.
-            - For delete: set action to "delete", search to the exact event title. IMPORTANT: deletion requires user confirmation — say "I've sent a deletion request. Tap Delete to confirm." Do NOT say the event was deleted.
-            - For create: after the block say "Added to your calendar."
-            - NEVER output a label like "Delete:" or "Create:" before the block.
-            - NEVER skip the block when a create, update, or delete is requested.
+            - Dates: ISO8601, no timezone. Default duration: 1 hour.
+            - Delete: search must match the exact event title. Do NOT say it was deleted — deletion requires the user to tap the confirm button.
+            - NEVER skip the block. NEVER output text-only when an action is requested.
             - NEVER tell the user to make changes manually.
             """
         ]
