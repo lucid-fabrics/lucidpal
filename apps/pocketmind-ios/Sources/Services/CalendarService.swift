@@ -1,18 +1,23 @@
 import EventKit
 import Foundation
 
+/// Lightweight domain model for writable calendars — avoids leaking EKCalendar into upper layers.
+struct CalendarInfo: Identifiable, Hashable, Sendable {
+    let id: String      // EKCalendar.calendarIdentifier
+    let title: String
+}
+
 // CalendarService is a pure data-access service — it holds no observable UI state.
 // SettingsViewModel owns @Published calendarAuthStatus and syncs it manually after
 // requestAccess() returns, keeping the observable layer entirely in ViewModels.
 @MainActor
 final class CalendarService {
     // nonisolated(unsafe): EKEventStore is documented as thread-safe for read operations.
-    // Marking it nonisolated(unsafe) allows background query offloading below.
-    nonisolated(unsafe) let store = EKEventStore()
+    // Private — no layer above CalendarService should access EKEventStore directly.
+    nonisolated(unsafe) private let store = EKEventStore()
 
     private(set) var authorizationStatus: EKAuthorizationStatus = .notDetermined
 
-    // Reuse formatter — DateFormatter is expensive to construct
     private static let eventFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateStyle = .medium
@@ -23,6 +28,8 @@ final class CalendarService {
     init() {
         authorizationStatus = EKEventStore.authorizationStatus(for: .event)
     }
+
+    // MARK: - Authorization
 
     func requestAccess() async -> Bool {
         do {
@@ -50,9 +57,33 @@ final class CalendarService {
         }
     }
 
+    // MARK: - Calendar metadata
+
+    /// All user-writable calendars as domain objects.
+    func writableCalendars() -> [CalendarInfo] {
+        guard isAuthorized else { return [] }
+        return store.calendars(for: .event)
+            .filter { $0.allowsContentModifications }
+            .sorted { $0.title < $1.title }
+            .map { CalendarInfo(id: $0.calendarIdentifier, title: $0.title) }
+    }
+
+    /// The system default calendar for new events.
+    func defaultCalendarInfo() -> CalendarInfo? {
+        guard let cal = store.defaultCalendarForNewEvents else { return nil }
+        return CalendarInfo(id: cal.calendarIdentifier, title: cal.title)
+    }
+
+    /// Calendar name for a saved event identifier — used to populate preview cards.
+    func calendarName(forEventIdentifier identifier: String) -> String? {
+        store.event(withIdentifier: identifier)?.calendar?.title
+    }
+
+    // MARK: - Event queries
+
     /// Fetches events and formats them as a prompt-ready string.
-    /// - Refreshes authorization status on every call to detect runtime revocation.
-    /// - Caps at 50 events to prevent LLM context overflow.
+    /// Refreshes authorization status on every call to detect runtime revocation.
+    /// Caps at 50 events to prevent LLM context overflow.
     func fetchEvents(from start: Date = .now, days: Int = 7) -> String {
         authorizationStatus = EKEventStore.authorizationStatus(for: .event)
         guard isAuthorized else { return "" }
@@ -69,6 +100,15 @@ final class CalendarService {
         return events.map { Self.formatEvent($0) }.joined(separator: "\n")
     }
 
+    /// Searches for events within a ±windowDays window around today.
+    func findEvents(matching title: String, windowDays: Int = 30) -> [EKEvent] {
+        guard isAuthorized else { return [] }
+        let windowStart = Calendar.current.date(byAdding: .day, value: -windowDays, to: .now) ?? .now
+        let windowEnd   = Calendar.current.date(byAdding: .day, value:  windowDays, to: .now) ?? .now
+        let predicate = store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: nil)
+        return store.events(matching: predicate)
+    }
+
     private static func formatEvent(_ event: EKEvent) -> String {
         let start = eventFormatter.string(from: event.startDate)
         let end = eventFormatter.string(from: event.endDate)
@@ -78,7 +118,7 @@ final class CalendarService {
         return "- \(title)\(location): \(start) → \(end) [\(cal)]"
     }
 
-    /// Returns events that overlap with the given time window, optionally excluding one event by identifier.
+    /// Returns events overlapping the given window, optionally excluding one by identifier.
     func findConflicts(start: Date, end: Date, excludingIdentifier: String? = nil) -> [EKEvent] {
         guard isAuthorized else { return [] }
         let predicate = store.predicateForEvents(withStart: start, end: end, calendars: nil)
@@ -95,14 +135,43 @@ final class CalendarService {
         return store.events(matching: predicate).sorted { $0.startDate < $1.startDate }
     }
 
-    /// Deletes the event with the given EKEvent identifier.
+    // MARK: - Mutations
+
+    /// Deletes the event with the given identifier.
     func deleteEvent(identifier: String) throws {
         authorizationStatus = EKEventStore.authorizationStatus(for: .event)
         guard isAuthorized else { throw CalendarError.notAuthorized }
         guard let event = store.event(withIdentifier: identifier) else {
             throw CalendarError.eventNotFound
         }
+        // For recurring events, remove only this instance; series is managed by user in Calendar app.
         try store.remove(event, span: .thisEvent)
+    }
+
+    /// Applies a PendingCalendarUpdate to an existing event. Returns the resulting preview state.
+    func applyUpdate(_ update: PendingCalendarUpdate, to identifier: String) throws -> CalendarEventPreview.PreviewState {
+        authorizationStatus = EKEventStore.authorizationStatus(for: .event)
+        guard isAuthorized else { throw CalendarError.notAuthorized }
+        guard let event = store.event(withIdentifier: identifier) else {
+            throw CalendarError.eventNotFound
+        }
+
+        let titleChanged = update.title != nil
+        let datesChanged = update.start != nil || update.end != nil
+
+        if let t = update.title    { event.title = t }
+        if let s = update.start    { event.startDate = s }
+        if let e = update.end      { event.endDate = e }
+        if let l = update.location, !l.isEmpty { event.location = l }
+        if let n = update.notes,   !n.isEmpty  { event.notes = n }
+        if let m = update.reminderMinutes {
+            event.alarms?.forEach { event.removeAlarm($0) }
+            event.addAlarm(EKAlarm(relativeOffset: -TimeInterval(m * 60)))
+        }
+        if let a = update.isAllDay { event.isAllDay = a }
+
+        try store.save(event, span: .thisEvent)
+        return datesChanged && !titleChanged ? .rescheduled : .updated
     }
 
     /// Creates and saves a calendar event. Returns the event identifier on success.
@@ -145,14 +214,15 @@ final class CalendarService {
             case "monthly": freq = .monthly
             default:        freq = .yearly
             }
-            let end = recurrenceEnd.map { EKRecurrenceEnd(end: $0) }
+            let ruleEnd = recurrenceEnd.map { EKRecurrenceEnd(end: $0) }
             event.recurrenceRules = [EKRecurrenceRule(
                 recurrenceWith: freq,
                 interval: 1,
-                end: end
+                end: ruleEnd
             )]
         }
 
+        // .thisEvent is correct for new events — the recurrence series is defined by the rule, not the span.
         try store.save(event, span: .thisEvent)
         return event.eventIdentifier ?? ""
     }

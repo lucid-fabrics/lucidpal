@@ -1,5 +1,4 @@
 import Combine
-import EventKit
 import Foundation
 
 @MainActor
@@ -21,7 +20,7 @@ final class ChatViewModel: ObservableObject {
     private let speechService = SpeechService()
     private var cancellables = Set<AnyCancellable>()
 
-    private static let historyURL: URL = {
+    nonisolated(unsafe) private static let historyURL: URL = {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("chat_history.json")
     }()
@@ -33,10 +32,13 @@ final class ChatViewModel: ObservableObject {
         self.settings = settings
         self.isModelLoaded = llmService.isLoaded
 
-        // Load persisted history
-        if let data = try? Data(contentsOf: Self.historyURL),
-           let saved = try? JSONDecoder().decode([ChatMessage].self, from: data) {
-            self.messages = saved
+        // Load persisted history asynchronously — avoids blocking the main thread on launch.
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            if let data = try? Data(contentsOf: ChatViewModel.historyURL),
+               let saved = try? JSONDecoder().decode([ChatMessage].self, from: data) {
+                self.messages = saved
+            }
         }
 
         // assign(to: &$property) uses weak self internally — no retain cycle.
@@ -50,13 +52,16 @@ final class ChatViewModel: ObservableObject {
             .filter { !$0.isEmpty }
             .assign(to: &$inputText)
 
-        // Persist messages on every change (debounced to avoid hammering disk)
+        // Persist messages on change — debounced on MainActor, disk write offloaded to background.
         $messages
-            .debounce(for: .seconds(1), scheduler: DispatchQueue.global(qos: .utility))
-            .sink { msgs in
+            .debounce(for: .seconds(3), scheduler: RunLoop.main)
+            .sink { [weak self] msgs in
+                guard self != nil else { return }
                 let filtered = msgs.filter { $0.role != .system }
-                if let data = try? JSONEncoder().encode(filtered) {
-                    try? data.write(to: Self.historyURL, options: .atomic)
+                Task.detached(priority: .utility) {
+                    if let data = try? JSONEncoder().encode(filtered) {
+                        try? data.write(to: ChatViewModel.historyURL, options: .atomic)
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -198,14 +203,22 @@ final class ChatViewModel: ObservableObject {
         let indices = messages[msgIdx].calendarEventPreviews.indices.filter {
             messages[msgIdx].calendarEventPreviews[$0].state == .pendingDeletion
         }
+        var failures: [String] = []
         for idx in indices {
-            guard let identifier = messages[msgIdx].calendarEventPreviews[idx].eventIdentifier else { continue }
+            guard let identifier = messages[msgIdx].calendarEventPreviews[idx].eventIdentifier else {
+                messages[msgIdx].calendarEventPreviews[idx].state = .deletionCancelled
+                continue
+            }
             do {
                 try calendarService.deleteEvent(identifier: identifier)
                 messages[msgIdx].calendarEventPreviews[idx].state = .deleted
             } catch {
-                errorMessage = error.localizedDescription
+                messages[msgIdx].calendarEventPreviews[idx].state = .deletionCancelled
+                failures.append(messages[msgIdx].calendarEventPreviews[idx].title)
             }
+        }
+        if !failures.isEmpty {
+            errorMessage = "Couldn't delete: \(failures.joined(separator: ", "))"
         }
     }
 
@@ -225,26 +238,14 @@ final class ChatViewModel: ObservableObject {
               let pending = messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate
         else { return }
         do {
-            guard let event = calendarService.store.event(withIdentifier: identifier) else {
-                errorMessage = "Event not found."; return
-            }
-            if let t = pending.title    { event.title = t }
-            if let s = pending.start    { event.startDate = s }
-            if let e = pending.end      { event.endDate = e }
-            if let l = pending.location, !l.isEmpty { event.location = l }
-            if let n = pending.notes, !n.isEmpty    { event.notes = n }
-            if let m = pending.reminderMinutes {
-                event.alarms?.forEach { event.removeAlarm($0) }
-                event.addAlarm(EKAlarm(relativeOffset: -TimeInterval(m * 60)))
-            }
-            if let a = pending.isAllDay { event.isAllDay = a }
-            try calendarService.store.save(event, span: .thisEvent)
-
-            let titleChanged = pending.title != nil
-            let datesChanged = pending.start != nil || pending.end != nil
-            let newState: CalendarEventPreview.PreviewState = datesChanged && !titleChanged ? .rescheduled : .updated
+            let newState = try calendarService.applyUpdate(pending, to: identifier)
             messages[msgIdx].calendarEventPreviews[previewIdx].state = newState
             messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate = nil
+        } catch CalendarError.eventNotFound {
+            // Event was deleted externally — dismiss the card rather than leaving it stuck.
+            messages[msgIdx].calendarEventPreviews[previewIdx].state = .updateCancelled
+            messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate = nil
+            errorMessage = "That event was deleted from your calendar."
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -267,7 +268,17 @@ final class ChatViewModel: ObservableObject {
     func clearHistory() {
         llmService.cancelGeneration()
         messages = []
-        try? FileManager.default.removeItem(at: Self.historyURL)
+        try? FileManager.default.removeItem(at: ChatViewModel.historyURL)
+    }
+
+    /// Immediately writes current messages to disk — call when app enters background.
+    func flushPersistence() {
+        let filtered = messages.filter { $0.role != .system }
+        Task.detached(priority: .utility) {
+            if let data = try? JSONEncoder().encode(filtered) {
+                try? data.write(to: ChatViewModel.historyURL, options: .atomic)
+            }
+        }
     }
 
     // MARK: - Calendar action dispatch

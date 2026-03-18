@@ -25,15 +25,12 @@ final class SettingsViewModel: ObservableObject {
         calendarService.isAuthorized
     }
 
-    var availableCalendars: [EKCalendar] {
-        guard calendarService.isAuthorized else { return [] }
-        return calendarService.store.calendars(for: .event)
-            .filter { $0.allowsContentModifications }
-            .sorted { $0.title < $1.title }
+    var availableCalendars: [CalendarInfo] {
+        calendarService.writableCalendars()
     }
 
-    func setDefaultCalendar(_ calendar: EKCalendar?) {
-        settings.defaultCalendarIdentifier = calendar?.calendarIdentifier ?? ""
+    func setDefaultCalendar(id: String?) {
+        settings.defaultCalendarIdentifier = id ?? ""
     }
 
     func requestCalendarAccess() async {

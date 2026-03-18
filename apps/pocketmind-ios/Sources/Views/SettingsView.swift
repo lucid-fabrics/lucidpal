@@ -1,4 +1,3 @@
-import EventKit
 import SwiftUI
 
 struct SettingsView: View {
@@ -49,14 +48,15 @@ struct SettingsView: View {
                 if !calendars.isEmpty {
                     Picker("Default Calendar", selection: Binding(
                         get: {
-                            calendars.first { $0.calendarIdentifier == viewModel.settings.defaultCalendarIdentifier }
-                                ?? viewModel.calendarService.store.defaultCalendarForNewEvents
+                            viewModel.settings.defaultCalendarIdentifier.isEmpty
+                                ? nil
+                                : viewModel.settings.defaultCalendarIdentifier
                         },
-                        set: { viewModel.setDefaultCalendar($0) }
+                        set: { viewModel.setDefaultCalendar(id: $0) }
                     )) {
-                        Text("System Default").tag(Optional<EKCalendar>.none)
-                        ForEach(calendars, id: \.calendarIdentifier) { cal in
-                            Text(cal.title).tag(Optional(cal))
+                        Text("System Default").tag(Optional<String>.none)
+                        ForEach(calendars) { cal in
+                            Text(cal.title).tag(Optional(cal.id))
                         }
                     }
                 }

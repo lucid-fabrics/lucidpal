@@ -198,11 +198,11 @@ private struct CalendarEventCard: View {
             cardContent(titleColor: .primary, dimmed: false)
             if let p = preview.pendingUpdate {
                 VStack(alignment: .leading, spacing: 3) {
-                    if let t = p.title { changeRow(label: "Title", value: t) }
-                    if let s = p.start { changeRow(label: "Start", value: Self.timeFormatter.string(from: s)) }
-                    if let e = p.end   { changeRow(label: "End",   value: Self.timeFormatter.string(from: e)) }
-                    if let l = p.location { changeRow(label: "Location", value: l) }
-                    if let m = p.reminderMinutes { changeRow(label: "Reminder", value: reminderLabel(m)) }
+                    if let t = p.title { diffRow(label: "Title", from: preview.title, to: t) }
+                    if let s = p.start { diffRow(label: "Start", from: Self.timeFormatter.string(from: preview.start), to: Self.timeFormatter.string(from: s)) }
+                    if let e = p.end   { diffRow(label: "End",   from: Self.timeFormatter.string(from: preview.end),   to: Self.timeFormatter.string(from: e)) }
+                    if let l = p.location { diffRow(label: "Location", from: "", to: l) }
+                    if let m = p.reminderMinutes { diffRow(label: "Reminder", from: "", to: reminderLabel(m)) }
                 }
                 .padding(.horizontal, 10)
                 .padding(.bottom, 8)
@@ -232,14 +232,24 @@ private struct CalendarEventCard: View {
         .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.accentColor.opacity(0.3), lineWidth: 1))
     }
 
-    private func changeRow(label: String, value: String) -> some View {
+    @ViewBuilder
+    private func diffRow(label: String, from current: String, to proposed: String) -> some View {
         HStack(spacing: 4) {
             Text("\(label):")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
-            Text(value)
+            if !current.isEmpty && current != proposed {
+                Text(current)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .strikethrough(true, color: .secondary)
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 7))
+                    .foregroundStyle(.secondary)
+            }
+            Text(proposed)
                 .font(.caption2)
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color.accentColor)
         }
     }
 
