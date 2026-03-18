@@ -19,10 +19,13 @@ final class ChatHistoryManager: ChatHistoryManagerProtocol {
 
     /// Loads persisted messages from disk. Returns an empty array on any failure.
     func load() -> [ChatMessage] {
-        guard let data = try? Data(contentsOf: Self.historyURL),
-              let saved = try? JSONDecoder().decode([ChatMessage].self, from: data)
-        else { return [] }
-        return saved
+        guard let data = try? Data(contentsOf: Self.historyURL) else { return [] }
+        do {
+            return try JSONDecoder().decode([ChatMessage].self, from: data)
+        } catch {
+            print("[ChatHistoryManager] Failed to decode history: \(error)")
+            return []
+        }
     }
 
     /// Persists messages to disk on a background thread. System roles are excluded.

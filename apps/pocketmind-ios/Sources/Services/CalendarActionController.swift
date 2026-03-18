@@ -147,7 +147,7 @@ final class CalendarActionController {
             title: event.title ?? searchTitle,
             start: event.startDate,
             end: event.endDate,
-            calendarName: event.calendar?.title,
+            calendarName: event.calendarTitle,
             state: .pendingUpdate,
             eventIdentifier: event.eventIdentifier
         )
@@ -183,7 +183,7 @@ final class CalendarActionController {
             title: event.title ?? searchTitle,
             start: event.startDate,
             end: event.endDate,
-            calendarName: event.calendar?.title,
+            calendarName: event.calendarTitle,
             state: .pendingDeletion,
             eventIdentifier: event.eventIdentifier
         )
@@ -242,12 +242,10 @@ final class CalendarActionController {
         let events = calendarService.events(in: rangeStart, end: rangeEnd)
             .sorted { $0.startDate < $1.startDate }
 
-        // Collect and merge overlapping busy windows (unwrap EKEvent's implicitly-unwrapped dates)
+        // Collect and merge overlapping busy windows
         var merged: [(Date, Date)] = []
-        for window in events.compactMap({ ev -> (Date, Date)? in
-            guard let s = ev.startDate else { return nil }
-            return (s, ev.endDate ?? s)
-        }) {
+        for ev in events {
+            let window = (ev.startDate, ev.endDate)
             if let last = merged.last, window.0 < last.1 {
                 merged[merged.count - 1] = (last.0, max(last.1, window.1))
             } else {
@@ -309,7 +307,7 @@ final class CalendarActionController {
                 title: event.title ?? "Untitled",
                 start: event.startDate,
                 end: event.endDate,
-                calendarName: event.calendar?.title,
+                calendarName: event.calendarTitle,
                 state: .pendingDeletion,
                 eventIdentifier: event.eventIdentifier
             )

@@ -1,17 +1,16 @@
-import EventKit
 import Foundation
 
 /// Abstracts CalendarService for dependency injection in CalendarActionController.
 /// Conforming CalendarService to this protocol enables unit testing without a live EKEventStore.
 protocol CalendarServiceProtocol: AnyObject {
     var isAuthorized: Bool { get }
-    var authorizationStatus: EKAuthorizationStatus { get }
+    var authorizationStatus: CalendarAuthorizationStatus { get }
     @discardableResult func requestAccess() async -> Bool
     func writableCalendars() -> [CalendarInfo]
     func fetchEvents(from start: Date, days: Int) -> String
-    func findEvents(matching title: String, windowDays: Int) -> [EKEvent]
-    func findConflicts(start: Date, end: Date, excludingIdentifier: String?) -> [EKEvent]
-    func events(in start: Date, end: Date) -> [EKEvent]
+    func findEvents(matching title: String, windowDays: Int) -> [CalendarEventInfo]
+    func findConflicts(start: Date, end: Date, excludingIdentifier: String?) -> [CalendarEventInfo]
+    func events(in start: Date, end: Date) -> [CalendarEventInfo]
     @discardableResult
     func createEvent(
         title: String,

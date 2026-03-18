@@ -264,12 +264,14 @@ final class CalendarActionControllerTests: XCTestCase {
 
     // MARK: - Helpers
 
-    private func makeEvent(title: String) -> EKEvent {
-        let store = EKEventStore()
-        let event = EKEvent(eventStore: store)
-        event.title = title
-        event.startDate = Date(timeIntervalSinceNow: 3600)
-        event.endDate   = Date(timeIntervalSinceNow: 7200)
-        return event
+    private func makeEvent(title: String) -> CalendarEventInfo {
+        CalendarEventInfo(
+            eventIdentifier: "mock-\(title)",
+            title: title,
+            startDate: Date(timeIntervalSinceNow: 3600),
+            endDate: Date(timeIntervalSinceNow: 7200),
+            isAllDay: false,
+            calendarTitle: "Test Calendar"
+        )
     }
 }

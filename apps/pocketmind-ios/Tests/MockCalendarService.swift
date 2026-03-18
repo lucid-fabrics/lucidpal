@@ -1,4 +1,3 @@
-import EventKit
 import Foundation
 @testable import PocketMind
 
@@ -7,10 +6,10 @@ import Foundation
 @MainActor
 final class MockCalendarService: CalendarServiceProtocol {
     var isAuthorized: Bool = true
-    var authorizationStatus: EKAuthorizationStatus = .authorized
+    var authorizationStatus: CalendarAuthorizationStatus = .fullAccess
     var requestAccessResult: Bool = true
-    var stubbedEvents: [EKEvent] = []
-    var stubbedConflicts: [EKEvent] = []
+    var stubbedEvents: [CalendarEventInfo] = []
+    var stubbedConflicts: [CalendarEventInfo] = []
     var stubbedFetchEvents: String = ""
     var createdEvents: [(title: String, start: Date, end: Date, isAllDay: Bool)] = []
     var deletedIdentifiers: [String] = []
@@ -20,7 +19,7 @@ final class MockCalendarService: CalendarServiceProtocol {
 
     func requestAccess() async -> Bool {
         isAuthorized = requestAccessResult
-        authorizationStatus = requestAccessResult ? .authorized : .denied
+        authorizationStatus = requestAccessResult ? .fullAccess : .denied
         return requestAccessResult
     }
 
@@ -32,15 +31,15 @@ final class MockCalendarService: CalendarServiceProtocol {
         stubbedFetchEvents
     }
 
-    func findEvents(matching title: String, windowDays: Int) -> [EKEvent] {
+    func findEvents(matching title: String, windowDays: Int) -> [CalendarEventInfo] {
         stubbedEvents
     }
 
-    func findConflicts(start: Date, end: Date, excludingIdentifier: String?) -> [EKEvent] {
+    func findConflicts(start: Date, end: Date, excludingIdentifier: String?) -> [CalendarEventInfo] {
         stubbedConflicts
     }
 
-    func events(in start: Date, end: Date) -> [EKEvent] {
+    func events(in start: Date, end: Date) -> [CalendarEventInfo] {
         stubbedEvents
     }
 
