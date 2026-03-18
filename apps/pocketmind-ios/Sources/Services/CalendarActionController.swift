@@ -11,10 +11,10 @@ struct CalendarActionPayload: Decodable {
 
     // Optional — small models often omit it; default to .create
     let action: ActionType?
-    let title: String          // new title (or title to create)
-    let search: String?        // existing event title to find (update only)
-    let start: Date
-    let end: Date
+    let title: String?         // required for create/update; omitted for delete
+    let search: String?        // existing event title to find (update/delete)
+    let start: Date?           // required for create/update; omitted for delete
+    let end: Date?             // required for create/update; omitted for delete
     let location: String?
     let notes: String?
 }
@@ -108,6 +108,9 @@ final class CalendarActionController {
         guard let searchTitle = p.search, !searchTitle.isEmpty else {
             return .failure("⚠️ No search title provided for update.")
         }
+        guard let newTitle = p.title, let newStart = p.start, let newEnd = p.end else {
+            return .failure("⚠️ Update requires title, start, and end.")
+        }
         do {
             // Search a 60-day window centred on today rather than on the LLM-emitted date.
             // This avoids missing the original event when the user asks to rename/move it
@@ -119,14 +122,14 @@ final class CalendarActionController {
             guard let event = events.first(where: { ($0.title ?? "").localizedCaseInsensitiveContains(searchTitle) }) else {
                 return .failure("⚠️ Could not find event matching \"\(searchTitle)\".")
             }
-            event.title = p.title
-            event.startDate = p.start
-            event.endDate = p.end
+            event.title = newTitle
+            event.startDate = newStart
+            event.endDate = newEnd
             if let loc = p.location, !loc.isEmpty { event.location = loc }
             if let notes = p.notes, !notes.isEmpty { event.notes = notes }
             try calendarService.store.save(event, span: .thisEvent)
-            let preview = CalendarEventPreview(title: p.title, start: p.start, end: p.end, calendarName: event.calendar?.title)
-            return .success("Updated \"\(searchTitle)\" → \"\(p.title)\".", preview)
+            let preview = CalendarEventPreview(title: newTitle, start: newStart, end: newEnd, calendarName: event.calendar?.title)
+            return .success("Updated \"\(searchTitle)\" → \"\(newTitle)\".", preview)
         } catch {
             return .failure("⚠️ Couldn't update event: \(error.localizedDescription)")
         }
@@ -155,22 +158,25 @@ final class CalendarActionController {
     }
 
     private func createEvent(_ p: CalendarActionPayload) async -> CalendarActionResult {
+        guard let title = p.title, let start = p.start, let end = p.end else {
+            return .failure("⚠️ Create requires title, start, and end.")
+        }
         do {
             let calendarName = calendarService.store.defaultCalendarForNewEvents?.title
             try calendarService.createEvent(
-                title: p.title,
-                start: p.start,
-                end: p.end,
+                title: title,
+                start: start,
+                end: end,
                 location: p.location,
                 notes: p.notes
             )
             let preview = CalendarEventPreview(
-                title: p.title,
-                start: p.start,
-                end: p.end,
+                title: title,
+                start: start,
+                end: end,
                 calendarName: calendarName
             )
-            return .success("Added \"\(p.title)\" to your calendar.", preview)
+            return .success("Added \"\(title)\" to your calendar.", preview)
         } catch {
             return .failure("⚠️ Couldn't save event: \(error.localizedDescription)")
         }
