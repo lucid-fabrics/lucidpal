@@ -12,6 +12,9 @@ final class SpeechService: ObservableObject {
     private var audioEngine = AVAudioEngine()
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
+    private var silenceTimer: Timer?
+
+    private static let silenceTimeoutSeconds: TimeInterval = 30
 
     func requestAuthorization() async {
         let micGranted = await Self.askMicrophonePermission()
@@ -72,6 +75,11 @@ final class SpeechService: ObservableObject {
         transcript = ""
         isRecording = true
 
+        // Safety net: if isFinal never fires (e.g. silence, locale unsupported), auto-stop.
+        silenceTimer = Timer.scheduledTimer(withTimeInterval: Self.silenceTimeoutSeconds, repeats: false) { [weak self] _ in
+            Task { @MainActor in self?.stopRecording() }
+        }
+
         task = recognizer.recognitionTask(with: request!) { [weak self] result, error in
             guard let self else { return }
             if let result {
@@ -87,6 +95,8 @@ final class SpeechService: ObservableObject {
 
     func stopRecording() {
         guard isRecording else { return }
+        silenceTimer?.invalidate()
+        silenceTimer = nil
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
         request?.endAudio()

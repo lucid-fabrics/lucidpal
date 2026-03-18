@@ -40,7 +40,7 @@ enum CalendarActionResult {
 /// Add new action types here without touching ChatViewModel.
 @MainActor
 final class CalendarActionController {
-    private let calendarService: CalendarService
+    private let calendarService: any CalendarServiceProtocol
     private let settings: AppSettings
 
     // Date formats the LLM might generate — tried in order
@@ -85,7 +85,7 @@ final class CalendarActionController {
         return d
     }()
 
-    init(calendarService: CalendarService, settings: AppSettings) {
+    init(calendarService: any CalendarServiceProtocol, settings: AppSettings) {
         self.calendarService = calendarService
         self.settings = settings
     }
@@ -141,6 +141,7 @@ final class CalendarActionController {
         if let n = p.notes, !n.isEmpty    { pending.notes = n }
         if let m = p.reminderMinutes      { pending.reminderMinutes = m }
         if let a = p.isAllDay             { pending.isAllDay = a }
+        if let r = p.recurrence           { pending.recurrence = r }
 
         var preview = CalendarEventPreview(
             title: event.title ?? searchTitle,

@@ -9,6 +9,7 @@ struct PendingCalendarUpdate: Codable, Equatable, Sendable {
     var notes: String?
     var reminderMinutes: Int?
     var isAllDay: Bool?
+    var recurrence: String?
 }
 
 struct CalendarEventPreview: Codable, Equatable, Sendable {

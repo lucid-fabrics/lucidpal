@@ -162,6 +162,16 @@ final class CalendarService {
             event.addAlarm(EKAlarm(relativeOffset: -TimeInterval(m * 60)))
         }
         if let a = update.isAllDay { event.isAllDay = a }
+        if let recurrence = update.recurrence {
+            let freq: EKRecurrenceFrequency
+            switch recurrence.lowercased() {
+            case "daily":   freq = .daily
+            case "weekly":  freq = .weekly
+            case "monthly": freq = .monthly
+            default:        freq = .yearly
+            }
+            event.recurrenceRules = [EKRecurrenceRule(recurrenceWith: freq, interval: 1, end: nil)]
+        }
 
         try store.save(event, span: .thisEvent)
         return datesChanged && !titleChanged ? .rescheduled : .updated

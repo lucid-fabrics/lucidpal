@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 enum DownloadState: Equatable, Sendable {
     case idle
@@ -32,8 +33,12 @@ final class ModelDownloader: NSObject {
 
         destinationURL = model.localURL
 
-        let config = URLSessionConfiguration.default
-        config.allowsCellularAccess = false  // WiFi-only; expose as user toggle in v2
+        // Background session: download continues even when the app is suspended.
+        // The same identifier is used across launches so the system can reconnect.
+        let config = URLSessionConfiguration.background(withIdentifier: "app.pocketmind.model-download")
+        config.allowsCellularAccess = false
+        config.isDiscretionary = false       // User-initiated — don't defer to low-power windows
+        config.sessionSendsLaunchEvents = true
         let session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
         self.session = session
 
@@ -139,6 +144,17 @@ extension ModelDownloader: URLSessionDownloadDelegate {
         let progress = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
         Task { @MainActor [weak self] in
             self?.state = .downloading(progress: progress)
+        }
+    }
+
+    /// Called after all background-session events have been delivered.
+    /// Calls the stored completion handler so the OS knows we're done.
+    nonisolated func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
+        Task { @MainActor in
+            if let delegate = UIApplication.shared.delegate as? AppDelegate {
+                delegate.backgroundSessionCompletionHandler?()
+                delegate.backgroundSessionCompletionHandler = nil
+            }
         }
     }
 
