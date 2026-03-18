@@ -10,9 +10,13 @@ final class AppSettingsTests: XCTestCase {
         settings = AppSettings()
     }
 
+    private static let allKeys = [
+        "calendarAccessEnabled", "selectedModelID", "hasCompletedOnboarding",
+        "thinkingEnabled", "defaultCalendarIdentifier", "speechAutoSendEnabled",
+    ]
+
     override func tearDown() {
-        // Remove keys written during tests to avoid polluting UserDefaults.standard
-        UserDefaults.standard.removeObject(forKey: "selectedModelID")
+        for key in Self.allKeys { UserDefaults.standard.removeObject(forKey: key) }
         super.tearDown()
     }
 
@@ -33,5 +37,32 @@ final class AppSettingsTests: XCTestCase {
 
     func testDeviceRAMGBIsPositive() {
         XCTAssertGreaterThan(settings.deviceRAMGB, 0)
+    }
+
+    // MARK: - Default values
+
+    func testDefaultCalendarAccessEnabledIsFalse() {
+        UserDefaults.standard.removeObject(forKey: "calendarAccessEnabled")
+        XCTAssertFalse(AppSettings().calendarAccessEnabled)
+    }
+
+    func testDefaultThinkingEnabledIsTrue() {
+        UserDefaults.standard.removeObject(forKey: "thinkingEnabled")
+        XCTAssertTrue(AppSettings().thinkingEnabled)
+    }
+
+    func testDefaultSpeechAutoSendEnabledIsTrue() {
+        UserDefaults.standard.removeObject(forKey: "speechAutoSendEnabled")
+        XCTAssertTrue(AppSettings().speechAutoSendEnabled)
+    }
+
+    func testDefaultHasCompletedOnboardingIsFalse() {
+        UserDefaults.standard.removeObject(forKey: "hasCompletedOnboarding")
+        XCTAssertFalse(AppSettings().hasCompletedOnboarding)
+    }
+
+    func testDefaultCalendarIdentifierIsEmpty() {
+        UserDefaults.standard.removeObject(forKey: "defaultCalendarIdentifier")
+        XCTAssertEqual(AppSettings().defaultCalendarIdentifier, "")
     }
 }

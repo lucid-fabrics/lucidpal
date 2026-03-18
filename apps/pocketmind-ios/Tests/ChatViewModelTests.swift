@@ -236,6 +236,30 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.messages.first?.calendarEventPreviews[1].state, .deletionCancelled)
     }
 
+    // MARK: - flushPersistence / cancelGeneration / handleSiriQuery
+
+    func testFlushPersistenceSavesMessages() {
+        let history = MockChatHistoryManager()
+        let vm = ChatViewModel(
+            llmService: llm, calendarService: mock,
+            calendarActionController: controller, settings: settings,
+            speechService: MockSpeechService(), historyManager: history
+        )
+        vm.messages = [ChatMessage(role: .user, content: "test")]
+        vm.flushPersistence()
+        XCTAssertTrue(history.saveCalled)
+    }
+
+    func testCancelGenerationCallsLLMService() {
+        viewModel.cancelGeneration()
+        XCTAssertTrue(llm.cancelCalled)
+    }
+
+    func testHandleSiriQuerySetsInputText() {
+        viewModel.handleSiriQuery("What's on my calendar?")
+        XCTAssertEqual(viewModel.inputText, "What's on my calendar?")
+    }
+
     // MARK: - sendMessage
 
     private func makeLoadedViewModel(tokens: [String] = []) -> (ChatViewModel, MockLLMService, MockSpeechService) {
