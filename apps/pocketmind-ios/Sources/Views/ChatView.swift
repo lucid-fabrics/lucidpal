@@ -56,6 +56,18 @@ struct ChatView: View {
                             },
                             onUndoDeletion: { previewID in
                                 Task { await viewModel.undoDeletion(messageID: message.id, previewID: previewID) }
+                            },
+                            onConfirmUpdate: { previewID in
+                                Task { await viewModel.confirmUpdate(messageID: message.id, previewID: previewID) }
+                            },
+                            onCancelUpdate: { previewID in
+                                viewModel.cancelUpdate(messageID: message.id, previewID: previewID)
+                            },
+                            onConfirmAllDeletions: {
+                                Task { await viewModel.confirmAllDeletions(messageID: message.id) }
+                            },
+                            onCancelAllDeletions: {
+                                viewModel.cancelAllDeletions(messageID: message.id)
                             }
                         )
                         .id(message.id)

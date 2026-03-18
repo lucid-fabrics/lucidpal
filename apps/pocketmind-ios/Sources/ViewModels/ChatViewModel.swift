@@ -1,4 +1,5 @@
 import Combine
+import EventKit
 import Foundation
 
 @MainActor
@@ -18,6 +19,12 @@ final class ChatViewModel: ObservableObject {
     private let calendarActionController: CalendarActionController
     private let settings: AppSettings
     private let speechService = SpeechService()
+    private var cancellables = Set<AnyCancellable>()
+
+    private static let historyURL: URL = {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("chat_history.json")
+    }()
 
     init(llmService: LLMService, calendarService: CalendarService, calendarActionController: CalendarActionController, settings: AppSettings) {
         self.llmService = llmService
@@ -25,6 +32,12 @@ final class ChatViewModel: ObservableObject {
         self.calendarActionController = calendarActionController
         self.settings = settings
         self.isModelLoaded = llmService.isLoaded
+
+        // Load persisted history
+        if let data = try? Data(contentsOf: Self.historyURL),
+           let saved = try? JSONDecoder().decode([ChatMessage].self, from: data) {
+            self.messages = saved
+        }
 
         // assign(to: &$property) uses weak self internally — no retain cycle.
         llmService.$isLoaded.assign(to: &$isModelLoaded)
@@ -36,6 +49,17 @@ final class ChatViewModel: ObservableObject {
         speechService.$transcript
             .filter { !$0.isEmpty }
             .assign(to: &$inputText)
+
+        // Persist messages on every change (debounced to avoid hammering disk)
+        $messages
+            .debounce(for: .seconds(1), scheduler: DispatchQueue.global(qos: .utility))
+            .sink { msgs in
+                let filtered = msgs.filter { $0.role != .system }
+                if let data = try? JSONEncoder().encode(filtered) {
+                    try? data.write(to: Self.historyURL, options: .atomic)
+                }
+            }
+            .store(in: &cancellables)
 
         // Request speech permissions on launch
         Task { await speechService.requestAuthorization() }
@@ -169,6 +193,71 @@ final class ChatViewModel: ObservableObject {
         messages[msgIdx].calendarEventPreviews[previewIdx].state = .deletionCancelled
     }
 
+    func confirmAllDeletions(messageID: UUID) async {
+        guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }) else { return }
+        let indices = messages[msgIdx].calendarEventPreviews.indices.filter {
+            messages[msgIdx].calendarEventPreviews[$0].state == .pendingDeletion
+        }
+        for idx in indices {
+            guard let identifier = messages[msgIdx].calendarEventPreviews[idx].eventIdentifier else { continue }
+            do {
+                try calendarService.deleteEvent(identifier: identifier)
+                messages[msgIdx].calendarEventPreviews[idx].state = .deleted
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    func cancelAllDeletions(messageID: UUID) {
+        guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }) else { return }
+        for idx in messages[msgIdx].calendarEventPreviews.indices {
+            if messages[msgIdx].calendarEventPreviews[idx].state == .pendingDeletion {
+                messages[msgIdx].calendarEventPreviews[idx].state = .deletionCancelled
+            }
+        }
+    }
+
+    func confirmUpdate(messageID: UUID, previewID: UUID) async {
+        guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }),
+              let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID }),
+              let identifier = messages[msgIdx].calendarEventPreviews[previewIdx].eventIdentifier,
+              let pending = messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate
+        else { return }
+        do {
+            guard let event = calendarService.store.event(withIdentifier: identifier) else {
+                errorMessage = "Event not found."; return
+            }
+            if let t = pending.title    { event.title = t }
+            if let s = pending.start    { event.startDate = s }
+            if let e = pending.end      { event.endDate = e }
+            if let l = pending.location, !l.isEmpty { event.location = l }
+            if let n = pending.notes, !n.isEmpty    { event.notes = n }
+            if let m = pending.reminderMinutes {
+                event.alarms?.forEach { event.removeAlarm($0) }
+                event.addAlarm(EKAlarm(relativeOffset: -TimeInterval(m * 60)))
+            }
+            if let a = pending.isAllDay { event.isAllDay = a }
+            try calendarService.store.save(event, span: .thisEvent)
+
+            let titleChanged = pending.title != nil
+            let datesChanged = pending.start != nil || pending.end != nil
+            let newState: CalendarEventPreview.PreviewState = datesChanged && !titleChanged ? .rescheduled : .updated
+            messages[msgIdx].calendarEventPreviews[previewIdx].state = newState
+            messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func cancelUpdate(messageID: UUID, previewID: UUID) {
+        guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }),
+              let previewIdx = messages[msgIdx].calendarEventPreviews.firstIndex(where: { $0.id == previewID })
+        else { return }
+        messages[msgIdx].calendarEventPreviews[previewIdx].state = .updateCancelled
+        messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate = nil
+    }
+
     /// Receives a query from Siri and sends it as if the user typed it.
     func handleSiriQuery(_ text: String) {
         inputText = text
@@ -178,6 +267,7 @@ final class ChatViewModel: ObservableObject {
     func clearHistory() {
         llmService.cancelGeneration()
         messages = []
+        try? FileManager.default.removeItem(at: Self.historyURL)
     }
 
     // MARK: - Calendar action dispatch
@@ -209,6 +299,8 @@ final class ChatViewModel: ObservableObject {
             case .bulkPending(let pending):
                 replacement = ""
                 previews.append(contentsOf: pending)
+            case .queryResult(let answer):
+                replacement = answer
             case .failure(let msg):
                 replacement = msg
             }
@@ -230,10 +322,12 @@ final class ChatViewModel: ObservableObject {
             When the user wants to create, update, or delete an event, you MUST output a [CALENDAR_ACTION:...] block. The block is mandatory — without it the action does not execute.
 
             Block formats:
-            Create:  [CALENDAR_ACTION:{"action":"create","title":"TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":"","reminderMinutes":15}]
-            Update:  [CALENDAR_ACTION:{"action":"update","search":"CURRENT TITLE","title":"NEW TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":""}]
-            Delete one: [CALENDAR_ACTION:{"action":"delete","search":"EXACT EVENT TITLE"}]
+            Create:       [CALENDAR_ACTION:{"action":"create","title":"TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":"","reminderMinutes":15}]
+            Create all-day: [CALENDAR_ACTION:{"action":"create","title":"TITLE","start":"YYYY-MM-DDT00:00:00","end":"YYYY-MM-DDT00:00:00","isAllDay":true}]
+            Update:       [CALENDAR_ACTION:{"action":"update","search":"CURRENT TITLE","title":"NEW TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":"","reminderMinutes":15}]
+            Delete one:   [CALENDAR_ACTION:{"action":"delete","search":"EXACT EVENT TITLE"}]
             Delete range: [CALENDAR_ACTION:{"action":"delete","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS"}]
+            Query free slots: [CALENDAR_ACTION:{"action":"query","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","durationMinutes":60}]
 
             Output format — block first, one short sentence after:
             [CALENDAR_ACTION:{...}]
@@ -261,10 +355,41 @@ final class ChatViewModel: ObservableObject {
             You: [CALENDAR_ACTION:{"action":"update","search":"Dentist","start":"2026-03-20T14:00:00","end":"2026-03-20T15:00:00"}]
             Rescheduled.
 
+            Example — rename an event:
+            User: rename "Team Sync" to "Weekly Review"
+            You: [CALENDAR_ACTION:{"action":"update","search":"Team Sync","title":"Weekly Review"}]
+            Renamed.
+
             Example — add notes or location to existing event (omit title/start/end if not changing them):
             User: add Zoom link to my standup
             You: [CALENDAR_ACTION:{"action":"update","search":"Standup","notes":"https://zoom.us/j/123456"}]
             Notes added.
+
+            Example — add reminder to existing event:
+            User: remind me 1 hour before my dentist appointment
+            You: [CALENDAR_ACTION:{"action":"update","search":"Dentist","reminderMinutes":60}]
+            Reminder set.
+
+            Example — two actions in one message:
+            User: delete dentist and add gym tomorrow at 7am
+            You: [CALENDAR_ACTION:{"action":"delete","search":"Dentist"}]
+            [CALENDAR_ACTION:{"action":"create","title":"Gym","start":"2026-03-18T07:00:00","end":"2026-03-18T08:00:00"}]
+            Done — dentist queued for deletion, gym added.
+
+            Example — all-day event:
+            User: add a holiday on April 1
+            You: [CALENDAR_ACTION:{"action":"create","title":"Holiday","start":"2026-04-01T00:00:00","end":"2026-04-01T00:00:00","isAllDay":true}]
+            Added as an all-day event.
+
+            Example — recurring event:
+            User: add a weekly team standup every Monday at 9am
+            You: [CALENDAR_ACTION:{"action":"create","title":"Team Standup","start":"2026-03-23T09:00:00","end":"2026-03-23T09:30:00","recurrence":"weekly"}]
+            Added as a weekly recurring event.
+
+            Example — find free slots:
+            User: find a free 2-hour slot this week
+            You: [CALENDAR_ACTION:{"action":"query","start":"2026-03-17T00:00:00","end":"2026-03-21T23:59:59","durationMinutes":120}]
+            Here are the available windows.
 
             Example — delete all events in a date range:
             User: clear my schedule for next Monday
@@ -275,7 +400,10 @@ final class ChatViewModel: ObservableObject {
             - Dates: ISO8601, no timezone. Default duration: 1 hour.
             - For update: only include the fields you want to change. Omit title if not renaming. Omit start/end if not rescheduling.
             - Delete: search must match the exact event title from the calendar list. Do NOT say it was deleted — deletion requires the user to tap the confirm button.
-            - reminderMinutes: only include when user explicitly asks for a reminder. Omit otherwise.
+            - reminderMinutes: include on create or update when user explicitly asks for a reminder. Omit otherwise.
+            - isAllDay: include only for all-day events (holidays, birthdays, etc). Omit start/end time precision.
+            - recurrence: "daily" | "weekly" | "monthly" | "yearly". Only include when user asks for a repeating event.
+            - recurrenceEnd: ISO8601 date when recurrence stops. Omit for indefinite.
             - NEVER skip the block. NEVER output text-only when an action is requested.
             - NEVER tell the user to make changes manually.
             """
