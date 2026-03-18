@@ -72,7 +72,7 @@ actor LlamaActor {
                 userInfo: [NSLocalizedDescriptionKey: "llama_model_load_from_file returned nil — file may be unsupported or corrupted."]))
         }
 
-        let nThreads = Int32(max(1, min(LLMConstants.maxThreadCount, ProcessInfo.processInfo.processorCount - 2)))
+        let nThreads = max(1, min(LLMConstants.maxThreadCount, Int32(ProcessInfo.processInfo.processorCount - 2)))
         // Use 8 K context on devices with ≥6 GB RAM (4B model tier); 4 K otherwise.
         let ramGB = Int(ProcessInfo.processInfo.physicalMemory / 1_073_741_824)
         var cp = llama_context_default_params()
@@ -238,8 +238,11 @@ actor LlamaActor {
 
 // MARK: - LLMService
 
+// ObservableObject intentionally omitted — LLMService is not observed directly
+// by any View. State is surfaced to ViewModels via the protocol's AnyPublisher
+// properties (isLoadedPublisher, isGeneratingPublisher, isLoadingPublisher).
 @MainActor
-final class LLMService: ObservableObject {
+final class LLMService {
     @Published private(set) var isLoaded    = false
     @Published private(set) var isLoading   = false
     @Published private(set) var isGenerating = false

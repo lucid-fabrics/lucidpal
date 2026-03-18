@@ -136,7 +136,7 @@ final class CalendarActionController: CalendarActionControllerProtocol {
         guard p.title != nil || p.start != nil || p.end != nil || p.location != nil || p.notes != nil || p.reminderMinutes != nil else {
             return .failure("(No fields to update were provided.)")
         }
-        let events = calendarService.findEvents(matching: searchTitle)
+        let events = calendarService.findEvents(matching: searchTitle, windowDays: 60)
         guard let event = events.first(where: { ($0.title ?? "").localizedCaseInsensitiveContains(searchTitle) }) else {
             return .failure("(Couldn't find an event called \"\(searchTitle)\" — please specify the exact name.)")
         }
@@ -168,7 +168,7 @@ final class CalendarActionController: CalendarActionControllerProtocol {
         guard let searchTitle = p.search, !searchTitle.isEmpty else {
             return .failure("(No event title provided for deletion.)")
         }
-        let events = calendarService.findEvents(matching: searchTitle)
+        let events = calendarService.findEvents(matching: searchTitle, windowDays: 60)
         let lower = searchTitle.lowercased()
 
         // 1. Exact substring match
@@ -205,7 +205,7 @@ final class CalendarActionController: CalendarActionControllerProtocol {
         }
         do {
             // Conflict check
-            let conflicts = calendarService.findConflicts(start: start, end: end)
+            let conflicts = calendarService.findConflicts(start: start, end: end, excludingIdentifier: nil)
             let conflictNote = conflicts.isEmpty ? "" :
                 " Note: overlaps with \(conflicts.map { "\"\($0.title ?? "event")\"" }.joined(separator: ", "))."
 

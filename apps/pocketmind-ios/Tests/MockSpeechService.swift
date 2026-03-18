@@ -12,14 +12,14 @@ final class MockSpeechService: SpeechServiceProtocol {
     private let isAuthorizedSubject  = CurrentValueSubject<Bool, Never>(true)
     private let transcriptSubject    = CurrentValueSubject<String, Never>("")
 
-    nonisolated var isRecordingPublisher: AnyPublisher<Bool, Never> {
-        MainActor.assumeIsolated { isRecordingSubject.eraseToAnyPublisher() }
+    var isRecordingPublisher: AnyPublisher<Bool, Never> {
+        isRecordingSubject.eraseToAnyPublisher()
     }
-    nonisolated var isAuthorizedPublisher: AnyPublisher<Bool, Never> {
-        MainActor.assumeIsolated { isAuthorizedSubject.eraseToAnyPublisher() }
+    var isAuthorizedPublisher: AnyPublisher<Bool, Never> {
+        isAuthorizedSubject.eraseToAnyPublisher()
     }
-    nonisolated var transcriptPublisher: AnyPublisher<String, Never> {
-        MainActor.assumeIsolated { transcriptSubject.eraseToAnyPublisher() }
+    var transcriptPublisher: AnyPublisher<String, Never> {
+        transcriptSubject.eraseToAnyPublisher()
     }
 
     var authorizationRequested = false

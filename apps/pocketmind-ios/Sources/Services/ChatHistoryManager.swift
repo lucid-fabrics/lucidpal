@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 protocol ChatHistoryManagerProtocol {
     func load() -> [ChatMessage]
     @discardableResult func save(_ messages: [ChatMessage]) -> Task<Void, Never>

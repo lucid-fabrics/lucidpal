@@ -2,6 +2,7 @@ import Foundation
 
 /// Abstracts CalendarService for dependency injection in CalendarActionController.
 /// Conforming CalendarService to this protocol enables unit testing without a live EKEventStore.
+@MainActor
 protocol CalendarServiceProtocol: AnyObject {
     var isAuthorized: Bool { get }
     var authorizationStatus: CalendarAuthorizationStatus { get }

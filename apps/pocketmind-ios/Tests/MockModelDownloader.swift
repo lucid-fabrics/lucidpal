@@ -8,8 +8,8 @@ final class MockModelDownloader: ModelDownloaderProtocol {
 
     private let stateSubject = CurrentValueSubject<DownloadState, Never>(.idle)
 
-    nonisolated var statePublisher: AnyPublisher<DownloadState, Never> {
-        MainActor.assumeIsolated { stateSubject.eraseToAnyPublisher() }
+    var statePublisher: AnyPublisher<DownloadState, Never> {
+        stateSubject.eraseToAnyPublisher()
     }
 
     var downloadCalled = false

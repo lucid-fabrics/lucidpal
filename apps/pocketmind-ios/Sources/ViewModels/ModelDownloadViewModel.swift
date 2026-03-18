@@ -19,7 +19,7 @@ final class ModelDownloadViewModel: ObservableObject {
     init(
         llmService: any LLMServiceProtocol,
         settings: AppSettings,
-        downloader: any ModelDownloaderProtocol = ModelDownloader()
+        downloader: any ModelDownloaderProtocol
     ) {
         self.llmService = llmService
         self.settings = settings
