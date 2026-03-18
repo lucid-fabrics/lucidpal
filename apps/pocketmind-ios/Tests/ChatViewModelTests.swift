@@ -342,6 +342,16 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertTrue(msg.contains("mic error"))
     }
 
+    // MARK: - sendMessage concurrency
+
+    func testSendMessageIsNoOpWhileAlreadyGenerating() async {
+        let (vm, llm, _) = makeLoadedViewModel(tokens: ["hi"])
+        llm.isGenerating = true   // simulate in-flight generation
+        vm.inputText = "second"
+        await vm.sendMessage()
+        XCTAssertTrue(vm.messages.isEmpty)
+    }
+
     // MARK: - sendMessage edge cases
 
     func testSendMessageEmptyTokenStreamLeavesBlankAssistantMessage() async {

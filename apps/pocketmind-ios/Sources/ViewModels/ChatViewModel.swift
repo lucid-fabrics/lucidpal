@@ -160,34 +160,7 @@ final class ChatViewModel: ObservableObject {
 
             for try await token in llmService.generate(systemPrompt: systemPrompt, messages: historyMessages, thinkingEnabled: showThinking) {
                 guard let idx = messages.firstIndex(where: { $0.id == assistantID }) else { break }
-                raw += token
-
-                if thinkDone {
-                    messages[idx].content += token
-                } else if raw.hasPrefix("<think>") {
-                    if let closeRange = raw.range(of: "</think>") {
-                        let thinkText = String(raw[raw.index(raw.startIndex, offsetBy: "<think>".count) ..< closeRange.lowerBound])
-                        let response  = String(raw[closeRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
-                        if showThinking {
-                            messages[idx].thinkingContent = thinkText.trimmingCharacters(in: .whitespacesAndNewlines)
-                        }
-                        messages[idx].isThinking = false
-                        messages[idx].content = response
-                        thinkDone = true
-                    } else {
-                        // Still inside <think>
-                        if showThinking {
-                            messages[idx].isThinking = true
-                            messages[idx].thinkingContent = String(raw.dropFirst("<think>".count))
-                        }
-                        // When thinking is off: buffer silently, show nothing
-                    }
-                } else if "<think>".hasPrefix(raw) {
-                    // Still buffering opening tag — don't display yet
-                } else {
-                    thinkDone = true
-                    messages[idx].content = raw
-                }
+                applyStreamToken(token, rawBuffer: &raw, thinkDone: &thinkDone, showThinking: showThinking, idx: idx)
             }
         } catch is CancellationError {
             // User cancelled — leave partial content visible
@@ -386,6 +359,43 @@ final class ChatViewModel: ObservableObject {
             result = result.replacingCharacters(in: fullRange, with: replacement)
         }
         return (result, previews)
+    }
+
+    /// Applies one streamed token to the assistant message at `idx`, handling
+    /// the <think>...</think> wrapper that Qwen3 emits before its response.
+    private func applyStreamToken(
+        _ token: String,
+        rawBuffer: inout String,
+        thinkDone: inout Bool,
+        showThinking: Bool,
+        idx: Int
+    ) {
+        rawBuffer += token
+        if thinkDone {
+            messages[idx].content += token
+        } else if rawBuffer.hasPrefix("<think>") {
+            if let closeRange = rawBuffer.range(of: "</think>") {
+                let thinkText = String(rawBuffer[rawBuffer.index(rawBuffer.startIndex, offsetBy: "<think>".count) ..< closeRange.lowerBound])
+                let response  = String(rawBuffer[closeRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+                if showThinking {
+                    messages[idx].thinkingContent = thinkText.trimmingCharacters(in: .whitespacesAndNewlines)
+                }
+                messages[idx].isThinking = false
+                messages[idx].content = response
+                thinkDone = true
+            } else {
+                // Still inside <think> — buffer or show depending on setting
+                if showThinking {
+                    messages[idx].isThinking = true
+                    messages[idx].thinkingContent = String(rawBuffer.dropFirst("<think>".count))
+                }
+            }
+        } else if "<think>".hasPrefix(rawBuffer) {
+            // Still buffering opening tag — don't display yet
+        } else {
+            thinkDone = true
+            messages[idx].content = rawBuffer
+        }
     }
 
     private func buildSystemPrompt() async -> String {
