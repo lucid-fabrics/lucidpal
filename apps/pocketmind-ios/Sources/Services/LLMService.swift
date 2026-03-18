@@ -256,23 +256,24 @@ final class LLMService: ObservableObject {
         isGenerating = true
 
         let prompt = Self.buildPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
-
-        nonisolated(unsafe) var capturedCont: AsyncThrowingStream<String, Error>.Continuation?
-        let stream = AsyncThrowingStream<String, Error> { capturedCont = $0 }
-        guard let cont = capturedCont else { return stream }
-
         let llamaRef = llama
-        let task = Task {
-            defer {
-                Task { @MainActor [weak self] in
-                    self?.isGenerating = false
-                    self?.currentTask  = nil
+
+        // AsyncThrowingStream closure runs synchronously on @MainActor (generate() is @MainActor-isolated),
+        // so MainActor.assumeIsolated is safe for assigning currentTask.
+        return AsyncThrowingStream { continuation in
+            let task = Task {
+                defer {
+                    Task { @MainActor [weak self] in
+                        self?.isGenerating = false
+                        self?.currentTask  = nil
+                    }
                 }
+                await llamaRef.generate(prompt: prompt, continuation: continuation)
             }
-            await llamaRef.generate(prompt: prompt, continuation: cont)
+            MainActor.assumeIsolated { [weak self] in self?.currentTask = task }
+            // Cancel inflight generation when caller drops the stream.
+            continuation.onTermination = { _ in task.cancel() }
         }
-        currentTask = task
-        return stream
     }
 
     // MARK: - Prompt builder (Qwen3 ChatML)
