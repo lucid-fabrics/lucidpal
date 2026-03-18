@@ -373,13 +373,17 @@ final class ChatViewModel: ObservableObject {
 
     private func buildSystemPrompt() async -> String {
         let today = formattedToday()
+        let calendarEnabled = settings.calendarAccessEnabled && calendarService.isAuthorized
         var parts: [String] = [
             """
-            You are PocketMind, an on-device AI assistant with direct read and write access to the user's iOS calendar.
+            You are PocketMind, an on-device AI assistant\(calendarEnabled ? " with direct read and write access to the user's iOS calendar" : "").
             Today is \(today).
             Be concise. Use plain text, no markdown.
             """,
-            """
+        ]
+
+        if calendarEnabled {
+            parts.append("""
             CALENDAR TOOL
             When the user wants to create, update, or delete an event, you MUST output a [CALENDAR_ACTION:...] block. The block is mandatory — without it the action does not execute.
 
@@ -468,10 +472,10 @@ final class ChatViewModel: ObservableObject {
             - recurrenceEnd: ISO8601 date when recurrence stops. Omit for indefinite.
             - NEVER skip the block. NEVER output text-only when an action is requested.
             - NEVER tell the user to make changes manually.
-            """
-        ]
+            """)
+        }
 
-        if settings.calendarAccessEnabled {
+        if calendarEnabled {
             let windowStart = Calendar.current.date(byAdding: .day, value: -2, to: .now) ?? .now
             let events = calendarService.fetchEvents(from: windowStart, days: 16)
             // Sync revocation: if OS denied access between the setting toggle and now, disable the toggle.
