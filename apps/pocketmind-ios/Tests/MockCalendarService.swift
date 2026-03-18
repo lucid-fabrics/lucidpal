@@ -9,9 +9,16 @@ final class MockCalendarService: CalendarServiceProtocol {
     var isAuthorized: Bool = true
     var stubbedEvents: [EKEvent] = []
     var stubbedConflicts: [EKEvent] = []
+    var stubbedFetchEvents: String = ""
     var createdEvents: [(title: String, start: Date, end: Date)] = []
     var deletedIdentifiers: [String] = []
     var appliedUpdates: [(PendingCalendarUpdate, String)] = []
+    var shouldThrowOnDelete = false
+    var shouldThrowOnApplyUpdate = false
+
+    func fetchEvents(from start: Date, days: Int) -> String {
+        stubbedFetchEvents
+    }
 
     func findEvents(matching title: String, windowDays: Int) -> [EKEvent] {
         stubbedEvents
@@ -43,10 +50,12 @@ final class MockCalendarService: CalendarServiceProtocol {
     }
 
     func deleteEvent(identifier: String) throws {
+        if shouldThrowOnDelete { throw CalendarError.eventNotFound }
         deletedIdentifiers.append(identifier)
     }
 
     func applyUpdate(_ update: PendingCalendarUpdate, to identifier: String) throws -> CalendarEventPreview.PreviewState {
+        if shouldThrowOnApplyUpdate { throw CalendarError.eventNotFound }
         appliedUpdates.append((update, identifier))
         let datesChanged = update.start != nil || update.end != nil
         let titleChanged = update.title != nil

@@ -15,7 +15,7 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isSpeechAvailable = false
 
     private let llmService: LLMService
-    private let calendarService: CalendarService
+    private let calendarService: any CalendarServiceProtocol
     private let calendarActionController: CalendarActionController
     private let settings: AppSettings
     private let speechService = SpeechService()
@@ -28,7 +28,7 @@ final class ChatViewModel: ObservableObject {
             .appendingPathComponent("chat_history.json")
     }()
 
-    init(llmService: LLMService, calendarService: CalendarService, calendarActionController: CalendarActionController, settings: AppSettings) {
+    init(llmService: LLMService, calendarService: any CalendarServiceProtocol, calendarActionController: CalendarActionController, settings: AppSettings) {
         self.llmService = llmService
         self.calendarService = calendarService
         self.calendarActionController = calendarActionController
@@ -219,9 +219,13 @@ final class ChatViewModel: ObservableObject {
                 title: preview.title,
                 start: preview.start,
                 end: preview.end,
+                location: nil,
+                notes: nil,
                 reminderMinutes: preview.reminderMinutes,
+                calendarIdentifier: nil,
                 isAllDay: preview.isAllDay,
-                recurrence: preview.recurrence
+                recurrence: preview.recurrence,
+                recurrenceEnd: nil
             )
             messages[msgIdx].calendarEventPreviews[previewIdx].state = .restored
             Self.notifySuccess()
