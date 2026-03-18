@@ -125,7 +125,7 @@ actor LlamaActor {
         nCur = batch.n_tokens
 
         // Generation loop
-        let maxNew: Int32 = 512
+        let maxNew: Int32 = 768
         while nCur - Int32(tokens.count) < maxNew {
             if Task.isCancelled { break }
 

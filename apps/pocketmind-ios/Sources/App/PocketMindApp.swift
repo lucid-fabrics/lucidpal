@@ -2,6 +2,8 @@ import SwiftUI
 
 @main
 struct PocketMindApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
 
     // MARK: - Services
 
