@@ -34,15 +34,34 @@ targets:
       path: Sources/App/PocketMind.entitlements
       properties: {}
 
+  PocketMindTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: Tests
+    settings:
+      base:
+        SWIFT_VERSION: "6.0"
+        PRODUCT_BUNDLE_IDENTIFIER: app.pocketmind.tests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: "KRPUAN3FFA"
+    dependencies:
+      - target: PocketMind
+
 schemes:
   PocketMind:
     build:
       targets:
         PocketMind: all
+        PocketMindTests: all
     run:
       config: Debug
     test:
       config: Debug
+      targets:
+        - PocketMindTests
     profile:
       config: Release
     analyze:

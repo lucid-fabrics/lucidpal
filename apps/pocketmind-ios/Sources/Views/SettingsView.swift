@@ -4,8 +4,7 @@ struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
 
-    // Force-unwrap safe: compile-time constant URL string is always valid.
-    private static let sourceURL = URL(string: "https://github.com/wassimmehanna/pocketmind")!
+    private static let sourceURL = URL(string: "https://github.com/wassimmehanna/pocketmind")
 
     var body: some View {
         NavigationStack {
@@ -43,6 +42,23 @@ struct SettingsView: View {
                     get: { viewModel.settings.calendarAccessEnabled },
                     set: { viewModel.settings.calendarAccessEnabled = $0 }
                 ))
+
+                let calendars = viewModel.availableCalendars
+                if !calendars.isEmpty {
+                    Picker("Default Calendar", selection: Binding(
+                        get: {
+                            viewModel.settings.defaultCalendarIdentifier.isEmpty
+                                ? nil
+                                : viewModel.settings.defaultCalendarIdentifier
+                        },
+                        set: { viewModel.setDefaultCalendar(id: $0) }
+                    )) {
+                        Text("System Default").tag(Optional<String>.none)
+                        ForEach(calendars) { cal in
+                            Text(cal.title).tag(Optional(cal.id))
+                        }
+                    }
+                }
             }
         } header: {
             Text("Calendar")
@@ -118,18 +134,32 @@ struct SettingsView: View {
             )) {
                 Label("Thinking Mode", systemImage: "brain")
             }
+            Toggle(isOn: Binding(
+                get: { viewModel.settings.speechAutoSendEnabled },
+                set: { viewModel.settings.speechAutoSendEnabled = $0 }
+            )) {
+                Label("Auto-send after speech", systemImage: "mic.badge.auto")
+            }
         } header: {
             Text("Inference")
         } footer: {
-            Text("When on, the model reasons before answering (slower but more accurate). Turn off for instant replies.")
+            Text("Thinking mode reasons before answering (slower but more accurate). Auto-send submits voice input automatically when speech recognition finishes.")
         }
     }
 
     private var aboutSection: some View {
         Section("About") {
-            LabeledContent("Version", value: "1.0.0")
+            LabeledContent("Version", value: Self.appVersion)
             LabeledContent("Inference", value: "On-device (llama.cpp)")
-            Link("Source Code", destination: Self.sourceURL)
+            if let url = Self.sourceURL {
+                Link("Source Code", destination: url)
+            }
         }
+    }
+
+    private static var appVersion: String {
+        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        return "\(v) (\(b))"
     }
 }

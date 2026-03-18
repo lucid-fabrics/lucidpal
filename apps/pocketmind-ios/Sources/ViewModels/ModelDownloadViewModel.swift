@@ -11,30 +11,56 @@ final class ModelDownloadViewModel: ObservableObject {
     @Published var loadError: String?
     @Published var deleteError: String?
 
-    let downloader: ModelDownloader
-    private let llmService: LLMService
+    let downloader: any ModelDownloaderProtocol
+    private let llmService: any LLMServiceProtocol
     let settings: AppSettings
+    private var cancellables = Set<AnyCancellable>()
 
-    init(llmService: LLMService, settings: AppSettings) {
+    init(
+        llmService: any LLMServiceProtocol,
+        settings: AppSettings,
+        downloader: any ModelDownloaderProtocol
+    ) {
         self.llmService = llmService
         self.settings = settings
-        self.downloader = ModelDownloader()
+        self.downloader = downloader
 
         let ram = settings.deviceRAMGB
         let models = ModelInfo.available(physicalRAMGB: ram)
         self.availableModels = models.isEmpty ? [.qwen3_1B7] : models
-        self.selectedModel = settings.selectedModel
+
+        // Pre-select the device-recommended model when nothing has been downloaded yet.
+        // If the user's saved model is already on disk, keep their choice.
+        let savedModel = settings.selectedModel
+        self.selectedModel = savedModel.isDownloaded
+            ? savedModel
+            : ModelInfo.recommended(physicalRAMGB: ram)
         self.isModelLoaded = llmService.isLoaded
 
         // assign(to: &$property) uses weak self internally — no retain cycle.
-        downloader.$state.assign(to: &$downloadState)
-        llmService.$isLoaded.assign(to: &$isModelLoaded)
-        llmService.$isLoading.assign(to: &$isModelLoading)
+        downloader.statePublisher.assign(to: &$downloadState)
+        llmService.isLoadedPublisher
+            .sink { [weak self] in self?.isModelLoaded = $0 }
+            .store(in: &cancellables)
+        llmService.isLoadingPublisher
+            .sink { [weak self] in self?.isModelLoading = $0 }
+            .store(in: &cancellables)
+
+        // Auto-load immediately when download finishes — removes the need for a "Load Model" tap.
+        downloader.statePublisher
+            .compactMap { state -> URL? in
+                if case .completed(let url) = state { return url }
+                return nil
+            }
+            .sink { [weak self] _ in
+                Task { [weak self] in await self?.loadModel() }
+            }
+            .store(in: &cancellables)
 
         // Auto-load the previously selected model on launch if already on disk.
         // Task is enqueued after init completes — self is fully initialized when body runs.
         if settings.selectedModel.isDownloaded && !llmService.isLoaded {
-            Task { await self.loadModel() }
+            Task { [weak self] in await self?.loadModel() }
         }
     }
 

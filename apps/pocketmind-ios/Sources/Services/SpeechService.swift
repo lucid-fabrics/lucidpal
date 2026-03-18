@@ -3,7 +3,7 @@ import Foundation
 import Speech
 
 @MainActor
-final class SpeechService: ObservableObject {
+final class SpeechService {
     @Published private(set) var isRecording = false
     @Published private(set) var isAuthorized = false
     @Published private(set) var transcript = ""
@@ -12,6 +12,9 @@ final class SpeechService: ObservableObject {
     private var audioEngine = AVAudioEngine()
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
+    private var silenceTimer: Timer?
+
+    private static let silenceTimeoutSeconds: TimeInterval = 30
 
     func requestAuthorization() async {
         let micGranted = await Self.askMicrophonePermission()
@@ -72,21 +75,29 @@ final class SpeechService: ObservableObject {
         transcript = ""
         isRecording = true
 
-        task = recognizer.recognitionTask(with: req!) { [weak self] result, error in
-            guard let self else { return }
+        // Safety net: if isFinal never fires (e.g. silence, locale unsupported), auto-stop.
+        silenceTimer = Timer.scheduledTimer(withTimeInterval: Self.silenceTimeoutSeconds, repeats: false) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.stopRecording() }
+        }
+
+        guard let request else { return }
+        task = recognizer.recognitionTask(with: request) { [weak self] result, error in
+            guard self != nil else { return }
             if let result {
-                Task { @MainActor in
-                    self.transcript = result.bestTranscription.formattedString
+                Task { @MainActor [weak self] in
+                    self?.transcript = result.bestTranscription.formattedString
                 }
             }
             if error != nil || result?.isFinal == true {
-                Task { @MainActor in self.stopRecording() }
+                Task { @MainActor [weak self] in self?.stopRecording() }
             }
         }
     }
 
     func stopRecording() {
         guard isRecording else { return }
+        silenceTimer?.invalidate()
+        silenceTimer = nil
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
         request?.endAudio()
@@ -94,6 +105,10 @@ final class SpeechService: ObservableObject {
         task?.finish()
         task = nil
         isRecording = false
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        do {
+            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("[SpeechService] Failed to deactivate audio session: \(error)")
+        }
     }
 }

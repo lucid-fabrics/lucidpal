@@ -1,16 +1,15 @@
 import Combine
-import EventKit
 import Foundation
 
 @MainActor
 final class SettingsViewModel: ObservableObject {
-    @Published var calendarAuthStatus: EKAuthorizationStatus = .notDetermined
+    @Published var calendarAuthStatus: CalendarAuthorizationStatus = .notDetermined
     @Published var availableModels: [ModelInfo] = []
 
     let settings: AppSettings
-    let calendarService: CalendarService
+    let calendarService: any CalendarServiceProtocol
 
-    init(settings: AppSettings, calendarService: CalendarService) {
+    init(settings: AppSettings, calendarService: any CalendarServiceProtocol) {
         self.settings = settings
         self.calendarService = calendarService
         self.calendarAuthStatus = calendarService.authorizationStatus
@@ -23,6 +22,14 @@ final class SettingsViewModel: ObservableObject {
 
     var isCalendarAuthorized: Bool {
         calendarService.isAuthorized
+    }
+
+    var availableCalendars: [CalendarInfo] {
+        calendarService.writableCalendars()
+    }
+
+    func setDefaultCalendar(id: String?) {
+        settings.defaultCalendarIdentifier = id ?? ""
     }
 
     func requestCalendarAccess() async {
