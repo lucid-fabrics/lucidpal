@@ -6,7 +6,7 @@ final class ChatViewModelTests: XCTestCase {
     var mock: MockCalendarService!
     var settings: AppSettings!
     var controller: CalendarActionController!
-    var llm: LLMService!
+    var llm: MockLLMService!
     var viewModel: ChatViewModel!
 
     override func setUp() {
@@ -14,7 +14,7 @@ final class ChatViewModelTests: XCTestCase {
         mock = MockCalendarService()
         settings = AppSettings()
         controller = CalendarActionController(calendarService: mock, settings: settings)
-        llm = LLMService()
+        llm = MockLLMService()
         viewModel = ChatViewModel(
             llmService: llm,
             calendarService: mock,

@@ -9,6 +9,27 @@ import llama
 /// C pointer properties are marked `nonisolated(unsafe)` so `deinit` (which is
 /// nonisolated in Swift 6) can free them. All *writes* happen exclusively from
 /// actor-isolated methods, so there is no concurrent access in practice.
+// MARK: - Constants
+
+private enum LLMConstants {
+    /// Token capacity for the llama batch (matches max context size).
+    static let batchCapacity: Int32 = 4096
+    /// Context size for devices with < 6 GB RAM.
+    static let smallContextSize: UInt32 = 4096
+    /// Context size for devices with ≥ 6 GB RAM (4B model tier).
+    static let largeContextSize: UInt32 = 8192
+    /// RAM threshold (GB) for selecting the larger context window.
+    static let largeContextRAMThresholdGB = 6
+    /// Maximum thread count offered to llama.cpp.
+    static let maxThreadCount: Int32 = 8
+    /// Tokens reserved for generation — subtracted from context to size the prompt budget.
+    static let generationReserveTokens = 512
+    /// Maximum tokens to generate per response.
+    static let maxNewTokens: Int32 = 768
+    /// Sampler temperature: lower = more deterministic, fewer hallucinated fields.
+    static let samplerTemperature: Float = 0.35
+}
+
 actor LlamaActor {
     nonisolated(unsafe) private var model:   OpaquePointer?
     nonisolated(unsafe) private var ctx:     OpaquePointer?
@@ -23,7 +44,7 @@ actor LlamaActor {
 
     init() {
         llama_backend_init()
-        batch = llama_batch_init(4096, 0, 1)
+        batch = llama_batch_init(LLMConstants.batchCapacity, 0, 1)
     }
 
     deinit {
@@ -49,11 +70,11 @@ actor LlamaActor {
                 userInfo: [NSLocalizedDescriptionKey: "llama_model_load_from_file returned nil — file may be unsupported or corrupted."]))
         }
 
-        let nThreads = Int32(max(1, min(8, ProcessInfo.processInfo.processorCount - 2)))
+        let nThreads = Int32(max(1, min(LLMConstants.maxThreadCount, ProcessInfo.processInfo.processorCount - 2)))
         // Use 8 K context on devices with ≥6 GB RAM (4B model tier); 4 K otherwise.
         let ramGB = Int(ProcessInfo.processInfo.physicalMemory / 1_073_741_824)
         var cp = llama_context_default_params()
-        cp.n_ctx           = ramGB >= 6 ? 8192 : 4096
+        cp.n_ctx           = ramGB >= LLMConstants.largeContextRAMThresholdGB ? LLMConstants.largeContextSize : LLMConstants.smallContextSize
         cp.n_threads       = nThreads
         cp.n_threads_batch = nThreads
 
@@ -72,7 +93,7 @@ actor LlamaActor {
         let s = llama_sampler_chain_init(sparams)
         // Lower temperature for a calendar assistant: reduces hallucinated JSON fields
         // and date/time errors. 0.35 keeps variety in prose while keeping actions precise.
-        llama_sampler_chain_add(s, llama_sampler_init_temp(0.35))
+        llama_sampler_chain_add(s, llama_sampler_init_temp(LLMConstants.samplerTemperature))
         llama_sampler_chain_add(s, llama_sampler_init_dist(UInt32.random(in: 0...UInt32.max)))
         sampler = s
     }
@@ -100,8 +121,7 @@ actor LlamaActor {
         }
 
         // Guard against context overflow — truncate from the front, keeping the most recent tokens.
-        // Reserve 512 for new generation; ctx was created with n_ctx=4096.
-        let maxPromptTokens = 4096 - 512
+        let maxPromptTokens = Int(LLMConstants.smallContextSize) - LLMConstants.generationReserveTokens
         if tokens.count > maxPromptTokens {
             tokens = Array(tokens.suffix(maxPromptTokens))
         }
@@ -125,7 +145,7 @@ actor LlamaActor {
         nCur = batch.n_tokens
 
         // Generation loop
-        let maxNew: Int32 = 768
+        let maxNew: Int32 = LLMConstants.maxNewTokens
         while nCur - Int32(tokens.count) < maxNew {
             if Task.isCancelled { break }
 

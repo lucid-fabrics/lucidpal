@@ -2,6 +2,21 @@ import Combine
 import Foundation
 import UIKit
 
+// MARK: - Constants
+
+private enum ChatConstants {
+    /// RAM threshold (GB) for selecting higher history/context limits.
+    static let largeContextRAMThresholdGB = 6
+    /// Max messages fed into the prompt on high-RAM devices.
+    static let largeHistoryLimit = 50
+    /// Max messages fed into the prompt on low-RAM devices.
+    static let smallHistoryLimit = 20
+    /// Seconds to debounce before persisting messages to disk.
+    static let persistenceDebounceSeconds: Double = 3
+    /// Seconds before auto-dismissing the error banner.
+    static let errorAutoDismissSeconds: Double = 5
+}
+
 @MainActor
 final class ChatViewModel: ObservableObject {
     @Published var messages: [ChatMessage] = []
@@ -66,7 +81,7 @@ final class ChatViewModel: ObservableObject {
 
         // Persist messages on change — debounced on MainActor, disk write offloaded to background.
         $messages
-            .debounce(for: .seconds(3), scheduler: RunLoop.main)
+            .debounce(for: .seconds(ChatConstants.persistenceDebounceSeconds), scheduler: RunLoop.main)
             .sink { [weak self] msgs in self?.history.save(msgs) }
             .store(in: &cancellables)
 
@@ -133,7 +148,7 @@ final class ChatViewModel: ObservableObject {
         // Cap based on device RAM: 8 K context devices get more history (50 msgs ≈ 5000 tokens),
         // 4 K context devices use 20 msgs ≈ 2000 tokens, leaving headroom for system prompt + reply.
         let ramGB = Int(ProcessInfo.processInfo.physicalMemory / 1_073_741_824)
-        let historyLimit = ramGB >= 6 ? 50 : 20
+        let historyLimit = ramGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeHistoryLimit : ChatConstants.smallHistoryLimit
         let historyMessages = Array(messages.dropLast().suffix(historyLimit))
 
         do {
