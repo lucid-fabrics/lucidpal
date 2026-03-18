@@ -259,7 +259,7 @@ final class LLMService: ObservableObject {
 
         nonisolated(unsafe) var capturedCont: AsyncThrowingStream<String, Error>.Continuation?
         let stream = AsyncThrowingStream<String, Error> { capturedCont = $0 }
-        let cont = capturedCont!
+        guard let cont = capturedCont else { return stream }
 
         let llamaRef = llama
         let task = Task {

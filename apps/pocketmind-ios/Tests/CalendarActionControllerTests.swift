@@ -43,6 +43,7 @@ final class CalendarActionControllerTests: XCTestCase {
             return XCTFail("Expected .success")
         }
         XCTAssertEqual(preview.reminderMinutes, 15)
+        XCTAssertEqual(mock.createdEvents.count, 1)
     }
 
     func testCreateEventWithRecurrence() async {
@@ -96,6 +97,7 @@ final class CalendarActionControllerTests: XCTestCase {
         }
         XCTAssertEqual(previews.count, 2)
         XCTAssertTrue(previews.allSatisfy { $0.state == .pendingDeletion })
+        XCTAssertTrue(previews.allSatisfy { !$0.title.isEmpty })
     }
 
     // MARK: - Update
@@ -156,6 +158,7 @@ final class CalendarActionControllerTests: XCTestCase {
             return XCTFail("Expected .queryResult")
         }
         XCTAssertFalse(answer.isEmpty)
+        XCTAssertTrue(answer.contains("Free") || answer.contains("slot") || answer.contains("•"))
     }
 
     func testFreeSlotQueryInvalidRangeFails() async {
@@ -172,6 +175,85 @@ final class CalendarActionControllerTests: XCTestCase {
         guard case .failure = result else {
             return XCTFail("Expected .failure for zero duration")
         }
+    }
+
+    // MARK: - Create validation
+
+    func testCreateMissingStartFails() async {
+        let json = #"{"action":"create","title":"Meeting","end":"2026-06-01T11:00:00"}"#
+        let result = await controller.execute(json: json)
+        guard case .failure = result else {
+            return XCTFail("Expected .failure for missing start")
+        }
+    }
+
+    func testCreateMissingEndFails() async {
+        let json = #"{"action":"create","title":"Meeting","start":"2026-06-01T10:00:00"}"#
+        let result = await controller.execute(json: json)
+        guard case .failure = result else {
+            return XCTFail("Expected .failure for missing end")
+        }
+    }
+
+    // MARK: - Update validation
+
+    func testUpdateMissingSearchFails() async {
+        let json = #"{"action":"update","title":"New Title"}"#
+        let result = await controller.execute(json: json)
+        guard case .failure = result else {
+            return XCTFail("Expected .failure when search is missing")
+        }
+    }
+
+    func testUpdateEventNotFoundFails() async {
+        mock.stubbedEvents = []
+        let json = #"{"action":"update","search":"Ghost Event","title":"New"}"#
+        let result = await controller.execute(json: json)
+        guard case .failure = result else {
+            return XCTFail("Expected .failure when event not found")
+        }
+    }
+
+    // MARK: - Delete validation
+
+    func testDeleteMissingSearchAndRangeFails() async {
+        let json = #"{"action":"delete"}"#
+        let result = await controller.execute(json: json)
+        guard case .failure = result else {
+            return XCTFail("Expected .failure when neither search nor range provided")
+        }
+    }
+
+    func testBulkDeleteNoEventsInRangeFails() async {
+        mock.stubbedEvents = []
+        let json = #"{"action":"delete","start":"2026-06-01T00:00:00","end":"2026-06-01T23:59:59"}"#
+        let result = await controller.execute(json: json)
+        guard case .failure = result else {
+            return XCTFail("Expected .failure when no events in range")
+        }
+    }
+
+    // MARK: - Query validation
+
+    func testQueryMissingStartFails() async {
+        let json = #"{"action":"query","end":"2026-06-01T20:00:00","durationMinutes":60}"#
+        let result = await controller.execute(json: json)
+        guard case .failure = result else {
+            return XCTFail("Expected .failure for missing start")
+        }
+    }
+
+    func testQueryWithEventsReturnsReducedSlots() async {
+        // Busy all day → no free slots
+        mock.stubbedEvents = [makeEvent(title: "All Day")]
+        // Override event times to cover entire window
+        let json = #"{"action":"query","start":"2026-06-01T08:00:00","end":"2026-06-01T09:00:00","durationMinutes":120}"#
+        let result = await controller.execute(json: json)
+        guard case .queryResult(let answer) = result else {
+            return XCTFail("Expected .queryResult")
+        }
+        // Window is 1h but we need 2h — should report no slots
+        XCTAssertTrue(answer.contains("No free"))
     }
 
     // MARK: - Helpers

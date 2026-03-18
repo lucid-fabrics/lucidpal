@@ -182,4 +182,54 @@ final class ChatViewModelTests: XCTestCase {
         viewModel.clearHistory()
         XCTAssertTrue(viewModel.messages.isEmpty)
     }
+
+    // MARK: - Confirm deletion edge cases
+
+    func testConfirmDeletionWithWrongMessageIDIsNoOp() async {
+        let (_, previewID) = insertMessage(state: .pendingDeletion)
+        await viewModel.confirmDeletion(messageID: UUID(), previewID: previewID)
+        XCTAssertTrue(mock.deletedIdentifiers.isEmpty)
+    }
+
+    func testConfirmDeletionWithWrongPreviewIDIsNoOp() async {
+        let (msgID, _) = insertMessage(state: .pendingDeletion)
+        await viewModel.confirmDeletion(messageID: msgID, previewID: UUID())
+        XCTAssertTrue(mock.deletedIdentifiers.isEmpty)
+    }
+
+    // MARK: - Update edge cases
+
+    func testConfirmUpdateWithNoPendingUpdateIsNoOp() async {
+        let (msgID, previewID) = insertMessage(state: .pendingUpdate, pendingUpdate: nil)
+        await viewModel.confirmUpdate(messageID: msgID, previewID: previewID)
+        XCTAssertTrue(mock.appliedUpdates.isEmpty)
+    }
+
+    func testCancelUpdateWithWrongIDsIsNoOp() {
+        let (msgID, _) = insertMessage(state: .pendingUpdate)
+        let before = viewModel.messages.first?.calendarEventPreviews.first?.state
+        viewModel.cancelUpdate(messageID: msgID, previewID: UUID())
+        let after = viewModel.messages.first?.calendarEventPreviews.first?.state
+        XCTAssertEqual(before, after)
+    }
+
+    // MARK: - Bulk deletion edge cases
+
+    func testConfirmAllDeletionsOnEmptyMessageIsNoOp() async {
+        let msg = ChatMessage(role: .assistant, content: "no previews")
+        viewModel.messages.append(msg)
+        await viewModel.confirmAllDeletions(messageID: msg.id)
+        XCTAssertTrue(mock.deletedIdentifiers.isEmpty)
+    }
+
+    func testCancelDeletionDoesNotAffectAlreadyDeletedPreviews() {
+        var preview1 = CalendarEventPreview(title: "A", start: .now, end: .now, calendarName: nil, state: .deleted, eventIdentifier: "id-1")
+        var preview2 = CalendarEventPreview(title: "B", start: .now, end: .now, calendarName: nil, state: .pendingDeletion, eventIdentifier: "id-2")
+        var msg = ChatMessage(role: .assistant, content: "")
+        msg.calendarEventPreviews = [preview1, preview2]
+        viewModel.messages.append(msg)
+        viewModel.cancelAllDeletions(messageID: msg.id)
+        XCTAssertEqual(viewModel.messages.first?.calendarEventPreviews[0].state, .deleted)
+        XCTAssertEqual(viewModel.messages.first?.calendarEventPreviews[1].state, .deletionCancelled)
+    }
 }
