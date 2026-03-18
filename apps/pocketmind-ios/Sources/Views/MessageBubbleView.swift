@@ -246,6 +246,15 @@ private struct CalendarEventCard: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
+                if let minutes = preview.reminderMinutes {
+                    HStack(spacing: 3) {
+                        Image(systemName: "bell.fill")
+                            .font(.system(size: 8))
+                        Text(reminderLabel(minutes))
+                            .font(.caption2)
+                    }
+                    .foregroundStyle(.secondary)
+                }
             }
             Spacer()
         }
@@ -288,6 +297,13 @@ private struct CalendarEventCard: View {
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "d"
         return f.string(from: preview.start)
+    }
+
+    private func reminderLabel(_ minutes: Int) -> String {
+        if minutes < 60 { return "\(minutes)m before" }
+        let h = minutes / 60
+        let m = minutes % 60
+        return m == 0 ? "\(h)h before" : "\(h)h \(m)m before"
     }
 
     private func openInCalendar() {

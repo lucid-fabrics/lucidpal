@@ -19,6 +19,8 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
     var state: PreviewState
     /// EKEvent.eventIdentifier — stored so confirmed deletion can locate the event.
     var eventIdentifier: String?
+    /// Minutes before event for reminder alarm (nil = no alarm).
+    let reminderMinutes: Int?
 
     init(
         id: UUID = UUID(),
@@ -27,7 +29,8 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
         end: Date,
         calendarName: String?,
         state: PreviewState = .created,
-        eventIdentifier: String? = nil
+        eventIdentifier: String? = nil,
+        reminderMinutes: Int? = nil
     ) {
         self.id = id
         self.title = title
@@ -36,6 +39,7 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
         self.calendarName = calendarName
         self.state = state
         self.eventIdentifier = eventIdentifier
+        self.reminderMinutes = reminderMinutes
     }
 }
 

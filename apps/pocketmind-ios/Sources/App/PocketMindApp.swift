@@ -23,7 +23,7 @@ struct PocketMindApp: App {
     // MARK: - Initialization
 
     init() {
-        let actionController = CalendarActionController(calendarService: calendarService)
+        let actionController = CalendarActionController(calendarService: calendarService, settings: settings)
         calendarActionController = actionController
         chatViewModel = ChatViewModel(
             llmService: llmService,

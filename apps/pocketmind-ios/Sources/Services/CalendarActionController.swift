@@ -13,16 +13,18 @@ struct CalendarActionPayload: Decodable {
     let action: ActionType?
     let title: String?         // required for create/update; omitted for delete
     let search: String?        // existing event title to find (update/delete)
-    let start: Date?           // required for create/update; omitted for delete
-    let end: Date?             // required for create/update; omitted for delete
+    let start: Date?           // event start for create/update; range start for bulk delete
+    let end: Date?             // event end for create/update; range end for bulk delete
     let location: String?
     let notes: String?
+    let reminderMinutes: Int?  // minutes before event to trigger alarm
 }
 
 // MARK: - Result
 
 enum CalendarActionResult {
     case success(String, CalendarEventPreview)
+    case bulkPending([CalendarEventPreview])   // multiple pending-deletion cards
     case failure(String)
 }
 
@@ -33,6 +35,7 @@ enum CalendarActionResult {
 @MainActor
 final class CalendarActionController {
     private let calendarService: CalendarService
+    private let settings: AppSettings
 
     // Date formats the LLM might generate — tried in order
     private static let dateFormats: [String] = [
@@ -76,8 +79,9 @@ final class CalendarActionController {
         return d
     }()
 
-    init(calendarService: CalendarService) {
+    init(calendarService: CalendarService, settings: AppSettings) {
         self.calendarService = calendarService
+        self.settings = settings
     }
 
     func execute(json: String) async -> CalendarActionResult {
@@ -98,6 +102,10 @@ final class CalendarActionController {
         case .update:
             return await updateEvent(payload)
         case .delete:
+            // Bulk delete: no search title but date range provided
+            if (payload.search == nil || payload.search!.isEmpty), payload.start != nil, payload.end != nil {
+                return await bulkFindEventsForDeletion(payload)
+            }
             return await findEventForDeletion(payload)
         }
     }
@@ -187,26 +195,57 @@ final class CalendarActionController {
 
     private func createEvent(_ p: CalendarActionPayload) async -> CalendarActionResult {
         guard let title = p.title, let start = p.start, let end = p.end else {
-            return .failure("⚠️ Create requires title, start, and end.")
+            return .failure("(Create requires title, start, and end.)")
         }
         do {
-            let calendarName = calendarService.store.defaultCalendarForNewEvents?.title
-            try calendarService.createEvent(
+            // Conflict check
+            let conflicts = calendarService.findConflicts(start: start, end: end)
+            let conflictNote = conflicts.isEmpty ? "" :
+                " Note: overlaps with \(conflicts.map { "\"\($0.title ?? "event")\"" }.joined(separator: ", "))."
+
+            let calID = settings.defaultCalendarIdentifier.isEmpty ? nil : settings.defaultCalendarIdentifier
+            let identifier = try calendarService.createEvent(
                 title: title,
                 start: start,
                 end: end,
                 location: p.location,
-                notes: p.notes
+                notes: p.notes,
+                reminderMinutes: p.reminderMinutes,
+                calendarIdentifier: calID
             )
+            let calendarName = calendarService.store.event(withIdentifier: identifier)?.calendar?.title
+                ?? calendarService.store.defaultCalendarForNewEvents?.title
             let preview = CalendarEventPreview(
                 title: title,
                 start: start,
                 end: end,
-                calendarName: calendarName
+                calendarName: calendarName,
+                reminderMinutes: p.reminderMinutes
             )
-            return .success("Added \"\(title)\" to your calendar.", preview)
+            return .success("Added \"\(title)\" to your calendar.\(conflictNote)", preview)
         } catch {
-            return .failure("⚠️ Couldn't save event: \(error.localizedDescription)")
+            return .failure("(Couldn't save event: \(error.localizedDescription))")
         }
+    }
+
+    private func bulkFindEventsForDeletion(_ p: CalendarActionPayload) async -> CalendarActionResult {
+        guard let rangeStart = p.start, let rangeEnd = p.end else {
+            return .failure("(Bulk delete requires start and end dates.)")
+        }
+        let events = calendarService.events(in: rangeStart, end: rangeEnd)
+        guard !events.isEmpty else {
+            return .failure("(No events found in that date range.)")
+        }
+        let previews = events.map { event in
+            CalendarEventPreview(
+                title: event.title ?? "Untitled",
+                start: event.startDate,
+                end: event.endDate,
+                calendarName: event.calendar?.title,
+                state: .pendingDeletion,
+                eventIdentifier: event.eventIdentifier
+            )
+        }
+        return .bulkPending(previews)
     }
 }
