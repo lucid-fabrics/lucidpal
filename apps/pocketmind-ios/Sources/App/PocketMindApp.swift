@@ -63,8 +63,14 @@ struct PocketMindApp: App {
             )
         }
         .onChange(of: scenePhase) { _, phase in
-            guard phase == .active else { return }
-            consumePendingSiriQuery()
+            switch phase {
+            case .active:
+                consumePendingSiriQuery()
+            case .background:
+                chatViewModel.flushPersistence()
+            default:
+                break
+            }
         }
     }
 

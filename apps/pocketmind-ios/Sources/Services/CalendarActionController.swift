@@ -127,10 +127,7 @@ final class CalendarActionController {
         guard p.title != nil || p.start != nil || p.end != nil || p.location != nil || p.notes != nil || p.reminderMinutes != nil else {
             return .failure("(No fields to update were provided.)")
         }
-        let windowStart = Calendar.current.date(byAdding: .day, value: -30, to: .now) ?? .now
-        let windowEnd   = Calendar.current.date(byAdding: .day, value:  30, to: .now) ?? .now
-        let predicate = calendarService.store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: nil)
-        let events = calendarService.store.events(matching: predicate)
+        let events = calendarService.findEvents(matching: searchTitle)
         guard let event = events.first(where: { ($0.title ?? "").localizedCaseInsensitiveContains(searchTitle) }) else {
             return .failure("(Couldn't find an event called \"\(searchTitle)\" — please specify the exact name.)")
         }
@@ -161,10 +158,7 @@ final class CalendarActionController {
         guard let searchTitle = p.search, !searchTitle.isEmpty else {
             return .failure("(No event title provided for deletion.)")
         }
-        let windowStart = Calendar.current.date(byAdding: .day, value: -30, to: .now) ?? .now
-        let windowEnd   = Calendar.current.date(byAdding: .day, value:  30, to: .now) ?? .now
-        let predicate = calendarService.store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: nil)
-        let events = calendarService.store.events(matching: predicate)
+        let events = calendarService.findEvents(matching: searchTitle)
         let lower = searchTitle.lowercased()
 
         // 1. Exact substring match
@@ -218,8 +212,8 @@ final class CalendarActionController {
                 recurrence: p.recurrence,
                 recurrenceEnd: p.recurrenceEnd
             )
-            let calendarName = calendarService.store.event(withIdentifier: identifier)?.calendar?.title
-                ?? calendarService.store.defaultCalendarForNewEvents?.title
+            let calendarName = calendarService.calendarName(forEventIdentifier: identifier)
+                ?? calendarService.defaultCalendarInfo()?.title
             let preview = CalendarEventPreview(
                 title: title,
                 start: start,
@@ -236,10 +230,14 @@ final class CalendarActionController {
     }
 
     private func findFreeSlots(_ p: CalendarActionPayload) async -> CalendarActionResult {
-        guard let rangeStart = p.start, let rangeEnd = p.end else {
-            return .failure("(Free slot query requires start and end range.)")
+        guard let rangeStart = p.start, let rangeEnd = p.end, rangeStart < rangeEnd else {
+            return .failure("(Free slot query requires a valid start and end range.)")
         }
-        let duration = TimeInterval((p.durationMinutes ?? 60) * 60)
+        let requestedMinutes = p.durationMinutes ?? 60
+        guard requestedMinutes > 0 else {
+            return .failure("(Duration must be greater than 0 minutes.)")
+        }
+        let duration = TimeInterval(requestedMinutes * 60)
         let events = calendarService.events(in: rangeStart, end: rangeEnd)
             .sorted { $0.startDate < $1.startDate }
 
@@ -280,6 +278,7 @@ final class CalendarActionController {
         formatter.timeStyle = .short
 
         for window in merged + [(rangeEnd, rangeEnd)] {
+            guard cursor < rangeEnd else { break }
             let freeEnd = min(window.0, dayEnd(cursor))
             if freeEnd > cursor && freeEnd.timeIntervalSince(cursor) >= duration {
                 slots.append("• \(formatter.string(from: cursor)) – \(formatter.string(from: freeEnd))")
@@ -287,13 +286,12 @@ final class CalendarActionController {
             }
             let afterBusy = window.1
             cursor = max(afterBusy, nextWorkStart(afterBusy))
-            if cursor >= rangeEnd { break }
         }
 
         if slots.isEmpty {
-            return .queryResult("No free slots of \(p.durationMinutes ?? 60) minutes found in that range.")
+            return .queryResult("No free \(requestedMinutes)-minute slots found in that range.")
         }
-        let label = p.durationMinutes.map { "\($0)-minute" } ?? "1-hour"
+        let label = "\(requestedMinutes)-minute"
         return .queryResult("Free \(label) slots:\n" + slots.joined(separator: "\n"))
     }
 
