@@ -6,6 +6,7 @@ struct CalendarActionPayload: Decodable {
     enum ActionType: String, Decodable {
         case create
         case update
+        case delete
     }
 
     // Optional — small models often omit it; default to .create
@@ -96,6 +97,8 @@ final class CalendarActionController {
             return await createEvent(payload)
         case .update:
             return await updateEvent(payload)
+        case .delete:
+            return await findEventForDeletion(payload)
         }
     }
 
@@ -127,6 +130,28 @@ final class CalendarActionController {
         } catch {
             return .failure("⚠️ Couldn't update event: \(error.localizedDescription)")
         }
+    }
+
+    private func findEventForDeletion(_ p: CalendarActionPayload) async -> CalendarActionResult {
+        guard let searchTitle = p.search, !searchTitle.isEmpty else {
+            return .failure("⚠️ No search title provided for deletion.")
+        }
+        let windowStart = Calendar.current.date(byAdding: .day, value: -30, to: .now) ?? .now
+        let windowEnd   = Calendar.current.date(byAdding: .day, value:  30, to: .now) ?? .now
+        let predicate = calendarService.store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: nil)
+        let events = calendarService.store.events(matching: predicate)
+        guard let event = events.first(where: { ($0.title ?? "").localizedCaseInsensitiveContains(searchTitle) }) else {
+            return .failure("⚠️ Could not find event matching \"\(searchTitle)\".")
+        }
+        let preview = CalendarEventPreview(
+            title: event.title ?? searchTitle,
+            start: event.startDate,
+            end: event.endDate,
+            calendarName: event.calendar?.title,
+            state: .pendingDeletion,
+            eventIdentifier: event.eventIdentifier
+        )
+        return .success("", preview)
     }
 
     private func createEvent(_ p: CalendarActionPayload) async -> CalendarActionResult {

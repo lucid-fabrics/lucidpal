@@ -46,8 +46,16 @@ struct ChatView: View {
             ScrollView {
                 LazyVStack(spacing: 8) {
                     ForEach(viewModel.messages) { message in
-                        MessageBubbleView(message: message)
-                            .id(message.id)
+                        MessageBubbleView(
+                            message: message,
+                            onConfirmDeletion: { previewID in
+                                Task { await viewModel.confirmDeletion(messageID: message.id, previewID: previewID) }
+                            },
+                            onCancelDeletion: { previewID in
+                                viewModel.cancelDeletion(messageID: message.id, previewID: previewID)
+                            }
+                        )
+                        .id(message.id)
                     }
                 }
                 .padding(.vertical, 12)

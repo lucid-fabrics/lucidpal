@@ -1,10 +1,40 @@
 import Foundation
 
 struct CalendarEventPreview: Codable, Equatable, Sendable {
+    enum PreviewState: String, Codable, Sendable {
+        case created
+        case updated
+        case pendingDeletion
+        case deleted
+        case deletionCancelled
+    }
+
+    let id: UUID
     let title: String
     let start: Date
     let end: Date
     let calendarName: String?
+    var state: PreviewState
+    /// EKEvent.eventIdentifier — stored so confirmed deletion can locate the event.
+    var eventIdentifier: String?
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        start: Date,
+        end: Date,
+        calendarName: String?,
+        state: PreviewState = .created,
+        eventIdentifier: String? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.start = start
+        self.end = end
+        self.calendarName = calendarName
+        self.state = state
+        self.eventIdentifier = eventIdentifier
+    }
 }
 
 enum MessageRole: String, Codable, Sendable {
