@@ -4,8 +4,7 @@ struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
 
-    // Force-unwrap safe: compile-time constant URL string is always valid.
-    private static let sourceURL = URL(string: "https://github.com/wassimmehanna/pocketmind")!
+    private static let sourceURL = URL(string: "https://github.com/wassimmehanna/pocketmind")
 
     var body: some View {
         NavigationStack {
@@ -152,7 +151,9 @@ struct SettingsView: View {
         Section("About") {
             LabeledContent("Version", value: Self.appVersion)
             LabeledContent("Inference", value: "On-device (llama.cpp)")
-            Link("Source Code", destination: Self.sourceURL)
+            if let url = Self.sourceURL {
+                Link("Source Code", destination: url)
+            }
         }
     }
 

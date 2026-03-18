@@ -407,7 +407,7 @@ private struct CalendarEventCard: View {
     private func openInCalendar() {
         // calshow:<NSTimeInterval> opens Calendar scrolled to the event's date/time.
         let interval = preview.start.timeIntervalSinceReferenceDate
-        let url = URL(string: "calshow:\(Int(interval))") ?? URL(string: "calshow://")!
+        guard let url = URL(string: "calshow:\(Int(interval))") ?? URL(string: "calshow://") else { return }
         UIApplication.shared.open(url)
     }
 }

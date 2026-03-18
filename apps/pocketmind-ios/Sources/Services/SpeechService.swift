@@ -80,7 +80,8 @@ final class SpeechService: ObservableObject {
             Task { @MainActor in self?.stopRecording() }
         }
 
-        task = recognizer.recognitionTask(with: request!) { [weak self] result, error in
+        guard let request else { return }
+        task = recognizer.recognitionTask(with: request) { [weak self] result, error in
             guard let self else { return }
             if let result {
                 Task { @MainActor in

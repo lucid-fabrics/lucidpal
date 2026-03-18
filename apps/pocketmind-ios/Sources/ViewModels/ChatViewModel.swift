@@ -14,65 +14,66 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isSpeechRecording = false
     @Published private(set) var isSpeechAvailable = false
 
-    private let llmService: LLMService
+    private let llmService: any LLMServiceProtocol
     private let calendarService: any CalendarServiceProtocol
     private let calendarActionController: CalendarActionController
     private let settings: AppSettings
-    private let speechService = SpeechService()
+    private let speechService: any SpeechServiceProtocol
+    private let history = ChatHistoryManager()
     private var cancellables = Set<AnyCancellable>()
     // Prevents auto-submit when the user manually taps the mic button to stop recording
     private var suppressSpeechAutoSend = false
 
-    nonisolated(unsafe) private static let historyURL: URL = {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("chat_history.json")
-    }()
-
-    init(llmService: LLMService, calendarService: any CalendarServiceProtocol, calendarActionController: CalendarActionController, settings: AppSettings) {
+    init(
+        llmService: any LLMServiceProtocol,
+        calendarService: any CalendarServiceProtocol,
+        calendarActionController: CalendarActionController,
+        settings: AppSettings,
+        speechService: any SpeechServiceProtocol = SpeechService()
+    ) {
         self.llmService = llmService
         self.calendarService = calendarService
         self.calendarActionController = calendarActionController
         self.settings = settings
+        self.speechService = speechService
         self.isModelLoaded = llmService.isLoaded
 
         // Load persisted history asynchronously — avoids blocking the main thread on launch.
         Task { @MainActor [weak self] in
             guard let self else { return }
-            if let data = try? Data(contentsOf: ChatViewModel.historyURL),
-               let saved = try? JSONDecoder().decode([ChatMessage].self, from: data) {
-                self.messages = saved
-            }
+            self.messages = self.history.load()
         }
 
-        // assign(to: &$property) uses weak self internally — no retain cycle.
-        llmService.$isLoaded.assign(to: &$isModelLoaded)
-        llmService.$isGenerating.assign(to: &$isGenerating)
-        speechService.$isRecording.assign(to: &$isSpeechRecording)
-        speechService.$isAuthorized.assign(to: &$isSpeechAvailable)
+        // Publishers — sink used instead of assign(to:) because existentials can't project @Published.
+        llmService.isLoadedPublisher
+            .sink { [weak self] in self?.isModelLoaded = $0 }
+            .store(in: &cancellables)
+        llmService.isGeneratingPublisher
+            .sink { [weak self] in self?.isGenerating = $0 }
+            .store(in: &cancellables)
+        speechService.isRecordingPublisher
+            .sink { [weak self] in self?.isSpeechRecording = $0 }
+            .store(in: &cancellables)
+        speechService.isAuthorizedPublisher
+            .sink { [weak self] in self?.isSpeechAvailable = $0 }
+            .store(in: &cancellables)
 
         // Forward live transcript into the input field while recording
-        speechService.$transcript
+        speechService.transcriptPublisher
             .filter { !$0.isEmpty }
-            .assign(to: &$inputText)
+            .sink { [weak self] in self?.inputText = $0 }
+            .store(in: &cancellables)
 
         // Persist messages on change — debounced on MainActor, disk write offloaded to background.
         $messages
             .debounce(for: .seconds(3), scheduler: RunLoop.main)
-            .sink { [weak self] msgs in
-                guard self != nil else { return }
-                let filtered = msgs.filter { $0.role != .system }
-                Task.detached(priority: .utility) {
-                    if let data = try? JSONEncoder().encode(filtered) {
-                        try? data.write(to: ChatViewModel.historyURL, options: .atomic)
-                    }
-                }
-            }
+            .sink { [weak self] msgs in self?.history.save(msgs) }
             .store(in: &cancellables)
 
         // Auto-submit when speech recognition ends naturally (final result / silence timeout).
         // If the user manually tapped the mic button to stop, suppressSpeechAutoSend is set
         // in toggleSpeech() and the observer skips the send.
-        speechService.$isRecording
+        speechService.isRecordingPublisher
             .removeDuplicates()
             .filter { !$0 }
             .receive(on: RunLoop.main)
@@ -323,17 +324,12 @@ final class ChatViewModel: ObservableObject {
     func clearHistory() {
         llmService.cancelGeneration()
         messages = []
-        try? FileManager.default.removeItem(at: ChatViewModel.historyURL)
+        history.clear()
     }
 
     /// Immediately writes current messages to disk — call when app enters background.
     func flushPersistence() {
-        let filtered = messages.filter { $0.role != .system }
-        Task.detached(priority: .utility) {
-            if let data = try? JSONEncoder().encode(filtered) {
-                try? data.write(to: ChatViewModel.historyURL, options: .atomic)
-            }
-        }
+        history.save(messages)
     }
 
     // MARK: - Calendar action dispatch
@@ -352,8 +348,8 @@ final class ChatViewModel: ObservableObject {
         var result = text
         var previews: [CalendarEventPreview] = []
         for match in matches.reversed() {
-            let fullRange = Range(match.range, in: result)!
-            let jsonRange = Range(match.range(at: 1), in: result)!
+            guard let fullRange = Range(match.range, in: result),
+                  let jsonRange = Range(match.range(at: 1), in: result) else { continue }
             let json = String(result[jsonRange])
 
             let actionResult = await calendarActionController.execute(json: json)

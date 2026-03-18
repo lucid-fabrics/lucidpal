@@ -12,11 +12,11 @@ final class ModelDownloadViewModel: ObservableObject {
     @Published var deleteError: String?
 
     let downloader: ModelDownloader
-    private let llmService: LLMService
+    private let llmService: any LLMServiceProtocol
     let settings: AppSettings
     private var cancellables = Set<AnyCancellable>()
 
-    init(llmService: LLMService, settings: AppSettings) {
+    init(llmService: any LLMServiceProtocol, settings: AppSettings) {
         self.llmService = llmService
         self.settings = settings
         self.downloader = ModelDownloader()
@@ -35,8 +35,12 @@ final class ModelDownloadViewModel: ObservableObject {
 
         // assign(to: &$property) uses weak self internally — no retain cycle.
         downloader.$state.assign(to: &$downloadState)
-        llmService.$isLoaded.assign(to: &$isModelLoaded)
-        llmService.$isLoading.assign(to: &$isModelLoading)
+        llmService.isLoadedPublisher
+            .sink { [weak self] in self?.isModelLoaded = $0 }
+            .store(in: &cancellables)
+        llmService.isLoadingPublisher
+            .sink { [weak self] in self?.isModelLoading = $0 }
+            .store(in: &cancellables)
 
         // Auto-load immediately when download finishes — removes the need for a "Load Model" tap.
         downloader.$state
