@@ -5,6 +5,7 @@ import Foundation
 /// Conforming CalendarService to this protocol enables unit testing without a live EKEventStore.
 protocol CalendarServiceProtocol: AnyObject {
     var isAuthorized: Bool { get }
+    func fetchEvents(from start: Date, days: Int) -> String
     func findEvents(matching title: String, windowDays: Int) -> [EKEvent]
     func findConflicts(start: Date, end: Date, excludingIdentifier: String?) -> [EKEvent]
     func events(in start: Date, end: Date) -> [EKEvent]
