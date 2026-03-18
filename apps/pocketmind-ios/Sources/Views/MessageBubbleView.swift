@@ -5,6 +5,7 @@ struct MessageBubbleView: View {
     let message: ChatMessage
     var onConfirmDeletion: ((UUID) -> Void)? = nil
     var onCancelDeletion: ((UUID) -> Void)? = nil
+    var onUndoDeletion: ((UUID) -> Void)? = nil
     @State private var thinkingExpanded = false
 
     var body: some View {
@@ -42,7 +43,8 @@ struct MessageBubbleView: View {
                     CalendarEventCard(
                         preview: preview,
                         onConfirm: { onConfirmDeletion?(preview.id) },
-                        onCancel:  { onCancelDeletion?(preview.id) }
+                        onCancel:  { onCancelDeletion?(preview.id) },
+                        onUndo:    { onUndoDeletion?(preview.id) }
                     )
                 }
 
@@ -64,6 +66,7 @@ private struct CalendarEventCard: View {
     let preview: CalendarEventPreview
     let onConfirm: () -> Void
     let onCancel: () -> Void
+    let onUndo: () -> Void
 
     private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -77,10 +80,10 @@ private struct CalendarEventCard: View {
         case .pendingDeletion:
             pendingDeletionCard
         case .deleted:
-            statusCard(icon: "trash.fill", label: "Deleted from calendar", color: .red)
+            deletedCard
         case .deletionCancelled:
             statusCard(icon: "xmark.circle", label: "Deletion cancelled", color: .secondary)
-        case .created, .updated:
+        case .created, .updated, .restored:
             tappableCard
         }
     }
@@ -126,6 +129,34 @@ private struct CalendarEventCard: View {
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.red.opacity(0.3), lineWidth: 1))
+    }
+
+    private var deletedCard: some View {
+        HStack(spacing: 10) {
+            dateBadge(dimmed: true)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(preview.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .strikethrough(true, color: .secondary)
+                    .lineLimit(1)
+                Text("\(Self.timeFormatter.string(from: preview.start)) – \(Self.timeFormatter.string(from: preview.end))")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Button(action: onUndo) {
+                Text("Undo")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.accentColor)
+            }
+            .buttonStyle(.plain)
+            .padding(.trailing, 4)
+        }
+        .padding(10)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .opacity(0.85)
     }
 
     private func statusCard(icon: String, label: String, color: Color) -> some View {
