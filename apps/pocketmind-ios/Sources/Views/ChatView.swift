@@ -8,41 +8,45 @@ struct ChatView: View {
     @State private var showClearConfirm = false
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                if !viewModel.isModelLoaded {
-                    modelNotLoadedBanner
-                }
-                errorBanner
-                    .animation(.easeInOut(duration: 0.2), value: viewModel.errorMessage)
-                messageList
-                inputBar
+        VStack(spacing: 0) {
+            if !viewModel.isModelLoaded {
+                modelNotLoadedBanner
             }
-            .navigationTitle("PocketMind")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    if !viewModel.messages.isEmpty {
-                        Button("Clear") { showClearConfirm = true }
-                            .foregroundStyle(.secondary)
-                    }
+            errorBanner
+                .animation(.easeInOut(duration: 0.2), value: viewModel.errorMessage)
+            messageList
+            inputBar
+        }
+        .navigationTitle(viewModel.sessionTitle)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                if !viewModel.messages.isEmpty {
+                    Button("Clear") { showClearConfirm = true }
+                        .foregroundStyle(.secondary)
                 }
             }
-            .confirmationDialog("Clear chat history?", isPresented: $showClearConfirm, titleVisibility: .visible) {
-                Button("Clear History", role: .destructive) { viewModel.clearHistory() }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("This will permanently delete all messages. This cannot be undone.")
+        }
+        .confirmationDialog("Clear chat history?", isPresented: $showClearConfirm, titleVisibility: .visible) {
+            Button("Clear History", role: .destructive) { viewModel.clearHistory() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently delete all messages. This cannot be undone.")
+        }
+        .onChange(of: viewModel.errorMessage) { _, msg in
+            errorDismissTask?.cancel()
+            guard msg != nil else { return }
+            errorDismissTask = Task { @MainActor in
+                try? await Task.sleep(for: .seconds(5))
+                viewModel.errorMessage = nil
             }
-            .onChange(of: viewModel.errorMessage) { _, msg in
-                errorDismissTask?.cancel()
-                guard msg != nil else { return }
-                errorDismissTask = Task { @MainActor in
-                    try? await Task.sleep(for: .seconds(5))
-                    viewModel.errorMessage = nil
-                }
-            }
-            .onDisappear { errorDismissTask?.cancel() }
+        }
+        .onDisappear { errorDismissTask?.cancel() }
+        .task {
+            guard let query = viewModel.pendingInput else { return }
+            viewModel.pendingInput = nil
+            viewModel.inputText = query
+            await viewModel.sendMessage()
         }
     }
 
@@ -122,6 +126,9 @@ struct ChatView: View {
                                 },
                                 onCancelAllDeletions: {
                                     viewModel.cancelAllDeletions(messageID: message.id)
+                                },
+                                onDeleteMessage: { msgID in
+                                    viewModel.deleteMessage(id: msgID)
                                 }
                             )
                             .id(message.id)
