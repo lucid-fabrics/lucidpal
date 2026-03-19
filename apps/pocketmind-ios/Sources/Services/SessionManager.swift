@@ -6,7 +6,7 @@ protocol SessionManagerProtocol {
     func loadSession(id: UUID) -> ChatSession?
     @discardableResult func save(_ session: ChatSession) -> Task<Void, Never>
     func delete(id: UUID)
-    func renameSession(id: UUID, title: String)
+    @discardableResult func renameSession(id: UUID, title: String) -> Task<Void, Never>
 }
 
 /// Manages multiple chat sessions on disk.
@@ -109,10 +109,11 @@ final class SessionManager: SessionManagerProtocol {
         saveIndex(index)
     }
 
-    func renameSession(id: UUID, title: String) {
-        guard var session = loadSession(id: id) else { return }
+    @discardableResult
+    func renameSession(id: UUID, title: String) -> Task<Void, Never> {
+        guard var session = loadSession(id: id) else { return Task {} }
         session.title = title
-        save(session)
+        return save(session)
     }
 
     // MARK: - Private
