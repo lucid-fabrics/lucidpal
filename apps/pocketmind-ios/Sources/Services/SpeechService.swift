@@ -68,7 +68,13 @@ final class SpeechService {
             // Clean up any partial state so the session doesn't stay locked in .record mode
             audioEngine.inputNode.removeTap(onBus: 0)
             request = nil
-            try? session.setActive(false, options: .notifyOthersOnDeactivation)
+            do {
+                try session.setActive(false, options: .notifyOthersOnDeactivation)
+            } catch {
+                #if DEBUG
+                print("[SpeechService] Failed to deactivate audio session during error cleanup: \(error)")
+                #endif
+            }
             throw error
         }
 
