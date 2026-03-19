@@ -115,6 +115,10 @@ A preview of the change appears for confirmation before anything is modified.
 
 A confirmation step appears before deletion. After deleting, an **Undo** button is shown on the card — tap it within the session to restore the event.
 
+:::note
+On event cards for created, updated, or rescheduled events, you can also swipe left and tap **Delete** to remove the event directly. A confirmation dialog shows the event name before anything is deleted.
+:::
+
 ---
 
 ## Conflict Detection

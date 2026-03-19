@@ -58,6 +58,7 @@
 		906F5D6C4C38916E11A2E8E7 /* CalendarEventCard+Pending.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA07612EEFA0F90E9EB9382 /* CalendarEventCard+Pending.swift */; };
 		90F821364EC9DE5B6091C8A6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 979CF042BA43DF068D6BA427 /* ContentView.swift */; };
 		969B8DD5A0DCF602F43C9AB0 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3A60B92E0F13DEFC19126F /* AppSettings.swift */; };
+		9CFDCFB95D5F27EDAF4BF3BC /* DeleteCalendarEventIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBF9C42766A8F03EB449F566 /* DeleteCalendarEventIntent.swift */; };
 		A1AA0FDDE97BCF0CB6F1AE80 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = B668BB645B31666F0197D789 /* llama */; };
 		A3C93B45B8009FED37A10B9F /* CalendarFreeSlotIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3874BCAC6AA47CED220E769 /* CalendarFreeSlotIntegrationTests.swift */; };
 		A49F828336DE087919543E16 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95AC9C8A5BA25C38328688EB /* SettingsViewModel.swift */; };
@@ -187,6 +188,7 @@
 		F0635F653727C5FC7632B651 /* CalendarActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionController.swift; sourceTree = "<group>"; };
 		F4FA54C25CA274D1725CA203 /* LLMServiceProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMServiceProtocolTests.swift; sourceTree = "<group>"; };
 		FA24E90C06ACD14A3337C972 /* SessionManagerMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManagerMigrationTests.swift; sourceTree = "<group>"; };
+		FBF9C42766A8F03EB449F566 /* DeleteCalendarEventIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteCalendarEventIntent.swift; sourceTree = "<group>"; };
 		FC203F3AE416391220185070 /* ChatConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatConstants.swift; sourceTree = "<group>"; };
 		FDA07612EEFA0F90E9EB9382 /* CalendarEventCard+Pending.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarEventCard+Pending.swift"; sourceTree = "<group>"; };
 		FEC6F0AF069907CCCB456FE5 /* CalendarQueryResultCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarQueryResultCard.swift; sourceTree = "<group>"; };
@@ -355,6 +357,7 @@
 			isa = PBXGroup;
 			children = (
 				7640B8A1C564B17C9131D052 /* AskPocketMindIntent.swift */,
+				FBF9C42766A8F03EB449F566 /* DeleteCalendarEventIntent.swift */,
 				100196F990B4C26BC3C25D3F /* PocketMindShortcuts.swift */,
 			);
 			path = Intents;
@@ -553,6 +556,7 @@
 				6D98D3562341380303569896 /* ChatViewModel+SystemPrompt.swift in Sources */,
 				C033C2F0B82EDB5CEC33DC7B /* ChatViewModel.swift in Sources */,
 				90F821364EC9DE5B6091C8A6 /* ContentView.swift in Sources */,
+				9CFDCFB95D5F27EDAF4BF3BC /* DeleteCalendarEventIntent.swift in Sources */,
 				4FE49E5414C9BF35D5D39E03 /* DesignConstants.swift in Sources */,
 				B7ECE3E7A8DDB6246FA44134 /* HapticService.swift in Sources */,
 				6A132CF41A20258F746B8CD5 /* LLMService.swift in Sources */,

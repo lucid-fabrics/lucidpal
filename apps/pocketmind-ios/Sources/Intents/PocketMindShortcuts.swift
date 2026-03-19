@@ -55,5 +55,29 @@ struct PocketMindShortcuts: AppShortcutsProvider {
             shortTitle: "Find Free Time",
             systemImageName: "clock"
         )
+
+        // Delete a calendar event with confirmation
+        AppShortcut(
+            intent: DeleteCalendarEventIntent(),
+            phrases: [
+                "Delete event in \(.applicationName)",
+                "Delete a \(.applicationName) event",
+                "Remove event from \(.applicationName)"
+            ],
+            shortTitle: "Delete Event",
+            systemImageName: "calendar.badge.minus"
+        )
+
+        // Undo the last deletion
+        AppShortcut(
+            intent: UndoLastDeletionIntent(),
+            phrases: [
+                "Undo last deletion in \(.applicationName)",
+                "Restore deleted event in \(.applicationName)",
+                "Undo \(.applicationName) deletion"
+            ],
+            shortTitle: "Undo Deletion",
+            systemImageName: "arrow.uturn.backward.circle"
+        )
     }
 }
