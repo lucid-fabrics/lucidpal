@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 @MainActor
-final class AppSettings: ObservableObject {
+final class AppSettings: ObservableObject, AppSettingsProtocol {
 
     // MARK: - Stored Preferences
 

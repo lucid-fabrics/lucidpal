@@ -1,47 +1,6 @@
 import Foundation
 
-// MARK: - Action payload
-
-struct CalendarActionPayload: Decodable {
-    enum ActionType: String, Decodable {
-        case create
-        case update
-        case delete
-        case query
-    }
-
-    // Optional — small models often omit it; default to .create
-    let action: ActionType?
-    let title: String?         // required for create/update; omitted for delete
-    let search: String?        // existing event title to find (update/delete)
-    let start: Date?           // event start for create/update; range start for bulk delete
-    let end: Date?             // event end for create/update; range end for bulk delete
-    let location: String?
-    let notes: String?
-    let reminderMinutes: Int?  // minutes before event to trigger alarm
-    let isAllDay: Bool?        // true for all-day events (holidays, birthdays)
-    let recurrence: String?    // "daily" | "weekly" | "monthly" | "yearly"
-    let recurrenceEnd: Date?   // optional end date for recurrence
-    let durationMinutes: Int?  // for query: desired free slot length in minutes
-}
-
-// MARK: - Result
-
-enum CalendarActionResult {
-    case success(String, CalendarEventPreview)
-    case bulkPending([CalendarEventPreview])   // multiple pending-deletion cards
-    case queryResult(String)                   // free slot query — plain text answer
-    case failure(String)
-}
-
-// MARK: - Protocol
-
-/// Abstraction for executing LLM-emitted calendar action JSON.
-/// Inject via `any CalendarActionControllerProtocol` in ChatViewModel for testability.
-@MainActor
-protocol CalendarActionControllerProtocol: AnyObject {
-    func execute(json: String) async -> CalendarActionResult
-}
+// Types: see CalendarActionModels.swift
 
 // MARK: - Controller
 
@@ -124,6 +83,8 @@ final class CalendarActionController: CalendarActionControllerProtocol {
             return await findEventForDeletion(payload)
         case .query:
             return await findFreeSlots(payload)
+        case .list:
+            return await listEvents(payload)
         }
     }
 
@@ -231,7 +192,9 @@ final class CalendarActionController: CalendarActionControllerProtocol {
                 calendarName: calendarName,
                 reminderMinutes: p.reminderMinutes,
                 isAllDay: p.isAllDay ?? false,
-                recurrence: p.recurrence
+                recurrence: p.recurrence,
+                location: p.location,
+                hasConflict: !conflicts.isEmpty
             )
             return .success("Added \"\(title)\" to your calendar.\(conflictNote)", preview)
         } catch {
@@ -251,56 +214,45 @@ final class CalendarActionController: CalendarActionControllerProtocol {
         let events = calendarService.events(in: rangeStart, end: rangeEnd)
             .sorted { $0.startDate < $1.startDate }
 
-        // Collect and merge overlapping busy windows
-        var merged: [(Date, Date)] = []
+        // Merge overlapping busy windows
+        var merged: [(start: Date, end: Date)] = []
         for ev in events {
-            let window = (ev.startDate, ev.endDate)
-            if let last = merged.last, window.0 < last.1 {
-                merged[merged.count - 1] = (last.0, max(last.1, window.1))
+            let window = (start: ev.startDate, end: ev.endDate)
+            if let last = merged.last, window.start < last.end {
+                merged[merged.count - 1] = (last.start, max(last.end, window.end))
             } else {
                 merged.append(window)
             }
         }
 
-        // Find gaps ≥ duration within working hours (8am–8pm)
-        let cal = Calendar.current
-        var slots: [String] = []
-        var cursor = rangeStart
+        let freeSlots = CalendarFreeSlotEngine.findSlots(
+            busyWindows: merged,
+            rangeStart: rangeStart,
+            rangeEnd: rangeEnd,
+            duration: duration
+        )
+        return .queryResult(freeSlots)
+    }
 
-        // Clamp cursor to next 8am if before
-        func nextWorkStart(_ from: Date) -> Date {
-            var comps = cal.dateComponents([.year, .month, .day], from: from)
-            comps.hour = 8; comps.minute = 0; comps.second = 0
-            let day8am = cal.date(from: comps) ?? from
-            return day8am < from ? cal.date(byAdding: .day, value: 1, to: day8am) ?? from : day8am
+    private func listEvents(_ p: CalendarActionPayload) async -> CalendarActionResult {
+        guard let rangeStart = p.start, let rangeEnd = p.end, rangeStart < rangeEnd else {
+            return .failure("(List requires a valid start and end date range.)")
         }
-        func dayEnd(_ from: Date) -> Date {
-            var comps = cal.dateComponents([.year, .month, .day], from: from)
-            comps.hour = 20; comps.minute = 0; comps.second = 0
-            return cal.date(from: comps) ?? from
+        let events = calendarService.events(in: rangeStart, end: rangeEnd)
+            .sorted { $0.startDate < $1.startDate }
+        let previews = events.map { event in
+            CalendarEventPreview(
+                title: event.title ?? "Untitled",
+                start: event.startDate,
+                end: event.endDate,
+                calendarName: event.calendarTitle,
+                state: .created,
+                eventIdentifier: event.eventIdentifier,
+                isAllDay: event.isAllDay,
+                location: event.location
+            )
         }
-
-        cursor = nextWorkStart(cursor)
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-
-        for window in merged + [(rangeEnd, rangeEnd)] {
-            guard cursor < rangeEnd else { break }
-            let freeEnd = min(window.0, dayEnd(cursor))
-            if freeEnd > cursor && freeEnd.timeIntervalSince(cursor) >= duration {
-                slots.append("• \(formatter.string(from: cursor)) – \(formatter.string(from: freeEnd))")
-                if slots.count == 3 { break }
-            }
-            let afterBusy = window.1
-            cursor = max(cursor, max(afterBusy, nextWorkStart(afterBusy)))
-        }
-
-        if slots.isEmpty {
-            return .queryResult("No free \(requestedMinutes)-minute slots found in that range.")
-        }
-        let label = "\(requestedMinutes)-minute"
-        return .queryResult("Free \(label) slots:\n" + slots.joined(separator: "\n"))
+        return .listResult(previews)
     }
 
     private func bulkFindEventsForDeletion(_ p: CalendarActionPayload) async -> CalendarActionResult {

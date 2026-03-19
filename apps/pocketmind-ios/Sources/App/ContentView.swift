@@ -4,7 +4,7 @@ struct ContentView: View {
 
     // MARK: - Dependencies
 
-    @ObservedObject var chatViewModel: ChatViewModel
+    @ObservedObject var sessionListViewModel: SessionListViewModel
     @ObservedObject var settingsViewModel: SettingsViewModel
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
 
@@ -12,7 +12,7 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            ChatView(viewModel: chatViewModel)
+            SessionListView(viewModel: sessionListViewModel)
                 .tabItem {
                     Label(Tab.chat.title, systemImage: Tab.chat.icon)
                 }

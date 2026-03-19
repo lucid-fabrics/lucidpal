@@ -96,7 +96,7 @@ final class ModelDownloadViewModelTests: XCTestCase {
 
     // MARK: - loadModel
 
-    func testLoadModelDoesNothingWhenModelNotOnDisk() async {
+    func testLoadModelDoesNothingWhenModelNotOnDisk() async throws {
         // selectedModel.isDownloaded is false in test env (no file on disk)
         await viewModel.loadModel()
         XCTAssertFalse(viewModel.isModelLoaded)

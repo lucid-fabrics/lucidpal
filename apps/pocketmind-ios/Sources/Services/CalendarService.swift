@@ -24,6 +24,17 @@ struct CalendarEventInfo: Sendable {
     let endDate: Date
     let isAllDay: Bool
     let calendarTitle: String?
+    let location: String?
+
+    init(eventIdentifier: String?, title: String?, startDate: Date, endDate: Date, isAllDay: Bool, calendarTitle: String?, location: String? = nil) {
+        self.eventIdentifier = eventIdentifier
+        self.title = title
+        self.startDate = startDate
+        self.endDate = endDate
+        self.isAllDay = isAllDay
+        self.calendarTitle = calendarTitle
+        self.location = location
+    }
 }
 
 // CalendarService is a pure data-access service — it holds no observable UI state.
@@ -66,7 +77,8 @@ final class CalendarService {
             startDate: event.startDate,
             endDate: event.endDate,
             isAllDay: event.isAllDay,
-            calendarTitle: event.calendar?.title
+            calendarTitle: event.calendar?.title,
+            location: event.location.flatMap { $0.isEmpty ? nil : $0 }
         )
     }
 

@@ -122,7 +122,7 @@ struct SettingsView: View {
         } header: {
             Text("Model")
         } footer: {
-            Text("Device RAM: \(viewModel.settings.deviceRAMGB) GB")
+            Text("Device RAM: \(viewModel.settings.deviceRAMGB) GB · Free storage: \(Self.freeStorageString)")
         }
     }
 
@@ -155,6 +155,12 @@ struct SettingsView: View {
                 Link("Source Code", destination: url)
             }
         }
+    }
+
+    private static var freeStorageString: String {
+        let attrs = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory())
+        let free = (attrs?[.systemFreeSize] as? Int64) ?? 0
+        return String(format: "%.1f GB free", Double(free) / 1_073_741_824)
     }
 
     private static var appVersion: String {

@@ -22,7 +22,7 @@ final class ChatHistoryManagerTests: XCTestCase {
         XCTAssertTrue(messages.isEmpty)
     }
 
-    func testSaveAndLoadRoundTrip() async {
+    func testSaveAndLoadRoundTrip() async throws {
         let messages = [
             ChatMessage(role: .user, content: "hello"),
             ChatMessage(role: .assistant, content: "hi there"),
@@ -35,7 +35,7 @@ final class ChatHistoryManagerTests: XCTestCase {
         XCTAssertEqual(loaded[1].content, "hi there")
     }
 
-    func testSaveFiltersSystemMessages() async {
+    func testSaveFiltersSystemMessages() async throws {
         let messages = [
             ChatMessage(role: .system, content: "system prompt"),
             ChatMessage(role: .user, content: "user message"),
@@ -47,7 +47,7 @@ final class ChatHistoryManagerTests: XCTestCase {
         XCTAssertEqual(loaded.first?.role, .user)
     }
 
-    func testClearRemovesPersistedMessages() async {
+    func testClearRemovesPersistedMessages() async throws {
         let messages = [ChatMessage(role: .user, content: "test")]
         await manager.save(messages).value
 
@@ -56,14 +56,14 @@ final class ChatHistoryManagerTests: XCTestCase {
         XCTAssertTrue(loaded.isEmpty)
     }
 
-    func testSaveEmptyArrayProducesEmptyLoad() async {
+    func testSaveEmptyArrayProducesEmptyLoad() async throws {
         await manager.save([]).value
 
         let loaded = manager.load()
         XCTAssertTrue(loaded.isEmpty)
     }
 
-    func testLoadPreservesMessageRoles() async {
+    func testLoadPreservesMessageRoles() async throws {
         let messages = [
             ChatMessage(role: .user, content: "q"),
             ChatMessage(role: .assistant, content: "a"),
@@ -76,7 +76,7 @@ final class ChatHistoryManagerTests: XCTestCase {
     }
 
     func testLoadReturnsFallbackWhenFileMalformed() throws {
-        try "not valid json {{{".data(using: .utf8)!.write(to: ChatHistoryManager.historyURL)
+        try XCTUnwrap("not valid json {{{".data(using: .utf8)).write(to: ChatHistoryManager.historyURL)
         let messages = manager.load()
         XCTAssertTrue(messages.isEmpty)
     }

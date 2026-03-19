@@ -11,14 +11,18 @@ struct PocketMindApp: App {
     private let llmService = LLMService()
     private let calendarService = CalendarService()
     private let speechService = SpeechService()
+    private let hapticService = HapticService()
     private let modelDownloader = ModelDownloader()
-    private let calendarActionController: CalendarActionController
+    private let calendarActionController: any CalendarActionControllerProtocol
 
     // MARK: - ViewModels
 
-    private let chatViewModel: ChatViewModel
+    private let sessionListViewModel: SessionListViewModel
     private let settingsViewModel: SettingsViewModel
     private let downloadViewModel: ModelDownloadViewModel
+
+    // Stored so the system doesn't immediately deallocate the observer.
+    private var memoryWarningObserver: (any NSObjectProtocol)?
 
     // MARK: - Environment
 
@@ -29,12 +33,15 @@ struct PocketMindApp: App {
     init() {
         let actionController = CalendarActionController(calendarService: calendarService, settings: settings)
         calendarActionController = actionController
-        chatViewModel = ChatViewModel(
+        let sessionManager = SessionManager()
+        sessionListViewModel = SessionListViewModel(
+            sessionManager: sessionManager,
             llmService: llmService,
             calendarService: calendarService,
             calendarActionController: actionController,
             settings: settings,
-            speechService: speechService
+            speechService: speechService,
+            hapticService: hapticService
         )
         settingsViewModel = SettingsViewModel(
             settings: settings,
@@ -46,9 +53,10 @@ struct PocketMindApp: App {
             downloader: modelDownloader
         )
 
-        // Cancel LLM generation on memory pressure to avoid Jetsam crash
+        // Cancel LLM generation on memory pressure to avoid Jetsam crash.
+        // Token is stored in memoryWarningObserver to prevent premature deallocation.
         let service = llmService
-        NotificationCenter.default.addObserver(
+        memoryWarningObserver = NotificationCenter.default.addObserver(
             forName: UIApplication.didReceiveMemoryWarningNotification,
             object: nil,
             queue: .main
@@ -63,20 +71,16 @@ struct PocketMindApp: App {
         WindowGroup {
             RootView(
                 settings: settings,
-                chatViewModel: chatViewModel,
+                sessionListViewModel: sessionListViewModel,
                 settingsViewModel: settingsViewModel,
                 downloadViewModel: downloadViewModel
             )
         }
         .onChange(of: scenePhase) { _, phase in
-            switch phase {
-            case .active:
+            if phase == .active {
                 consumePendingSiriQuery()
-            case .background:
-                chatViewModel.flushPersistence()
-            default:
-                break
             }
+            // Background persistence is handled per-session by ChatSessionContainer.
         }
     }
 
@@ -86,17 +90,13 @@ struct PocketMindApp: App {
         guard let query = UserDefaults.standard.string(forKey: "pm_siri_pending_query"),
               !query.isEmpty else { return }
         UserDefaults.standard.removeObject(forKey: "pm_siri_pending_query")
-        guard chatViewModel.isModelLoaded else {
-            chatViewModel.errorMessage = "Model not ready — please wait for it to load, then ask again."
-            return
-        }
-        chatViewModel.handleSiriQuery(query)
+        sessionListViewModel.scheduleSiriQuery(query)
     }
 }
 
 private struct RootView: View {
     @ObservedObject var settings: AppSettings
-    @ObservedObject var chatViewModel: ChatViewModel
+    @ObservedObject var sessionListViewModel: SessionListViewModel
     @ObservedObject var settingsViewModel: SettingsViewModel
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
 
@@ -107,7 +107,7 @@ private struct RootView: View {
         // link. Kicking back to Onboarding would orphan chat history.
         if settings.hasCompletedOnboarding {
             ContentView(
-                chatViewModel: chatViewModel,
+                sessionListViewModel: sessionListViewModel,
                 settingsViewModel: settingsViewModel,
                 downloadViewModel: downloadViewModel
             )

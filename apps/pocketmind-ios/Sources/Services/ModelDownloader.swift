@@ -1,5 +1,8 @@
 import Combine
 import Foundation
+import OSLog
+
+private let logger = Logger(subsystem: "com.pocketmind", category: "ModelDownloader")
 
 enum DownloadState: Equatable, Sendable {
     case idle
@@ -115,7 +118,9 @@ extension ModelDownloader: URLSessionDownloadDelegate {
 
         // Sanity-check file size: reject files under 10 MB (an HTML error page is a few KB).
         let minExpectedBytes: Int64 = 10 * 1024 * 1024
-        let downloadedSize = (try? FileManager.default.attributesOfItem(atPath: location.path)[.size] as? Int64) ?? 0
+        let rawSize = try? FileManager.default.attributesOfItem(atPath: location.path)[.size] as? Int64
+        if rawSize == nil { logger.warning("Could not read temp file attributes at \(location.path)") }
+        let downloadedSize = rawSize ?? 0
         guard downloadedSize >= minExpectedBytes else {
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
