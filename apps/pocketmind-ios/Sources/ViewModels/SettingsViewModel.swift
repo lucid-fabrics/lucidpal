@@ -16,7 +16,7 @@ final class SettingsViewModel: ObservableObject {
         self.availableModels = ModelInfo.available(physicalRAMGB: settings.deviceRAMGB)
 
         if availableModels.isEmpty {
-            availableModels = [.qwen3_1B7]
+            availableModels = [.qwen3_5_2B]
         }
     }
 

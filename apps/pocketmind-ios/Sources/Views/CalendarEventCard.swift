@@ -31,7 +31,7 @@ struct CalendarEventCard: View {
             pendingUpdateCard
         case .updateCancelled:
             statusCard(icon: "xmark.circle", label: "Update cancelled", color: .secondary)
-        case .created, .updated, .rescheduled, .restored:
+        case .created, .updated, .rescheduled, .restored, .listed:
             tappableCard
         }
     }

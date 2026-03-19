@@ -43,9 +43,9 @@ for try await token in llmService.generate(
 }
 ```
 
-## Thinking Mode (Qwen3 `<think>` Tags)
+## Thinking Mode (Qwen3.5 `<think>` Tags)
 
-Qwen3 models emit a `<think>...</think>` block before answering. PocketMind handles this live:
+Qwen3.5 models emit a `<think>...</think>` block before answering. PocketMind handles this live:
 
 ```
 <think>
@@ -75,8 +75,8 @@ let historyLimit = ramGB >= 6
 
 | RAM | Context | History Limit |
 |-----|---------|---------------|
-| < 6 GB | 4K tokens | 20 messages |
-| ≥ 6 GB | 8K tokens | 50 messages |
+| < 4 GB | 4K tokens | 20 messages |
+| ≥ 4 GB | 8K tokens | 50 messages |
 
 ## Sampler Configuration
 

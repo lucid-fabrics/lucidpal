@@ -20,19 +20,19 @@ final class AppSettingsTests: XCTestCase {
         super.tearDown()
     }
 
-    func testSelectedModelReturnsQwen1B7ByID() {
-        settings.selectedModelID = ModelInfo.qwen3_1B7.id
-        XCTAssertEqual(settings.selectedModel, .qwen3_1B7)
+    func testSelectedModelReturnsQwen3_5_2BByID() {
+        settings.selectedModelID = ModelInfo.qwen3_5_2B.id
+        XCTAssertEqual(settings.selectedModel, .qwen3_5_2B)
     }
 
-    func testSelectedModelReturnsQwen4BByID() {
-        settings.selectedModelID = ModelInfo.qwen3_4B.id
-        XCTAssertEqual(settings.selectedModel, .qwen3_4B)
+    func testSelectedModelReturnsQwen3_5_4BByID() {
+        settings.selectedModelID = ModelInfo.qwen3_5_4B.id
+        XCTAssertEqual(settings.selectedModel, .qwen3_5_4B)
     }
 
-    func testSelectedModelFallsBackToQwen1B7ForUnknownID() {
+    func testSelectedModelFallsBackToQwen3_5_2BForUnknownID() {
         settings.selectedModelID = "nonexistent-model-id"
-        XCTAssertEqual(settings.selectedModel, .qwen3_1B7)
+        XCTAssertEqual(settings.selectedModel, .qwen3_5_2B)
     }
 
     func testDeviceRAMGBIsPositive() {

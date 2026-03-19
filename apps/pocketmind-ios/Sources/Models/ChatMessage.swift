@@ -36,6 +36,8 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
         case restored
         case pendingUpdate
         case updateCancelled
+        /// Read-only result from a list action — rendered as a grouped calendar card.
+        case listed
     }
 
     let id: UUID

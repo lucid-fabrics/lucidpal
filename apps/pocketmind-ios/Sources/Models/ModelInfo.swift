@@ -25,30 +25,39 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
 
     // MARK: - Available Models
 
-    static let qwen3_1B7 = ModelInfo(
-        id: "qwen3-1.7b-q8",
-        displayName: "Qwen3 1.7B (Q8_0) · 1.83 GB",
-        downloadURL: knownURL("https://huggingface.co/Qwen/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q8_0.gguf"),
-        filename: "Qwen3-1.7B-Q8_0.gguf",
-        fileSizeGB: 1.83,
+    static let qwen3_5_0B8 = ModelInfo(
+        id: "qwen3.5-0.8b-q4km",
+        displayName: "Qwen3.5 0.8B (Q4_K_M) · 0.51 GB",
+        downloadURL: knownURL("https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/main/Qwen3.5-0.8B-Q4_K_M.gguf"),
+        filename: "Qwen3.5-0.8B-Q4_K_M.gguf",
+        fileSizeGB: 0.51,
+        minimumRAMGB: 2
+    )
+
+    static let qwen3_5_2B = ModelInfo(
+        id: "qwen3.5-2b-q4km",
+        displayName: "Qwen3.5 2B (Q4_K_M) · 1.2 GB",
+        downloadURL: knownURL("https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf"),
+        filename: "Qwen3.5-2B-Q4_K_M.gguf",
+        fileSizeGB: 1.2,
         minimumRAMGB: 3
     )
 
-    static let qwen3_4B = ModelInfo(
-        id: "qwen3-4b-q4",
-        displayName: "Qwen3 4B (Q4_K_M) · 2.5 GB",
-        downloadURL: knownURL("https://huggingface.co/Qwen/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf"),
-        filename: "Qwen3-4B-Q4_K_M.gguf",
+    static let qwen3_5_4B = ModelInfo(
+        id: "qwen3.5-4b-q4km",
+        displayName: "Qwen3.5 4B (Q4_K_M) · 2.5 GB",
+        downloadURL: knownURL("https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf"),
+        filename: "Qwen3.5-4B-Q4_K_M.gguf",
         fileSizeGB: 2.5,
         minimumRAMGB: 5
     )
 
     static func available(physicalRAMGB: Int) -> [ModelInfo] {
-        [.qwen3_1B7, .qwen3_4B].filter { $0.minimumRAMGB <= physicalRAMGB }
+        [.qwen3_5_0B8, .qwen3_5_2B, .qwen3_5_4B].filter { $0.minimumRAMGB <= physicalRAMGB }
     }
 
     static func recommended(physicalRAMGB: Int) -> ModelInfo {
-        physicalRAMGB >= 5 ? .qwen3_4B : .qwen3_1B7
+        physicalRAMGB >= 5 ? .qwen3_5_4B : .qwen3_5_2B
     }
 
     // MARK: - Private Helpers

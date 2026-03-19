@@ -2,7 +2,7 @@
 
 An on-device AI assistant for iOS with native calendar access. All inference runs locally — no internet connection, no API keys, no data leaves your phone.
 
-Powered by [Qwen3](https://huggingface.co/Qwen) and [llama.cpp](https://github.com/ggml-org/llama.cpp).
+Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [llama.cpp](https://github.com/ggml-org/llama.cpp).
 
 **[Documentation](https://lucid-fabrics.github.io/pocketmind)**
 
@@ -25,9 +25,9 @@ Powered by [Qwen3](https://huggingface.co/Qwen) and [llama.cpp](https://github.c
 
 | | Minimum |
 |---|---|
-| iPhone | Any model with 4 GB RAM (iPhone 12 or newer recommended) |
+| iPhone | Any model with 2 GB RAM (iPhone 12 or newer recommended) |
 | iOS | 16.0 |
-| Free storage | 2 GB (1.7B model) or 3 GB (4B model) |
+| Free storage | 1 GB (0.8B model), 2 GB (2B model), or 3 GB (4B model) |
 
 ---
 
@@ -35,7 +35,7 @@ Powered by [Qwen3](https://huggingface.co/Qwen) and [llama.cpp](https://github.c
 
 1. **Download the app** from the App Store *(coming soon)*
 2. **Choose a model** — the app recommends one based on your device RAM
-3. **Download** — the model fetches directly from Hugging Face (~1.8–2.5 GB, Wi-Fi recommended)
+3. **Download** — the model fetches directly from Hugging Face (~0.5–2.5 GB, Wi-Fi recommended)
 4. **Grant calendar access** — optional; required for reading/writing events
 5. **Start chatting**
 
@@ -75,10 +75,11 @@ PocketMind registers four shortcuts automatically. Use them from Siri, the Short
 
 | Model | Size | Best for |
 |-------|------|----------|
-| Qwen3 1.7B Q8_0 | 1.83 GB | Devices with 4–6 GB RAM |
-| Qwen3 4B Q4_K_M | 2.5 GB | Devices with 6 GB+ RAM |
+| Qwen3.5 0.8B Q4_K_M | 0.51 GB | Devices with 2–3 GB RAM |
+| Qwen3.5 2B Q4_K_M | 1.2 GB | Devices with 3–5 GB RAM |
+| Qwen3.5 4B Q4_K_M | 2.5 GB | Devices with 5 GB+ RAM |
 
-Both models support Qwen3's built-in reasoning (thinking mode). Disable it in Settings for faster, more concise answers.
+All models support Qwen3.5's built-in reasoning (thinking mode). Disable it in Settings for faster, more concise answers.
 
 ---
 

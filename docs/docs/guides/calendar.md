@@ -75,6 +75,10 @@ After describing the event, a **preview card** appears in the chat. Tap **Confir
 
 Events appear as cards in the chat, sorted by time. Tap any card to open it in the Calendar app.
 
+:::note
+Tapping a card opens the Calendar app scrolled to that date. The view mode (day, week, or month) is determined by whatever you last had open in Calendar — PocketMind cannot control which view opens.
+:::
+
 ---
 
 ## Finding Free Time

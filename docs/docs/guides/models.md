@@ -12,10 +12,11 @@ PocketMind runs an AI model entirely on your device. On first launch, you'll be 
 
 | Model | Download size | Min RAM | Best for |
 |-------|--------------|---------|----------|
-| Qwen3 1.7B | 1.83 GB | 4 GB RAM | iPhone 12 / 13 with 4 GB RAM |
-| Qwen3 4B | 2.5 GB | 6 GB RAM | iPhone 14 Pro / 15 / 16 and newer |
+| Qwen3.5 0.8B | 0.51 GB | 2 GB RAM | Older iPhones with limited RAM |
+| Qwen3.5 2B | 1.2 GB | 3 GB RAM | iPhone 12 / 13 — recommended default |
+| Qwen3.5 4B | 2.5 GB | 5 GB RAM | iPhone 14 Pro / 15 / 16 and newer |
 
-Both models run at the same speed relative to their size — the 4B model gives more accurate and nuanced responses.
+All three models run at similar speed relative to their size — the 4B model gives more accurate and nuanced responses.
 
 ---
 
@@ -27,7 +28,7 @@ Both models run at the same speed relative to their size — the 4B model gives 
 4. **Start chatting** — once the download completes, PocketMind loads the model and you're ready to go.
 
 :::note
-Wi-Fi is strongly recommended. The models are between 1.8 GB and 2.5 GB.
+Wi-Fi is strongly recommended. The models are between 0.51 GB and 2.5 GB.
 :::
 
 ---
@@ -46,7 +47,7 @@ Models are stored in the app's local storage on your device. Deleting the app al
 
 ## Thinking Mode
 
-Qwen3 models support a **Thinking** mode where the AI reasons through your request before answering. This improves accuracy for complex calendar operations.
+Qwen3.5 models support a **Thinking** mode where the AI reasons through your request before answering. This improves accuracy for complex calendar operations.
 
 Toggle it in **Settings → Thinking Mode**. When enabled, you can tap the **Thinking** disclosure in any assistant reply to see the reasoning steps.
 

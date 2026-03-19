@@ -56,7 +56,7 @@ Your chat sessions are saved locally in the app's private storage on your device
 
 ## The AI Model
 
-The Qwen3 model files are stored locally after download. Once downloaded, PocketMind works completely offline. The model weights are never sent anywhere — all inference runs via **llama.cpp** with Metal GPU acceleration directly on your iPhone's Neural Engine.
+The Qwen3.5 model files are stored locally after download. Once downloaded, PocketMind works completely offline. The model weights are never sent anywhere — all inference runs via **llama.cpp** with Metal GPU acceleration directly on your iPhone's Neural Engine.
 
 ---
 
