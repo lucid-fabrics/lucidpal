@@ -6,10 +6,10 @@ final class SettingsViewModel: ObservableObject {
     @Published var calendarAuthStatus: CalendarAuthorizationStatus = .notDetermined
     @Published var availableModels: [ModelInfo] = []
 
-    let settings: AppSettings
+    let settings: any AppSettingsProtocol
     let calendarService: any CalendarServiceProtocol
 
-    init(settings: AppSettings, calendarService: any CalendarServiceProtocol) {
+    init(settings: any AppSettingsProtocol, calendarService: any CalendarServiceProtocol) {
         self.settings = settings
         self.calendarService = calendarService
         self.calendarAuthStatus = calendarService.authorizationStatus

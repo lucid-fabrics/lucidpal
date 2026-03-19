@@ -16,7 +16,7 @@ final class CalendarActionControllerTests: XCTestCase {
 
     // MARK: - Create
 
-    func testCreateEventSuccess() async {
+    func testCreateEventSuccess() async throws {
         let json = #"{"action":"create","title":"Dentist","start":"2026-06-01T10:00:00","end":"2026-06-01T11:00:00"}"#
         let result = await controller.execute(json: json)
         guard case .success(_, let preview) = result else {
@@ -27,7 +27,7 @@ final class CalendarActionControllerTests: XCTestCase {
         XCTAssertEqual(mock.createdEvents.count, 1)
     }
 
-    func testCreateEventAllDay() async {
+    func testCreateEventAllDay() async throws {
         let json = #"{"action":"create","title":"Holiday","start":"2026-07-04T00:00:00","end":"2026-07-04T00:00:00","isAllDay":true}"#
         let result = await controller.execute(json: json)
         guard case .success(_, let preview) = result else {
@@ -38,7 +38,7 @@ final class CalendarActionControllerTests: XCTestCase {
         XCTAssertEqual(mock.createdEvents.first?.title, "Holiday")
     }
 
-    func testCreateEventWithReminder() async {
+    func testCreateEventWithReminder() async throws {
         let json = #"{"action":"create","title":"Meeting","start":"2026-06-01T09:00:00","end":"2026-06-01T10:00:00","reminderMinutes":15}"#
         let result = await controller.execute(json: json)
         guard case .success(_, let preview) = result else {
@@ -48,7 +48,7 @@ final class CalendarActionControllerTests: XCTestCase {
         XCTAssertEqual(mock.createdEvents.count, 1)
     }
 
-    func testCreateEventWithRecurrence() async {
+    func testCreateEventWithRecurrence() async throws {
         let json = #"{"action":"create","title":"Standup","start":"2026-06-02T09:00:00","end":"2026-06-02T09:30:00","recurrence":"weekly"}"#
         let result = await controller.execute(json: json)
         guard case .success(_, let preview) = result else {
@@ -57,7 +57,7 @@ final class CalendarActionControllerTests: XCTestCase {
         XCTAssertEqual(preview.recurrence, "weekly")
     }
 
-    func testCreateMissingTitleFails() async {
+    func testCreateMissingTitleFails() async throws {
         let json = #"{"action":"create","start":"2026-06-01T10:00:00","end":"2026-06-01T11:00:00"}"#
         let result = await controller.execute(json: json)
         guard case .failure = result else {
@@ -67,7 +67,7 @@ final class CalendarActionControllerTests: XCTestCase {
 
     // MARK: - Delete
 
-    func testDeleteBySearchTitle() async {
+    func testDeleteBySearchTitle() async throws {
         mock.stubbedEvents = [makeEvent(title: "Dentist")]
         let json = #"{"action":"delete","search":"Dentist"}"#
         let result = await controller.execute(json: json)
@@ -78,7 +78,7 @@ final class CalendarActionControllerTests: XCTestCase {
         XCTAssertEqual(preview.title, "Dentist")
     }
 
-    func testDeleteNotFoundFails() async {
+    func testDeleteNotFoundFails() async throws {
         mock.stubbedEvents = []
         let json = #"{"action":"delete","search":"Nonexistent"}"#
         let result = await controller.execute(json: json)
@@ -87,7 +87,7 @@ final class CalendarActionControllerTests: XCTestCase {
         }
     }
 
-    func testBulkDeleteByDateRange() async {
+    func testBulkDeleteByDateRange() async throws {
         mock.stubbedEvents = [
             makeEvent(title: "Event A"),
             makeEvent(title: "Event B"),
@@ -104,7 +104,7 @@ final class CalendarActionControllerTests: XCTestCase {
 
     // MARK: - Update
 
-    func testUpdateEventRename() async {
+    func testUpdateEventRename() async throws {
         mock.stubbedEvents = [makeEvent(title: "Team Sync")]
         let json = #"{"action":"update","search":"Team Sync","title":"Weekly Review"}"#
         let result = await controller.execute(json: json)
@@ -115,7 +115,7 @@ final class CalendarActionControllerTests: XCTestCase {
         XCTAssertEqual(preview.pendingUpdate?.title, "Weekly Review")
     }
 
-    func testUpdateEventReschedule() async {
+    func testUpdateEventReschedule() async throws {
         mock.stubbedEvents = [makeEvent(title: "Dentist")]
         let json = #"{"action":"update","search":"Dentist","start":"2026-06-10T14:00:00","end":"2026-06-10T15:00:00"}"#
         let result = await controller.execute(json: json)
@@ -129,7 +129,7 @@ final class CalendarActionControllerTests: XCTestCase {
         XCTAssertEqual(Calendar.current.component(.minute, from: pendingStart), 0)
     }
 
-    func testUpdateNoFieldsFails() async {
+    func testUpdateNoFieldsFails() async throws {
         mock.stubbedEvents = [makeEvent(title: "Meeting")]
         let json = #"{"action":"update","search":"Meeting"}"#
         let result = await controller.execute(json: json)
@@ -140,14 +140,14 @@ final class CalendarActionControllerTests: XCTestCase {
 
     // MARK: - Malformed input
 
-    func testMalformedJSONFails() async {
+    func testMalformedJSONFails() async throws {
         let result = await controller.execute(json: "{not valid json}")
         guard case .failure = result else {
             return XCTFail("Expected .failure for malformed JSON")
         }
     }
 
-    func testEmptyJSONFails() async {
+    func testEmptyJSONFails() async throws {
         let result = await controller.execute(json: "")
         guard case .failure = result else {
             return XCTFail("Expected .failure for empty input")
@@ -156,18 +156,17 @@ final class CalendarActionControllerTests: XCTestCase {
 
     // MARK: - Free slot query
 
-    func testFreeSlotQueryNoEvents() async {
+    func testFreeSlotQueryNoEvents() async throws {
         mock.stubbedEvents = []
         let json = #"{"action":"query","start":"2026-06-01T08:00:00","end":"2026-06-01T20:00:00","durationMinutes":60}"#
         let result = await controller.execute(json: json)
-        guard case .queryResult(let answer) = result else {
+        guard case .queryResult(let slots) = result else {
             return XCTFail("Expected .queryResult")
         }
-        XCTAssertFalse(answer.isEmpty)
-        XCTAssertTrue(answer.contains("Free") || answer.contains("slot") || answer.contains("•"))
+        XCTAssertFalse(slots.isEmpty)
     }
 
-    func testFreeSlotQueryInvalidRangeFails() async {
+    func testFreeSlotQueryInvalidRangeFails() async throws {
         let json = #"{"action":"query","start":"2026-06-01T20:00:00","end":"2026-06-01T08:00:00","durationMinutes":60}"#
         let result = await controller.execute(json: json)
         guard case .failure = result else {
@@ -175,7 +174,7 @@ final class CalendarActionControllerTests: XCTestCase {
         }
     }
 
-    func testFreeSlotQueryZeroDurationFails() async {
+    func testFreeSlotQueryZeroDurationFails() async throws {
         let json = #"{"action":"query","start":"2026-06-01T08:00:00","end":"2026-06-01T20:00:00","durationMinutes":0}"#
         let result = await controller.execute(json: json)
         guard case .failure = result else {
@@ -185,7 +184,7 @@ final class CalendarActionControllerTests: XCTestCase {
 
     // MARK: - Create validation
 
-    func testCreateMissingStartFails() async {
+    func testCreateMissingStartFails() async throws {
         let json = #"{"action":"create","title":"Meeting","end":"2026-06-01T11:00:00"}"#
         let result = await controller.execute(json: json)
         guard case .failure = result else {
@@ -193,7 +192,7 @@ final class CalendarActionControllerTests: XCTestCase {
         }
     }
 
-    func testCreateMissingEndFails() async {
+    func testCreateMissingEndFails() async throws {
         let json = #"{"action":"create","title":"Meeting","start":"2026-06-01T10:00:00"}"#
         let result = await controller.execute(json: json)
         guard case .failure = result else {
@@ -203,7 +202,7 @@ final class CalendarActionControllerTests: XCTestCase {
 
     // MARK: - Update validation
 
-    func testUpdateMissingSearchFails() async {
+    func testUpdateMissingSearchFails() async throws {
         let json = #"{"action":"update","title":"New Title"}"#
         let result = await controller.execute(json: json)
         guard case .failure = result else {
@@ -211,7 +210,7 @@ final class CalendarActionControllerTests: XCTestCase {
         }
     }
 
-    func testUpdateEventNotFoundFails() async {
+    func testUpdateEventNotFoundFails() async throws {
         mock.stubbedEvents = []
         let json = #"{"action":"update","search":"Ghost Event","title":"New"}"#
         let result = await controller.execute(json: json)
@@ -222,7 +221,7 @@ final class CalendarActionControllerTests: XCTestCase {
 
     // MARK: - Delete validation
 
-    func testDeleteMissingSearchAndRangeFails() async {
+    func testDeleteMissingSearchAndRangeFails() async throws {
         let json = #"{"action":"delete"}"#
         let result = await controller.execute(json: json)
         guard case .failure = result else {
@@ -230,7 +229,7 @@ final class CalendarActionControllerTests: XCTestCase {
         }
     }
 
-    func testBulkDeleteNoEventsInRangeFails() async {
+    func testBulkDeleteNoEventsInRangeFails() async throws {
         mock.stubbedEvents = []
         let json = #"{"action":"delete","start":"2026-06-01T00:00:00","end":"2026-06-01T23:59:59"}"#
         let result = await controller.execute(json: json)
@@ -241,7 +240,7 @@ final class CalendarActionControllerTests: XCTestCase {
 
     // MARK: - Query validation
 
-    func testQueryMissingStartFails() async {
+    func testQueryMissingStartFails() async throws {
         let json = #"{"action":"query","end":"2026-06-01T20:00:00","durationMinutes":60}"#
         let result = await controller.execute(json: json)
         guard case .failure = result else {
@@ -249,20 +248,20 @@ final class CalendarActionControllerTests: XCTestCase {
         }
     }
 
-    func testQueryWithEventsReturnsReducedSlots() async {
+    func testQueryWithEventsReturnsReducedSlots() async throws {
         // Window is 1h but we need 2h — no free slots regardless of events
         let json = #"{"action":"query","start":"2026-06-01T08:00:00","end":"2026-06-01T09:00:00","durationMinutes":120}"#
         let result = await controller.execute(json: json)
-        guard case .queryResult(let answer) = result else {
+        guard case .queryResult(let slots) = result else {
             return XCTFail("Expected .queryResult")
         }
-        // Window is 1h but we need 2h — should report no slots
-        XCTAssertTrue(answer.contains("No free"))
+        // Window is 1h but we need 2h — should return no slots
+        XCTAssertTrue(slots.isEmpty)
     }
 
     // MARK: - Date edge cases
 
-    func testCreateInvalidDateStringReturnsFailed() async {
+    func testCreateInvalidDateStringReturnsFailed() async throws {
         let json = #"{"action":"create","title":"Test","start":"not-a-date","end":"also-not-a-date"}"#
         let result = await controller.execute(json: json)
         guard case .failure = result else {
@@ -270,7 +269,7 @@ final class CalendarActionControllerTests: XCTestCase {
         }
     }
 
-    func testCreateExtremeYearSucceeds() async {
+    func testCreateExtremeYearSucceeds() async throws {
         let json = #"{"action":"create","title":"FarFuture","start":"2099-12-31T23:00:00","end":"2099-12-31T23:59:00"}"#
         let result = await controller.execute(json: json)
         guard case .success(_, let preview) = result else {

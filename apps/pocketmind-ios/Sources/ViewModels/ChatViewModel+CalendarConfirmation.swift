@@ -20,7 +20,7 @@ extension ChatViewModel {
         do {
             try calendarService.deleteEvent(identifier: identifier)
             messages[msgIdx].calendarEventPreviews[previewIdx].state = .deleted
-            HapticService.notifySuccess()
+            hapticService.notifySuccess()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -43,7 +43,7 @@ extension ChatViewModel {
                 recurrenceEnd: nil
             )
             messages[msgIdx].calendarEventPreviews[previewIdx].state = .restored
-            HapticService.notifySuccess()
+            hapticService.notifySuccess()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -52,7 +52,7 @@ extension ChatViewModel {
     func cancelDeletion(messageID: UUID, previewID: UUID) {
         guard let (msgIdx, previewIdx) = indices(messageID: messageID, previewID: previewID) else { return }
         messages[msgIdx].calendarEventPreviews[previewIdx].state = .deletionCancelled
-        HapticService.impact(.light)
+        hapticService.impact(.light)
     }
 
     func confirmAllDeletions(messageID: UUID) async {
@@ -75,7 +75,7 @@ extension ChatViewModel {
             }
         }
         if failures.isEmpty {
-            HapticService.notifySuccess()
+            hapticService.notifySuccess()
         } else {
             errorMessage = "Couldn't delete: \(failures.joined(separator: ", "))"
         }
@@ -88,7 +88,7 @@ extension ChatViewModel {
                 messages[msgIdx].calendarEventPreviews[idx].state = .deletionCancelled
             }
         }
-        HapticService.impact(.light)
+        hapticService.impact(.light)
     }
 
     func confirmUpdate(messageID: UUID, previewID: UUID) async {
@@ -106,7 +106,7 @@ extension ChatViewModel {
             if let m = pending.reminderMinutes { messages[msgIdx].calendarEventPreviews[previewIdx].reminderMinutes = m }
             messages[msgIdx].calendarEventPreviews[previewIdx].state = newState
             messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate = nil
-            HapticService.notifySuccess()
+            hapticService.notifySuccess()
         } catch CalendarError.eventNotFound {
             // Event was deleted externally — dismiss the card rather than leaving it stuck.
             messages[msgIdx].calendarEventPreviews[previewIdx].state = .updateCancelled
@@ -121,6 +121,6 @@ extension ChatViewModel {
         guard let (msgIdx, previewIdx) = indices(messageID: messageID, previewID: previewID) else { return }
         messages[msgIdx].calendarEventPreviews[previewIdx].state = .updateCancelled
         messages[msgIdx].calendarEventPreviews[previewIdx].pendingUpdate = nil
-        HapticService.impact(.light)
+        hapticService.impact(.light)
     }
 }

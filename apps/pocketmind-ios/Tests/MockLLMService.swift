@@ -38,7 +38,12 @@ final class MockLLMService: LLMServiceProtocol {
     func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool) -> AsyncThrowingStream<String, Error> {
         let tokens = stubbedTokens
         let error = shouldThrowOnGenerate
+        let loaded = isLoaded
         return AsyncThrowingStream { continuation in
+            if !loaded {
+                continuation.finish(throwing: LLMError.modelNotLoaded)
+                return
+            }
             if let error {
                 continuation.finish(throwing: error)
                 return
