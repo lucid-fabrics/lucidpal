@@ -28,52 +28,16 @@ Powered by [Qwen3](https://huggingface.co/Qwen) and [llama.cpp](https://github.c
 | iPhone | Any model with 4 GB RAM (iPhone 12 or newer recommended) |
 | iOS | 16.0 |
 | Free storage | 2 GB (1.7B model) or 3 GB (4B model) |
-| Xcode | 15 or later (to build from source) |
 
 ---
 
-## Installation
+## Getting started
 
-PocketMind is not on the App Store. You build it yourself in Xcode.
-
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/wassimmehanna/pocketmind.git
-cd pocketmind/apps/pocketmind-ios
-```
-
-### 2. Generate the Xcode project
-
-```bash
-brew install xcodegen   # one-time
-xcodegen generate
-```
-
-### 3. Open in Xcode
-
-```bash
-open PocketMind.xcodeproj
-```
-
-### 4. Set your Team
-
-In Xcode → select the **PocketMind** target → **Signing & Capabilities** → set your Apple ID as the team.
-
-### 5. Build & run on your iPhone
-
-Connect your iPhone, select it as the run destination, press **⌘R**.
-
-> On first launch, go to **Settings → General → VPN & Device Management** and trust your developer certificate.
-
----
-
-## First launch
-
-1. **Choose a model** — the app recommends one based on your device RAM
-2. **Download** — the model downloads directly from Hugging Face (~1.8–2.5 GB)
-3. **Grant calendar access** — optional; required for reading/writing events
-4. **Start chatting**
+1. **Download the app** from the App Store *(coming soon)*
+2. **Choose a model** — the app recommends one based on your device RAM
+3. **Download** — the model fetches directly from Hugging Face (~1.8–2.5 GB, Wi-Fi recommended)
+4. **Grant calendar access** — optional; required for reading/writing events
+5. **Start chatting**
 
 ---
 
@@ -124,17 +88,6 @@ Both models support Qwen3's built-in reasoning (thinking mode). Disable it in Se
 - The model file is stored in your app's private Documents folder
 - Calendar data never leaves the device
 - Microphone audio is processed on-device by Apple's Speech framework and discarded immediately
-
----
-
-## Building with Fastlane (optional)
-
-```bash
-gem install bundler
-cd apps/pocketmind-ios
-bundle install
-bundle exec fastlane ios device   # build + install on connected iPhone
-```
 
 ---
 
