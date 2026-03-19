@@ -1,21 +1,6 @@
 import Combine
 import Foundation
 
-// MARK: - Constants
-
-private enum ChatConstants {
-    /// RAM threshold (GB) for selecting higher history/context limits.
-    static let largeContextRAMThresholdGB = 6
-    /// Max messages fed into the prompt on high-RAM devices.
-    static let largeHistoryLimit = 50
-    /// Max messages fed into the prompt on low-RAM devices.
-    static let smallHistoryLimit = 20
-    /// Seconds to debounce before persisting messages to disk.
-    static let persistenceDebounceSeconds: Double = 3
-    /// Seconds before auto-dismissing the error banner.
-    static let errorAutoDismissSeconds: Double = 5
-}
-
 @MainActor
 final class ChatViewModel: ObservableObject {
     @Published var messages: [ChatMessage] = []
@@ -28,34 +13,60 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isSpeechRecording = false
     @Published private(set) var isSpeechAvailable = false
 
+    /// Navigation title — equals session title in session mode, "PocketMind" otherwise.
+    @Published private(set) var sessionTitle: String
+
     let llmService: any LLMServiceProtocol
     let calendarService: any CalendarServiceProtocol
     let calendarActionController: any CalendarActionControllerProtocol
-    let settings: AppSettings
+    let settings: any AppSettingsProtocol
     let speechService: any SpeechServiceProtocol
+    let hapticService: any HapticServiceProtocol
     let history: any ChatHistoryManagerProtocol
     var cancellables = Set<AnyCancellable>()
     // Prevents auto-submit when the user manually taps the mic button to stop recording
     var suppressSpeechAutoSend = false
 
+    /// If set, ChatView auto-sends this message on appear (used for Siri integration).
+    var pendingInput: String?
+
+    // Session-mode properties — nil when operating in legacy single-history mode.
+    private let sessionID: UUID?
+    private let sessionCreatedAt: Date
+    private let sessionManager: (any SessionManagerProtocol)?
+    private var onSessionUpdated: ((@MainActor (ChatSessionMeta) -> Void))?
+
     init(
         llmService: any LLMServiceProtocol,
         calendarService: any CalendarServiceProtocol,
         calendarActionController: any CalendarActionControllerProtocol,
-        settings: AppSettings,
+        settings: any AppSettingsProtocol,
         speechService: any SpeechServiceProtocol,
-        historyManager: any ChatHistoryManagerProtocol = ChatHistoryManager()
+        hapticService: any HapticServiceProtocol,
+        historyManager: any ChatHistoryManagerProtocol,
+        // Session-mode params — pass these to enable multi-session persistence.
+        session: ChatSession? = nil,
+        sessionManager: (any SessionManagerProtocol)? = nil,
+        onSessionUpdated: ((@MainActor (ChatSessionMeta) -> Void))? = nil,
+        pendingInput: String? = nil
     ) {
         self.llmService = llmService
         self.calendarService = calendarService
         self.calendarActionController = calendarActionController
         self.settings = settings
         self.speechService = speechService
-        self.history = historyManager
+        self.hapticService = hapticService
+        self.history = session != nil ? NoOpChatHistoryManager() : historyManager
+        self.sessionID = session?.id
+        self.sessionCreatedAt = session?.createdAt ?? .now
+        self.sessionManager = sessionManager
+        self.onSessionUpdated = onSessionUpdated
+        self.sessionTitle = session?.title ?? "PocketMind"
+        self.pendingInput = pendingInput
         self.isModelLoaded = llmService.isLoaded
 
-        // Load persisted history synchronously — load() is a fast local disk read.
-        self.messages = historyManager.load()
+        // Load messages: from session if in session mode, else from history file.
+        self.messages = session?.messages ?? historyManager.load()
 
         // Publishers — sink used instead of assign(to:) because existentials can't project @Published.
         llmService.isLoadedPublisher
@@ -80,7 +91,19 @@ final class ChatViewModel: ObservableObject {
         // Persist messages on change — debounced on MainActor, disk write offloaded to background.
         $messages
             .debounce(for: .seconds(ChatConstants.persistenceDebounceSeconds), scheduler: RunLoop.main)
-            .sink { [weak self] msgs in self?.history.save(msgs) }
+            .sink { [weak self] msgs in
+                guard let self else { return }
+                if let sm = self.sessionManager, let sid = self.sessionID {
+                    let session = ChatSession(
+                        id: sid, title: self.sessionTitle,
+                        createdAt: self.sessionCreatedAt, updatedAt: .now, messages: msgs
+                    )
+                    sm.save(session)
+                    self.onSessionUpdated?(session.meta)
+                } else {
+                    self.history.save(msgs)
+                }
+            }
             .store(in: &cancellables)
 
         // Auto-submit when speech recognition ends naturally (final result / silence timeout).
@@ -114,7 +137,7 @@ final class ChatViewModel: ObservableObject {
         } else {
             do {
                 try speechService.startRecording()
-                HapticService.impact(.light)
+                hapticService.impact(.light)
             } catch {
                 errorMessage = "Microphone error: \(error.localizedDescription)"
             }
@@ -125,9 +148,14 @@ final class ChatViewModel: ObservableObject {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isGenerating, isModelLoaded else { return }
 
-        HapticService.impact(.light)
+        hapticService.impact(.light)
         inputText = ""
         messages.append(ChatMessage(role: .user, content: text))
+
+        // Auto-title: derive session title from the first user message.
+        if sessionManager != nil && sessionTitle == "New Chat" {
+            sessionTitle = String(text.prefix(ChatConstants.maxSessionTitleLength))
+        }
         errorMessage = nil
 
         // Build system prompt before showing the assistant placeholder —
@@ -170,9 +198,10 @@ final class ChatViewModel: ObservableObject {
         // After streaming, execute calendar actions (thinking already extracted live)
         if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
             messages[idx].isThinking = false
-            let (content, previews) = await executeCalendarActions(in: messages[idx].content)
+            let (content, previews, freeSlots) = await executeCalendarActions(in: messages[idx].content)
             messages[idx].content = content
             messages[idx].calendarEventPreviews = previews
+            messages[idx].calendarFreeSlots = freeSlots
         }
     }
 
@@ -186,15 +215,35 @@ final class ChatViewModel: ObservableObject {
         Task { await sendMessage() }
     }
 
+    func deleteMessage(id: UUID) {
+        messages.removeAll { $0.id == id }
+    }
+
     func clearHistory() {
         llmService.cancelGeneration()
         messages = []
-        history.clear()
+        if let sm = sessionManager, let sid = sessionID {
+            let session = ChatSession(
+                id: sid, title: sessionTitle,
+                createdAt: sessionCreatedAt, updatedAt: .now, messages: []
+            )
+            sm.save(session)
+        } else {
+            history.clear()
+        }
     }
 
     /// Immediately writes current messages to disk — call when app enters background.
     func flushPersistence() {
-        history.save(messages)
+        if let sm = sessionManager, let sid = sessionID {
+            let session = ChatSession(
+                id: sid, title: sessionTitle,
+                createdAt: sessionCreatedAt, updatedAt: .now, messages: messages
+            )
+            sm.save(session)
+        } else {
+            history.save(messages)
+        }
     }
 
     // MARK: - Token streaming
