@@ -63,8 +63,9 @@ let llmService: LLMService
 
 ```swift
 actor LlamaActor {
-    // All calls serialized — no data races on C pointers
-    func generate(prompt: String) async throws -> String { ... }
+    // nonisolated(unsafe): deinit is nonisolated in Swift 6 — must free C pointers there
+    // All writes happen exclusively from actor-isolated methods; no concurrent access
+    func generate(prompt: String, continuation: AsyncThrowingStream<String, Error>.Continuation) async
 }
 ```
 

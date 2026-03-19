@@ -162,7 +162,6 @@ CalendarService executes → preview.state = .deleted / .updated / .rescheduled
 struct CalendarInfo {
     let id: String
     let title: String
-    let color: UIColor
 }
 ```
 
@@ -171,7 +170,7 @@ struct CalendarInfo {
 When creating or updating an event, `CalendarService` checks for overlapping events in the same time window:
 
 ```swift
-func findConflicts(start: Date, end: Date) -> [CalendarEventInfo]
+func findConflicts(start: Date, end: Date, excludingIdentifier: String? = nil) -> [CalendarEventInfo]
 ```
 
 If conflicts exist, `CalendarEventPreview.hasConflict = true` and an orange `⚠` badge is shown on the card.

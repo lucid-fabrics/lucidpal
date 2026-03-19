@@ -68,7 +68,8 @@ AppShortcut(
     phrases: [
         "Check my \(.applicationName) calendar",
         "What's on my \(.applicationName) calendar",
-        "Show my \(.applicationName) schedule"
+        "Show my \(.applicationName) schedule",
+        "Open my \(.applicationName) schedule"
     ],
     shortTitle: "Check Calendar",
     systemImageName: "calendar"
