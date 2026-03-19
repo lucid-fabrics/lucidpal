@@ -27,7 +27,7 @@ final class ModelDownloadViewModel: ObservableObject {
 
         let ram = settings.deviceRAMGB
         let models = ModelInfo.available(physicalRAMGB: ram)
-        self.availableModels = models.isEmpty ? [.qwen3_1B7] : models
+        self.availableModels = models.isEmpty ? [.qwen3_5_2B] : models
 
         // Pre-select the device-recommended model when nothing has been downloaded yet.
         // If the user's saved model is already on disk, keep their choice.
