@@ -13,12 +13,12 @@ final class ModelDownloadViewModel: ObservableObject {
 
     let downloader: any ModelDownloaderProtocol
     private let llmService: any LLMServiceProtocol
-    let settings: AppSettings
+    let settings: any AppSettingsProtocol
     private var cancellables = Set<AnyCancellable>()
 
     init(
         llmService: any LLMServiceProtocol,
-        settings: AppSettings,
+        settings: any AppSettingsProtocol,
         downloader: any ModelDownloaderProtocol
     ) {
         self.llmService = llmService
