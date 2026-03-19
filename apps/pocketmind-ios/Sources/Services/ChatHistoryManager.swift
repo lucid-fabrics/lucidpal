@@ -20,7 +20,15 @@ final class ChatHistoryManager: ChatHistoryManagerProtocol {
 
     /// Loads persisted messages from disk. Returns an empty array on any failure.
     func load() -> [ChatMessage] {
-        guard let data = try? Data(contentsOf: Self.historyURL) else { return [] }
+        let data: Data
+        do {
+            data = try Data(contentsOf: Self.historyURL)
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile {
+            return []  // expected on first launch — no history yet
+        } catch {
+            print("[ChatHistoryManager] Failed to read history file: \(error)")
+            return []
+        }
         do {
             return try JSONDecoder().decode([ChatMessage].self, from: data)
         } catch {
@@ -35,8 +43,8 @@ final class ChatHistoryManager: ChatHistoryManagerProtocol {
     func save(_ messages: [ChatMessage]) -> Task<Void, Never> {
         let filtered = messages.filter { $0.role != .system }
         return Task.detached(priority: .utility) {
-            guard let data = try? JSONEncoder().encode(filtered) else { return }
             do {
+                let data = try JSONEncoder().encode(filtered)
                 try data.write(to: ChatHistoryManager.historyURL, options: .atomic)
             } catch {
                 print("[ChatHistoryManager] Failed to write history: \(error)")
@@ -52,4 +60,13 @@ final class ChatHistoryManager: ChatHistoryManagerProtocol {
             print("[ChatHistoryManager] Failed to clear history: \(error)")
         }
     }
+}
+
+/// No-op history manager — used when ChatViewModel operates in session mode.
+/// Persistence is handled by SessionManager instead.
+@MainActor
+final class NoOpChatHistoryManager: ChatHistoryManagerProtocol {
+    func load() -> [ChatMessage] { [] }
+    @discardableResult func save(_ messages: [ChatMessage]) -> Task<Void, Never> { Task {} }
+    func clear() {}
 }
