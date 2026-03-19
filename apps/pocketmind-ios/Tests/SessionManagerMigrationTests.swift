@@ -90,7 +90,7 @@ final class SessionManagerMigrationTests: XCTestCase {
         var session = ChatSession.new()
         session.title = "Original"
         await manager.save(session).value
-        manager.renameSession(id: session.id, title: "Renamed")
+        await manager.renameSession(id: session.id, title: "Renamed").value
         let loaded = manager.loadSession(id: session.id)
         XCTAssertEqual(loaded?.title, "Renamed")
     }

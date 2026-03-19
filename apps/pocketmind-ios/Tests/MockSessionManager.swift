@@ -27,9 +27,11 @@ final class MockSessionManager: SessionManagerProtocol {
         store.removeValue(forKey: id)
     }
 
-    func renameSession(id: UUID, title: String) {
-        guard var session = store[id] else { return }
+    @discardableResult
+    func renameSession(id: UUID, title: String) -> Task<Void, Never> {
+        guard var session = store[id] else { return Task {} }
         session.title = title
         store[id] = session
+        return Task {}
     }
 }
