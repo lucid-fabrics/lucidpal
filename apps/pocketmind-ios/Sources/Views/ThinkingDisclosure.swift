@@ -7,6 +7,7 @@ struct ThinkingDisclosure: View {
     let isThinking: Bool      // still streaming
     @Binding var isExpanded: Bool
     @State private var pulse = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -19,7 +20,7 @@ struct ThinkingDisclosure: View {
                     Image(systemName: "brain")
                         .font(.caption)
                         .opacity(isThinking ? (pulse ? 0.4 : 1.0) : 1.0)
-                        .animation(isThinking ? .easeInOut(duration: 0.8).repeatForever() : .default, value: pulse)
+                        .animation(isThinking && !reduceMotion ? .easeInOut(duration: 0.8).repeatForever() : .default, value: pulse)
                     Text(isThinking ? "Thinking..." : (isExpanded ? "Hide thinking" : "Thought for a moment"))
                         .font(.caption)
                     Spacer()

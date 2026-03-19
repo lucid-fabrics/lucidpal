@@ -12,6 +12,7 @@ struct MessageBubbleView: View {
     var onCancelAllDeletions: (() -> Void)? = nil
     var onDeleteMessage: ((UUID) -> Void)? = nil
     @State private var thinkingExpanded = false
+    @State private var showTimestamp = false
 
     private var pendingDeletionCount: Int {
         message.calendarEventPreviews.filter { $0.state == .pendingDeletion }.count
@@ -58,13 +59,7 @@ struct MessageBubbleView: View {
                             }
                         }
                 } else if !message.isUser && !message.isStreamingAction && message.calendarEventPreviews.isEmpty {
-                    // Bubble with placeholder while non-action content streams in
-                    Text("…")
-                        .padding(.horizontal, DesignConstants.Padding.bubbleHorizontal)
-                        .padding(.vertical, DesignConstants.Padding.bubbleVertical)
-                        .background(Color(.systemGray5))
-                        .foregroundStyle(.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.bubble, style: .continuous))
+                    StreamingSkeletonView()
                 }
 
                 // Animated pill while action block is streaming
@@ -98,10 +93,18 @@ struct MessageBubbleView: View {
                     )
                 }
 
-                Text(message.timestamp, style: .time)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, DesignConstants.Padding.timestamp)
+                if showTimestamp {
+                    Text(message.timestamp, style: .time)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, DesignConstants.Padding.timestamp)
+                        .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                }
+            }
+            .onTapGesture {
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    showTimestamp.toggle()
+                }
             }
 
             if !message.isUser { Spacer(minLength: DesignConstants.Size.messageSpacer) }
@@ -122,5 +125,46 @@ private func bubbleTextView(_ text: String, isUser: Bool) -> some View {
         Text(attributed)
     } else {
         Text(text)
+    }
+}
+
+// MARK: - Streaming skeleton
+
+private struct StreamingSkeletonView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var phase: CGFloat = 0
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            skeletonLine(width: nil)
+            skeletonLine(width: nil)
+            skeletonLine(width: 80)
+        }
+        .padding(.horizontal, DesignConstants.Padding.bubbleHorizontal)
+        .padding(.vertical, DesignConstants.Padding.bubbleVertical)
+        .background(Color(.systemGray5))
+        .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.bubble, style: .continuous))
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
+                phase = 1
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func skeletonLine(width: CGFloat?) -> some View {
+        RoundedRectangle(cornerRadius: 4)
+            .fill(shimmerGradient)
+            .frame(height: 11)
+            .frame(maxWidth: width ?? .infinity, alignment: .leading)
+    }
+
+    private var shimmerGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color(.systemGray4), Color(.systemGray3), Color(.systemGray4)],
+            startPoint: UnitPoint(x: phase - 0.5, y: 0.5),
+            endPoint: UnitPoint(x: phase + 0.5, y: 0.5)
+        )
     }
 }

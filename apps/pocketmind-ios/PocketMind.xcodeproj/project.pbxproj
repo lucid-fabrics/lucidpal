@@ -24,6 +24,7 @@
 		3729B6D0AF8163910802B64A /* HapticServiceProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A0D2C0FFE1AA189D2DF325 /* HapticServiceProtocolTests.swift */; };
 		38613A4E38E15A30F0E15449 /* LLMServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D4ADCAA29604B5AC274F060 /* LLMServiceProtocol.swift */; };
 		3981175B8F90E3B1BBEC297D /* CalendarActionPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA58CD3241A9D95315BF9196 /* CalendarActionPill.swift */; };
+		3A09F44096102E4C913E6902 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80EB1F543172F8F1C5871341 /* ToastView.swift */; };
 		3A2FEE9193A6769FE13D4027 /* CalendarActionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7131BAE76DD35CC9E41BE33E /* CalendarActionModels.swift */; };
 		3D71FD1AC59971853AC53B14 /* CalendarEventCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 722836196C99E28F75C58B9A /* CalendarEventCard.swift */; };
 		4A58AC0F867DF8A7A811A85D /* PocketMindApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78BF7EEADC2A6E48DB74F5E9 /* PocketMindApp.swift */; };
@@ -37,6 +38,7 @@
 		554C40156A320AC04E291AEE /* CalendarDomainTypesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BCC2F0FDB961A8C83EF65C6 /* CalendarDomainTypesTests.swift */; };
 		573DE30FB5E1F48175825B86 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101B77275AB89E3FA4DE37C9 /* ChatMessage.swift */; };
 		57DDE7836359DA32F1BFF161 /* ModelDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 571F2AB04B35CA5F7570E1CD /* ModelDownloadView.swift */; };
+		597E2E6176442FDE6FAF99CD /* OnboardingCarouselView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6FA46FBE6ABFD92E753D500 /* OnboardingCarouselView.swift */; };
 		5A174F4502C64FC6535170A2 /* ModelDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBA7D82AF887DCB8B5DD5FD6 /* ModelDownloader.swift */; };
 		5CE3EEF4B7967FEF6D0CDE0F /* ModelDownloadViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F85334EDFEC8E4B15028C3A /* ModelDownloadViewModelTests.swift */; };
 		601AAD971476A146EA5E10D5 /* ChatHistoryManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67BC9AE3151EB8450507B61C /* ChatHistoryManagerTests.swift */; };
@@ -145,6 +147,7 @@
 		79D226E65D59DA01784FEC0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7DEAD89CA22611B2DA24DBEF /* MockAppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAppSettings.swift; sourceTree = "<group>"; };
 		7FE470DBD0E3313C49495D23 /* CalendarServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarServiceProtocol.swift; sourceTree = "<group>"; };
+		80EB1F543172F8F1C5871341 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		81C28CF37163D73F425B2A11 /* BulkDeletionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulkDeletionBar.swift; sourceTree = "<group>"; };
 		835BD8A24AFB478DEA8B6AF6 /* ChatSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSession.swift; sourceTree = "<group>"; };
 		89223E5E2E51426BF499376F /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticService.swift; sourceTree = "<group>"; };
@@ -164,6 +167,7 @@
 		B1037B4EA77CF451D9319998 /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
 		B3BF69D3177D4BBE17CC1D1F /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
 		B4F8CCE8E6FB28347D93C869 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		B6FA46FBE6ABFD92E753D500 /* OnboardingCarouselView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCarouselView.swift; sourceTree = "<group>"; };
 		B9A0D2C0FFE1AA189D2DF325 /* HapticServiceProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticServiceProtocolTests.swift; sourceTree = "<group>"; };
 		BA58CD3241A9D95315BF9196 /* CalendarActionPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionPill.swift; sourceTree = "<group>"; };
 		BBDC7018784BC5A1605E15C8 /* CalendarFreeSlotEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarFreeSlotEngine.swift; sourceTree = "<group>"; };
@@ -311,10 +315,12 @@
 				5B46BEF3C5A881C6F37E0197 /* DesignConstants.swift */,
 				003B25C43CBE913DF321F18A /* MessageBubbleView.swift */,
 				571F2AB04B35CA5F7570E1CD /* ModelDownloadView.swift */,
+				B6FA46FBE6ABFD92E753D500 /* OnboardingCarouselView.swift */,
 				B4F8CCE8E6FB28347D93C869 /* OnboardingView.swift */,
 				3293F52DCB45E22040CC1500 /* SessionListView.swift */,
 				929E991CDFEEBC85C42D0EC6 /* SettingsView.swift */,
 				D4797A688FBD64A2C9FA9189 /* ThinkingDisclosure.swift */,
+				80EB1F543172F8F1C5871341 /* ToastView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -537,6 +543,7 @@
 				68EFEE10CA6D6CAF754FD74A /* ModelDownloadViewModel.swift in Sources */,
 				5A174F4502C64FC6535170A2 /* ModelDownloader.swift in Sources */,
 				6E71EBE2DE405A9C62CDC87A /* ModelInfo.swift in Sources */,
+				597E2E6176442FDE6FAF99CD /* OnboardingCarouselView.swift in Sources */,
 				29AF9C1644EB1DBA9EC822A5 /* OnboardingView.swift in Sources */,
 				4A58AC0F867DF8A7A811A85D /* PocketMindApp.swift in Sources */,
 				268F3CCC33CF4B86F016B5AD /* PocketMindShortcuts.swift in Sources */,
@@ -548,6 +555,7 @@
 				22DD8B453E83D972404B1141 /* SpeechService.swift in Sources */,
 				0D85BD28C66B4AD418A1E85A /* SpeechServiceProtocol.swift in Sources */,
 				8E992579DACB482D55CB45E6 /* ThinkingDisclosure.swift in Sources */,
+				3A09F44096102E4C913E6902 /* ToastView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
