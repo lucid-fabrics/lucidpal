@@ -9,6 +9,7 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isPreparing = false
     @Published private(set) var isModelLoaded = false
     @Published var errorMessage: String?
+    @Published var toast: ToastItem?
 
     @Published private(set) var isSpeechRecording = false
     @Published private(set) var isSpeechAvailable = false
@@ -250,6 +251,14 @@ final class ChatViewModel: ObservableObject {
 
     /// Applies one streamed token to the assistant message at `idx`, handling
     /// the <think>...</think> wrapper that Qwen3 emits before its response.
+    func showToast(_ message: String, systemImage: String) {
+        toast = ToastItem(message: message, systemImage: systemImage)
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2.5))
+            toast = nil
+        }
+    }
+
     func applyStreamToken(
         _ token: String,
         rawBuffer: inout String,

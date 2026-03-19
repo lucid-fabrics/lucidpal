@@ -7,20 +7,27 @@ struct ContentView: View {
     @ObservedObject var sessionListViewModel: SessionListViewModel
     @ObservedObject var settingsViewModel: SettingsViewModel
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
 
     // MARK: - Body
 
     var body: some View {
-        TabView {
-            SessionListView(viewModel: sessionListViewModel)
-                .tabItem {
-                    Label(Tab.chat.title, systemImage: Tab.chat.icon)
-                }
+        Group {
+            if hasSeenOnboarding {
+                TabView {
+                    SessionListView(viewModel: sessionListViewModel)
+                        .tabItem {
+                            Label(Tab.chat.title, systemImage: Tab.chat.icon)
+                        }
 
-            SettingsView(viewModel: settingsViewModel, downloadViewModel: downloadViewModel)
-                .tabItem {
-                    Label(Tab.settings.title, systemImage: Tab.settings.icon)
+                    SettingsView(viewModel: settingsViewModel, downloadViewModel: downloadViewModel)
+                        .tabItem {
+                            Label(Tab.settings.title, systemImage: Tab.settings.icon)
+                        }
                 }
+            } else {
+                OnboardingCarouselView()
+            }
         }
     }
 }
