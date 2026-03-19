@@ -5,7 +5,7 @@ sidebar_position: 1
 
 # PocketMind
 
-**On-device AI calendar assistant for iOS — fully private, no cloud, powered by Qwen3.**
+**On-device AI calendar assistant for iOS — fully private, no cloud, powered by Qwen3.5.**
 
 ## What is PocketMind?
 
@@ -20,14 +20,15 @@ PocketMind is an on-device AI assistant that understands and manages your iOS ca
 
 ## Models
 
-PocketMind ships with two GGUF model options, automatically selected based on device RAM:
+PocketMind ships with three GGUF model options, automatically selected based on device RAM:
 
-| Model | Size | RAM Requirement | Context |
-|-------|------|-----------------|---------|
-| Qwen3 1.7B | 1.83 GB | 4 GB+ | 4K tokens |
-| Qwen3 4B | 2.5 GB | 6 GB+ | 8K tokens |
+| Model | Size | Min RAM | Recommended for |
+|-------|------|---------|-----------------|
+| Qwen3.5 0.8B | 0.51 GB | 2 GB | Older iPhones with limited RAM |
+| Qwen3.5 2B | 1.2 GB | 3 GB | Default — iPhone 12 / 13 and similar |
+| Qwen3.5 4B | 2.5 GB | 5 GB | iPhone 14 Pro / 15 / 16 and newer |
 
-Both models run natively via [llama.cpp](https://github.com/ggml-org/llama.cpp) with Metal GPU acceleration.
+All three models run natively via [llama.cpp](https://github.com/ggml-org/llama.cpp) with Metal GPU acceleration.
 
 ## Tech Stack
 

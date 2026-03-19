@@ -56,8 +56,8 @@ final class SettingsViewModelTests: XCTestCase {
     }
 
     func testSelectModelUpdatesSettingsID() {
-        viewModel.selectModel(.qwen3_1B7)
-        XCTAssertEqual(settings.selectedModelID, ModelInfo.qwen3_1B7.id)
+        viewModel.selectModel(.qwen3_5_2B)
+        XCTAssertEqual(settings.selectedModelID, ModelInfo.qwen3_5_2B.id)
     }
 
     func testAvailableModelsNotEmpty() {

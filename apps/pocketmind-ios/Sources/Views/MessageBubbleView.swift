@@ -37,9 +37,16 @@ struct MessageBubbleView: View {
                     bubbleTextView(bubbleText, isUser: message.isUser)
                         .padding(.horizontal, DesignConstants.Padding.bubbleHorizontal)
                         .padding(.vertical, DesignConstants.Padding.bubbleVertical)
-                        .background(message.isUser ? Color.accentColor : Color(.systemGray5))
+                        .background(message.isUser ? Color.accentColor : Color(.systemBackground))
                         .foregroundStyle(message.isUser ? .white : .primary)
                         .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.bubble, style: .continuous))
+                        .overlay {
+                            if !message.isUser {
+                                RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.bubble, style: .continuous)
+                                    .strokeBorder(Color(.systemGray4), lineWidth: 1)
+                            }
+                        }
+                        .shadow(color: .black.opacity(message.isUser ? 0 : 0.06), radius: 4, x: 0, y: 2)
                         .contextMenu {
                             if !message.content.isEmpty {
                                 Button {
@@ -72,8 +79,14 @@ struct MessageBubbleView: View {
                     CalendarQueryResultCard(slots: message.calendarFreeSlots)
                 }
 
-                // Calendar event cards
-                ForEach(message.calendarEventPreviews, id: \.id) { preview in
+                // Listed events → grouped calendar card
+                let listedEvents = message.calendarEventPreviews.filter { $0.state == .listed }
+                if !listedEvents.isEmpty {
+                    CalendarEventListCard(events: listedEvents)
+                }
+
+                // All other calendar event cards (created, updated, pending deletion, etc.)
+                ForEach(message.calendarEventPreviews.filter { $0.state != .listed }, id: \.id) { preview in
                     CalendarEventCard(
                         preview: preview,
                         onConfirm:        { onConfirmDeletion?(preview.id) },
@@ -117,14 +130,19 @@ struct MessageBubbleView: View {
 
 
 /// Renders message text with inline markdown (bold, italic, code, links).
+/// Converts leading `- ` list markers to `•` before parsing.
 /// Falls back to plain text if AttributedString parsing fails.
 @ViewBuilder
 private func bubbleTextView(_ text: String, isUser: Bool) -> some View {
+    let processed = text
+        .components(separatedBy: "\n")
+        .map { $0.hasPrefix("- ") ? "• " + $0.dropFirst(2) : $0 }
+        .joined(separator: "\n")
     let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-    if let attributed = try? AttributedString(markdown: text, options: options) {
+    if let attributed = try? AttributedString(markdown: processed, options: options) {
         Text(attributed)
     } else {
-        Text(text)
+        Text(processed)
     }
 }
 

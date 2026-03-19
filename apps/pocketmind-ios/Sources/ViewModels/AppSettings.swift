@@ -7,7 +7,7 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
     // MARK: - Stored Preferences
 
     @AppStorage("calendarAccessEnabled") var calendarAccessEnabled: Bool = false
-    @AppStorage("selectedModelID") var selectedModelID: String = ModelInfo.qwen3_1B7.id
+    @AppStorage("selectedModelID") var selectedModelID: String = ModelInfo.qwen3_5_2B.id
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
     @AppStorage("thinkingEnabled") var thinkingEnabled: Bool = true
     @AppStorage("defaultCalendarIdentifier") var defaultCalendarIdentifier: String = ""
@@ -17,8 +17,8 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
 
     var selectedModel: ModelInfo {
         // Array lookup — adding new models requires no changes here
-        [ModelInfo.qwen3_1B7, ModelInfo.qwen3_4B]
-            .first { $0.id == selectedModelID } ?? .qwen3_1B7
+        [ModelInfo.qwen3_5_0B8, ModelInfo.qwen3_5_2B, ModelInfo.qwen3_5_4B]
+            .first { $0.id == selectedModelID } ?? .qwen3_5_2B
     }
 
     var deviceRAMGB: Int {

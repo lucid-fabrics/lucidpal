@@ -9,6 +9,10 @@ options:
 packages:
   llama:
     path: ./Packages/llama
+  SnapshotTesting:
+    url: https://github.com/pointfreeco/swift-snapshot-testing
+    from: "1.16.0"
+    maxVersion: "1.16.99"
 
 targets:
   PocketMind:
@@ -49,6 +53,8 @@ targets:
         DEVELOPMENT_TEAM: "KRPUAN3FFA"
     dependencies:
       - target: PocketMind
+      - package: SnapshotTesting
+        product: SnapshotTesting
 
 schemes:
   PocketMind:

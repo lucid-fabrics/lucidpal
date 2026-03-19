@@ -103,7 +103,7 @@ Or delete a date range:
 }
 ```
 
-Returns a list of `CalendarEventPreview` cards in the chat.
+Returns a single `CalendarEventListCard` containing grouped `CalendarEventPreview` items (state: `.listed`) — tap any row to open it in Calendar.
 
 </details>
 
@@ -152,6 +152,7 @@ CalendarService executes → preview.state = .deleted / .updated / .rescheduled
 | `.rescheduled` | Start/end times changed |
 | `.updateCancelled` | User dismissed the update |
 | `.restored` | Event recreated after undo |
+| `.listed` | Read-only list result — shown in `CalendarEventListCard`, no confirm buttons |
 
 ## Anti-Corruption Layer
 
