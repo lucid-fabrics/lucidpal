@@ -1,7 +1,10 @@
 ---
-title: "Architecture Overview"
-description: "MVVM layers, dependency injection, and actor isolation in PocketMind."
+sidebar_position: 1
 ---
+
+# Architecture Overview
+
+MVVM layers, dependency injection, and actor isolation in PocketMind.
 
 ## Layer Diagram
 
@@ -99,32 +102,16 @@ Sources/
 │   ├── CalendarActionController.swift ← LLM JSON → calendar action
 │   ├── CalendarFreeSlotEngine.swift   ← Pure slot-finding algorithm
 │   ├── SessionManager.swift      ← Multi-session persistence
-│   ├── ChatHistoryManager.swift  ← Legacy single-history persistence
-│   ├── SpeechService.swift       ← On-device speech recognition
-│   ├── ModelDownloader.swift     ← Background URLSession downloads
 │   └── HapticService.swift       ← UIImpactFeedbackGenerator wrapper
 ├── ViewModels/
 │   ├── ChatViewModel.swift       ← Core message/stream logic
 │   ├── ChatViewModel+CalendarConfirmation.swift ← Confirm/cancel/undo
 │   ├── ChatViewModel+SystemPrompt.swift ← Prompt construction + calendar dispatch
 │   ├── SessionListViewModel.swift ← Session CRUD + Siri routing
-│   ├── ModelDownloadViewModel.swift ← Download state machine
-│   ├── SettingsViewModel.swift   ← Calendar auth, model selection
-│   ├── AppSettings.swift         ← @AppStorage preferences
-│   ├── AppSettingsProtocol.swift ← Settings protocol for DI
-│   └── ChatConstants.swift       ← Context limits, debounce values
-├── Views/
-│   ├── ChatView.swift            ← Message list + input bar
-│   ├── SessionListView.swift     ← Session browser
-│   ├── MessageBubbleView.swift   ← Bubble routing (user/assistant)
-│   ├── CalendarEventCard.swift   ← Event preview card
-│   ├── CalendarEventCard+Pending.swift ← Confirm/update variants
-│   ├── CalendarQueryResultCard.swift ← Free-slot results
-│   ├── DesignConstants.swift     ← Named design tokens
-│   ├── BulkDeletionBar.swift     ← Batch delete UI
-│   ├── CalendarActionPill.swift  ← "Updating calendar..." indicator
-│   └── ThinkingDisclosure.swift  ← Expandable thinking block
-└── Intents/
-    ├── AskPocketMindIntent.swift  ← All 4 Siri intent types
-    └── PocketMindShortcuts.swift  ← AppShortcutsProvider
+│   └── AppSettings.swift         ← @AppStorage preferences
+└── Views/
+    ├── ChatView.swift            ← Message list + input bar
+    ├── SessionListView.swift     ← Session browser
+    ├── CalendarEventCard.swift   ← Event preview card
+    └── ThinkingDisclosure.swift  ← Expandable thinking block
 ```

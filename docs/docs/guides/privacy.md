@@ -1,7 +1,10 @@
 ---
-title: "Privacy"
-description: "How PocketMind keeps your data entirely on your device."
+sidebar_position: 5
 ---
+
+# Privacy
+
+How PocketMind keeps your data entirely on your device.
 
 ## Fully On-Device
 
@@ -43,7 +46,7 @@ Microphone access is optional. The app works fully without it.
 
 ## Conversation History
 
-Your chat sessions are saved locally in the app's private storage on your device (`Documents/sessions/`). They are:
+Your chat sessions are saved locally in the app's private storage on your device. They are:
 
 - Not backed up to iCloud by default
 - Not synced across devices

@@ -1,0 +1,27 @@
+{
+  "id": "architecture/llm-inference",
+  "title": "LLM Inference",
+  "description": "How PocketMind streams tokens from llama.cpp to the SwiftUI UI.",
+  "source": "@site/docs/architecture/llm-inference.md",
+  "sourceDirName": "architecture",
+  "slug": "/architecture/llm-inference",
+  "permalink": "/pocketmind/architecture/llm-inference",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/lucid-fabrics/pocketmind/tree/main/docs/docs/architecture/llm-inference.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "sidebar_position": 2
+  },
+  "sidebar": "architecture",
+  "previous": {
+    "title": "Architecture Overview",
+    "permalink": "/pocketmind/architecture/overview"
+  },
+  "next": {
+    "title": "Calendar Integration",
+    "permalink": "/pocketmind/architecture/calendar"
+  }
+}

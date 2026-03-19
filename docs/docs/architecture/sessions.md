@@ -1,7 +1,10 @@
 ---
-title: "Session Management"
-description: "How PocketMind persists and navigates multiple chat sessions."
+sidebar_position: 4
 ---
+
+# Session Management
+
+How PocketMind persists and navigates multiple chat sessions.
 
 ## Data Model
 
@@ -44,21 +47,7 @@ Documents/
 
 System messages (role `.system`) are excluded from persistence — the system prompt is rebuilt on each launch from the current model and settings.
 
-## SessionManager
-
-`SessionManager` is a `@MainActor` class injected via `SessionManagerProtocol`:
-
-```swift
-protocol SessionManagerProtocol {
-    func loadIndex() -> [ChatSessionMeta]
-    func loadSession(id: UUID) -> ChatSession?
-    @discardableResult func save(_ session: ChatSession) -> Task<Void, Never>
-    func delete(id: UUID)
-    func renameSession(id: UUID, title: String)
-}
-```
-
-### Save Path
+## Save Path
 
 `save(_:)` is non-blocking — it dispatches a `Task.detached(priority: .utility)` for the JSON encode + write and returns the task handle. The in-memory index is updated synchronously so the list reflects changes immediately.
 
@@ -71,15 +60,6 @@ func save(_ session: ChatSession) -> Task<Void, Never> {
     updateIndex(with: session.meta)   // synchronous index update
     return task
 }
-```
-
-### Test Isolation
-
-Pass a custom `directory:` URL to avoid polluting the real Documents folder:
-
-```swift
-let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-let manager = SessionManager(directory: tmp)
 ```
 
 ## Legacy Migration
@@ -99,29 +79,3 @@ Removes chat_history.json
 ```
 
 Migration is a no-op if the legacy file doesn't exist.
-
-## SessionListViewModel
-
-`SessionListViewModel` is the `@MainActor` owner of the session list. It handles:
-
-| Responsibility | Method |
-|----------------|--------|
-| Load index on launch | `loadSessions()` |
-| Create new session | `createNewSession()` |
-| Delete session(s) | `deleteSession(id:)` / `deleteAllSessions()` |
-| Rename session | `renameSession(id:title:)` |
-| Route Siri queries | `handleSiriQuery(_:)` |
-
-### Siri Routing
-
-When the app opens from a Siri intent, `SessionListViewModel.handleSiriQuery(_:)` is called with the pending query string. It creates a new `ChatSession`, navigates to it, and forwards the query to `ChatViewModel.sendMessage()`.
-
-```swift
-func handleSiriQuery(_ query: String) {
-    let session = ChatSession.new()
-    sessionManager.save(session)
-    sessions.insert(session.meta, at: 0)
-    selectedSessionID = session.id
-    // ChatViewModel picks up the query via the pendingQuery binding
-}
-```

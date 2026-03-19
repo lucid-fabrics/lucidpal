@@ -1,0 +1,283 @@
+{
+  "entrypoints": [
+    "main"
+  ],
+  "origins": {
+    "42": [
+      42
+    ],
+    "17896441": [
+      869,
+      401
+    ],
+    "main": [
+      354,
+      869,
+      792
+    ],
+    "runtime~main": [
+      792,
+      869,
+      354
+    ],
+    "0512f8f1": [
+      398
+    ],
+    "0b1ac180": [
+      863
+    ],
+    "5e95c892": [
+      647
+    ],
+    "5f1708b6": [
+      174
+    ],
+    "6cb7d006": [
+      145
+    ],
+    "7e9136aa": [
+      832
+    ],
+    "8070e160": [
+      822
+    ],
+    "82b918f0": [
+      471
+    ],
+    "a09c2993": [
+      899
+    ],
+    "a7bd4aaa": [
+      98
+    ],
+    "a94703ab": [
+      869,
+      48
+    ],
+    "aba21aa0": [
+      742
+    ],
+    "b9c8e8e0": [
+      69
+    ],
+    "c33c8bc9": [
+      857
+    ],
+    "d004a0e9": [
+      346
+    ],
+    "d2420314": [
+      507
+    ],
+    "ff88659e": [
+      10
+    ],
+    "styles": [
+      48,
+      354,
+      401,
+      792,
+      869
+    ]
+  },
+  "assets": {
+    "10": {
+      "js": [
+        {
+          "file": "assets/js/ff88659e.0709598f.js",
+          "hash": "dbe872e8deefe652",
+          "publicPath": "/pocketmind/assets/js/ff88659e.0709598f.js"
+        }
+      ]
+    },
+    "42": {
+      "js": [
+        {
+          "file": "assets/js/42.9b13f2cb.js",
+          "hash": "29adcd179dcfdc01",
+          "publicPath": "/pocketmind/assets/js/42.9b13f2cb.js"
+        }
+      ]
+    },
+    "48": {
+      "js": [
+        {
+          "file": "assets/js/a94703ab.e1186a90.js",
+          "hash": "705a4dc5d2734fc5",
+          "publicPath": "/pocketmind/assets/js/a94703ab.e1186a90.js"
+        }
+      ]
+    },
+    "69": {
+      "js": [
+        {
+          "file": "assets/js/b9c8e8e0.c13fb61b.js",
+          "hash": "99c9a584adcc5a3f",
+          "publicPath": "/pocketmind/assets/js/b9c8e8e0.c13fb61b.js"
+        }
+      ]
+    },
+    "98": {
+      "js": [
+        {
+          "file": "assets/js/a7bd4aaa.32727cef.js",
+          "hash": "d1188df82d362711",
+          "publicPath": "/pocketmind/assets/js/a7bd4aaa.32727cef.js"
+        }
+      ]
+    },
+    "145": {
+      "js": [
+        {
+          "file": "assets/js/6cb7d006.0555f29f.js",
+          "hash": "e2e5e8e6d82c380e",
+          "publicPath": "/pocketmind/assets/js/6cb7d006.0555f29f.js"
+        }
+      ]
+    },
+    "174": {
+      "js": [
+        {
+          "file": "assets/js/5f1708b6.86fd4078.js",
+          "hash": "302d79cafeca6a1a",
+          "publicPath": "/pocketmind/assets/js/5f1708b6.86fd4078.js"
+        }
+      ]
+    },
+    "346": {
+      "js": [
+        {
+          "file": "assets/js/d004a0e9.28f649e1.js",
+          "hash": "12c987dcd3d0bc39",
+          "publicPath": "/pocketmind/assets/js/d004a0e9.28f649e1.js"
+        }
+      ]
+    },
+    "354": {
+      "js": [
+        {
+          "file": "assets/js/runtime~main.f5de0ed9.js",
+          "hash": "326f7a0db1cfd450",
+          "publicPath": "/pocketmind/assets/js/runtime~main.f5de0ed9.js"
+        }
+      ]
+    },
+    "398": {
+      "js": [
+        {
+          "file": "assets/js/0512f8f1.69ff4f2d.js",
+          "hash": "16618c2757f42343",
+          "publicPath": "/pocketmind/assets/js/0512f8f1.69ff4f2d.js"
+        }
+      ]
+    },
+    "401": {
+      "js": [
+        {
+          "file": "assets/js/17896441.33fabe3e.js",
+          "hash": "74656b9ce0668f78",
+          "publicPath": "/pocketmind/assets/js/17896441.33fabe3e.js"
+        }
+      ]
+    },
+    "471": {
+      "js": [
+        {
+          "file": "assets/js/82b918f0.8884567f.js",
+          "hash": "c610f1c65d18e5e6",
+          "publicPath": "/pocketmind/assets/js/82b918f0.8884567f.js"
+        }
+      ]
+    },
+    "507": {
+      "js": [
+        {
+          "file": "assets/js/d2420314.a8f4b867.js",
+          "hash": "da38fbfe8a236314",
+          "publicPath": "/pocketmind/assets/js/d2420314.a8f4b867.js"
+        }
+      ]
+    },
+    "647": {
+      "js": [
+        {
+          "file": "assets/js/5e95c892.0a3e68bd.js",
+          "hash": "c51b152763e6d80c",
+          "publicPath": "/pocketmind/assets/js/5e95c892.0a3e68bd.js"
+        }
+      ]
+    },
+    "742": {
+      "js": [
+        {
+          "file": "assets/js/aba21aa0.dacdba66.js",
+          "hash": "03ac407355536117",
+          "publicPath": "/pocketmind/assets/js/aba21aa0.dacdba66.js"
+        }
+      ]
+    },
+    "792": {
+      "js": [
+        {
+          "file": "assets/js/main.6464b5e5.js",
+          "hash": "0f7897938558f017",
+          "publicPath": "/pocketmind/assets/js/main.6464b5e5.js"
+        }
+      ]
+    },
+    "822": {
+      "js": [
+        {
+          "file": "assets/js/8070e160.487b8dac.js",
+          "hash": "5699b42f1f18359f",
+          "publicPath": "/pocketmind/assets/js/8070e160.487b8dac.js"
+        }
+      ]
+    },
+    "832": {
+      "js": [
+        {
+          "file": "assets/js/7e9136aa.17250887.js",
+          "hash": "fc92f12906235839",
+          "publicPath": "/pocketmind/assets/js/7e9136aa.17250887.js"
+        }
+      ]
+    },
+    "857": {
+      "js": [
+        {
+          "file": "assets/js/c33c8bc9.d5dd0c83.js",
+          "hash": "bbfb522e721f3e07",
+          "publicPath": "/pocketmind/assets/js/c33c8bc9.d5dd0c83.js"
+        }
+      ]
+    },
+    "863": {
+      "js": [
+        {
+          "file": "assets/js/0b1ac180.3d4423ac.js",
+          "hash": "dcd212879c1bd50c",
+          "publicPath": "/pocketmind/assets/js/0b1ac180.3d4423ac.js"
+        }
+      ]
+    },
+    "869": {
+      "css": [
+        {
+          "file": "assets/css/styles.cffb94b1.css",
+          "hash": "bb32cbc86c8befa2",
+          "publicPath": "/pocketmind/assets/css/styles.cffb94b1.css"
+        }
+      ]
+    },
+    "899": {
+      "js": [
+        {
+          "file": "assets/js/a09c2993.0dd4b1ca.js",
+          "hash": "30a2217eb868a250",
+          "publicPath": "/pocketmind/assets/js/a09c2993.0dd4b1ca.js"
+        }
+      ]
+    }
+  }
+}

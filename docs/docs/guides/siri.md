@@ -1,7 +1,10 @@
 ---
-title: "Siri Shortcuts"
-description: "Manage your calendar hands-free using Siri and PocketMind."
+sidebar_position: 2
 ---
+
+# Siri Shortcuts
+
+Manage your calendar hands-free using Siri and PocketMind.
 
 PocketMind includes four built-in Siri shortcuts. You can trigger them with your voice without ever opening the app.
 
@@ -20,20 +23,10 @@ PocketMind includes four built-in Siri shortcuts. You can trigger them with your
 
 On iOS 16.4 and later, shortcuts are suggested automatically after you use PocketMind a few times. On earlier versions:
 
-<Steps>
-  <Step title="Open the Shortcuts app">
-    Find it on your Home Screen or search in Spotlight.
-  </Step>
-  <Step title="Tap the + button">
-    Create a new shortcut.
-  </Step>
-  <Step title="Search for PocketMind">
-    All four intents appear in the app actions list.
-  </Step>
-  <Step title="Add a Siri phrase">
-    Tap **Add to Siri** and record your preferred trigger phrase.
-  </Step>
-</Steps>
+1. **Open the Shortcuts app** — find it on your Home Screen or search in Spotlight.
+2. **Tap the + button** — create a new shortcut.
+3. **Search for PocketMind** — all four intents appear in the app actions list.
+4. **Add a Siri phrase** — tap **Add to Siri** and record your preferred trigger phrase.
 
 ---
 

@@ -1,7 +1,10 @@
 ---
-title: "LLM Inference"
-description: "How PocketMind streams tokens from llama.cpp to the SwiftUI UI."
+sidebar_position: 2
 ---
+
+# LLM Inference
+
+How PocketMind streams tokens from llama.cpp to the SwiftUI UI.
 
 ## Flow
 
@@ -77,8 +80,6 @@ let historyLimit = ramGB >= 6
 
 ## Sampler Configuration
 
-Set inside `LlamaActor` to balance creativity vs. determinism for calendar JSON output:
-
 | Parameter | Value | Reason |
 |-----------|-------|--------|
 | Temperature | 0.35 | Low — reduces hallucinated JSON fields |
@@ -100,9 +101,9 @@ actor LlamaActor {
 }
 ```
 
-<Warning>
+:::warning
 `LlamaActor` requires a physical device — the llama.cpp Metal backend does not run in the Simulator.
-</Warning>
+:::
 
 ## Error Handling
 

@@ -1,26 +1,29 @@
 ---
-title: "Calendar Integration"
-description: "How PocketMind translates natural language into EventKit operations."
+sidebar_position: 3
 ---
+
+# Calendar Integration
+
+How PocketMind translates natural language into EventKit operations.
 
 ## End-to-End Flow
 
 ```
 User: "Add dentist Friday at 10am, remind me 30 min before"
-           ↓
+          ↓
 LLM generates CALENDAR_ACTION block:
 [CALENDAR_ACTION:{"action":"create","title":"Dentist",
   "start":"2026-03-20T10:00:00","end":"2026-03-20T11:00:00",
   "reminderMinutes":30}]
-           ↓
+          ↓
 ChatViewModel.executeCalendarActions() detects block
-           ↓
+          ↓
 CalendarActionController.execute(json:) → CalendarActionResult
-           ↓
+          ↓
 CalendarService.createEvent(...) → EventKit EKEventStore
-           ↓
+          ↓
 CalendarEventPreview shown as card in chat
-           ↓
+          ↓
 User taps "Confirm" → event created
 ```
 
@@ -34,69 +37,91 @@ The LLM is instructed (via system prompt) to output structured JSON wrapped in a
 
 ### Supported Actions
 
-<AccordionGroup>
-  <Accordion title="create">
-    ```json
-    {
-      "action": "create",
-      "title": "Team Meeting",
-      "start": "2026-03-20T14:00:00",
-      "end": "2026-03-20T15:00:00",
-      "location": "Zoom",
-      "notes": "Weekly sync",
-      "reminderMinutes": 15,
-      "isAllDay": false,
-      "recurrence": "weekly",
-      "recurrenceEnd": "2026-06-01T00:00:00"
-    }
-    ```
-  </Accordion>
-  <Accordion title="update">
-    ```json
-    {
-      "action": "update",
-      "search": "Team Meeting",
-      "title": "Weekly Review",
-      "start": "2026-03-20T15:00:00"
-    }
-    ```
-    Only include fields you want to change. `search` must match the exact event title.
-  </Accordion>
-  <Accordion title="delete">
-    ```json
-    { "action": "delete", "search": "Dentist" }
-    ```
-    Or delete a date range:
-    ```json
-    {
-      "action": "delete",
-      "start": "2026-03-23T00:00:00",
-      "end": "2026-03-23T23:59:59"
-    }
-    ```
-  </Accordion>
-  <Accordion title="list">
-    ```json
-    {
-      "action": "list",
-      "start": "2026-03-17T00:00:00",
-      "end": "2026-03-21T23:59:59"
-    }
-    ```
-    Returns a list of `CalendarEventPreview` cards in the chat.
-  </Accordion>
-  <Accordion title="query (free slots)">
-    ```json
-    {
-      "action": "query",
-      "start": "2026-03-17T00:00:00",
-      "end": "2026-03-21T23:59:59",
-      "durationMinutes": 60
-    }
-    ```
-    Returns available time windows via `CalendarFreeSlotEngine`.
-  </Accordion>
-</AccordionGroup>
+<details>
+<summary>create</summary>
+
+```json
+{
+  "action": "create",
+  "title": "Team Meeting",
+  "start": "2026-03-20T14:00:00",
+  "end": "2026-03-20T15:00:00",
+  "location": "Zoom",
+  "notes": "Weekly sync",
+  "reminderMinutes": 15,
+  "isAllDay": false,
+  "recurrence": "weekly",
+  "recurrenceEnd": "2026-06-01T00:00:00"
+}
+```
+
+</details>
+
+<details>
+<summary>update</summary>
+
+```json
+{
+  "action": "update",
+  "search": "Team Meeting",
+  "title": "Weekly Review",
+  "start": "2026-03-20T15:00:00"
+}
+```
+
+Only include fields you want to change. `search` must match the exact event title.
+
+</details>
+
+<details>
+<summary>delete</summary>
+
+```json
+{ "action": "delete", "search": "Dentist" }
+```
+
+Or delete a date range:
+
+```json
+{
+  "action": "delete",
+  "start": "2026-03-23T00:00:00",
+  "end": "2026-03-23T23:59:59"
+}
+```
+
+</details>
+
+<details>
+<summary>list</summary>
+
+```json
+{
+  "action": "list",
+  "start": "2026-03-17T00:00:00",
+  "end": "2026-03-21T23:59:59"
+}
+```
+
+Returns a list of `CalendarEventPreview` cards in the chat.
+
+</details>
+
+<details>
+<summary>query (free slots)</summary>
+
+```json
+{
+  "action": "query",
+  "start": "2026-03-17T00:00:00",
+  "end": "2026-03-21T23:59:59",
+  "durationMinutes": 60
+}
+```
+
+Returns available time windows via `CalendarFreeSlotEngine`.
+
+</details>
 
 ## Confirmation Flow
 

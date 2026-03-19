@@ -1,0 +1,23 @@
+{
+  "id": "guides/privacy",
+  "title": "Privacy",
+  "description": "How PocketMind keeps your data entirely on your device.",
+  "source": "@site/docs/guides/privacy.md",
+  "sourceDirName": "guides",
+  "slug": "/guides/privacy",
+  "permalink": "/pocketmind/guides/privacy",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/lucid-fabrics/pocketmind/tree/main/docs/docs/guides/privacy.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 5,
+  "frontMatter": {
+    "sidebar_position": 5
+  },
+  "sidebar": "guides",
+  "previous": {
+    "title": "AI Models",
+    "permalink": "/pocketmind/guides/models"
+  }
+}
