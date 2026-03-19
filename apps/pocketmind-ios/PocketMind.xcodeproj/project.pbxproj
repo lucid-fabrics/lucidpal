@@ -63,6 +63,7 @@
 		A49F828336DE087919543E16 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95AC9C8A5BA25C38328688EB /* SettingsViewModel.swift */; };
 		A5C77BCA78790115E658B337 /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EAA5A7FB227DCCA6BACB25C /* CalendarService.swift */; };
 		A783372E3A6B9481B83A1321 /* BulkDeletionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81C28CF37163D73F425B2A11 /* BulkDeletionBar.swift */; };
+		AF97A59E372AEA310DE4977E /* CalendarEventListCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CCFB720E7470B942D0E9FCF /* CalendarEventListCard.swift */; };
 		B12902D6ADBD80A907F7F9C2 /* ChatSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835BD8A24AFB478DEA8B6AF6 /* ChatSession.swift */; };
 		B7ECE3E7A8DDB6246FA44134 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89223E5E2E51426BF499376F /* HapticService.swift */; };
 		BB116DAEF827E61A46D747E5 /* SettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 592DDB922C3872F1E5FE3E2F /* SettingsViewModelTests.swift */; };
@@ -70,12 +71,14 @@
 		C527E8CB5A979BDF1B29A51B /* CalendarActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0635F653727C5FC7632B651 /* CalendarActionController.swift */; };
 		D4B0FE3DD67176C2E52DF474 /* SessionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225C2CED08860E986B07CC66 /* SessionManagerTests.swift */; };
 		D8AA6370CAF98BE9F55733A3 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 929E991CDFEEBC85C42D0EC6 /* SettingsView.swift */; };
+		D98B4DB26D9A600448AFBDB4 /* SnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48D63B17A7DB85CD907E6B5 /* SnapshotTests.swift */; };
 		DB4ECE27A3F80A715C94E696 /* SessionListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB525B84070359088E650A2 /* SessionListViewModelTests.swift */; };
 		DBD2DA7E4CF201196C9B3D82 /* SessionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3293F52DCB45E22040CC1500 /* SessionListView.swift */; };
 		DCD7844CFE3F3C559225633C /* ChatHistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16BCD27C5A1EDDD649A3DF5C /* ChatHistoryManager.swift */; };
 		DDEE306A7A5BEFDFFB1E912B /* ChatViewModelSystemPromptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39263A906F2BCD8731C48571 /* ChatViewModelSystemPromptTests.swift */; };
 		E42449B54D7950415655003F /* ChatViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DC3E33EC485EEECF12DB8B /* ChatViewModelTests.swift */; };
 		E46A32B6AA3CD28B24852703 /* CalendarFreeSlotEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDC7018784BC5A1605E15C8 /* CalendarFreeSlotEngine.swift */; };
+		E60BBB9F2EC8E0523DC6DFB2 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 93427C78368A8A8C5B86F73F /* SnapshotTesting */; };
 		E7D13B3D910E7EE43046D1F3 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BB1BC9F65292E2F7F1CCE17 /* SessionManager.swift */; };
 		E838880E9B61E243583DCE3A /* MockHapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B46DCC91A680D2C593E5BA /* MockHapticService.swift */; };
 		E8E19CC42B403C1212B1DB15 /* MockCalendarActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF5B7A052A7A4BC30FCA13DE /* MockCalendarActionController.swift */; };
@@ -120,6 +123,7 @@
 		30F66EB8E67D9C99294EEFC4 /* CalendarActionControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionControllerTests.swift; sourceTree = "<group>"; };
 		3293F52DCB45E22040CC1500 /* SessionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListView.swift; sourceTree = "<group>"; };
 		39263A906F2BCD8731C48571 /* ChatViewModelSystemPromptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelSystemPromptTests.swift; sourceTree = "<group>"; };
+		3CCFB720E7470B942D0E9FCF /* CalendarEventListCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventListCard.swift; sourceTree = "<group>"; };
 		3FC8CFBD786A8733ADC00B75 /* CalendarFreeSlotEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarFreeSlotEngineTests.swift; sourceTree = "<group>"; };
 		419A531854066E5D9E4432DD /* MockSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSessionManager.swift; sourceTree = "<group>"; };
 		421B7828BBD2ABDEC4FE49DE /* ModelInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInfoTests.swift; sourceTree = "<group>"; };
@@ -177,6 +181,7 @@
 		CEF981EFA6472ACC7A4EAC6E /* ModelInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInfo.swift; sourceTree = "<group>"; };
 		D3874BCAC6AA47CED220E769 /* CalendarFreeSlotIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarFreeSlotIntegrationTests.swift; sourceTree = "<group>"; };
 		D4797A688FBD64A2C9FA9189 /* ThinkingDisclosure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkingDisclosure.swift; sourceTree = "<group>"; };
+		E48D63B17A7DB85CD907E6B5 /* SnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotTests.swift; sourceTree = "<group>"; };
 		E52E3FBE9B7F8FB587B81E07 /* AppSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsTests.swift; sourceTree = "<group>"; };
 		E7E8187D2E299E73374D3166 /* ChatMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessageTests.swift; sourceTree = "<group>"; };
 		F0635F653727C5FC7632B651 /* CalendarActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionController.swift; sourceTree = "<group>"; };
@@ -189,6 +194,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		2DF541C3B272B1925C46463B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E60BBB9F2EC8E0523DC6DFB2 /* SnapshotTesting in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		35179A794DF841764282CE7A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -298,6 +311,7 @@
 				225C2CED08860E986B07CC66 /* SessionManagerTests.swift */,
 				592DDB922C3872F1E5FE3E2F /* SettingsViewModelTests.swift */,
 				5AF3A9A88F44B2EF6FFA0E0F /* SiriIntentTests.swift */,
+				E48D63B17A7DB85CD907E6B5 /* SnapshotTests.swift */,
 				52A9413BED870888AC318A48 /* ViewSmokeTests.swift */,
 			);
 			path = Tests;
@@ -310,6 +324,7 @@
 				BA58CD3241A9D95315BF9196 /* CalendarActionPill.swift */,
 				722836196C99E28F75C58B9A /* CalendarEventCard.swift */,
 				FDA07612EEFA0F90E9EB9382 /* CalendarEventCard+Pending.swift */,
+				3CCFB720E7470B942D0E9FCF /* CalendarEventListCard.swift */,
 				FEC6F0AF069907CCCB456FE5 /* CalendarQueryResultCard.swift */,
 				23E71755F4423670B08C5890 /* ChatView.swift */,
 				5B46BEF3C5A881C6F37E0197 /* DesignConstants.swift */,
@@ -399,6 +414,7 @@
 			buildConfigurationList = C58ECE3489A0BEEBAE4380E3 /* Build configuration list for PBXNativeTarget "PocketMindTests" */;
 			buildPhases = (
 				360F174056A6AE2A50547E41 /* Sources */,
+				2DF541C3B272B1925C46463B /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -407,6 +423,7 @@
 			);
 			name = PocketMindTests;
 			packageProductDependencies = (
+				93427C78368A8A8C5B86F73F /* SnapshotTesting */,
 			);
 			productName = PocketMindTests;
 			productReference = 496CEA815F3CE084AE84F4DB /* PocketMindTests.xctest */;
@@ -441,6 +458,7 @@
 			mainGroup = E1655B2260A05B42271CDFC3;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				063B8066BFC0CF4C368F7D38 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
 				7CC70F680DA36D242BBE7468 /* XCLocalSwiftPackageReference "Packages/llama" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -502,6 +520,7 @@
 				D4B0FE3DD67176C2E52DF474 /* SessionManagerTests.swift in Sources */,
 				BB116DAEF827E61A46D747E5 /* SettingsViewModelTests.swift in Sources */,
 				056D8A1F1E97FCF836F063CA /* SiriIntentTests.swift in Sources */,
+				D98B4DB26D9A600448AFBDB4 /* SnapshotTests.swift in Sources */,
 				8DDD7EC34B7FC9EEB09F3AF9 /* ViewSmokeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -520,6 +539,7 @@
 				3981175B8F90E3B1BBEC297D /* CalendarActionPill.swift in Sources */,
 				906F5D6C4C38916E11A2E8E7 /* CalendarEventCard+Pending.swift in Sources */,
 				3D71FD1AC59971853AC53B14 /* CalendarEventCard.swift in Sources */,
+				AF97A59E372AEA310DE4977E /* CalendarEventListCard.swift in Sources */,
 				E46A32B6AA3CD28B24852703 /* CalendarFreeSlotEngine.swift in Sources */,
 				FE5EE4637EB6383122F9A17C /* CalendarQueryResultCard.swift in Sources */,
 				A5C77BCA78790115E658B337 /* CalendarService.swift in Sources */,
@@ -816,7 +836,23 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		063B8066BFC0CF4C368F7D38 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.16.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		93427C78368A8A8C5B86F73F /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 063B8066BFC0CF4C368F7D38 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
 		B668BB645B31666F0197D789 /* llama */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = llama;

@@ -246,7 +246,7 @@ final class CalendarActionController: CalendarActionControllerProtocol {
                 start: event.startDate,
                 end: event.endDate,
                 calendarName: event.calendarTitle,
-                state: .created,
+                state: .listed,
                 eventIdentifier: event.eventIdentifier,
                 isAllDay: event.isAllDay,
                 location: event.location
