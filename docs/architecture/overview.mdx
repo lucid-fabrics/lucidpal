@@ -1,0 +1,130 @@
+---
+title: "Architecture Overview"
+description: "MVVM layers, dependency injection, and actor isolation in PocketMind."
+---
+
+## Layer Diagram
+
+```
+┌─────────────────────────────────────┐
+│           SwiftUI Views             │  ← Layout only, zero business logic
+├─────────────────────────────────────┤
+│           ViewModels                │  ← @MainActor ObservableObject
+│  ChatViewModel  SessionListViewModel│
+│  ModelDownloadViewModel  Settings   │
+├─────────────────────────────────────┤
+│           Services (Protocols)      │  ← Injected as any XProtocol
+│  LLMService  CalendarService        │
+│  SessionManager  SpeechService      │
+│  HapticService  ModelDownloader     │
+├─────────────────────────────────────┤
+│         Models / Domain Types       │  ← Pure data, no UIKit/SwiftUI
+│  ChatMessage  ChatSession           │
+│  CalendarEventPreview  ModelInfo    │
+└─────────────────────────────────────┘
+```
+
+## Dependency Injection
+
+PocketMind uses **constructor injection** throughout. All service dependencies are declared as protocol existentials (`any XProtocol`), never concrete types.
+
+```swift
+// ✅ Correct — protocol existential
+final class ChatViewModel: ObservableObject {
+    let llmService: any LLMServiceProtocol
+    let calendarService: any CalendarServiceProtocol
+    let settings: any AppSettingsProtocol
+}
+
+// ❌ Wrong — concrete type (untestable, breaks DI)
+let llmService: LLMService
+```
+
+**`PocketMindApp`** is the sole composition root — the only place concrete services are instantiated:
+
+```swift
+@main struct PocketMindApp: App {
+    private let llmService = LLMService()
+    private let calendarService = CalendarService()
+    private let hapticService = HapticService()
+    // ...injected into SessionListViewModel
+}
+```
+
+## Actor Isolation
+
+| Actor | Purpose |
+|-------|---------|
+| `@MainActor` | All ViewModels and ObservableObjects — guarantees UI updates on main thread |
+| `LlamaActor` | Serial actor wrapping llama.cpp C FFI — serializes inference, safe for async |
+
+```swift
+actor LlamaActor {
+    // All calls serialized — no data races on C pointers
+    func generate(prompt: String) async throws -> String { ... }
+}
+```
+
+## Protocol Inventory
+
+| Protocol | Conforming Type | Mock |
+|----------|----------------|------|
+| `LLMServiceProtocol` | `LLMService` | `MockLLMService` |
+| `CalendarServiceProtocol` | `CalendarService` | `MockCalendarService` |
+| `CalendarActionControllerProtocol` | `CalendarActionController` | `MockCalendarActionController` |
+| `SessionManagerProtocol` | `SessionManager` | `MockSessionManager` |
+| `SpeechServiceProtocol` | `SpeechService` | `MockSpeechService` |
+| `HapticServiceProtocol` | `HapticService` | `MockHapticService` |
+| `ChatHistoryManagerProtocol` | `ChatHistoryManager` / `NoOpChatHistoryManager` | — |
+| `ModelDownloaderProtocol` | `ModelDownloader` | `MockModelDownloader` |
+| `AppSettingsProtocol` | `AppSettings` | `MockAppSettings` |
+
+## File Structure
+
+```
+Sources/
+├── App/
+│   ├── PocketMindApp.swift       ← @main, composition root
+│   ├── ContentView.swift         ← Root navigation (onboarding → sessions)
+│   └── AppDelegate.swift         ← UIApplicationDelegate (background tasks)
+├── Models/
+│   ├── ChatMessage.swift         ← Message struct, CalendarEventPreview
+│   ├── ChatSession.swift         ← Session and SessionMeta types
+│   ├── CalendarActionModels.swift← Payload and result types
+│   └── ModelInfo.swift           ← GGUF model metadata
+├── Services/
+│   ├── LLMService.swift          ← Model load/unload, streaming
+│   ├── LlamaActor.swift          ← llama.cpp serial actor
+│   ├── CalendarService.swift     ← EventKit abstraction
+│   ├── CalendarActionController.swift ← LLM JSON → calendar action
+│   ├── CalendarFreeSlotEngine.swift   ← Pure slot-finding algorithm
+│   ├── SessionManager.swift      ← Multi-session persistence
+│   ├── ChatHistoryManager.swift  ← Legacy single-history persistence
+│   ├── SpeechService.swift       ← On-device speech recognition
+│   ├── ModelDownloader.swift     ← Background URLSession downloads
+│   └── HapticService.swift       ← UIImpactFeedbackGenerator wrapper
+├── ViewModels/
+│   ├── ChatViewModel.swift       ← Core message/stream logic
+│   ├── ChatViewModel+CalendarConfirmation.swift ← Confirm/cancel/undo
+│   ├── ChatViewModel+SystemPrompt.swift ← Prompt construction + calendar dispatch
+│   ├── SessionListViewModel.swift ← Session CRUD + Siri routing
+│   ├── ModelDownloadViewModel.swift ← Download state machine
+│   ├── SettingsViewModel.swift   ← Calendar auth, model selection
+│   ├── AppSettings.swift         ← @AppStorage preferences
+│   ├── AppSettingsProtocol.swift ← Settings protocol for DI
+│   └── ChatConstants.swift       ← Context limits, debounce values
+├── Views/
+│   ├── ChatView.swift            ← Message list + input bar
+│   ├── SessionListView.swift     ← Session browser
+│   ├── MessageBubbleView.swift   ← Bubble routing (user/assistant)
+│   ├── CalendarEventCard.swift   ← Event preview card
+│   ├── CalendarEventCard+Pending.swift ← Confirm/update variants
+│   ├── CalendarQueryResultCard.swift ← Free-slot results
+│   ├── DesignConstants.swift     ← Named design tokens
+│   ├── BulkDeletionBar.swift     ← Batch delete UI
+│   ├── CalendarActionPill.swift  ← "Updating calendar..." indicator
+│   └── ThinkingDisclosure.swift  ← Expandable thinking block
+└── Intents/
+    ├── AskPocketMindIntent.swift  ← All 4 Siri intent types
+    └── PocketMindShortcuts.swift  ← AppShortcutsProvider
+```
