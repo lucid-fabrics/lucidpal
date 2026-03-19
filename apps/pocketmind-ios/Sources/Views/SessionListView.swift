@@ -63,7 +63,7 @@ struct SessionListView: View {
                         Button {
                             navigationPath.append(meta)
                         } label: {
-                            SessionRowView(meta: meta)
+                            SessionRowView(meta: meta, searchText: searchText)
                         }
                         .buttonStyle(.plain)
                         .contextMenu {
@@ -159,13 +159,25 @@ struct SessionListView: View {
 
 private struct SessionRowView: View {
     let meta: ChatSessionMeta
+    var searchText: String = ""
+
+    private var highlightedTitle: AttributedString {
+        var attributed = AttributedString(meta.title)
+        guard !searchText.isEmpty,
+              let range = attributed.range(of: searchText, options: .caseInsensitive) else {
+            return attributed
+        }
+        attributed[range].foregroundColor = .accentColor
+        attributed[range].font = .body.bold()
+        return attributed
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             avatar
             VStack(alignment: .leading, spacing: 3) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(meta.title)
+                    Text(highlightedTitle)
                         .font(.body.weight(.semibold))
                         .lineLimit(1)
                     Spacer()
