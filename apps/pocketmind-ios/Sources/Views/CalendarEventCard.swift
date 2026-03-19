@@ -11,6 +11,7 @@ struct CalendarEventCard: View {
     let onCancelUpdate: () -> Void
 
     @Environment(\.openURL) private var openURL
+    @State private var showDeleteConfirmation = false
 
     static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -31,7 +32,20 @@ struct CalendarEventCard: View {
             pendingUpdateCard
         case .updateCancelled:
             statusCard(icon: "xmark.circle", label: "Update cancelled", color: .secondary)
-        case .created, .updated, .rescheduled, .restored, .listed:
+        case .created, .updated, .rescheduled, .restored:
+            tappableCard
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button(role: .destructive) {
+                        showDeleteConfirmation = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+                .confirmationDialog("Delete \"\(preview.title)\"?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+                    Button("Delete Event", role: .destructive) { onConfirm() }
+                    Button("Cancel", role: .cancel) {}
+                }
+        case .listed:
             tappableCard
         }
     }

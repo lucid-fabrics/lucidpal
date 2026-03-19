@@ -8,7 +8,7 @@ How PocketMind integrates with Siri using the AppIntents framework.
 
 ## Overview
 
-PocketMind registers four Siri intents via the **AppIntents** framework. Because on-device inference cannot run inside a Siri extension, the intents use a **handoff pattern**: they store a pending query in `UserDefaults`, tell Siri a brief spoken confirmation, and open the app. The app picks up the pending query when its scene becomes active.
+PocketMind registers six Siri intents via the **AppIntents** framework. Because on-device inference cannot run inside a Siri extension, the intents use a **handoff pattern**: they store a pending query in `UserDefaults`, tell Siri a brief spoken confirmation, and open the app. The app picks up the pending query when its scene becomes active.
 
 ```
 User: "Add dentist Friday at 10am to PocketMind"
@@ -34,6 +34,8 @@ LLM generates CALENDAR_ACTION block → CalendarEventPreview shown
 | `CheckCalendarIntent` | "Check my PocketMind calendar" | "What's on my calendar today?" | — |
 | `AddCalendarEventIntent` | "Add [event] to PocketMind" | "Add [event] to my calendar" | `@Parameter event: String` |
 | `FindFreeTimeIntent` | "Find free time in PocketMind" | "Find a free 1-hour slot today" | — |
+| `DeleteCalendarEventIntent` | "Delete [event] in PocketMind" | — | `@Parameter eventName: String` |
+| `UndoLastDeletionIntent` | "Undo last deletion in PocketMind" | — | — |
 
 ## Handoff Key
 

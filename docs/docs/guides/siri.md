@@ -6,7 +6,7 @@ sidebar_position: 2
 
 Manage your calendar hands-free using Siri and PocketMind.
 
-PocketMind includes four built-in Siri shortcuts. You can trigger them with your voice without ever opening the app.
+PocketMind includes six built-in Siri shortcuts. You can trigger them with your voice without ever opening the app.
 
 ## Available Shortcuts
 
@@ -16,6 +16,8 @@ PocketMind includes four built-in Siri shortcuts. You can trigger them with your
 | Check My Calendar | "Check my PocketMind calendar" | Shows today's events |
 | Add Calendar Event | "Add dentist to PocketMind" | Starts an event creation |
 | Find Free Time | "Find free time in PocketMind" | Finds a free 1-hour slot today |
+| Delete Calendar Event | "Delete event in PocketMind" | Searches for an event, shows a preview, and deletes it after confirmation |
+| Undo Last Deletion | "Undo last deletion in PocketMind" | Restores the most recently Siri-deleted event after confirmation |
 
 ---
 
@@ -25,7 +27,7 @@ On iOS 16.4 and later, shortcuts are suggested automatically after you use Pocke
 
 1. **Open the Shortcuts app** — find it on your Home Screen or search in Spotlight.
 2. **Tap the + button** — create a new shortcut.
-3. **Search for PocketMind** — all four intents appear in the app actions list.
+3. **Search for PocketMind** — all six intents appear in the app actions list.
 4. **Add a Siri phrase** — tap **Add to Siri** and record your preferred trigger phrase.
 
 ---
@@ -60,6 +62,18 @@ PocketMind opens and shows a preview card ready to confirm.
 
 PocketMind opens and searches for the next free 1-hour slot today.
 
+**Deleting an event by voice:**
+> "Hey Siri, delete event in PocketMind"
+
+Siri replies: *"Which event would you like to delete?"*
+You say: *"Team standup tomorrow"*
+PocketMind shows a preview card of the matching event and asks you to confirm before deleting.
+
+**Undoing a deletion:**
+> "Hey Siri, undo last deletion in PocketMind"
+
+PocketMind shows the event that was most recently deleted via Siri and asks you to confirm before restoring it.
+
 ---
 
 ## Tips
@@ -67,3 +81,5 @@ PocketMind opens and searches for the next free 1-hour slot today.
 - Shortcuts work on iPhone, iPad, HomePod, AirPods, Apple Watch, and CarPlay.
 - You can customize the trigger phrase to anything you like in the Shortcuts app.
 - The **Add Calendar Event** shortcut lets you dictate the full event detail in one sentence — Siri passes everything to PocketMind.
+- The **Delete Calendar Event** shortcut also responds to *"Delete a PocketMind event"* and *"Remove event from PocketMind"*.
+- The **Undo Last Deletion** shortcut also responds to *"Restore deleted event in PocketMind"* and *"Undo PocketMind deletion"*.
