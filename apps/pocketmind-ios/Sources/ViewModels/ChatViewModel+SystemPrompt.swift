@@ -10,14 +10,22 @@ extension ChatViewModel {
     // while still correctly terminating at the closing `}]` sequence.
     static let actionPattern = #"\[CALENDAR_ACTION:(\{(?:[^}]|\}(?!\]))*\})\]"#
 
-    func executeCalendarActions(in text: String) async -> (content: String, previews: [CalendarEventPreview]) {
-        guard let regex = try? NSRegularExpression(pattern: Self.actionPattern, options: [.dotMatchesLineSeparators]) else { return (text, []) }
+    private static let calendarActionRegex: NSRegularExpression = {
+        guard let regex = try? NSRegularExpression(pattern: actionPattern, options: [.dotMatchesLineSeparators]) else {
+            preconditionFailure("Invalid calendarActionRegex pattern: \(actionPattern)")
+        }
+        return regex
+    }()
+
+    func executeCalendarActions(in text: String) async -> (content: String, previews: [CalendarEventPreview], freeSlots: [CalendarFreeSlot]) {
+        let regex = Self.calendarActionRegex
         let range = NSRange(text.startIndex..., in: text)
         let matches = regex.matches(in: text, range: range)
-        guard !matches.isEmpty else { return (text, []) }
+        guard !matches.isEmpty else { return (text, [], []) }
 
         var result = text
         var previews: [CalendarEventPreview] = []
+        var freeSlots: [CalendarFreeSlot] = []
         for match in matches.reversed() {
             guard let fullRange = Range(match.range, in: result),
                   let jsonRange = Range(match.range(at: 1), in: result) else { continue }
@@ -32,14 +40,18 @@ extension ChatViewModel {
             case .bulkPending(let pending):
                 replacement = ""
                 previews.append(contentsOf: pending)
-            case .queryResult(let answer):
-                replacement = answer
+            case .queryResult(let slots):
+                replacement = ""
+                freeSlots.append(contentsOf: slots)
+            case .listResult(let eventPreviews):
+                replacement = ""
+                previews.append(contentsOf: eventPreviews)
             case .failure(let msg):
                 replacement = msg
             }
             result = result.replacingCharacters(in: fullRange, with: replacement)
         }
-        return (result, previews)
+        return (result, previews, freeSlots)
     }
 
     func buildSystemPrompt() async -> String {
@@ -49,7 +61,7 @@ extension ChatViewModel {
             """
             You are PocketMind, an on-device AI assistant\(calendarEnabled ? " with direct read and write access to the user's iOS calendar" : "").
             Today is \(today).
-            Be concise. Use plain text, no markdown.
+            Be concise. Use markdown for emphasis (**bold**), bullet lists (- item), and inline code (`code`). Keep responses short.
             """,
         ]
         if calendarEnabled { parts.append(calendarToolInstructions()) }
@@ -81,6 +93,7 @@ extension ChatViewModel {
             Update:       [CALENDAR_ACTION:{"action":"update","search":"CURRENT TITLE","title":"NEW TITLE","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","location":"","notes":"","reminderMinutes":15}]
             Delete one:   [CALENDAR_ACTION:{"action":"delete","search":"EXACT EVENT TITLE"}]
             Delete range: [CALENDAR_ACTION:{"action":"delete","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS"}]
+            List events:  [CALENDAR_ACTION:{"action":"list","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS"}]
             Query free slots: [CALENDAR_ACTION:{"action":"query","start":"YYYY-MM-DDTHH:MM:SS","end":"YYYY-MM-DDTHH:MM:SS","durationMinutes":60}]
 
             Output format — block first, one short sentence after:
@@ -145,6 +158,11 @@ extension ChatViewModel {
             You: [CALENDAR_ACTION:{"action":"create","title":"Team Standup","start":"2026-03-23T09:00:00","end":"2026-03-23T09:30:00","recurrence":"weekly"}]
             Added as a weekly recurring event.
 
+            Example — list events in a date range:
+            User: what's on my calendar this week?
+            You: [CALENDAR_ACTION:{"action":"list","start":"2026-03-18T00:00:00","end":"2026-03-22T23:59:59"}]
+            Here's your week.
+
             Example — find free slots:
             User: find a free 2-hour slot this week
             You: [CALENDAR_ACTION:{"action":"query","start":"2026-03-17T00:00:00","end":"2026-03-21T23:59:59","durationMinutes":120}]
@@ -170,6 +188,7 @@ extension ChatViewModel {
             - recurrenceEnd: ISO8601 date when recurrence stops. Omit for indefinite.
             - NEVER skip the block. NEVER output text-only when an action is requested.
             - NEVER tell the user to make changes manually.
+            - list: use to show events in a date range when the user asks "what's on my calendar", "show my meetings", etc. Do NOT use query for listing — query is only for finding free slots.
             """
     }
 

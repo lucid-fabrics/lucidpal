@@ -1,5 +1,18 @@
 import Foundation
 
+/// A free time slot returned by a calendar query action.
+struct CalendarFreeSlot: Codable, Equatable, Sendable, Identifiable {
+    let id: UUID
+    let start: Date
+    let end: Date
+
+    init(start: Date, end: Date) {
+        self.id = UUID()
+        self.start = start
+        self.end = end
+    }
+}
+
 /// Snapshot of proposed changes before a user-confirmed update.
 struct PendingCalendarUpdate: Codable, Equatable, Sendable {
     var title: String?
@@ -37,6 +50,9 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
     var reminderMinutes: Int?
     var isAllDay: Bool
     var recurrence: String?
+    var location: String?
+    /// True when the created event overlaps with an existing event.
+    var hasConflict: Bool?
     /// Proposed changes for pendingUpdate state.
     var pendingUpdate: PendingCalendarUpdate?
 
@@ -50,7 +66,9 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
         eventIdentifier: String? = nil,
         reminderMinutes: Int? = nil,
         isAllDay: Bool = false,
-        recurrence: String? = nil
+        recurrence: String? = nil,
+        location: String? = nil,
+        hasConflict: Bool? = nil
     ) {
         self.id = id
         self.title = title
@@ -62,6 +80,8 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
         self.reminderMinutes = reminderMinutes
         self.isAllDay = isAllDay
         self.recurrence = recurrence
+        self.location = location
+        self.hasConflict = hasConflict
         self.pendingUpdate = nil
     }
 }
@@ -81,13 +101,16 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
     var calendarEventPreviews: [CalendarEventPreview]
     let timestamp: Date
 
-    init(id: UUID = UUID(), role: MessageRole, content: String, thinkingContent: String? = nil, isThinking: Bool = false, calendarEventPreviews: [CalendarEventPreview] = [], timestamp: Date = .now) {
+    var calendarFreeSlots: [CalendarFreeSlot]
+
+    init(id: UUID = UUID(), role: MessageRole, content: String, thinkingContent: String? = nil, isThinking: Bool = false, calendarEventPreviews: [CalendarEventPreview] = [], calendarFreeSlots: [CalendarFreeSlot] = [], timestamp: Date = .now) {
         self.id = id
         self.role = role
         self.content = content
         self.thinkingContent = thinkingContent
         self.isThinking = isThinking
         self.calendarEventPreviews = calendarEventPreviews
+        self.calendarFreeSlots = calendarFreeSlots
         self.timestamp = timestamp
     }
 
@@ -101,19 +124,20 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
     }
 
     // Compiled once — NSRegularExpression is thread-safe for matching.
-    private static let actionBlockRegex: NSRegularExpression? = try? NSRegularExpression(
-        pattern: #"\[CALENDAR_ACTION:\{(?:[^}]|\}(?!\]))*\}\]"#,
-        options: .dotMatchesLineSeparators
-    )
+    private static let actionBlockRegex: NSRegularExpression = {
+        let pattern = #"\[CALENDAR_ACTION:\{(?:[^}]|\}(?!\]))*\}\]"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators) else {
+            preconditionFailure("Invalid actionBlockRegex pattern")
+        }
+        return regex
+    }()
 
     /// Content with [CALENDAR_ACTION:...] blocks stripped for display.
     /// Removes complete blocks via regex and partial blocks still mid-stream.
     var displayContent: String {
         var text = content
-        if let regex = Self.actionBlockRegex {
-            let ns = NSRange(text.startIndex..., in: text)
-            text = regex.stringByReplacingMatches(in: text, range: ns, withTemplate: "")
-        }
+        let ns = NSRange(text.startIndex..., in: text)
+        text = Self.actionBlockRegex.stringByReplacingMatches(in: text, range: ns, withTemplate: "")
         // Remove any partial block still streaming (no closing ])
         if let start = text.range(of: "[CALENDAR_ACTION:") {
             text = String(text[..<start.lowerBound])
