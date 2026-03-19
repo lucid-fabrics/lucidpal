@@ -3,7 +3,7 @@ import Foundation
 
 @MainActor
 final class MockCalendarActionController: CalendarActionControllerProtocol {
-    var stubbedResult: CalendarActionResult = .queryResult("")
+    var stubbedResult: CalendarActionResult = .queryResult([])
     private(set) var executeCalled = false
     private(set) var lastJSON: String?
 
