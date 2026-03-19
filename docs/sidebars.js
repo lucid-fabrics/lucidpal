@@ -2,7 +2,6 @@
 const sidebars = {
   guides: [
     'introduction',
-    'quickstart',
     {
       type: 'category',
       label: 'Using PocketMind',
