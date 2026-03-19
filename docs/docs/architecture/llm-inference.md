@@ -92,12 +92,12 @@ let historyLimit = ramGB >= 6
 
 ```swift
 actor LlamaActor {
-    private var model: OpaquePointer?
-    private var context: OpaquePointer?
+    nonisolated(unsafe) private var model: OpaquePointer?
+    nonisolated(unsafe) private var ctx: OpaquePointer?
 
     func load(path: String) throws { ... }
     func unload() { ... }
-    func generate(tokens: [Int32], maxNew: Int) async throws -> AsyncThrowingStream<String, Error>
+    func generate(prompt: String, continuation: AsyncThrowingStream<String, Error>.Continuation) async
 }
 ```
 
