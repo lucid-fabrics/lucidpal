@@ -1,7 +1,10 @@
 ---
-title: "AI Models"
-description: "Choosing and downloading the right model for your iPhone."
+sidebar_position: 4
 ---
+
+# AI Models
+
+Choosing and downloading the right model for your iPhone.
 
 PocketMind runs an AI model entirely on your device. On first launch, you'll be prompted to download one. The app recommends the best model for your iPhone automatically.
 
@@ -18,24 +21,14 @@ Both models run at the same speed relative to their size — the 4B model gives 
 
 ## Downloading a Model
 
-<Steps>
-  <Step title="Open PocketMind for the first time">
-    The Model Download screen appears automatically.
-  </Step>
-  <Step title="Check the recommended model">
-    The app selects the best model for your device RAM. You can switch to the other model if you prefer.
-  </Step>
-  <Step title="Tap Download">
-    The download runs in the background. You can lock your screen — it continues automatically.
-  </Step>
-  <Step title="Start chatting">
-    Once the download completes, PocketMind loads the model and you're ready to go.
-  </Step>
-</Steps>
+1. **Open PocketMind for the first time** — the Model Download screen appears automatically.
+2. **Check the recommended model** — the app selects the best model for your device RAM. You can switch to the other model if you prefer.
+3. **Tap Download** — the download runs in the background. You can lock your screen — it continues automatically.
+4. **Start chatting** — once the download completes, PocketMind loads the model and you're ready to go.
 
-<Note>
+:::note
 Wi-Fi is strongly recommended. The models are between 1.8 GB and 2.5 GB.
-</Note>
+:::
 
 ---
 
@@ -47,7 +40,7 @@ Go to **Settings → AI Model** to switch between models. The new model loads th
 
 ## Storage
 
-Models are stored in the app's local storage on your device. You can see the exact path in **Settings → Storage**. Deleting the app also removes the downloaded model file.
+Models are stored in the app's local storage on your device. Deleting the app also removes the downloaded model file.
 
 ---
 

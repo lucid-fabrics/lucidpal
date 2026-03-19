@@ -1,32 +1,22 @@
 ---
-title: "PocketMind"
-description: "On-device AI calendar assistant for iOS — fully private, no cloud, powered by Qwen3."
+slug: /
+sidebar_position: 1
 ---
 
-<img
-  src="/images/hero.png"
-  alt="PocketMind hero"
-  noZoom
-/>
+# PocketMind
+
+**On-device AI calendar assistant for iOS — fully private, no cloud, powered by Qwen3.**
 
 ## What is PocketMind?
 
 PocketMind is an on-device AI assistant that understands and manages your iOS calendar through natural language. Every word is processed locally on your iPhone — no data ever leaves the device.
 
-<CardGroup cols={2}>
-  <Card title="100% On-Device" icon="lock">
-    All inference runs via llama.cpp on the Neural Engine. No API keys, no subscriptions, no internet required.
-  </Card>
-  <Card title="Calendar Integration" icon="calendar">
-    Create, update, delete and query events using plain English. Conflict detection included.
-  </Card>
-  <Card title="Siri Shortcuts" icon="mic">
-    Four built-in Siri intents let you manage your calendar without ever opening the app.
-  </Card>
-  <Card title="Multi-Session" icon="clock">
-    Full conversation history with named sessions, persisted locally across launches.
-  </Card>
-</CardGroup>
+| Feature | Description |
+|---------|-------------|
+| **100% On-Device** | All inference runs via llama.cpp on the Neural Engine. No API keys, no subscriptions, no internet required. |
+| **Calendar Integration** | Create, update, delete and query events using plain English. Conflict detection included. |
+| **Siri Shortcuts** | Four built-in Siri intents let you manage your calendar without ever opening the app. |
+| **Multi-Session** | Full conversation history with named sessions, persisted locally across launches. |
 
 ## Models
 

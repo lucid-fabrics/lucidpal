@@ -1,7 +1,10 @@
 ---
-title: "Conversations"
-description: "How to create, manage, and switch between chat sessions in PocketMind."
+sidebar_position: 3
 ---
+
+# Conversations
+
+How to create, manage, and switch between chat sessions in PocketMind.
 
 PocketMind saves each conversation as a separate session. You can pick up any previous chat or start fresh at any time.
 
@@ -37,9 +40,9 @@ Long-press any session in the list, then tap **Rename**. Give it a meaningful na
 
 **All sessions:** Tap **Edit → Select All → Delete**.
 
-<Warning>
+:::warning
 Deleted sessions cannot be recovered. Events that were created from a session remain in your calendar.
-</Warning>
+:::
 
 ---
 

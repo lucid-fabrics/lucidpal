@@ -1,0 +1,23 @@
+{
+  "id": "architecture/overview",
+  "title": "Architecture Overview",
+  "description": "MVVM layers, dependency injection, and actor isolation in PocketMind.",
+  "source": "@site/docs/architecture/overview.md",
+  "sourceDirName": "architecture",
+  "slug": "/architecture/overview",
+  "permalink": "/pocketmind/architecture/overview",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/lucid-fabrics/pocketmind/tree/main/docs/docs/architecture/overview.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1
+  },
+  "sidebar": "architecture",
+  "next": {
+    "title": "LLM Inference",
+    "permalink": "/pocketmind/architecture/llm-inference"
+  }
+}

@@ -1,7 +1,10 @@
 ---
-title: "Siri & Shortcuts"
-description: "How PocketMind integrates with Siri using the AppIntents framework."
+sidebar_position: 5
 ---
+
+# Siri & Shortcuts
+
+How PocketMind integrates with Siri using the AppIntents framework.
 
 ## Overview
 
@@ -40,7 +43,20 @@ All intents write to the same `UserDefaults` key:
 UserDefaults.standard.set(query, forKey: "pm_siri_pending_query")
 ```
 
-`PocketMindApp` reads and clears this key in `onReceive(NotificationCenter.default.publisher(for: UIScene.didActivateNotification))`. The query is cleared immediately after forwarding to prevent replaying on subsequent launches.
+`PocketMindApp` reads and clears this key when the scene activates. The query is cleared immediately after forwarding to prevent replaying on subsequent launches.
+
+## Audio Feedback (`ProvidesDialog`)
+
+Every intent conforms to `ProvidesDialog`, giving Siri a spoken response:
+
+```swift
+func perform() async throws -> some IntentResult & ProvidesDialog {
+    // ...store pending query...
+    return .result(dialog: "Opening PocketMind.")
+}
+```
+
+Without `ProvidesDialog`, Siri would show a generic "Done" card with no audio confirmation.
 
 ## AppShortcutsProvider
 
@@ -60,35 +76,3 @@ AppShortcut(
 ```
 
 On iOS < 16.4, the intents still work but users must add the shortcuts manually via the Shortcuts app.
-
-## Audio Feedback (`ProvidesDialog`)
-
-Every intent conforms to `ProvidesDialog`, giving Siri a spoken response:
-
-```swift
-func perform() async throws -> some IntentResult & ProvidesDialog {
-    // ...store pending query...
-    return .result(dialog: "Opening PocketMind.")
-}
-```
-
-Without `ProvidesDialog`, Siri would show a generic "Done" card with no audio confirmation.
-
-## Error Handling
-
-`AskPocketMindIntent` and `AddCalendarEventIntent` validate their parameters before writing to `UserDefaults`:
-
-```swift
-let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-guard !trimmed.isEmpty else { throw SiriQueryError.emptyQuery }
-```
-
-`SiriQueryError.emptyQuery` has a `LocalizedError` description that Siri reads aloud: *"Please provide a question for PocketMind."*
-
-## Adding a New Intent
-
-1. Create a struct conforming to `AppIntent` in `Sources/Intents/`.
-2. Implement `perform() async throws -> some IntentResult & ProvidesDialog`.
-3. Write the pre-seeded query to `UserDefaults["pm_siri_pending_query"]`.
-4. Add an `AppShortcut` entry in `PocketMindShortcuts.appShortcuts`.
-5. Add test coverage in `Tests/SiriIntentTests.swift`.

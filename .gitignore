@@ -20,3 +20,7 @@ apps/pocketmind-ios/**/*.gguf
 
 # Fastlane build artifacts
 **/fastlane/report.xml
+docs/node_modules
+docs/build
+docs/node_modules
+docs/build

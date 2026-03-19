@@ -1,47 +1,63 @@
 ---
-title: "Calendar Commands"
-description: "Natural language examples for creating, updating, deleting, and querying events."
+sidebar_position: 1
 ---
+
+# Calendar Commands
+
+Natural language examples for creating, updating, deleting, and querying events.
 
 PocketMind understands plain English. You don't need to learn any special syntax — just describe what you want.
 
 ## Creating Events
 
-<AccordionGroup>
-  <Accordion title="Basic event">
-    > "Add a dentist appointment Friday at 10am"
+<details>
+<summary>Basic event</summary>
 
-    > "Schedule a team lunch tomorrow at noon"
+> "Add a dentist appointment Friday at 10am"
 
-    > "Book a flight on March 25th from 8am to 11am"
-  </Accordion>
+> "Schedule a team lunch tomorrow at noon"
 
-  <Accordion title="With a reminder">
-    > "Add dentist Friday at 10am, remind me 30 minutes before"
+> "Book a flight on March 25th from 8am to 11am"
 
-    > "Schedule a meeting at 3pm with a 1-hour warning"
-  </Accordion>
+</details>
 
-  <Accordion title="All-day event">
-    > "Add a vacation day next Monday"
+<details>
+<summary>With a reminder</summary>
 
-    > "Block off the whole day on April 5th"
-  </Accordion>
+> "Add dentist Friday at 10am, remind me 30 minutes before"
 
-  <Accordion title="Recurring event">
-    > "Add a weekly standup every Monday at 9am"
+> "Schedule a meeting at 3pm with a 1-hour warning"
 
-    > "Schedule a monthly budget review on the first of every month"
+</details>
 
-    > "Create a daily gym session at 7am until the end of June"
-  </Accordion>
+<details>
+<summary>All-day event</summary>
 
-  <Accordion title="With location or notes">
-    > "Add dinner at Osteria on Saturday at 7pm, location 123 Main St"
+> "Add a vacation day next Monday"
 
-    > "Schedule a call with Sarah at 2pm, notes: discuss Q2 roadmap"
-  </Accordion>
-</AccordionGroup>
+> "Block off the whole day on April 5th"
+
+</details>
+
+<details>
+<summary>Recurring event</summary>
+
+> "Add a weekly standup every Monday at 9am"
+
+> "Schedule a monthly budget review on the first of every month"
+
+> "Create a daily gym session at 7am until the end of June"
+
+</details>
+
+<details>
+<summary>With location or notes</summary>
+
+> "Add dinner at Osteria on Saturday at 7pm, location 123 Main St"
+
+> "Schedule a call with Sarah at 2pm, notes: discuss Q2 roadmap"
+
+</details>
 
 After describing the event, a **preview card** appears in the chat. Tap **Confirm** to save it — or discard if anything looks wrong.
 

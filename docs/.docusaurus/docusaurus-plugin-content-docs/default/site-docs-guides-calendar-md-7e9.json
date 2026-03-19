@@ -1,0 +1,27 @@
+{
+  "id": "guides/calendar",
+  "title": "Calendar Commands",
+  "description": "Natural language examples for creating, updating, deleting, and querying events.",
+  "source": "@site/docs/guides/calendar.md",
+  "sourceDirName": "guides",
+  "slug": "/guides/calendar",
+  "permalink": "/pocketmind/guides/calendar",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/lucid-fabrics/pocketmind/tree/main/docs/docs/guides/calendar.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1
+  },
+  "sidebar": "guides",
+  "previous": {
+    "title": "Quickstart",
+    "permalink": "/pocketmind/quickstart"
+  },
+  "next": {
+    "title": "Siri Shortcuts",
+    "permalink": "/pocketmind/guides/siri"
+  }
+}
