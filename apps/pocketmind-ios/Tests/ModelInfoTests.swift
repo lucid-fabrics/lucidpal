@@ -1,6 +1,7 @@
 import XCTest
 @testable import PocketMind
 
+@MainActor
 final class ModelInfoTests: XCTestCase {
 
     // MARK: - available()
