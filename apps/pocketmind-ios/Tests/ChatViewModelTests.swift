@@ -21,6 +21,7 @@ final class ChatViewModelTests: XCTestCase {
             calendarActionController: controller,
             settings: settings,
             speechService: MockSpeechService(),
+            hapticService: MockHapticService(),
             historyManager: MockChatHistoryManager()
         )
     }
@@ -48,7 +49,7 @@ final class ChatViewModelTests: XCTestCase {
 
     // MARK: - Deletion
 
-    func testConfirmDeletionSetsStateToDeleted() async {
+    func testConfirmDeletionSetsStateToDeleted() async throws {
         let (msgID, previewID) = insertMessage(state: .pendingDeletion)
         await viewModel.confirmDeletion(messageID: msgID, previewID: previewID)
         let state = viewModel.messages.first?.calendarEventPreviews.first?.state
@@ -56,7 +57,7 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(mock.deletedIdentifiers, ["evt-1"])
     }
 
-    func testConfirmDeletionWithNilIdentifierIsNoOp() async {
+    func testConfirmDeletionWithNilIdentifierIsNoOp() async throws {
         let (msgID, previewID) = insertMessage(state: .pendingDeletion, eventIdentifier: nil)
         await viewModel.confirmDeletion(messageID: msgID, previewID: previewID)
         let state = viewModel.messages.first?.calendarEventPreviews.first?.state
@@ -72,7 +73,7 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertTrue(mock.deletedIdentifiers.isEmpty)
     }
 
-    func testUndoDeletionSetsStateToRestored() async {
+    func testUndoDeletionSetsStateToRestored() async throws {
         let (msgID, previewID) = insertMessage(state: .deleted)
         await viewModel.undoDeletion(messageID: msgID, previewID: previewID)
         let state = viewModel.messages.first?.calendarEventPreviews.first?.state
@@ -81,7 +82,7 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(mock.createdEvents.first?.title, "Test Event")
     }
 
-    func testConfirmAllDeletionsSetsAllToDeleted() async {
+    func testConfirmAllDeletionsSetsAllToDeleted() async throws {
         var preview1 = CalendarEventPreview(
             title: "A", start: .now, end: .now, calendarName: nil,
             state: .pendingDeletion, eventIdentifier: "id-1"
@@ -132,7 +133,7 @@ final class ChatViewModelTests: XCTestCase {
 
     // MARK: - Update
 
-    func testConfirmUpdateMirrorsFieldsAndClearsPending() async {
+    func testConfirmUpdateMirrorsFieldsAndClearsPending() async throws {
         var pending = PendingCalendarUpdate()
         pending.title = "Renamed"
         pending.start = Date(timeIntervalSinceNow: 7200)
@@ -148,7 +149,7 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(mock.appliedUpdates.count, 1)
     }
 
-    func testConfirmUpdateSetsTerminalState() async {
+    func testConfirmUpdateSetsTerminalState() async throws {
         var pending = PendingCalendarUpdate()
         pending.title = "Renamed"
         let (msgID, previewID) = insertMessage(state: .pendingUpdate, pendingUpdate: pending)
@@ -200,13 +201,13 @@ final class ChatViewModelTests: XCTestCase {
 
     // MARK: - Confirm deletion edge cases
 
-    func testConfirmDeletionWithWrongMessageIDIsNoOp() async {
+    func testConfirmDeletionWithWrongMessageIDIsNoOp() async throws {
         let (_, previewID) = insertMessage(state: .pendingDeletion)
         await viewModel.confirmDeletion(messageID: UUID(), previewID: previewID)
         XCTAssertTrue(mock.deletedIdentifiers.isEmpty)
     }
 
-    func testConfirmDeletionWithWrongPreviewIDIsNoOp() async {
+    func testConfirmDeletionWithWrongPreviewIDIsNoOp() async throws {
         let (msgID, _) = insertMessage(state: .pendingDeletion)
         await viewModel.confirmDeletion(messageID: msgID, previewID: UUID())
         XCTAssertTrue(mock.deletedIdentifiers.isEmpty)
@@ -214,7 +215,7 @@ final class ChatViewModelTests: XCTestCase {
 
     // MARK: - Update edge cases
 
-    func testConfirmUpdateWithNoPendingUpdateIsNoOp() async {
+    func testConfirmUpdateWithNoPendingUpdateIsNoOp() async throws {
         let (msgID, previewID) = insertMessage(state: .pendingUpdate, pendingUpdate: nil)
         await viewModel.confirmUpdate(messageID: msgID, previewID: previewID)
         XCTAssertTrue(mock.appliedUpdates.isEmpty)
@@ -230,7 +231,7 @@ final class ChatViewModelTests: XCTestCase {
 
     // MARK: - Bulk deletion edge cases
 
-    func testConfirmAllDeletionsOnEmptyMessageIsNoOp() async {
+    func testConfirmAllDeletionsOnEmptyMessageIsNoOp() async throws {
         let msg = ChatMessage(role: .assistant, content: "no previews")
         viewModel.messages.append(msg)
         await viewModel.confirmAllDeletions(messageID: msg.id)
@@ -255,7 +256,8 @@ final class ChatViewModelTests: XCTestCase {
         let vm = ChatViewModel(
             llmService: llm, calendarService: mock,
             calendarActionController: controller, settings: settings,
-            speechService: MockSpeechService(), historyManager: history
+            speechService: MockSpeechService(), hapticService: MockHapticService(),
+            historyManager: history
         )
         vm.messages = [ChatMessage(role: .user, content: "test")]
         vm.flushPersistence()
@@ -285,12 +287,13 @@ final class ChatViewModelTests: XCTestCase {
             calendarActionController: MockCalendarActionController(),
             settings: settings,
             speechService: speech,
+            hapticService: MockHapticService(),
             historyManager: MockChatHistoryManager()
         )
         return (vm, llm, speech)
     }
 
-    func testSendMessageAppendsUserAndAssistantMessages() async {
+    func testSendMessageAppendsUserAndAssistantMessages() async throws {
         let (vm, _, _) = makeLoadedViewModel(tokens: ["Hello", " world"])
         vm.inputText = "hi"
         await vm.sendMessage()
@@ -301,21 +304,21 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertEqual(vm.messages[1].content, "Hello world")
     }
 
-    func testSendMessageClearsInputText() async {
+    func testSendMessageClearsInputText() async throws {
         let (vm, _, _) = makeLoadedViewModel(tokens: ["ok"])
         vm.inputText = "test"
         await vm.sendMessage()
         XCTAssertEqual(vm.inputText, "")
     }
 
-    func testSendMessageDoesNothingWhenModelNotLoaded() async {
+    func testSendMessageDoesNothingWhenModelNotLoaded() async throws {
         // llm.isLoaded = false (default in setUp)
         viewModel.inputText = "test"
         await viewModel.sendMessage()
         XCTAssertTrue(viewModel.messages.isEmpty)
     }
 
-    func testSendMessageDoesNothingForEmptyInput() async {
+    func testSendMessageDoesNothingForEmptyInput() async throws {
         let (vm, _, _) = makeLoadedViewModel()
         vm.inputText = "   "
         await vm.sendMessage()
@@ -357,7 +360,7 @@ final class ChatViewModelTests: XCTestCase {
 
     // MARK: - sendMessage concurrency
 
-    func testSendMessageIsNoOpWhileAlreadyGenerating() async {
+    func testSendMessageIsNoOpWhileAlreadyGenerating() async throws {
         let (vm, llm, _) = makeLoadedViewModel(tokens: ["hi"])
         llm.isGenerating = true   // simulate in-flight generation
         vm.inputText = "second"
@@ -367,7 +370,7 @@ final class ChatViewModelTests: XCTestCase {
 
     // MARK: - sendMessage edge cases
 
-    func testSendMessageEmptyTokenStreamLeavesBlankAssistantMessage() async {
+    func testSendMessageEmptyTokenStreamLeavesBlankAssistantMessage() async throws {
         let (vm, _, _) = makeLoadedViewModel(tokens: [])
         vm.inputText = "hi"
         await vm.sendMessage()
@@ -476,5 +479,30 @@ final class ChatViewModelTests: XCTestCase {
         viewModel.applyStreamToken("<think>thinking</think>  ", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: false, idx: idx)
         XCTAssertTrue(thinkDone)
         XCTAssertTrue(viewModel.messages[idx].content.isEmpty)
+    }
+
+    // MARK: - deleteMessage
+
+    func testDeleteMessageRemovesItFromMessages() {
+        let msg = ChatMessage(role: .assistant, content: "to delete")
+        viewModel.messages = [msg]
+        viewModel.deleteMessage(id: msg.id)
+        XCTAssertTrue(viewModel.messages.isEmpty)
+    }
+
+    func testDeleteMessageWithWrongIDIsNoOp() {
+        let msg = ChatMessage(role: .assistant, content: "keep")
+        viewModel.messages = [msg]
+        viewModel.deleteMessage(id: UUID())
+        XCTAssertEqual(viewModel.messages.count, 1)
+    }
+
+    // MARK: - sendMessage whitespace guard
+
+    func testSendMessageWithWhitespaceOnlyInputIsNoOp() async throws {
+        let (vm, _, _) = makeLoadedViewModel(tokens: ["hi"])
+        vm.inputText = "   "
+        await vm.sendMessage()
+        XCTAssertTrue(vm.messages.isEmpty)
     }
 }

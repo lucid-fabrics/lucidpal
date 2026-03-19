@@ -1,6 +1,7 @@
 import XCTest
 @testable import PocketMind
 
+@MainActor
 final class CalendarDomainTypesTests: XCTestCase {
 
     // MARK: - CalendarEventInfo

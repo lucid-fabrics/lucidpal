@@ -1,6 +1,7 @@
 import XCTest
 @testable import PocketMind
 
+@MainActor
 final class ChatMessageTests: XCTestCase {
 
     // MARK: - isUser
@@ -51,7 +52,7 @@ final class ChatMessageTests: XCTestCase {
     func testMessageRoleDecodable() throws {
         let json = #"{"role":"assistant"}"#
         struct Wrapper: Decodable { let role: MessageRole }
-        let w = try JSONDecoder().decode(Wrapper.self, from: json.data(using: .utf8)!)
+        let w = try JSONDecoder().decode(Wrapper.self, from: try XCTUnwrap(json.data(using: .utf8)))
         XCTAssertEqual(w.role, .assistant)
     }
 

@@ -25,14 +25,14 @@ final class SettingsViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isCalendarAuthorized)
     }
 
-    func testRequestCalendarAccessGrantedUpdatesSettings() async {
+    func testRequestCalendarAccessGrantedUpdatesSettings() async throws {
         mockCalendar.requestAccessResult = true
         await viewModel.requestCalendarAccess()
         XCTAssertTrue(settings.calendarAccessEnabled)
         XCTAssertEqual(viewModel.calendarAuthStatus, .fullAccess)
     }
 
-    func testRequestCalendarAccessDeniedDisablesToggle() async {
+    func testRequestCalendarAccessDeniedDisablesToggle() async throws {
         mockCalendar.requestAccessResult = false
         await viewModel.requestCalendarAccess()
         XCTAssertFalse(settings.calendarAccessEnabled)
