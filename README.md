@@ -4,15 +4,19 @@ An on-device AI assistant for iOS with native calendar access. All inference run
 
 Powered by [Qwen3](https://huggingface.co/Qwen) and [llama.cpp](https://github.com/ggml-org/llama.cpp).
 
+**[Documentation](https://lucid-fabrics.github.io/pocketmind)**
+
 ---
 
 ## Features
 
 - **Fully on-device** — model runs in your iPhone's RAM, nothing is sent to any server
-- **Calendar read & write** — ask it to create, rename, or look up events; they appear instantly in the iOS Calendar app
+- **Calendar read & write** — create, rename, delete, or look up events; they appear instantly in the iOS Calendar app
+- **Free time finder** — ask for a free slot and it checks your calendar for conflicts automatically
+- **Multiple chat sessions** — create, rename, and switch between conversations; history is saved locally
 - **Voice input** — tap the mic and speak your question
 - **Thinking mode** — shows the model's reasoning process before answering (collapsible)
-- **Siri shortcut** — say *"Hey Siri, ask PocketMind [anything]"* to open the app with your query pre-filled
+- **Siri shortcuts** — ask a question, check your schedule, add an event, or find free time hands-free
 - **Copy messages** — long-press any bubble to copy the text
 
 ---
@@ -92,11 +96,14 @@ A calendar card appears in the chat after every successful write. Tap it to open
 
 ## Siri
 
-After installing, add the shortcut via the Shortcuts app or just say:
+PocketMind registers four shortcuts automatically. Use them from Siri, the Shortcuts app, or the Lock Screen:
 
-> **"Hey Siri, ask PocketMind [your question]"**
-
-Siri will open PocketMind with your question ready to send.
+| Phrase | What it does |
+|--------|--------------|
+| *"Ask PocketMind [question]"* | Opens the app with your question pre-filled |
+| *"Check my PocketMind schedule"* | Shows your upcoming calendar events |
+| *"Add a PocketMind event"* | Creates a calendar event via voice |
+| *"Find free time in PocketMind"* | Finds an open slot in your calendar |
 
 ---
 
