@@ -25,8 +25,10 @@ struct CalendarEventInfo: Sendable {
     let isAllDay: Bool
     let calendarTitle: String?
     let location: String?
+    /// True when the event belongs to a recurring series.
+    let isRecurring: Bool
 
-    init(eventIdentifier: String?, title: String?, startDate: Date, endDate: Date, isAllDay: Bool, calendarTitle: String?, location: String? = nil) {
+    init(eventIdentifier: String?, title: String?, startDate: Date, endDate: Date, isAllDay: Bool, calendarTitle: String?, location: String? = nil, isRecurring: Bool = false) {
         self.eventIdentifier = eventIdentifier
         self.title = title
         self.startDate = startDate
@@ -34,6 +36,7 @@ struct CalendarEventInfo: Sendable {
         self.isAllDay = isAllDay
         self.calendarTitle = calendarTitle
         self.location = location
+        self.isRecurring = isRecurring
     }
 }
 
@@ -42,8 +45,9 @@ struct CalendarEventInfo: Sendable {
 // requestAccess() returns, keeping the observable layer entirely in ViewModels.
 @MainActor
 final class CalendarService {
-    // nonisolated(unsafe): EKEventStore is documented as thread-safe for read operations.
-    // Private — no layer above CalendarService should access EKEventStore directly.
+    // Safety: `store` is only ever accessed from the MainActor (CalendarService is @MainActor),
+    // and EKEventStore is documented as internally thread-safe for concurrent reads.
+    // nonisolated(unsafe) is required because deinit is nonisolated in Swift 6.
     nonisolated(unsafe) private let store = EKEventStore()
 
     private(set) var authorizationStatus: CalendarAuthorizationStatus = .notDetermined
@@ -78,7 +82,8 @@ final class CalendarService {
             endDate: event.endDate,
             isAllDay: event.isAllDay,
             calendarTitle: event.calendar?.title,
-            location: event.location.flatMap { $0.isEmpty ? nil : $0 }
+            location: event.location.flatMap { $0.isEmpty ? nil : $0 },
+            isRecurring: event.hasRecurrenceRules
         )
     }
 
@@ -286,14 +291,3 @@ final class CalendarService {
     }
 }
 
-enum CalendarError: LocalizedError {
-    case notAuthorized
-    case eventNotFound
-
-    var errorDescription: String? {
-        switch self {
-        case .notAuthorized: return "Calendar access is not authorized. Enable it in Settings."
-        case .eventNotFound: return "The event could not be found in your calendar."
-        }
-    }
-}

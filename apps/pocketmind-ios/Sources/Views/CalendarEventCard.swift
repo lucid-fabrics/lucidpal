@@ -10,8 +10,15 @@ struct CalendarEventCard: View {
     let onConfirmUpdate: () -> Void
     let onCancelUpdate: () -> Void
 
+    // Conflict resolution callbacks — optional, ignored when preview has no conflict
+    var onKeepConflict: (() -> Void)? = nil
+    var onCancelConflict: (() async -> Void)? = nil
+    var onFindFreeSlots: (() async -> [CalendarFreeSlot])? = nil
+    var onRescheduleToSlot: ((CalendarFreeSlot) async -> Void)? = nil
+
     @Environment(\.openURL) private var openURL
     @State private var showDeleteConfirmation = false
+    @State var showConflictSheet = false
 
     static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -21,6 +28,24 @@ struct CalendarEventCard: View {
     }()
 
     var body: some View {
+        if preview.isStale {
+            staleCard
+        } else {
+            mainBody
+                .sheet(isPresented: $showConflictSheet) {
+                    ConflictDetailSheet(
+                        preview: preview,
+                        onKeep: { onKeepConflict?() },
+                        onCancel: { await onCancelConflict?() },
+                        onFindFreeSlots: { await onFindFreeSlots?() ?? [] },
+                        onReschedule: { slot in await onRescheduleToSlot?(slot) }
+                    )
+                }
+        }
+    }
+
+    @ViewBuilder
+    private var mainBody: some View {
         switch preview.state {
         case .pendingDeletion:
             pendingDeletionCard
@@ -33,18 +58,23 @@ struct CalendarEventCard: View {
         case .updateCancelled:
             statusCard(icon: "xmark.circle", label: "Update cancelled", color: .secondary)
         case .created, .updated, .rescheduled, .restored:
-            tappableCard
-                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                    Button(role: .destructive) {
-                        showDeleteConfirmation = true
-                    } label: {
-                        Label("Delete", systemImage: "trash")
+            VStack(spacing: 4) {
+                tappableCard
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button(role: .destructive) {
+                            showDeleteConfirmation = true
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
                     }
+                    .confirmationDialog("Delete \"\(preview.title)\"?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+                        Button("Delete Event", role: .destructive) { onConfirm() }
+                        Button("Cancel", role: .cancel) {}
+                    }
+                if preview.hasConflict == true && !preview.conflictingEvents.isEmpty {
+                    conflictBanner
                 }
-                .confirmationDialog("Delete \"\(preview.title)\"?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
-                    Button("Delete Event", role: .destructive) { onConfirm() }
-                    Button("Cancel", role: .cancel) {}
-                }
+            }
         case .listed:
             tappableCard
         }
@@ -70,59 +100,6 @@ struct CalendarEventCard: View {
                 }
         }
         .buttonStyle(.plain)
-    }
-
-    private var deletedCard: some View {
-        HStack(spacing: 10) {
-            dateBadge(dimmed: true)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(preview.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .strikethrough(true, color: .secondary)
-                    .lineLimit(1)
-                Text(timeText)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            Button(action: onUndo) {
-                Text("Undo")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.accentColor)
-            }
-            .buttonStyle(.plain)
-            .padding(.trailing, 4)
-        }
-        .padding(DesignConstants.Padding.card)
-        .background(Color(.systemGray6))
-        .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous))
-        .opacity(DesignConstants.Opacity.dimmed)
-    }
-
-    private func statusCard(icon: String, label: String, color: Color) -> some View {
-        HStack(spacing: 10) {
-            dateBadge(dimmed: true)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(preview.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .strikethrough(preview.state == .deleted, color: .secondary)
-                    .lineLimit(1)
-                Text(timeText)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            Image(systemName: icon)
-                .font(.caption)
-                .foregroundStyle(color)
-                .padding(.trailing, DesignConstants.Padding.card)
-        }
-        .padding(DesignConstants.Padding.card)
-        .background(Color(.systemGray6))
-        .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous))
-        .opacity(DesignConstants.Opacity.verDimmed)
     }
 
     // MARK: - Shared sub-views
@@ -186,7 +163,7 @@ struct CalendarEventCard: View {
         .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous))
     }
 
-    private func dateBadge(dimmed: Bool) -> some View {
+    func dateBadge(dimmed: Bool) -> some View {
         VStack(spacing: 1) {
             Text(monthText)
                 .font(.system(size: DesignConstants.FontSize.monthBadge, weight: .semibold))
@@ -230,7 +207,7 @@ struct CalendarEventCard: View {
         Self.dayFormatter.string(from: preview.start)
     }
 
-    private var timeText: String {
+    var timeText: String {
         preview.isAllDay ? "All day" : "\(Self.timeFormatter.string(from: preview.start)) – \(Self.timeFormatter.string(from: preview.end))"
     }
 

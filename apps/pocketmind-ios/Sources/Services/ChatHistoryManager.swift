@@ -12,7 +12,7 @@ protocol ChatHistoryManagerProtocol {
 @MainActor
 final class ChatHistoryManager: ChatHistoryManagerProtocol {
 
-    // Compile-time constant — safe to mark nonisolated(unsafe) as it is never mutated.
+    // Safety: immutable `let` written once; `nonisolated` allows Task.detached reads without actor hop.
     nonisolated(unsafe) static let historyURL: URL = {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("chat_history.json")

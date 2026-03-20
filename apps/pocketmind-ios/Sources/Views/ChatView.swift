@@ -137,6 +137,18 @@ struct ChatView: View {
                                 },
                                 onDeleteMessage: { msgID in
                                     viewModel.deleteMessage(id: msgID)
+                                },
+                                onKeepConflict: { previewID in
+                                    viewModel.keepConflict(messageID: message.id, previewID: previewID)
+                                },
+                                onCancelConflict: { previewID in
+                                    await viewModel.cancelConflict(messageID: message.id, previewID: previewID)
+                                },
+                                onFindFreeSlots: { previewID in
+                                    await viewModel.findFreeSlotsForConflict(messageID: message.id, previewID: previewID)
+                                },
+                                onRescheduleToSlot: { previewID, slot in
+                                    await viewModel.rescheduleConflict(messageID: message.id, previewID: previewID, to: slot)
                                 }
                             )
                             .id(message.id)
@@ -168,23 +180,12 @@ struct ChatView: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
-            VStack(spacing: 10) {
-                ForEach(suggestedPrompts, id: \.self) { prompt in
-                    Button {
-                        viewModel.inputText = prompt
-                        inputFocused = true
-                    } label: {
-                        Text(prompt)
-                            .font(.subheadline)
-                            .foregroundStyle(.primary)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(.systemGray6))
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    }
-                    .buttonStyle(.plain)
-                }
+            SuggestedPromptsView(
+                prompts: viewModel.suggestedPrompts,
+                isLoading: viewModel.isGeneratingSuggestions
+            ) { prompt in
+                viewModel.inputText = prompt
+                inputFocused = true
             }
             .padding(.horizontal, 24)
             Spacer()
@@ -193,12 +194,10 @@ struct ChatView: View {
         .padding(.vertical, 40)
     }
 
-    private let suggestedPrompts = [
-        "What's on my calendar this week?",
-        "Add a meeting tomorrow at 2pm",
-        "Find a free 1-hour slot today",
-        "Delete my next dentist appointment",
-    ]
+    /// True only when generating a user-initiated response (not background suggestion generation).
+    private var isUserGenerating: Bool {
+        viewModel.isGenerating && !viewModel.isGeneratingSuggestions
+    }
 
     private func needsDateSeparator(current: ChatMessage, previous: ChatMessage?) -> Bool {
         guard let previous else { return true }
@@ -225,7 +224,7 @@ struct ChatView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
 
             Button {
-                if viewModel.isGenerating {
+                if isUserGenerating {
                     viewModel.cancelGeneration()
                 } else {
                     if viewModel.isSpeechRecording { viewModel.toggleSpeech() }
@@ -238,16 +237,16 @@ struct ChatView: View {
                         .font(.system(size: 32))
                         .foregroundStyle(.orange)
                 } else {
-                    Image(systemName: viewModel.isGenerating ? "stop.circle.fill" : "arrow.up.circle.fill")
+                    Image(systemName: isUserGenerating ? "stop.circle.fill" : "arrow.up.circle.fill")
                         .font(.system(size: 32))
                         .foregroundStyle(sendButtonColor)
                 }
             }
             .disabled(viewModel.isPreparing)
-            .disabled(!viewModel.isModelLoaded && !viewModel.isGenerating)
+            .disabled(!viewModel.isModelLoaded && !isUserGenerating)
             .disabled(
                 viewModel.inputText.trimmingCharacters(in: .whitespaces).isEmpty
-                && !viewModel.isGenerating
+                && !isUserGenerating
             )
         }
         .padding(.horizontal, 12)
@@ -257,7 +256,7 @@ struct ChatView: View {
     }
 
     private var sendButtonColor: Color {
-        if viewModel.isGenerating { return .red }
+        if isUserGenerating { return .red }
         if viewModel.inputText.trimmingCharacters(in: .whitespaces).isEmpty { return Color(.systemGray3) }
         return .accentColor
     }
@@ -270,71 +269,3 @@ struct ChatView: View {
     }
 }
 
-// MARK: - Mic button label
-
-private struct MicButtonLabel: View {
-    let isRecording: Bool
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var ring1Scale: CGFloat = 1
-    @State private var ring2Scale: CGFloat = 1
-
-    var body: some View {
-        ZStack {
-            if isRecording && !reduceMotion {
-                Circle()
-                    .stroke(Color.red.opacity(0.25), lineWidth: 1.5)
-                    .frame(width: 40, height: 40)
-                    .scaleEffect(ring1Scale)
-                Circle()
-                    .stroke(Color.red.opacity(0.15), lineWidth: 1.5)
-                    .frame(width: 40, height: 40)
-                    .scaleEffect(ring2Scale)
-            }
-            Image(systemName: isRecording ? "mic.fill" : "mic")
-                .font(.system(size: 22))
-                .foregroundStyle(isRecording ? .red : Color(.systemGray))
-        }
-        .frame(width: 40, height: 40)
-        .onChange(of: isRecording) { _, recording in
-            if recording {
-                withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { ring1Scale = 1.5 }
-                withAnimation(.easeInOut(duration: 0.9).delay(0.3).repeatForever(autoreverses: true)) { ring2Scale = 1.7 }
-            } else {
-                ring1Scale = 1
-                ring2Scale = 1
-            }
-        }
-        .onAppear {
-            if isRecording && !reduceMotion {
-                withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { ring1Scale = 1.5 }
-                withAnimation(.easeInOut(duration: 0.9).delay(0.3).repeatForever(autoreverses: true)) { ring2Scale = 1.7 }
-            }
-        }
-    }
-}
-
-// MARK: - Date separator
-
-private struct DateSeparatorView: View {
-    let date: Date
-
-    private static let formatter: DateFormatter = {
-        let f = DateFormatter()
-        f.doesRelativeDateFormatting = true
-        f.dateStyle = .medium
-        f.timeStyle = .none
-        return f
-    }()
-
-    var body: some View {
-        Text(Self.formatter.string(from: date))
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
-            .background(Color(.systemGray5))
-            .clipShape(Capsule())
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 4)
-    }
-}

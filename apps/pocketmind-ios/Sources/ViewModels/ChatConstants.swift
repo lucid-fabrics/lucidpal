@@ -15,4 +15,12 @@ enum ChatConstants {
     static let errorAutoDismissSeconds: Double = 5
     /// Maximum character length for auto-generated session titles.
     static let maxSessionTitleLength = 40
+    /// Bytes in one gigabyte — used for RAM-based context sizing.
+    static let bytesPerGB: UInt64 = 1_073_741_824
+    /// Seconds in one hour — used for calendar slot duration calculations.
+    static let secondsPerHour: TimeInterval = 3600
+    /// Maximum duration (hours) used when searching for a free calendar slot.
+    static let maxSlotSearchHours: TimeInterval = 4
+    /// Duration (hours) used for all-day event slot searches.
+    static let allDaySlotSearchHours: TimeInterval = 2
 }

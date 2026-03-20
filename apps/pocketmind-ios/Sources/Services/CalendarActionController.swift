@@ -113,13 +113,29 @@ final class CalendarActionController: CalendarActionControllerProtocol {
         if let a = p.isAllDay             { pending.isAllDay = a }
         if let r = p.recurrence           { pending.recurrence = r }
 
+        // When rescheduling, check conflicts at the new time window
+        let newStart = pending.start ?? event.startDate
+        let newEnd = pending.end ?? event.endDate
+        let conflictSnapshots: [ConflictingEventSnapshot]
+        if pending.start != nil || pending.end != nil {
+            let rawConflicts = calendarService.findConflicts(
+                start: newStart, end: newEnd,
+                excludingIdentifier: event.eventIdentifier
+            )
+            conflictSnapshots = makeConflictSnapshots(from: rawConflicts)
+        } else {
+            conflictSnapshots = []
+        }
+
         var preview = CalendarEventPreview(
             title: event.title ?? searchTitle,
             start: event.startDate,
             end: event.endDate,
             calendarName: event.calendarTitle,
             state: .pendingUpdate,
-            eventIdentifier: event.eventIdentifier
+            eventIdentifier: event.eventIdentifier,
+            hasConflict: !conflictSnapshots.isEmpty,
+            conflictingEvents: conflictSnapshots
         )
         preview.pendingUpdate = pending
         return .success("", preview)
@@ -165,10 +181,11 @@ final class CalendarActionController: CalendarActionControllerProtocol {
             return .failure("(Create requires title, start, and end.)")
         }
         do {
-            // Conflict check
-            let conflicts = calendarService.findConflicts(start: start, end: end, excludingIdentifier: nil)
-            let conflictNote = conflicts.isEmpty ? "" :
-                " Note: overlaps with \(conflicts.map { "\"\($0.title ?? "event")\"" }.joined(separator: ", "))."
+            // Conflict check — capture snapshots before creating so we have rich info for the card
+            let rawConflicts = calendarService.findConflicts(start: start, end: end, excludingIdentifier: nil)
+            let conflictSnapshots = makeConflictSnapshots(from: rawConflicts)
+            let conflictNote = conflictSnapshots.isEmpty ? "" :
+                " Heads-up: this overlaps with \(conflictSnapshots.map { "\"\($0.title)\"" }.joined(separator: ", "))."
 
             let calID = settings.defaultCalendarIdentifier.isEmpty ? nil : settings.defaultCalendarIdentifier
             let identifier = try calendarService.createEvent(
@@ -190,11 +207,13 @@ final class CalendarActionController: CalendarActionControllerProtocol {
                 start: start,
                 end: end,
                 calendarName: calendarName,
+                eventIdentifier: identifier.isEmpty ? nil : identifier,
                 reminderMinutes: p.reminderMinutes,
                 isAllDay: p.isAllDay ?? false,
                 recurrence: p.recurrence,
                 location: p.location,
-                hasConflict: !conflicts.isEmpty
+                hasConflict: !conflictSnapshots.isEmpty,
+                conflictingEvents: conflictSnapshots
             )
             return .success("Added \"\(title)\" to your calendar.\(conflictNote)", preview)
         } catch {
@@ -214,16 +233,7 @@ final class CalendarActionController: CalendarActionControllerProtocol {
         let events = calendarService.events(in: rangeStart, end: rangeEnd)
             .sorted { $0.startDate < $1.startDate }
 
-        // Merge overlapping busy windows
-        var merged: [(start: Date, end: Date)] = []
-        for ev in events {
-            let window = (start: ev.startDate, end: ev.endDate)
-            if let last = merged.last, window.start < last.end {
-                merged[merged.count - 1] = (last.start, max(last.end, window.end))
-            } else {
-                merged.append(window)
-            }
-        }
+        let merged = mergeBusyWindows(from: events)
 
         let freeSlots = CalendarFreeSlotEngine.findSlots(
             busyWindows: merged,

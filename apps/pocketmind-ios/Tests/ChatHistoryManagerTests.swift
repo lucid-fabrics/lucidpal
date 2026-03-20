@@ -9,11 +9,11 @@ final class ChatHistoryManagerTests: XCTestCase {
         super.setUp()
         manager = ChatHistoryManager()
         // Clean slate — remove any leftover file from previous test runs
-        manager.clear()
+        try? FileManager.default.removeItem(at: ChatHistoryManager.historyURL)
     }
 
     override func tearDown() {
-        manager.clear()
+        try? FileManager.default.removeItem(at: ChatHistoryManager.historyURL)
         super.tearDown()
     }
 
@@ -79,5 +79,50 @@ final class ChatHistoryManagerTests: XCTestCase {
         try XCTUnwrap("not valid json {{{".data(using: .utf8)).write(to: ChatHistoryManager.historyURL)
         let messages = manager.load()
         XCTAssertTrue(messages.isEmpty)
+    }
+
+    func testSavePreservesMessageIDs() async throws {
+        let msg = ChatMessage(role: .user, content: "identify me")
+        await manager.save([msg]).value
+        let loaded = manager.load()
+        XCTAssertEqual(loaded.first?.id, msg.id)
+    }
+
+    func testSaveOverwritesPreviousHistory() async throws {
+        await manager.save([ChatMessage(role: .user, content: "first")]).value
+        await manager.save([ChatMessage(role: .user, content: "second")]).value
+        let loaded = manager.load()
+        XCTAssertEqual(loaded.count, 1)
+        XCTAssertEqual(loaded[0].content, "second")
+    }
+
+    func testSaveOnlySystemMessagesWritesEmptyFile() async throws {
+        await manager.save([ChatMessage(role: .system, content: "sys")]).value
+        XCTAssertTrue(manager.load().isEmpty)
+    }
+
+    func testClearIsIdempotentWhenFileAbsent() {
+        // setUp already removed the file — calling clear twice must not crash
+        manager.clear()
+        manager.clear()
+    }
+
+    // MARK: - NoOpChatHistoryManager
+
+    func testNoOpLoadAlwaysReturnsEmpty() {
+        let noOp = NoOpChatHistoryManager()
+        XCTAssertTrue(noOp.load().isEmpty)
+    }
+
+    func testNoOpSaveDoesNotPersistToDisk() async {
+        let noOp = NoOpChatHistoryManager()
+        await noOp.save([ChatMessage(role: .user, content: "x")]).value
+        // A fresh ChatHistoryManager should still find nothing
+        XCTAssertTrue(manager.load().isEmpty)
+    }
+
+    func testNoOpClearDoesNotCrash() {
+        let noOp = NoOpChatHistoryManager()
+        noOp.clear()
     }
 }

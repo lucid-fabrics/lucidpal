@@ -25,6 +25,17 @@ struct PendingCalendarUpdate: Codable, Equatable, Sendable {
     var recurrence: String?
 }
 
+/// Snapshot of a conflicting event stored alongside a preview card.
+/// Codable so conflict info survives session persistence.
+struct ConflictingEventSnapshot: Codable, Equatable, Sendable {
+    let title: String
+    let start: Date
+    let end: Date
+    let calendarName: String?
+    let isRecurring: Bool
+    let isAllDay: Bool
+}
+
 struct CalendarEventPreview: Codable, Equatable, Sendable {
     enum PreviewState: String, Codable, Sendable {
         case created
@@ -55,6 +66,10 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
     var location: String?
     /// True when the created event overlaps with an existing event.
     var hasConflict: Bool?
+    /// Snapshots of events that conflict with this one (populated on create/reschedule).
+    var conflictingEvents: [ConflictingEventSnapshot]
+    /// True when the event no longer exists in the user's calendar (deleted externally).
+    var isStale: Bool
     /// Proposed changes for pendingUpdate state.
     var pendingUpdate: PendingCalendarUpdate?
 
@@ -70,7 +85,9 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
         isAllDay: Bool = false,
         recurrence: String? = nil,
         location: String? = nil,
-        hasConflict: Bool? = nil
+        hasConflict: Bool? = nil,
+        conflictingEvents: [ConflictingEventSnapshot] = [],
+        isStale: Bool = false
     ) {
         self.id = id
         self.title = title
@@ -84,7 +101,35 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
         self.recurrence = recurrence
         self.location = location
         self.hasConflict = hasConflict
+        self.conflictingEvents = conflictingEvents
+        self.isStale = isStale
         self.pendingUpdate = nil
+    }
+
+    // MARK: - Codable (backward compat: isStale defaults to false when key absent)
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, start, end, calendarName, state, eventIdentifier
+        case reminderMinutes, isAllDay, recurrence, location, hasConflict, conflictingEvents, isStale, pendingUpdate
+    }
+
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        title = try c.decode(String.self, forKey: .title)
+        start = try c.decode(Date.self, forKey: .start)
+        end = try c.decode(Date.self, forKey: .end)
+        calendarName = try c.decodeIfPresent(String.self, forKey: .calendarName)
+        state = try c.decode(PreviewState.self, forKey: .state)
+        eventIdentifier = try c.decodeIfPresent(String.self, forKey: .eventIdentifier)
+        reminderMinutes = try c.decodeIfPresent(Int.self, forKey: .reminderMinutes)
+        isAllDay = try c.decode(Bool.self, forKey: .isAllDay)
+        recurrence = try c.decodeIfPresent(String.self, forKey: .recurrence)
+        location = try c.decodeIfPresent(String.self, forKey: .location)
+        hasConflict = try c.decodeIfPresent(Bool.self, forKey: .hasConflict)
+        conflictingEvents = try c.decodeIfPresent([ConflictingEventSnapshot].self, forKey: .conflictingEvents) ?? []
+        isStale = try c.decodeIfPresent(Bool.self, forKey: .isStale) ?? false
+        pendingUpdate = try c.decodeIfPresent(PendingCalendarUpdate.self, forKey: .pendingUpdate)
     }
 }
 

@@ -104,6 +104,40 @@ extension ChatViewModel {
 
     /// Few-shot examples covering all action types for in-context learning.
     func calendarActionExamples() -> String {
+        [calendarCreateExamples(), calendarUpdateDeleteExamples(), calendarQueryExamples()]
+            .joined(separator: "\n\n")
+    }
+
+    private func calendarCreateExamples() -> String {
+        """
+            Example — create request (no conflict):
+            User: add a meeting tomorrow at 3pm
+            You: [CALENDAR_ACTION:{"action":"create","title":"Meeting","start":"2026-03-18T15:00:00","end":"2026-03-18T16:00:00","location":"","notes":""}]
+            Added to your calendar.
+
+            Example — create with conflict (system detects overlap after the block executes):
+            User: add lunch tomorrow at noon
+            You: [CALENDAR_ACTION:{"action":"create","title":"Lunch","start":"2026-03-18T12:00:00","end":"2026-03-18T13:00:00"}]
+            Added — heads-up, it overlaps with "Team Meeting" (12–1 pm). Tap the card to keep it, cancel it, or find a free slot.
+
+            Example — create with reminder:
+            User: add dentist Friday 10am, remind me 30 minutes before
+            You: [CALENDAR_ACTION:{"action":"create","title":"Dentist","start":"2026-03-20T10:00:00","end":"2026-03-20T11:00:00","reminderMinutes":30}]
+            Added with a 30-minute reminder.
+
+            Example — all-day event:
+            User: add a holiday on April 1
+            You: [CALENDAR_ACTION:{"action":"create","title":"Holiday","start":"2026-04-01T00:00:00","end":"2026-04-01T00:00:00","isAllDay":true}]
+            Added as an all-day event.
+
+            Example — recurring event:
+            User: add a weekly team standup every Monday at 9am
+            You: [CALENDAR_ACTION:{"action":"create","title":"Team Standup","start":"2026-03-23T09:00:00","end":"2026-03-23T09:30:00","recurrence":"weekly"}]
+            Added as a weekly recurring event.
+            """
+    }
+
+    private func calendarUpdateDeleteExamples() -> String {
         """
             Example — delete request (event "Dentist" is in the calendar list):
             User: delete my dentist appointment
@@ -112,15 +146,10 @@ extension ChatViewModel {
 
             IMPORTANT for delete and update: the "search" field must be the EXACT title of the event as it appears in the calendar list below. Never invent a generic name like "Appointment" — look at the user's actual events and use the exact title.
 
-            Example — create request:
-            User: add a meeting tomorrow at 3pm
-            You: [CALENDAR_ACTION:{"action":"create","title":"Meeting","start":"2026-03-18T15:00:00","end":"2026-03-18T16:00:00","location":"","notes":""}]
-            Added to your calendar.
-
-            Example — create with reminder:
-            User: add dentist Friday 10am, remind me 30 minutes before
-            You: [CALENDAR_ACTION:{"action":"create","title":"Dentist","start":"2026-03-20T10:00:00","end":"2026-03-20T11:00:00","reminderMinutes":30}]
-            Added with a 30-minute reminder.
+            Example — delete all events in a date range:
+            User: clear my schedule for next Monday
+            You: [CALENDAR_ACTION:{"action":"delete","start":"2026-03-23T00:00:00","end":"2026-03-23T23:59:59"}]
+            Tap Delete on each card to confirm removal.
 
             Example — reschedule (move to new time):
             User: move my dentist to Friday at 2pm
@@ -147,17 +176,11 @@ extension ChatViewModel {
             You: [CALENDAR_ACTION:{"action":"delete","search":"Dentist"}]
             [CALENDAR_ACTION:{"action":"create","title":"Gym","start":"2026-03-18T07:00:00","end":"2026-03-18T08:00:00"}]
             Done — dentist queued for deletion, gym added.
+            """
+    }
 
-            Example — all-day event:
-            User: add a holiday on April 1
-            You: [CALENDAR_ACTION:{"action":"create","title":"Holiday","start":"2026-04-01T00:00:00","end":"2026-04-01T00:00:00","isAllDay":true}]
-            Added as an all-day event.
-
-            Example — recurring event:
-            User: add a weekly team standup every Monday at 9am
-            You: [CALENDAR_ACTION:{"action":"create","title":"Team Standup","start":"2026-03-23T09:00:00","end":"2026-03-23T09:30:00","recurrence":"weekly"}]
-            Added as a weekly recurring event.
-
+    private func calendarQueryExamples() -> String {
+        """
             Example — list events in a date range:
             User: what's on my calendar this week?
             You: [CALENDAR_ACTION:{"action":"list","start":"2026-03-18T00:00:00","end":"2026-03-22T23:59:59"}]
@@ -167,11 +190,6 @@ extension ChatViewModel {
             User: find a free 2-hour slot this week
             You: [CALENDAR_ACTION:{"action":"query","start":"2026-03-17T00:00:00","end":"2026-03-21T23:59:59","durationMinutes":120}]
             Here are the available windows.
-
-            Example — delete all events in a date range:
-            User: clear my schedule for next Monday
-            You: [CALENDAR_ACTION:{"action":"delete","start":"2026-03-23T00:00:00","end":"2026-03-23T23:59:59"}]
-            Tap Delete on each card to confirm removal.
             """
     }
 
@@ -188,6 +206,7 @@ extension ChatViewModel {
             - recurrenceEnd: ISO8601 date when recurrence stops. Omit for indefinite.
             - NEVER skip the block. NEVER output text-only when an action is requested.
             - NEVER tell the user to make changes manually.
+            - Conflict: if the system appends a conflict note (e.g. "Heads-up: overlaps with..."), acknowledge it naturally in your response and tell the user they can tap the card to keep, cancel, or reschedule to a free slot.
             - list: use to show events in a date range when the user asks "what's on my calendar", "show my meetings", etc. Do NOT use query for listing — query is only for finding free slots.
             """
     }

@@ -1,4 +1,5 @@
 import SwiftUI
+// UIKit is used solely for UIPasteboard clipboard access — no UI components imported.
 import UIKit
 
 struct MessageBubbleView: View {
@@ -11,6 +12,10 @@ struct MessageBubbleView: View {
     var onConfirmAllDeletions: (() -> Void)? = nil
     var onCancelAllDeletions: (() -> Void)? = nil
     var onDeleteMessage: ((UUID) -> Void)? = nil
+    var onKeepConflict: ((UUID) -> Void)? = nil
+    var onCancelConflict: ((UUID) async -> Void)? = nil
+    var onFindFreeSlots: ((UUID) async -> [CalendarFreeSlot])? = nil
+    var onRescheduleToSlot: ((UUID, CalendarFreeSlot) async -> Void)? = nil
     @State private var thinkingExpanded = false
     @State private var showTimestamp = false
 
@@ -93,7 +98,11 @@ struct MessageBubbleView: View {
                         onCancel:         { onCancelDeletion?(preview.id) },
                         onUndo:           { onUndoDeletion?(preview.id) },
                         onConfirmUpdate:  { onConfirmUpdate?(preview.id) },
-                        onCancelUpdate:   { onCancelUpdate?(preview.id) }
+                        onCancelUpdate:   { onCancelUpdate?(preview.id) },
+                        onKeepConflict:   { onKeepConflict?(preview.id) },
+                        onCancelConflict: { await onCancelConflict?(preview.id) },
+                        onFindFreeSlots:  { await onFindFreeSlots?(preview.id) ?? [] },
+                        onRescheduleToSlot: { slot in await onRescheduleToSlot?(preview.id, slot) }
                     )
                 }
 

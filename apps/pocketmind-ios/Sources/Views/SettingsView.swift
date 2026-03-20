@@ -160,7 +160,8 @@ struct SettingsView: View {
     private static var freeStorageString: String {
         let attrs = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory())
         let free = (attrs?[.systemFreeSize] as? Int64) ?? 0
-        return String(format: "%.1f GB free", Double(free) / 1_073_741_824)
+        let bytesPerGB: Double = 1_073_741_824
+        return String(format: "%.1f GB free", Double(free) / bytesPerGB)
     }
 
     private static var appVersion: String {

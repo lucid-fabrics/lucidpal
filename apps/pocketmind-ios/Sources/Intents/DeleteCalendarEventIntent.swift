@@ -45,22 +45,7 @@ struct DeleteCalendarEventIntent: AppIntent {
             return .result(dialog: "Calendar access is required. Please allow it in Settings.", view: EmptyView())
         }
 
-        // Search ±1 day to +90 days for matching events
-        let now = Date()
-        let past = Calendar.current.date(byAdding: .day, value: -1, to: now)!
-        let future = Calendar.current.date(byAdding: .day, value: 90, to: now)!
-        let predicate = store.predicateForEvents(withStart: past, end: future, calendars: nil)
-        let matches = store.events(matching: predicate)
-            .filter { $0.title.localizedCaseInsensitiveContains(eventName) }
-
-        guard !matches.isEmpty else {
-            return .result(dialog: "I couldn't find an event named \"\(eventName)\".", view: EmptyView())
-        }
-
-        // Pick the soonest upcoming match, or the first one if all are past
-        let event = matches.filter { $0.startDate >= now }
-            .sorted { $0.startDate < $1.startDate }
-            .first ?? matches.sorted { $0.startDate < $1.startDate }.first!
+        let event = try findMatchingEvent(named: eventName, in: store)
 
         // Show event card + ask for confirmation
         try await requestConfirmation(
@@ -87,8 +72,11 @@ struct DeleteCalendarEventIntent: AppIntent {
             location: event.location,
             notes: event.notes
         )
-        if let encoded = try? JSONEncoder().encode(undoData) {
+        do {
+            let encoded = try JSONEncoder().encode(undoData)
             UserDefaults.standard.set(encoded, forKey: undoDefaultsKey)
+        } catch {
+            print("[DeleteCalendarEventIntent] Failed to encode undo data: \(error)")
         }
 
         // Delete
@@ -105,6 +93,29 @@ struct DeleteCalendarEventIntent: AppIntent {
                 deleted: true
             )
         )
+    }
+
+    /// Searches ±1 day to +90 days for an event whose title contains `name`.
+    /// Returns the soonest upcoming match, or the earliest past match if all are past.
+    /// Throws a localised error string when nothing matches.
+    private func findMatchingEvent(named name: String, in store: EKEventStore) throws -> EKEvent {
+        let now = Date()
+        let past = Calendar.current.date(byAdding: .day, value: -1, to: now) ?? now
+        let future = Calendar.current.date(byAdding: .day, value: 90, to: now) ?? now
+        let predicate = store.predicateForEvents(withStart: past, end: future, calendars: nil)
+        let matches = store.events(matching: predicate)
+            .filter { $0.title.localizedCaseInsensitiveContains(name) }
+
+        guard !matches.isEmpty else {
+            throw NSError(
+                domain: "DeleteCalendarEventIntent",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "I couldn't find an event named \"\(name)\"."]
+            )
+        }
+
+        let sorted = matches.sorted { $0.startDate < $1.startDate }
+        return sorted.first(where: { $0.startDate >= now }) ?? sorted[0]
     }
 }
 
@@ -150,21 +161,7 @@ struct UndoLastDeletionIntent: AppIntent {
             )
         )
 
-        // Recreate the event
-        let event = EKEvent(eventStore: store)
-        event.title = deleted.title
-        event.startDate = deleted.start
-        event.endDate = deleted.end
-        event.isAllDay = deleted.isAllDay
-        event.location = deleted.location
-        event.notes = deleted.notes
-        if let calID = deleted.calendarIdentifier,
-           let cal = store.calendar(withIdentifier: calID) {
-            event.calendar = cal
-        } else {
-            event.calendar = store.defaultCalendarForNewEvents
-        }
-        try store.save(event, span: .thisEvent)
+        try recreateEvent(from: deleted, in: store)
 
         // Clear undo data
         UserDefaults.standard.removeObject(forKey: undoDefaultsKey)
@@ -180,6 +177,24 @@ struct UndoLastDeletionIntent: AppIntent {
                 deleted: false
             )
         )
+    }
+
+    /// Reconstructs an EKEvent from a `SiriDeletedEvent` snapshot and saves it to `store`.
+    private func recreateEvent(from deleted: SiriDeletedEvent, in store: EKEventStore) throws {
+        let event = EKEvent(eventStore: store)
+        event.title = deleted.title
+        event.startDate = deleted.start
+        event.endDate = deleted.end
+        event.isAllDay = deleted.isAllDay
+        event.location = deleted.location
+        event.notes = deleted.notes
+        if let calID = deleted.calendarIdentifier,
+           let cal = store.calendar(withIdentifier: calID) {
+            event.calendar = cal
+        } else {
+            event.calendar = store.defaultCalendarForNewEvents
+        }
+        try store.save(event, span: .thisEvent)
     }
 }
 

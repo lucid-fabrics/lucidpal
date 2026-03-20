@@ -8,6 +8,10 @@ final class SessionListViewModel: ObservableObject {
     /// SessionListView observes this to navigate to the new session.
     @Published var siriNavigationMeta: ChatSessionMeta?
 
+    /// Set by PocketMindApp when a Siri "Add Event" intent provides event details.
+    /// SessionListView presents CreateEventSheet when non-nil.
+    @Published var pendingEventCreation: SiriPendingEvent?
+
     /// Keyed by session ID — consumed by ChatSessionContainer on init to auto-send the first message.
     var pendingQueryBySessionID: [UUID: String] = [:]
 
@@ -15,7 +19,7 @@ final class SessionListViewModel: ObservableObject {
     let llmService: any LLMServiceProtocol
     let calendarService: any CalendarServiceProtocol
     let calendarActionController: any CalendarActionControllerProtocol
-    let settings: AppSettings
+    let settings: any AppSettingsProtocol
     let speechService: any SpeechServiceProtocol
     let hapticService: any HapticServiceProtocol
 
@@ -24,7 +28,7 @@ final class SessionListViewModel: ObservableObject {
         llmService: any LLMServiceProtocol,
         calendarService: any CalendarServiceProtocol,
         calendarActionController: any CalendarActionControllerProtocol,
-        settings: AppSettings,
+        settings: any AppSettingsProtocol,
         speechService: any SpeechServiceProtocol,
         hapticService: any HapticServiceProtocol
     ) {
@@ -103,5 +107,27 @@ final class SessionListViewModel: ObservableObject {
         let session = createSession()
         pendingQueryBySessionID[session.id] = query
         siriNavigationMeta = session.meta
+    }
+
+    func scheduleCreateEvent(_ event: SiriPendingEvent) {
+        pendingEventCreation = event
+    }
+
+    func createCalendarEvent(
+        title: String, start: Date, end: Date,
+        isAllDay: Bool, location: String?, notes: String?
+    ) throws {
+        try calendarService.createEvent(
+            title: title,
+            start: start,
+            end: end,
+            location: location,
+            notes: notes,
+            reminderMinutes: nil,
+            calendarIdentifier: nil,
+            isAllDay: isAllDay,
+            recurrence: nil,
+            recurrenceEnd: nil
+        )
     }
 }

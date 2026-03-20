@@ -37,6 +37,14 @@ struct SessionListView: View {
                 viewModel.siriNavigationMeta = nil
                 navigationPath = [meta]
             }
+            .sheet(item: $viewModel.pendingEventCreation) { draft in
+                CreateEventSheet(draft: draft) { title, start, end, allDay, location, notes in
+                    try viewModel.createCalendarEvent(
+                        title: title, start: start, end: end,
+                        isAllDay: allDay, location: location, notes: notes
+                    )
+                }
+            }
             .alert("Rename Chat", isPresented: Binding(
                 get: { renamingSession != nil },
                 set: { if !$0 { renamingSession = nil } }
@@ -254,6 +262,8 @@ struct ChatSessionContainer: View {
             .onChange(of: scenePhase) { _, phase in
                 if phase == .background {
                     chatViewModel.flushPersistence()
+                } else if phase == .active {
+                    chatViewModel.refreshStalePreviews()
                 }
             }
     }

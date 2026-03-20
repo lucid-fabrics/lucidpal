@@ -15,9 +15,8 @@ protocol SessionManagerProtocol {
 @MainActor
 final class SessionManager: SessionManagerProtocol {
 
-    // nonisolated(unsafe): stored once in init and never mutated after — safe to read from any context.
-    nonisolated(unsafe) private let sessionsDirectory: URL
-    nonisolated(unsafe) private let indexURL: URL
+    private let sessionsDirectory: URL
+    private let indexURL: URL
 
     /// Creates a `SessionManager` rooted at `directory`.
     /// Pass a custom temp path in tests to avoid polluting the real Documents directory.
@@ -155,11 +154,15 @@ final class SessionManager: SessionManagerProtocol {
             messages = try JSONDecoder().decode([ChatMessage].self, from: data)
         } catch {
             print("[SessionManager] Failed to read legacy history: \(error)")
-            try? FileManager.default.removeItem(at: legacyURL)
+            do { try FileManager.default.removeItem(at: legacyURL) } catch {
+                print("[SessionManager] Failed to remove corrupt legacy file: \(error)")
+            }
             return
         }
         guard !messages.isEmpty else {
-            try? FileManager.default.removeItem(at: legacyURL)
+            do { try FileManager.default.removeItem(at: legacyURL) } catch {
+                print("[SessionManager] Failed to remove empty legacy file: \(error)")
+            }
             return
         }
         let firstUserContent = messages.first(where: { $0.role == .user })?.content ?? "Chat"

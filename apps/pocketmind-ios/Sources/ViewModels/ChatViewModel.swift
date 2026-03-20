@@ -14,6 +14,17 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isSpeechRecording = false
     @Published private(set) var isSpeechAvailable = false
 
+    /// LLM-generated prompt suggestions shown in the empty state.
+    @Published var suggestedPrompts: [String] = [
+        "What's on my calendar this week?",
+        "Add a meeting tomorrow at 2pm",
+        "Find a free 1-hour slot today",
+        "Delete my next dentist appointment",
+    ]
+    @Published var isGeneratingSuggestions = false
+
+    var suggestionsTask: Task<Void, Never>?
+
     /// Navigation title — equals session title in session mode, "PocketMind" otherwise.
     @Published private(set) var sessionTitle: String
 
@@ -71,7 +82,11 @@ final class ChatViewModel: ObservableObject {
 
         // Publishers — sink used instead of assign(to:) because existentials can't project @Published.
         llmService.isLoadedPublisher
-            .sink { [weak self] in self?.isModelLoaded = $0 }
+            .sink { [weak self] loaded in
+                self?.isModelLoaded = loaded
+                guard loaded, self?.messages.isEmpty == true, self?.pendingInput == nil else { return }
+                Task { [weak self] in await self?.generateSuggestedPrompts() }
+            }
             .store(in: &cancellables)
         llmService.isGeneratingPublisher
             .sink { [weak self] in self?.isGenerating = $0 }
@@ -128,6 +143,11 @@ final class ChatViewModel: ObservableObject {
 
         // Request speech permissions on launch
         Task { await speechService.requestAuthorization() }
+
+        // If model is already loaded and there's nothing to show, kick off suggestions.
+        if llmService.isLoaded && messages.isEmpty && pendingInput == nil {
+            Task { [weak self] in await self?.generateSuggestedPrompts() }
+        }
     }
 
     func toggleSpeech() {
@@ -146,6 +166,7 @@ final class ChatViewModel: ObservableObject {
     }
 
     func sendMessage() async {
+        cancelSuggestionsGeneration()
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isGenerating, isModelLoaded else { return }
 
@@ -174,7 +195,7 @@ final class ChatViewModel: ObservableObject {
         // Snapshot history without the empty assistant placeholder.
         // Cap based on device RAM: 8 K context devices get more history (50 msgs ≈ 5000 tokens),
         // 4 K context devices use 20 msgs ≈ 2000 tokens, leaving headroom for system prompt + reply.
-        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / 1_073_741_824)
+        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / ChatConstants.bytesPerGB)
         let historyLimit = ramGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeHistoryLimit : ChatConstants.smallHistoryLimit
         let historyMessages = Array(messages.dropLast().suffix(historyLimit))
 
@@ -210,10 +231,28 @@ final class ChatViewModel: ObservableObject {
         llmService.cancelGeneration()
     }
 
+    /// Checks all active calendar event previews against EventKit and marks
+    /// any whose underlying event no longer exists as stale.
+    func refreshStalePreviews() {
+        guard calendarService.isAuthorized else { return }
+        let activeStates: Set<CalendarEventPreview.PreviewState> = [.created, .updated, .rescheduled, .restored]
+        for msgIdx in messages.indices {
+            for prevIdx in messages[msgIdx].calendarEventPreviews.indices {
+                let preview = messages[msgIdx].calendarEventPreviews[prevIdx]
+                guard activeStates.contains(preview.state),
+                      let eid = preview.eventIdentifier,
+                      !preview.isStale else { continue }
+                if calendarService.calendarName(forEventIdentifier: eid) == nil {
+                    messages[msgIdx].calendarEventPreviews[prevIdx].isStale = true
+                }
+            }
+        }
+    }
+
     /// Receives a query from Siri and sends it as if the user typed it.
     func handleSiriQuery(_ text: String) {
         inputText = text
-        Task { await sendMessage() }
+        Task { [weak self] in await self?.sendMessage() }
     }
 
     func deleteMessage(id: UUID) {
@@ -247,50 +286,4 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Token streaming
-
-    /// Applies one streamed token to the assistant message at `idx`, handling
-    /// the <think>...</think> wrapper that Qwen3 emits before its response.
-    func showToast(_ message: String, systemImage: String) {
-        toast = ToastItem(message: message, systemImage: systemImage)
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(2.5))
-            toast = nil
-        }
-    }
-
-    func applyStreamToken(
-        _ token: String,
-        rawBuffer: inout String,
-        thinkDone: inout Bool,
-        showThinking: Bool,
-        idx: Int
-    ) {
-        rawBuffer += token
-        if thinkDone {
-            messages[idx].content += token
-        } else if rawBuffer.hasPrefix("<think>") {
-            if let closeRange = rawBuffer.range(of: "</think>") {
-                let thinkText = String(rawBuffer[rawBuffer.index(rawBuffer.startIndex, offsetBy: "<think>".count) ..< closeRange.lowerBound])
-                let response  = String(rawBuffer[closeRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
-                if showThinking {
-                    messages[idx].thinkingContent = thinkText.trimmingCharacters(in: .whitespacesAndNewlines)
-                }
-                messages[idx].isThinking = false
-                messages[idx].content = response
-                thinkDone = true
-            } else {
-                // Still inside <think> — buffer or show depending on setting
-                if showThinking {
-                    messages[idx].isThinking = true
-                    messages[idx].thinkingContent = String(rawBuffer.dropFirst("<think>".count))
-                }
-            }
-        } else if "<think>".hasPrefix(rawBuffer) {
-            // Still buffering opening tag — don't display yet
-        } else {
-            thinkDone = true
-            messages[idx].content = rawBuffer
-        }
-    }
 }

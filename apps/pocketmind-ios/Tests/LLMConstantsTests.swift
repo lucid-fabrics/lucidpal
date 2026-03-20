@@ -10,6 +10,7 @@ import XCTest
 ///
 /// These tests enforce that the constants remain self-consistent so the same
 /// class of bug cannot silently re-appear.
+@MainActor
 final class LLMConstantsTests: XCTestCase {
 
     // MARK: - Context size sanity

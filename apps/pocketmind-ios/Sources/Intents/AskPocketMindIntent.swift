@@ -1,5 +1,21 @@
 import AppIntents
 
+// MARK: - Siri Pending Event
+
+struct SiriPendingEvent: Codable, Identifiable {
+    let id: UUID
+    let title: String
+    let date: Date
+
+    init(title: String, date: Date) {
+        self.id = UUID()
+        self.title = title
+        self.date = date
+    }
+}
+
+private let pendingEventDefaultsKey = "pm_siri_pending_event"
+
 // MARK: - Errors
 
 enum SiriQueryError: Error, LocalizedError {
@@ -55,7 +71,7 @@ struct CheckCalendarIntent: AppIntent {
 // MARK: - AddCalendarEventIntent
 
 /// Siri intent — user says "Add [event] to PocketMind".
-/// Captures the event title and forwards it as a create request.
+/// Asks for event title and date/time if not provided, then opens the app with a pre-filled form.
 struct AddCalendarEventIntent: AppIntent {
 
     static let title: LocalizedStringResource = "Add Calendar Event"
@@ -67,11 +83,22 @@ struct AddCalendarEventIntent: AppIntent {
                requestValueDialog: IntentDialog("What would you like to add to your calendar?"))
     var event: String
 
+    @Parameter(title: "Date",
+               description: "When is the event?",
+               requestValueDialog: IntentDialog("When is the event?"))
+    var when: Date
+
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let trimmed = event.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { throw SiriQueryError.emptyQuery }
-        UserDefaults.standard.set("Add \(trimmed) to my calendar", forKey: "pm_siri_pending_query")
-        return .result(dialog: "Opening PocketMind to add \(trimmed).")
+        let payload = SiriPendingEvent(title: trimmed, date: when)
+        do {
+            let encoded = try JSONEncoder().encode(payload)
+            UserDefaults.standard.set(encoded, forKey: pendingEventDefaultsKey)
+        } catch {
+            print("[AddCalendarEventIntent] Failed to encode pending event: \(error)")
+        }
+        return .result(dialog: "Opening PocketMind to schedule \(trimmed).")
     }
 }
 

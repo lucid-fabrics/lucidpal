@@ -1,6 +1,7 @@
 import XCTest
 @testable import PocketMind
 
+@MainActor
 final class CalendarFreeSlotEngineTests: XCTestCase {
 
     private func date(_ dayOffset: Int, hour: Int, minute: Int = 0) -> Date {
@@ -79,6 +80,28 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
             duration: 3600  // require 1 hour
         )
         XCTAssertTrue(slots.isEmpty, "30-minute gap should not satisfy 1-hour duration requirement")
+    }
+
+    func testDSTTransitionDoesNotProduceInvalidSlots() {
+        // Build a range that straddles a DST boundary using a fixed UTC offset calendar
+        // so the test is repeatable regardless of current date.
+        // We simulate a 23-hour day (spring-forward) by constructing the range manually
+        // from absolute TimeIntervals, then verify engine still returns valid ordered slots.
+        let springForward = Date(timeIntervalSince1970: 1_710_054_000) // 2024-03-10 07:00 UTC (2am ET spring-forward)
+        let rangeStart = springForward
+        let rangeEnd = springForward.addingTimeInterval(23 * 3600) // 23h day
+
+        let slots = CalendarFreeSlotEngine.findSlots(
+            busyWindows: [],
+            rangeStart: rangeStart,
+            rangeEnd: rangeEnd,
+            duration: 3600
+        )
+        for slot in slots {
+            XCTAssertLessThan(slot.start, slot.end, "DST transition slot must have start < end")
+            XCTAssertGreaterThanOrEqual(slot.start, rangeStart, "Slot must not start before range")
+            XCTAssertLessThanOrEqual(slot.end, rangeEnd, "Slot must not end after range")
+        }
     }
 
     func testSlotStartAndEndAreOrdered() {

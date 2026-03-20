@@ -1,5 +1,8 @@
 import Combine
 import Foundation
+import OSLog
+
+private let modelDownloadLogger = Logger(subsystem: "com.pocketmind", category: "ModelDownloadViewModel")
 
 @MainActor
 final class ModelDownloadViewModel: ObservableObject {
@@ -87,6 +90,7 @@ final class ModelDownloadViewModel: ObservableObject {
             settings.selectedModelID = selectedModel.id
             downloader.resetState()  // Reset download state — clears stale "Load Model" button
         } catch {
+            modelDownloadLogger.error("loadModel failed: \(error)")
             loadError = error.localizedDescription
             downloader.resetState()  // Reset download UI — don't leave it stuck in "Load Model" state
         }
@@ -100,6 +104,7 @@ final class ModelDownloadViewModel: ObservableObject {
         do {
             try downloader.deleteModel(model)
         } catch {
+            modelDownloadLogger.error("deleteModel failed: \(error)")
             deleteError = "Could not delete model: \(error.localizedDescription)"
         }
     }

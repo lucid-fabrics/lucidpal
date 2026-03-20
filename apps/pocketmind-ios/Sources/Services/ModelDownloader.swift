@@ -145,7 +145,7 @@ extension ModelDownloader: URLSessionDownloadDelegate {
             do {
                 try FileManager.default.removeItem(at: destination)
             } catch {
-                print("[ModelDownloader] Cleanup failed after disk-full error: \(error)")
+                logger.error("Cleanup failed after disk-full error: \(error)")
             }
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
@@ -157,7 +157,7 @@ extension ModelDownloader: URLSessionDownloadDelegate {
             do {
                 try FileManager.default.removeItem(at: destination)
             } catch {
-                print("[ModelDownloader] Cleanup failed: \(error)")
+                logger.error("Cleanup failed: \(error)")
             }
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil

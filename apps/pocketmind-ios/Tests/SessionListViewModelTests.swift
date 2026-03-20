@@ -155,6 +155,84 @@ final class SessionListViewModelTests: XCTestCase {
         XCTAssertEqual(vm.pendingInput, "What's on my calendar?")
     }
 
+    // MARK: - renameSession
+
+    func testRenameSessionUpdatesTitle() {
+        let session = viewModel.createSession()
+        viewModel.renameSession(id: session.id, title: "Weekly Standup")
+        XCTAssertEqual(viewModel.sessions.first?.title, "Weekly Standup")
+    }
+
+    func testRenameSessionCallsManagerRename() {
+        let session = viewModel.createSession()
+        viewModel.renameSession(id: session.id, title: "Sprint Retro")
+        let stored = mock.loadSession(id: session.id)
+        XCTAssertEqual(stored?.title, "Sprint Retro")
+    }
+
+    func testRenameSessionUnknownIDIsNoOp() {
+        viewModel.createSession()
+        let countBefore = viewModel.sessions.count
+        viewModel.renameSession(id: UUID(), title: "Ghost")
+        XCTAssertEqual(viewModel.sessions.count, countBefore)
+        XCTAssertNotEqual(viewModel.sessions.first?.title, "Ghost")
+    }
+
+    // MARK: - scheduleCreateEvent
+
+    func testScheduleCreateEventSetsPendingEventCreation() {
+        let event = SiriPendingEvent(title: "Dentist", date: Date(timeIntervalSinceNow: 3600))
+        viewModel.scheduleCreateEvent(event)
+        XCTAssertEqual(viewModel.pendingEventCreation?.title, "Dentist")
+    }
+
+    func testScheduleCreateEventPreservesDate() {
+        let date = Date(timeIntervalSinceNow: 7200)
+        let event = SiriPendingEvent(title: "Meeting", date: date)
+        viewModel.scheduleCreateEvent(event)
+        XCTAssertEqual(viewModel.pendingEventCreation?.date, date)
+    }
+
+    func testScheduleCreateEventOverwritesPreviousPending() {
+        viewModel.scheduleCreateEvent(SiriPendingEvent(title: "First", date: .now))
+        viewModel.scheduleCreateEvent(SiriPendingEvent(title: "Second", date: .now))
+        XCTAssertEqual(viewModel.pendingEventCreation?.title, "Second")
+    }
+
+    // MARK: - createCalendarEvent
+
+    func testCreateCalendarEventDelegatesToCalendarService() throws {
+        let start = Date(timeIntervalSinceNow: 3600)
+        let end = Date(timeIntervalSinceNow: 7200)
+        try viewModel.createCalendarEvent(
+            title: "Team Sync", start: start, end: end,
+            isAllDay: false, location: nil, notes: nil
+        )
+        XCTAssertEqual(calendarService.createdEvents.count, 1)
+        XCTAssertEqual(calendarService.createdEvents.first?.title, "Team Sync")
+    }
+
+    func testCreateCalendarEventPassesAllDayFlag() throws {
+        let start = Date(timeIntervalSinceNow: 0)
+        let end = Date(timeIntervalSinceNow: 0)
+        try viewModel.createCalendarEvent(
+            title: "Holiday", start: start, end: end,
+            isAllDay: true, location: nil, notes: nil
+        )
+        XCTAssertEqual(calendarService.createdEvents.first?.isAllDay, true)
+    }
+
+    func testCreateCalendarEventPassesCorrectDates() throws {
+        let start = Date(timeIntervalSinceNow: 1000)
+        let end = Date(timeIntervalSinceNow: 5000)
+        try viewModel.createCalendarEvent(
+            title: "Lunch", start: start, end: end,
+            isAllDay: false, location: "Cafe", notes: "Bring laptop"
+        )
+        XCTAssertEqual(calendarService.createdEvents.first?.start, start)
+        XCTAssertEqual(calendarService.createdEvents.first?.end, end)
+    }
+
     // MARK: - scheduleSiriQuery
 
     func testScheduleSiriQueryCreatesSession() {

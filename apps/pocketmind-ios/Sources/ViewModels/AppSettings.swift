@@ -1,22 +1,49 @@
 import Foundation
-import SwiftUI
 
 @MainActor
 final class AppSettings: ObservableObject, AppSettingsProtocol {
 
     // MARK: - Stored Preferences
 
-    @AppStorage("calendarAccessEnabled") var calendarAccessEnabled: Bool = false
-    @AppStorage("selectedModelID") var selectedModelID: String = ModelInfo.qwen3_5_2B.id
-    @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
-    @AppStorage("thinkingEnabled") var thinkingEnabled: Bool = true
-    @AppStorage("defaultCalendarIdentifier") var defaultCalendarIdentifier: String = ""
-    @AppStorage("speechAutoSendEnabled") var speechAutoSendEnabled: Bool = true
+    @Published var calendarAccessEnabled: Bool {
+        didSet { UserDefaults.standard.set(calendarAccessEnabled, forKey: "calendarAccessEnabled") }
+    }
+
+    @Published var selectedModelID: String {
+        didSet { UserDefaults.standard.set(selectedModelID, forKey: "selectedModelID") }
+    }
+
+    @Published var hasCompletedOnboarding: Bool {
+        didSet { UserDefaults.standard.set(hasCompletedOnboarding, forKey: "hasCompletedOnboarding") }
+    }
+
+    @Published var thinkingEnabled: Bool {
+        didSet { UserDefaults.standard.set(thinkingEnabled, forKey: "thinkingEnabled") }
+    }
+
+    @Published var defaultCalendarIdentifier: String {
+        didSet { UserDefaults.standard.set(defaultCalendarIdentifier, forKey: "defaultCalendarIdentifier") }
+    }
+
+    @Published var speechAutoSendEnabled: Bool {
+        didSet { UserDefaults.standard.set(speechAutoSendEnabled, forKey: "speechAutoSendEnabled") }
+    }
+
+    // MARK: - Init
+
+    init() {
+        let defaults = UserDefaults.standard
+        calendarAccessEnabled = defaults.bool(forKey: "calendarAccessEnabled")
+        selectedModelID = defaults.string(forKey: "selectedModelID") ?? ModelInfo.qwen3_5_2B.id
+        hasCompletedOnboarding = defaults.bool(forKey: "hasCompletedOnboarding")
+        thinkingEnabled = defaults.object(forKey: "thinkingEnabled") as? Bool ?? true
+        defaultCalendarIdentifier = defaults.string(forKey: "defaultCalendarIdentifier") ?? ""
+        speechAutoSendEnabled = defaults.object(forKey: "speechAutoSendEnabled") as? Bool ?? true
+    }
 
     // MARK: - Computed Properties
 
     var selectedModel: ModelInfo {
-        // Array lookup — adding new models requires no changes here
         [ModelInfo.qwen3_5_0B8, ModelInfo.qwen3_5_2B, ModelInfo.qwen3_5_4B]
             .first { $0.id == selectedModelID } ?? .qwen3_5_2B
     }

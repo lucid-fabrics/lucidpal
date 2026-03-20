@@ -19,6 +19,8 @@ enum LLMConstants {
     static let maxNewTokens: Int32 = 768
     /// Sampler temperature: lower = more deterministic, fewer hallucinated fields.
     static let samplerTemperature: Float = 0.35
+    /// Bytes in one gigabyte — used for RAM-based context sizing.
+    static let bytesPerGB: UInt64 = 1_073_741_824
 }
 
 // MARK: - LlamaActor
@@ -30,8 +32,12 @@ enum LLMConstants {
 /// nonisolated in Swift 6) can free them. All *writes* happen exclusively from
 /// actor-isolated methods, so there is no concurrent access in practice.
 actor LlamaActor {
-    // nonisolated(unsafe): deinit is nonisolated in Swift 6 — must free C pointers there.
-    // All writes happen exclusively from actor-isolated methods; no concurrent access.
+    // Safety: These C pointers are only ever read or written inside actor-isolated methods
+    // (load, unload, generate, batchAdd, etc.), guaranteeing serial access during the
+    // object's lifetime. `nonisolated(unsafe)` is required solely so that `deinit`
+    // (which is nonisolated in Swift 6) can call the llama C free functions; by the time
+    // deinit runs no other code holds a reference to this actor, so there is no concurrent
+    // access.
     nonisolated(unsafe) private var model:   OpaquePointer?   // freed in deinit
     nonisolated(unsafe) private var ctx:     OpaquePointer?   // freed in deinit
     nonisolated(unsafe) private var vocab:   OpaquePointer?   // freed in deinit (via model)
@@ -73,7 +79,7 @@ actor LlamaActor {
 
         let nThreads = max(1, min(LLMConstants.maxThreadCount, Int32(ProcessInfo.processInfo.processorCount - 2)))
         // Use 8 K context on devices with ≥6 GB RAM (4B model tier); 4 K otherwise.
-        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / 1_073_741_824)
+        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / LLMConstants.bytesPerGB)
         var cp = llama_context_default_params()
         cp.n_ctx           = ramGB >= LLMConstants.largeContextRAMThresholdGB ? LLMConstants.largeContextSize : LLMConstants.smallContextSize
         cp.n_batch         = cp.n_ctx   // must match n_ctx so full-prompt prefill fits in one decode call

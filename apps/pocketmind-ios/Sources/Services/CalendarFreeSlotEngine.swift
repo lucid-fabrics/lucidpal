@@ -18,35 +18,60 @@ enum CalendarFreeSlotEngine {
     ) -> [CalendarFreeSlot] {
         let cal = Calendar.current
 
-        func nextWorkStart(_ from: Date) -> Date {
+        func nextWeekdayStart(_ from: Date) -> Date {
             var comps = cal.dateComponents([.year, .month, .day], from: from)
             comps.hour = 8; comps.minute = 0; comps.second = 0
-            let day8am = cal.date(from: comps) ?? from
-            return day8am < from ? cal.date(byAdding: .day, value: 1, to: day8am) ?? from : day8am
+            var candidate = cal.date(from: comps) ?? from
+            if candidate < from {
+                candidate = cal.date(byAdding: .day, value: 1, to: candidate) ?? candidate
+            }
+            // Skip Saturday (7) and Sunday (1)
+            while [1, 7].contains(cal.component(.weekday, from: candidate)) {
+                candidate = cal.date(byAdding: .day, value: 1, to: candidate) ?? candidate
+            }
+            return candidate
         }
-        func dayEnd(_ from: Date) -> Date {
+
+        func workDayEnd(_ from: Date) -> Date {
             var comps = cal.dateComponents([.year, .month, .day], from: from)
             comps.hour = 20; comps.minute = 0; comps.second = 0
             return cal.date(from: comps) ?? from
         }
 
-        var cursor = nextWorkStart(rangeStart)
         var freeSlots: [CalendarFreeSlot] = []
+        var cursor = nextWeekdayStart(rangeStart)
+        var busyIdx = 0
 
-        for window in busyWindows + [(rangeEnd, rangeEnd)] {
-            guard cursor < rangeEnd else { break }
-            let weekday = cal.component(.weekday, from: cursor)
-            if weekday == 1 || weekday == 7 {
-                cursor = nextWorkStart(cal.date(byAdding: .day, value: 1, to: cursor) ?? cursor)
+        while cursor < rangeEnd && freeSlots.count < 5 {
+            // Skip weekends (nextWeekdayStart handles them, but guard against drift)
+            if [1, 7].contains(cal.component(.weekday, from: cursor)) {
+                cursor = nextWeekdayStart(cursor)
                 continue
             }
-            let freeEnd = min(window.start, dayEnd(cursor))
-            if freeEnd > cursor && freeEnd.timeIntervalSince(cursor) >= duration {
-                freeSlots.append(CalendarFreeSlot(start: cursor, end: freeEnd))
-                if freeSlots.count == 5 { break }
+
+            let workEnd = workDayEnd(cursor)
+
+            // Advance past busy windows that have already ended
+            while busyIdx < busyWindows.count && busyWindows[busyIdx].end <= cursor {
+                busyIdx += 1
             }
-            let afterBusy = window.end
-            cursor = max(cursor, max(afterBusy, nextWorkStart(afterBusy)))
+
+            let nextBusyStart = busyIdx < busyWindows.count ? busyWindows[busyIdx].start : rangeEnd
+            let freeUntil = min(nextBusyStart, workEnd)
+
+            if freeUntil > cursor && freeUntil.timeIntervalSince(cursor) >= duration {
+                // Slot fits — emit exactly `duration` long and advance cursor within the same gap
+                let slotEnd = cursor.addingTimeInterval(duration)
+                freeSlots.append(CalendarFreeSlot(start: cursor, end: slotEnd))
+                cursor = slotEnd
+            } else if busyIdx < busyWindows.count && busyWindows[busyIdx].start < workEnd {
+                // Blocked by a busy window before end of work day — skip past it
+                cursor = nextWeekdayStart(busyWindows[busyIdx].end)
+                busyIdx += 1
+            } else {
+                // Reached end of work day — advance to next weekday morning
+                cursor = nextWeekdayStart(cal.date(byAdding: .day, value: 1, to: workEnd) ?? workEnd)
+            }
         }
         return freeSlots
     }

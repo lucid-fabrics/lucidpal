@@ -79,6 +79,7 @@ struct PocketMindApp: App {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 consumePendingSiriQuery()
+                consumePendingSiriEvent()
             }
             // Background persistence is handled per-session by ChatSessionContainer.
         }
@@ -91,6 +92,13 @@ struct PocketMindApp: App {
               !query.isEmpty else { return }
         UserDefaults.standard.removeObject(forKey: "pm_siri_pending_query")
         sessionListViewModel.scheduleSiriQuery(query)
+    }
+
+    private func consumePendingSiriEvent() {
+        guard let data = UserDefaults.standard.data(forKey: "pm_siri_pending_event"),
+              let event = try? JSONDecoder().decode(SiriPendingEvent.self, from: data) else { return }
+        UserDefaults.standard.removeObject(forKey: "pm_siri_pending_event")
+        sessionListViewModel.scheduleCreateEvent(event)
     }
 }
 

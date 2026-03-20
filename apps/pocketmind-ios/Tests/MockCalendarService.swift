@@ -9,13 +9,29 @@ final class MockCalendarService: CalendarServiceProtocol {
     var authorizationStatus: CalendarAuthorizationStatus = .fullAccess
     var requestAccessResult: Bool = true
     var stubbedEvents: [CalendarEventInfo] = []
+    /// Maps event identifier → calendar name. If an ID is absent, calendarName returns nil (simulates deleted event).
+    var stubbedCalendarNames: [String: String] = [:]
     var stubbedConflicts: [CalendarEventInfo] = []
+
+    /// Convenience factory — creates a conflict stub with isRecurring support.
+    static func makeConflict(title: String, start: Date, end: Date, isRecurring: Bool = false) -> CalendarEventInfo {
+        CalendarEventInfo(
+            eventIdentifier: "conflict-\(title)",
+            title: title,
+            startDate: start,
+            endDate: end,
+            isAllDay: false,
+            calendarTitle: "Test Calendar",
+            isRecurring: isRecurring
+        )
+    }
     var stubbedFetchEvents: String = ""
     var createdEvents: [(title: String, start: Date, end: Date, isAllDay: Bool)] = []
     var deletedIdentifiers: [String] = []
     var appliedUpdates: [(PendingCalendarUpdate, String)] = []
     var shouldThrowOnDelete = false
     var shouldThrowOnApplyUpdate = false
+    var shouldThrowOnCreate = false
 
     func requestAccess() async -> Bool {
         isAuthorized = requestAccessResult
@@ -56,6 +72,7 @@ final class MockCalendarService: CalendarServiceProtocol {
         recurrence: String?,
         recurrenceEnd: Date?
     ) throws -> String {
+        if shouldThrowOnCreate { throw CalendarError.notAuthorized }
         createdEvents.append((title: title, start: start, end: end, isAllDay: isAllDay))
         return "mock-id-\(createdEvents.count)"
     }
@@ -74,7 +91,7 @@ final class MockCalendarService: CalendarServiceProtocol {
     }
 
     func calendarName(forEventIdentifier identifier: String) -> String? {
-        "Test Calendar"
+        stubbedCalendarNames[identifier]
     }
 
     func defaultCalendarInfo() -> CalendarInfo? {
