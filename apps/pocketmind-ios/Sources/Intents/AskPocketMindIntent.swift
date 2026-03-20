@@ -14,7 +14,7 @@ struct SiriPendingEvent: Codable, Identifiable {
     }
 }
 
-private let pendingEventDefaultsKey = "pm_siri_pending_event"
+private let pendingEventDefaultsKey = UserDefaultsKeys.siriPendingEvent
 
 // MARK: - Errors
 
@@ -47,7 +47,7 @@ struct AskPocketMindIntent: AppIntent {
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { throw SiriQueryError.emptyQuery }
-        UserDefaults.standard.set(trimmed, forKey: "pm_siri_pending_query")
+        UserDefaults.standard.set(trimmed, forKey: UserDefaultsKeys.siriPendingQuery)
         return .result(dialog: "Opening PocketMind.")
     }
 }
@@ -63,7 +63,7 @@ struct CheckCalendarIntent: AppIntent {
     static let openAppWhenRun: Bool = true
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        UserDefaults.standard.set("What's on my calendar today?", forKey: "pm_siri_pending_query")
+        UserDefaults.standard.set("What's on my calendar today?", forKey: UserDefaultsKeys.siriPendingQuery)
         return .result(dialog: "Let me check your calendar.")
     }
 }
@@ -113,7 +113,7 @@ struct FindFreeTimeIntent: AppIntent {
     static let openAppWhenRun: Bool = true
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        UserDefaults.standard.set("Find a free 1-hour slot today", forKey: "pm_siri_pending_query")
+        UserDefaults.standard.set("Find a free 1-hour slot today", forKey: UserDefaultsKeys.siriPendingQuery)
         return .result(dialog: "Let me find a free slot for you.")
     }
 }

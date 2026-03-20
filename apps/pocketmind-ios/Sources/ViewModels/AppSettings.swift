@@ -6,39 +6,39 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
     // MARK: - Stored Preferences
 
     @Published var calendarAccessEnabled: Bool {
-        didSet { UserDefaults.standard.set(calendarAccessEnabled, forKey: "calendarAccessEnabled") }
+        didSet { UserDefaults.standard.set(calendarAccessEnabled, forKey: UserDefaultsKeys.calendarAccessEnabled) }
     }
 
     @Published var selectedModelID: String {
-        didSet { UserDefaults.standard.set(selectedModelID, forKey: "selectedModelID") }
+        didSet { UserDefaults.standard.set(selectedModelID, forKey: UserDefaultsKeys.selectedModelID) }
     }
 
     @Published var hasCompletedOnboarding: Bool {
-        didSet { UserDefaults.standard.set(hasCompletedOnboarding, forKey: "hasCompletedOnboarding") }
+        didSet { UserDefaults.standard.set(hasCompletedOnboarding, forKey: UserDefaultsKeys.hasCompletedOnboarding) }
     }
 
     @Published var thinkingEnabled: Bool {
-        didSet { UserDefaults.standard.set(thinkingEnabled, forKey: "thinkingEnabled") }
+        didSet { UserDefaults.standard.set(thinkingEnabled, forKey: UserDefaultsKeys.thinkingEnabled) }
     }
 
     @Published var defaultCalendarIdentifier: String {
-        didSet { UserDefaults.standard.set(defaultCalendarIdentifier, forKey: "defaultCalendarIdentifier") }
+        didSet { UserDefaults.standard.set(defaultCalendarIdentifier, forKey: UserDefaultsKeys.defaultCalendarIdentifier) }
     }
 
     @Published var speechAutoSendEnabled: Bool {
-        didSet { UserDefaults.standard.set(speechAutoSendEnabled, forKey: "speechAutoSendEnabled") }
+        didSet { UserDefaults.standard.set(speechAutoSendEnabled, forKey: UserDefaultsKeys.speechAutoSendEnabled) }
     }
 
     // MARK: - Init
 
     init() {
         let defaults = UserDefaults.standard
-        calendarAccessEnabled = defaults.bool(forKey: "calendarAccessEnabled")
-        selectedModelID = defaults.string(forKey: "selectedModelID") ?? ModelInfo.qwen3_5_2B.id
-        hasCompletedOnboarding = defaults.bool(forKey: "hasCompletedOnboarding")
-        thinkingEnabled = defaults.object(forKey: "thinkingEnabled") as? Bool ?? true
-        defaultCalendarIdentifier = defaults.string(forKey: "defaultCalendarIdentifier") ?? ""
-        speechAutoSendEnabled = defaults.object(forKey: "speechAutoSendEnabled") as? Bool ?? true
+        calendarAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.calendarAccessEnabled)
+        selectedModelID = defaults.string(forKey: UserDefaultsKeys.selectedModelID) ?? ModelInfo.qwen3_5_2B.id
+        hasCompletedOnboarding = defaults.bool(forKey: UserDefaultsKeys.hasCompletedOnboarding)
+        thinkingEnabled = defaults.object(forKey: UserDefaultsKeys.thinkingEnabled) as? Bool ?? true
+        defaultCalendarIdentifier = defaults.string(forKey: UserDefaultsKeys.defaultCalendarIdentifier) ?? ""
+        speechAutoSendEnabled = defaults.object(forKey: UserDefaultsKeys.speechAutoSendEnabled) as? Bool ?? true
     }
 
     // MARK: - Computed Properties

@@ -91,23 +91,23 @@ struct PocketMindApp: App {
     // MARK: - Siri Integration
 
     private func consumePendingSiriQuery() {
-        guard let query = UserDefaults.standard.string(forKey: "pm_siri_pending_query"),
+        guard let query = UserDefaults.standard.string(forKey: UserDefaultsKeys.siriPendingQuery),
               !query.isEmpty else { return }
-        UserDefaults.standard.removeObject(forKey: "pm_siri_pending_query")
+        UserDefaults.standard.removeObject(forKey: UserDefaultsKeys.siriPendingQuery)
         sessionListViewModel.scheduleSiriQuery(query)
     }
 
     private func consumePendingSiriEvent() {
-        guard let data = UserDefaults.standard.data(forKey: "pm_siri_pending_event") else { return }
+        guard let data = UserDefaults.standard.data(forKey: UserDefaultsKeys.siriPendingEvent) else { return }
         let event: SiriPendingEvent
         do {
             event = try JSONDecoder().decode(SiriPendingEvent.self, from: data)
         } catch {
             appLogger.error("Failed to decode pending Siri event: \(error)")
-            UserDefaults.standard.removeObject(forKey: "pm_siri_pending_event")
+            UserDefaults.standard.removeObject(forKey: UserDefaultsKeys.siriPendingEvent)
             return
         }
-        UserDefaults.standard.removeObject(forKey: "pm_siri_pending_event")
+        UserDefaults.standard.removeObject(forKey: UserDefaultsKeys.siriPendingEvent)
         sessionListViewModel.scheduleCreateEvent(event)
     }
 }

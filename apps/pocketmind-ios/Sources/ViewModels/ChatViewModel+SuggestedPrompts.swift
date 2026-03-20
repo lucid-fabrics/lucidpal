@@ -70,9 +70,9 @@ extension ChatViewModel {
 
     private func loadCachedSuggestions() -> [String]? {
         let defaults = UserDefaults.standard
-        guard let date = defaults.object(forKey: "pm_suggestions_date") as? Date,
+        guard let date = defaults.object(forKey: UserDefaultsKeys.suggestionsCacheDate) as? Date,
               Calendar.current.isDateInToday(date),
-              let data = defaults.data(forKey: "pm_suggestions") else { return nil }
+              let data = defaults.data(forKey: UserDefaultsKeys.suggestionsCache) else { return nil }
         do {
             return try JSONDecoder().decode([String].self, from: data)
         } catch {
@@ -84,8 +84,8 @@ extension ChatViewModel {
     private func cacheSuggestions(_ prompts: [String]) {
         do {
             let data = try JSONEncoder().encode(prompts)
-            UserDefaults.standard.set(data, forKey: "pm_suggestions")
-            UserDefaults.standard.set(Date(), forKey: "pm_suggestions_date")
+            UserDefaults.standard.set(data, forKey: UserDefaultsKeys.suggestionsCache)
+            UserDefaults.standard.set(Date(), forKey: UserDefaultsKeys.suggestionsCacheDate)
         } catch {
             suggestionsLogger.error("Failed to encode suggestions for cache: \(error)")
         }
