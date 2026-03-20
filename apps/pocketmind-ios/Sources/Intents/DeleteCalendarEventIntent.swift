@@ -1,6 +1,9 @@
 import AppIntents
 import EventKit
+import OSLog
 import SwiftUI
+
+private let intentLogger = Logger(subsystem: "com.pocketmind", category: "DeleteCalendarEventIntent")
 
 // MARK: - Shared undo store
 
@@ -130,8 +133,14 @@ struct UndoLastDeletionIntent: AppIntent {
     static let openAppWhenRun: Bool = false
 
     func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
-        guard let data = UserDefaults.standard.data(forKey: undoDefaultsKey),
-              let deleted = try? JSONDecoder().decode(SiriDeletedEvent.self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: undoDefaultsKey) else {
+            return .result(dialog: "There's nothing to undo.", view: EmptyView())
+        }
+        let deleted: SiriDeletedEvent
+        do {
+            deleted = try JSONDecoder().decode(SiriDeletedEvent.self, from: data)
+        } catch {
+            intentLogger.error("Failed to decode undo data: \(error)")
             return .result(dialog: "There's nothing to undo.", view: EmptyView())
         }
 

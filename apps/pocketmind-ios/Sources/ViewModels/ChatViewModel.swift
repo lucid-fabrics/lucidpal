@@ -106,7 +106,7 @@ final class ChatViewModel: ObservableObject {
 
         // Persist messages on change — debounced on MainActor, disk write offloaded to background.
         $messages
-            .debounce(for: .seconds(ChatConstants.persistenceDebounceSeconds), scheduler: RunLoop.main)
+            .debounce(for: .seconds(ChatConstants.persistenceDebounceSeconds), scheduler: DispatchQueue.main)
             .sink { [weak self] msgs in
                 guard let self else { return }
                 if let sm = self.sessionManager, let sid = self.sessionID {
@@ -128,7 +128,7 @@ final class ChatViewModel: ObservableObject {
         speechService.isRecordingPublisher
             .removeDuplicates()
             .filter { !$0 }
-            .receive(on: RunLoop.main)
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }
                 if self.suppressSpeechAutoSend {
@@ -142,7 +142,7 @@ final class ChatViewModel: ObservableObject {
             .store(in: &cancellables)
 
         // Request speech permissions on launch
-        Task { await speechService.requestAuthorization() }
+        Task { [weak self] in await self?.speechService.requestAuthorization() }
 
         // If model is already loaded and there's nothing to show, kick off suggestions.
         if llmService.isLoaded && messages.isEmpty && pendingInput == nil {

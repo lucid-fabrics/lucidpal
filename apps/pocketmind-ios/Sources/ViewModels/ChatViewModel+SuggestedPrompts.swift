@@ -1,4 +1,7 @@
 import Foundation
+import OSLog
+
+private let suggestionsLogger = Logger(subsystem: "com.pocketmind", category: "SuggestedPrompts")
 
 // MARK: - Suggested prompts generation + caching
 // Separated from the core ViewModel to keep each file under 400 lines.
@@ -25,7 +28,8 @@ extension ChatViewModel {
             return
         }
         isGeneratingSuggestions = true
-        suggestionsTask = Task {
+        suggestionsTask = Task { [weak self] in
+            guard let self else { return }
             defer { isGeneratingSuggestions = false }
             let system = "Return ONLY a valid JSON array of exactly 4 short questions a user might ask a calendar assistant. Each under 8 words. No markdown, no extra text. Format: [\"Q1?\",\"Q2?\",\"Q3?\",\"Q4?\"]"
             let userMsg = ChatMessage(role: .user, content: "Give me 4 suggested prompts.")
@@ -52,9 +56,15 @@ extension ChatViewModel {
               let end = output.lastIndex(of: "]"),
               start <= end else { return nil }
         let jsonString = String(output[start...end])
-        guard let data = jsonString.data(using: .utf8),
-              let array = try? JSONDecoder().decode([String].self, from: data),
-              array.count >= 2 else { return nil }
+        guard let data = jsonString.data(using: .utf8) else { return nil }
+        let array: [String]
+        do {
+            array = try JSONDecoder().decode([String].self, from: data)
+        } catch {
+            suggestionsLogger.error("Failed to decode suggestions JSON: \(error)")
+            return nil
+        }
+        guard array.count >= 2 else { return nil }
         return Array(array.prefix(4))
     }
 
@@ -62,14 +72,22 @@ extension ChatViewModel {
         let defaults = UserDefaults.standard
         guard let date = defaults.object(forKey: "pm_suggestions_date") as? Date,
               Calendar.current.isDateInToday(date),
-              let data = defaults.data(forKey: "pm_suggestions"),
-              let prompts = try? JSONDecoder().decode([String].self, from: data) else { return nil }
-        return prompts
+              let data = defaults.data(forKey: "pm_suggestions") else { return nil }
+        do {
+            return try JSONDecoder().decode([String].self, from: data)
+        } catch {
+            suggestionsLogger.error("Failed to decode cached suggestions: \(error)")
+            return nil
+        }
     }
 
     private func cacheSuggestions(_ prompts: [String]) {
-        guard let data = try? JSONEncoder().encode(prompts) else { return }
-        UserDefaults.standard.set(data, forKey: "pm_suggestions")
-        UserDefaults.standard.set(Date(), forKey: "pm_suggestions_date")
+        do {
+            let data = try JSONEncoder().encode(prompts)
+            UserDefaults.standard.set(data, forKey: "pm_suggestions")
+            UserDefaults.standard.set(Date(), forKey: "pm_suggestions_date")
+        } catch {
+            suggestionsLogger.error("Failed to encode suggestions for cache: \(error)")
+        }
     }
 }

@@ -39,6 +39,8 @@ final class ModelDownloader: NSObject {
 
     // Tracks explicit user cancellation so we can distinguish it from a system-initiated
     // NSURLErrorCancelled (e.g. cellular blocked by allowsCellularAccess=false).
+    // Safe: written on @MainActor in cancel(), read once in the delegate callback after
+    // cancellation is issued — no concurrent read/write overlap.
     nonisolated(unsafe) private var userCancelled = false
 
     // Set by AppDelegate when the OS wakes the app for a completed background session.
@@ -118,7 +120,7 @@ extension ModelDownloader: URLSessionDownloadDelegate {
 
         // Sanity-check file size: reject files under 10 MB (an HTML error page is a few KB).
         let minExpectedBytes: Int64 = 10 * 1024 * 1024
-        let rawSize = try? FileManager.default.attributesOfItem(atPath: location.path)[.size] as? Int64
+        let rawSize = try? FileManager.default.attributesOfItem(atPath: location.path)[.size] as? Int64 // safe: returns nil on failure
         if rawSize == nil { logger.warning("Could not read temp file attributes at \(location.path)") }
         let downloadedSize = rawSize ?? 0
         guard downloadedSize >= minExpectedBytes else {

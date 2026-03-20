@@ -148,7 +148,7 @@ private func bubbleTextView(_ text: String, isUser: Bool) -> some View {
         .map { $0.hasPrefix("- ") ? "• " + $0.dropFirst(2) : $0 }
         .joined(separator: "\n")
     let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-    if let attributed = try? AttributedString(markdown: processed, options: options) {
+    if let attributed = try? AttributedString(markdown: processed, options: options) { // safe: returns nil, falls back to plain text
         Text(attributed)
     } else {
         Text(processed)

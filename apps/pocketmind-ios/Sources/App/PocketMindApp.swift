@@ -1,4 +1,7 @@
+import OSLog
 import SwiftUI
+
+private let appLogger = Logger(subsystem: "com.pocketmind", category: "PocketMindApp")
 
 @main
 struct PocketMindApp: App {
@@ -95,8 +98,15 @@ struct PocketMindApp: App {
     }
 
     private func consumePendingSiriEvent() {
-        guard let data = UserDefaults.standard.data(forKey: "pm_siri_pending_event"),
-              let event = try? JSONDecoder().decode(SiriPendingEvent.self, from: data) else { return }
+        guard let data = UserDefaults.standard.data(forKey: "pm_siri_pending_event") else { return }
+        let event: SiriPendingEvent
+        do {
+            event = try JSONDecoder().decode(SiriPendingEvent.self, from: data)
+        } catch {
+            appLogger.error("Failed to decode pending Siri event: \(error)")
+            UserDefaults.standard.removeObject(forKey: "pm_siri_pending_event")
+            return
+        }
         UserDefaults.standard.removeObject(forKey: "pm_siri_pending_event")
         sessionListViewModel.scheduleCreateEvent(event)
     }
