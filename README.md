@@ -13,6 +13,7 @@ Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [lla
 - **Fully on-device** — model runs in your iPhone's RAM, nothing is sent to any server
 - **Calendar read & write** — create, rename, delete, or look up events; they appear instantly in the iOS Calendar app
 - **Free time finder** — ask for a free slot and it checks your calendar for conflicts automatically
+- **Conflict detection** — when a new or rescheduled event overlaps an existing one, a conflict banner appears on the card; tap it to keep the event, cancel it, or find an available slot; recurring events are identified separately
 - **Multiple chat sessions** — create, rename, and switch between conversations; history is saved locally
 - **Voice input** — tap the mic and speak your question
 - **Thinking mode** — shows the model's reasoning process before answering (collapsible)
@@ -55,6 +56,22 @@ PocketMind can read your upcoming events and create or rename them on your behal
 > "Move my dentist appointment to 2pm"
 
 A calendar card appears in the chat after every successful write. Tap it to open the Calendar app.
+
+**Conflict detection:**
+
+When a new or rescheduled event overlaps an existing one, an orange banner appears below the card:
+
+> ⚠ Conflicts with 1 event — tap to review
+
+Tapping the banner opens a sheet showing the conflicting event(s) — including title, time, calendar, and a "Recurring" badge when applicable — with three options:
+
+| Action | What it does |
+|--------|-------------|
+| Keep Anyway | Saves the event as-is and clears the warning |
+| Find Free Slot | Searches the next 3 days for open windows matching the event's duration |
+| Cancel Event | Deletes the newly created event |
+
+Tapping a free slot reschedules the event to that time instantly.
 
 ---
 
