@@ -45,7 +45,7 @@ struct ChatView: View {
             errorDismissTask?.cancel()
             guard msg != nil else { return }
             errorDismissTask = Task { @MainActor in
-                try? await Task.sleep(for: .seconds(5))
+                try? await Task.sleep(for: .seconds(5)) // safe: cancellation discarded; errorDismissTask?.cancel() handles early teardown
                 viewModel.errorMessage = nil
             }
         }

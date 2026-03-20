@@ -8,7 +8,7 @@ extension ChatViewModel {
     func showToast(_ message: String, systemImage: String) {
         toast = ToastItem(message: message, systemImage: systemImage)
         Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .seconds(2.5))
+            try? await Task.sleep(for: .seconds(2.5)) // safe: cancellation discarded intentionally
             self?.toast = nil
         }
     }

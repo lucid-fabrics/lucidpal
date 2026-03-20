@@ -173,7 +173,7 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
     // Compiled once — NSRegularExpression is thread-safe for matching.
     private static let actionBlockRegex: NSRegularExpression = {
         let pattern = #"\[CALENDAR_ACTION:\{(?:[^}]|\}(?!\]))*\}\]"#
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators) else {
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators) else { // safe: pattern is a compile-time constant; failure is caught by preconditionFailure below
             preconditionFailure("Invalid actionBlockRegex pattern")
         }
         return regex

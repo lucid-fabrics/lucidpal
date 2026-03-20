@@ -11,7 +11,7 @@ extension ChatViewModel {
     static let actionPattern = #"\[CALENDAR_ACTION:(\{(?:[^}]|\}(?!\]))*\})\]"#
 
     private static let calendarActionRegex: NSRegularExpression = {
-        guard let regex = try? NSRegularExpression(pattern: actionPattern, options: [.dotMatchesLineSeparators]) else {
+        guard let regex = try? NSRegularExpression(pattern: actionPattern, options: [.dotMatchesLineSeparators]) else { // safe: pattern is a compile-time constant; failure is caught by preconditionFailure below
             preconditionFailure("Invalid calendarActionRegex pattern: \(actionPattern)")
         }
         return regex
