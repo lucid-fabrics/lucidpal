@@ -185,10 +185,9 @@ final class CalendarServiceProtocolTests: XCTestCase {
 
     // MARK: - defaultCalendarInfo
 
-    func testDefaultCalendarInfoReturnsDefaultCalendar() {
-        let info = service.defaultCalendarInfo()
-        XCTAssertNotNil(info)
-        XCTAssertEqual(info?.title, "Calendar")
+    func testDefaultCalendarInfoReturnsDefaultCalendar() throws {
+        let info = try XCTUnwrap(service.defaultCalendarInfo())
+        XCTAssertEqual(info.title, "Calendar")
     }
 
     func testDefaultCalendarInfoHasDefaultId() {

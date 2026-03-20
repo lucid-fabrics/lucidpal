@@ -310,8 +310,8 @@ final class ViewSmokeTests: XCTestCase {
             settings: MockAppSettings(),
             downloader: MockModelDownloader()
         )
-        let view = ModelDownloadView(viewModel: vm)
-        XCTAssertNotNil(view)
+        _ = ModelDownloadView(viewModel: vm)
+        XCTAssertFalse(vm.availableModels.isEmpty)
     }
 
     func testModelDownloadViewReflectsIdleState() {
