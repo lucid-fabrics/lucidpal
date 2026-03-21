@@ -73,8 +73,8 @@ final class SessionListViewModel: ObservableObject {
 
     // MARK: - ChatViewModel Factory
 
-    func makeChatViewModel(for session: ChatSession, initialQuery: String? = nil) -> ChatViewModel {
-        ChatViewModel(
+    func makeChatViewModel(for session: ChatSession, initialQuery: String? = nil, startWithVoice: Bool = false) -> ChatViewModel {
+        let vm = ChatViewModel(
             llmService: llmService,
             calendarService: calendarService,
             calendarActionController: calendarActionController,
@@ -89,6 +89,8 @@ final class SessionListViewModel: ObservableObject {
             },
             pendingInput: initialQuery
         )
+        vm.pendingVoiceStart = startWithVoice
+        return vm
     }
 
     func loadFullSession(meta: ChatSessionMeta) -> ChatSession {
@@ -107,6 +109,70 @@ final class SessionListViewModel: ObservableObject {
         let session = createSession()
         pendingQueryBySessionID[session.id] = query
         siriNavigationMeta = session.meta
+    }
+
+    // MARK: - Calendar context for hero panel
+
+    func nextUpcomingEvent() -> CalendarEventInfo? {
+        guard calendarService.isAuthorized else { return nil }
+        let now = Date.now
+        let end = Calendar.current.date(byAdding: .hour, value: 24, to: now) ?? now.addingTimeInterval(86400)
+        return calendarService.events(in: now, end: end)
+            .filter { !$0.isAllDay }
+            .sorted { $0.startDate < $1.startDate }
+            .first
+    }
+
+    func todayEventCount() -> Int {
+        guard calendarService.isAuthorized else { return 0 }
+        let cal = Calendar.current
+        let start = cal.startOfDay(for: .now)
+        let end = cal.date(byAdding: .day, value: 1, to: start) ?? start.addingTimeInterval(86400)
+        return calendarService.events(in: start, end: end)
+            .filter { !$0.isAllDay }
+            .count
+    }
+
+    // MARK: - Session Grouping
+
+    struct SessionGroup {
+        let title: String
+        let sessions: [ChatSessionMeta]
+    }
+
+    func filteredSessions(searchText: String) -> [ChatSessionMeta] {
+        guard !searchText.isEmpty else { return sessions }
+        return sessions.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+    }
+
+    func groupedSessions(searchText: String) -> [SessionGroup] {
+        let cal = Calendar.current
+        let now = Date.now
+
+        var today: [ChatSessionMeta] = []
+        var yesterday: [ChatSessionMeta] = []
+        var thisWeek: [ChatSessionMeta] = []
+        var earlier: [ChatSessionMeta] = []
+
+        for meta in filteredSessions(searchText: searchText) {
+            if cal.isDateInToday(meta.updatedAt) {
+                today.append(meta)
+            } else if cal.isDateInYesterday(meta.updatedAt) {
+                yesterday.append(meta)
+            } else if let weekAgo = cal.date(byAdding: .day, value: -7, to: now),
+                      meta.updatedAt >= weekAgo {
+                thisWeek.append(meta)
+            } else {
+                earlier.append(meta)
+            }
+        }
+
+        return [
+            SessionGroup(title: "Today", sessions: today),
+            SessionGroup(title: "Yesterday", sessions: yesterday),
+            SessionGroup(title: "This Week", sessions: thisWeek),
+            SessionGroup(title: "Earlier", sessions: earlier),
+        ].filter { !$0.sessions.isEmpty }
     }
 
     func scheduleCreateEvent(_ event: SiriPendingEvent) {
