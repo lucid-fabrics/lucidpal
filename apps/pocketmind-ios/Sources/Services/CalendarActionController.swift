@@ -11,6 +11,10 @@ final class CalendarActionController: CalendarActionControllerProtocol {
     private let calendarService: any CalendarServiceProtocol
     private let settings: AppSettings
 
+    /// Search window for update/delete by title — smaller than the default browse window
+    /// to avoid matching stale events from years ago when names recur (e.g. "Dentist").
+    private static let actionSearchWindowDays = 60
+
     // Date formats the LLM might generate — tried in order
     private static let dateFormats: [String] = [
         "yyyy-MM-dd'T'HH:mm:ss",   // canonical ISO8601 (no tz)
@@ -97,7 +101,7 @@ final class CalendarActionController: CalendarActionControllerProtocol {
         guard p.title != nil || p.start != nil || p.end != nil || p.location != nil || p.notes != nil || p.reminderMinutes != nil else {
             return .failure("(No fields to update were provided.)")
         }
-        let events = calendarService.findEvents(matching: searchTitle, windowDays: 60)
+        let events = calendarService.findEvents(matching: searchTitle, windowDays: Self.actionSearchWindowDays)
         guard let event = events.first(where: { ($0.title ?? "").localizedCaseInsensitiveContains(searchTitle) }) else {
             return .failure("(Couldn't find an event called \"\(searchTitle)\" — please specify the exact name.)")
         }
@@ -145,7 +149,7 @@ final class CalendarActionController: CalendarActionControllerProtocol {
         guard let searchTitle = p.search, !searchTitle.isEmpty else {
             return .failure("(No event title provided for deletion.)")
         }
-        let events = calendarService.findEvents(matching: searchTitle, windowDays: 60)
+        let events = calendarService.findEvents(matching: searchTitle, windowDays: Self.actionSearchWindowDays)
         let lower = searchTitle.lowercased()
 
         // 1. Exact substring match
@@ -202,12 +206,26 @@ final class CalendarActionController: CalendarActionControllerProtocol {
             )
             let calendarName = calendarService.calendarName(forEventIdentifier: identifier)
                 ?? calendarService.defaultCalendarInfo()?.title
+            let eventIdentifier = identifier.isEmpty ? nil : identifier
+            SiriContextStore.write(SiriLastAction(
+                type: .created,
+                eventTitle: title,
+                eventStart: start,
+                eventEnd: end,
+                calendarName: calendarName,
+                calendarIdentifier: calID,
+                isAllDay: p.isAllDay ?? false,
+                location: p.location,
+                notes: p.notes,
+                eventIdentifier: eventIdentifier,
+                timestamp: .now
+            ))
             let preview = CalendarEventPreview(
                 title: title,
                 start: start,
                 end: end,
                 calendarName: calendarName,
-                eventIdentifier: identifier.isEmpty ? nil : identifier,
+                eventIdentifier: eventIdentifier,
                 reminderMinutes: p.reminderMinutes,
                 isAllDay: p.isAllDay ?? false,
                 recurrence: p.recurrence,
