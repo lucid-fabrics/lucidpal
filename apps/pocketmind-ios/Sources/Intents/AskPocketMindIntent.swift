@@ -1,4 +1,7 @@
 import AppIntents
+import OSLog
+
+private let intentLogger = Logger(subsystem: "com.pocketmind", category: "AskPocketMindIntent")
 
 // MARK: - Siri Pending Event
 
@@ -96,7 +99,7 @@ struct AddCalendarEventIntent: AppIntent {
             let encoded = try JSONEncoder().encode(payload)
             UserDefaults.standard.set(encoded, forKey: pendingEventDefaultsKey)
         } catch {
-            print("[AddCalendarEventIntent] Failed to encode pending event: \(error)")
+            intentLogger.error("Failed to encode pending event: \(error)")
         }
         return .result(dialog: "Opening PocketMind to schedule \(trimmed).")
     }

@@ -163,11 +163,15 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
 
     var isUser: Bool { role == .user }
 
-    /// True while the LLM is still streaming a [CALENDAR_ACTION:...] block
+    /// True while the LLM is still streaming a write [CALENDAR_ACTION:...] block
     /// and previews have not yet been populated. Used by the bubble View
     /// to show the animated "Updating calendar…" pill.
+    /// Read-only actions (list, query) are excluded — their result cards appear directly.
     var isStreamingAction: Bool {
-        calendarEventPreviews.isEmpty && content.contains("[CALENDAR_ACTION:")
+        guard content.contains("[CALENDAR_ACTION:") else { return false }
+        let isReadAction = content.contains("\"action\":\"list\"") ||
+                           content.contains("\"action\":\"query\"")
+        return !isReadAction && calendarEventPreviews.isEmpty
     }
 
     // Compiled once — NSRegularExpression is thread-safe for matching.

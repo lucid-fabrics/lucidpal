@@ -68,15 +68,18 @@ struct PocketMindShortcuts: AppShortcutsProvider {
             systemImageName: "calendar.badge.minus"
         )
 
-        // Undo the last deletion
+        // Undo the last calendar action (deletion, creation, update)
         AppShortcut(
             intent: UndoLastDeletionIntent(),
             phrases: [
+                "Undo my last \(.applicationName) action",
+                "Undo what I just did in \(.applicationName)",
+                "Undo last \(.applicationName) change",
                 "Undo last deletion in \(.applicationName)",
                 "Restore deleted event in \(.applicationName)",
                 "Undo \(.applicationName) deletion"
             ],
-            shortTitle: "Undo Deletion",
+            shortTitle: "Undo Last Action",
             systemImageName: "arrow.uturn.backward.circle"
         )
     }

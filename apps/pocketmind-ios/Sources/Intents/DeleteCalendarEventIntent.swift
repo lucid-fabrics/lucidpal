@@ -5,20 +5,6 @@ import SwiftUI
 
 private let intentLogger = Logger(subsystem: "com.pocketmind", category: "DeleteCalendarEventIntent")
 
-// MARK: - Shared undo store
-
-private let undoDefaultsKey = "pm_siri_last_deleted_event"
-
-struct SiriDeletedEvent: Codable {
-    let title: String
-    let start: Date
-    let end: Date
-    let calendarIdentifier: String?
-    let isAllDay: Bool
-    let location: String?
-    let notes: String?
-}
-
 // MARK: - DeleteCalendarEventIntent
 
 /// Siri intent: "Delete [event] in PocketMind"
@@ -50,7 +36,6 @@ struct DeleteCalendarEventIntent: AppIntent {
 
         let event = try findMatchingEvent(named: eventName, in: store)
 
-        // Show event card + ask for confirmation
         try await requestConfirmation(
             output: .result(
                 dialog: IntentDialog(stringLiteral: "Delete \"\(event.title)\"?"),
@@ -65,24 +50,21 @@ struct DeleteCalendarEventIntent: AppIntent {
             )
         )
 
-        // Save for undo
-        let undoData = SiriDeletedEvent(
-            title: event.title,
-            start: event.startDate,
-            end: event.endDate,
+        // Persist for undo before deleting
+        SiriContextStore.write(SiriLastAction(
+            type: .deleted,
+            eventTitle: event.title,
+            eventStart: event.startDate,
+            eventEnd: event.endDate,
+            calendarName: event.calendar.title,
             calendarIdentifier: event.calendar.calendarIdentifier,
             isAllDay: event.isAllDay,
             location: event.location,
-            notes: event.notes
-        )
-        do {
-            let encoded = try JSONEncoder().encode(undoData)
-            UserDefaults.standard.set(encoded, forKey: undoDefaultsKey)
-        } catch {
-            print("[DeleteCalendarEventIntent] Failed to encode undo data: \(error)")
-        }
+            notes: event.notes,
+            eventIdentifier: nil,
+            timestamp: .now
+        ))
 
-        // Delete
         try store.remove(event, span: .thisEvent)
 
         return .result(
@@ -100,7 +82,6 @@ struct DeleteCalendarEventIntent: AppIntent {
 
     /// Searches ±1 day to +90 days for an event whose title contains `name`.
     /// Returns the soonest upcoming match, or the earliest past match if all are past.
-    /// Throws a localised error string when nothing matches.
     private func findMatchingEvent(named name: String, in store: EKEventStore) throws -> EKEvent {
         let now = Date()
         let past = Calendar.current.date(byAdding: .day, value: -1, to: now) ?? now
@@ -122,25 +103,21 @@ struct DeleteCalendarEventIntent: AppIntent {
     }
 }
 
-// MARK: - UndoLastDeletionIntent
+// MARK: - UndoLastActionIntent
 
-/// Siri intent: "Undo last deletion in PocketMind"
-/// Restores the most recently Siri-deleted event, with confirmation.
+/// Siri intent: "Undo my last PocketMind action"
+/// Covers both in-app and Siri-initiated calendar changes:
+///   - deleted event → restores it
+///   - created event → deletes it (with confirmation)
+///   - updated/rescheduled → informs the user (full field-level undo not yet supported)
 struct UndoLastDeletionIntent: AppIntent {
 
-    static let title: LocalizedStringResource = "Undo Last Deletion"
-    static let description = IntentDescription("Restore the last event deleted via PocketMind")
+    static let title: LocalizedStringResource = "Undo Last Action"
+    static let description = IntentDescription("Undo the last calendar action taken in PocketMind")
     static let openAppWhenRun: Bool = false
 
     func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
-        guard let data = UserDefaults.standard.data(forKey: undoDefaultsKey) else {
-            return .result(dialog: "There's nothing to undo.", view: EmptyView())
-        }
-        let deleted: SiriDeletedEvent
-        do {
-            deleted = try JSONDecoder().decode(SiriDeletedEvent.self, from: data)
-        } catch {
-            intentLogger.error("Failed to decode undo data: \(error)")
+        guard let last = SiriContextStore.read() else {
             return .result(dialog: "There's nothing to undo.", view: EmptyView())
         }
 
@@ -155,136 +132,94 @@ struct UndoLastDeletionIntent: AppIntent {
             return .result(dialog: "Calendar access is required. Please allow it in Settings.", view: EmptyView())
         }
 
-        // Show confirmation with the event to restore
-        try await requestConfirmation(
-            output: .result(
-                dialog: IntentDialog(stringLiteral: "Restore \"\(deleted.title)\"?"),
+        switch last.type {
+
+        case .deleted:
+            try await requestConfirmation(
+                output: .result(
+                    dialog: IntentDialog(stringLiteral: "Restore \"\(last.eventTitle)\"?"),
+                    view: SiriEventCard(
+                        title: last.eventTitle,
+                        start: last.eventStart,
+                        end: last.eventEnd,
+                        calendarName: last.calendarName,
+                        isAllDay: last.isAllDay,
+                        deleted: false
+                    )
+                )
+            )
+            let event = EKEvent(eventStore: store)
+            event.title = last.eventTitle
+            event.startDate = last.eventStart
+            event.endDate = last.eventEnd
+            event.isAllDay = last.isAllDay
+            event.location = last.location
+            event.notes = last.notes
+            if let calID = last.calendarIdentifier,
+               let cal = store.calendar(withIdentifier: calID) {
+                event.calendar = cal
+            } else {
+                event.calendar = store.defaultCalendarForNewEvents
+            }
+            try store.save(event, span: .thisEvent)
+            SiriContextStore.clear()
+            return .result(
+                dialog: IntentDialog(stringLiteral: "\"\(last.eventTitle)\" has been restored."),
                 view: SiriEventCard(
-                    title: deleted.title,
-                    start: deleted.start,
-                    end: deleted.end,
-                    calendarName: nil,
-                    isAllDay: deleted.isAllDay,
+                    title: last.eventTitle,
+                    start: last.eventStart,
+                    end: last.eventEnd,
+                    calendarName: last.calendarName,
+                    isAllDay: last.isAllDay,
                     deleted: false
                 )
             )
-        )
 
-        try recreateEvent(from: deleted, in: store)
-
-        // Clear undo data
-        UserDefaults.standard.removeObject(forKey: undoDefaultsKey)
-
-        return .result(
-            dialog: IntentDialog(stringLiteral: "\"\(deleted.title)\" has been restored."),
-            view: SiriEventCard(
-                title: deleted.title,
-                start: deleted.start,
-                end: deleted.end,
-                calendarName: nil,
-                isAllDay: deleted.isAllDay,
-                deleted: false
+        case .created:
+            guard let identifier = last.eventIdentifier,
+                  let event = store.event(withIdentifier: identifier) else {
+                return .result(dialog: "That event no longer exists.", view: EmptyView())
+            }
+            try await requestConfirmation(
+                output: .result(
+                    dialog: IntentDialog(stringLiteral: "Delete \"\(last.eventTitle)\"?"),
+                    view: SiriEventCard(
+                        title: last.eventTitle,
+                        start: last.eventStart,
+                        end: last.eventEnd,
+                        calendarName: last.calendarName,
+                        isAllDay: last.isAllDay,
+                        deleted: false
+                    )
+                )
             )
-        )
-    }
+            try store.remove(event, span: .thisEvent)
+            SiriContextStore.clear()
+            return .result(
+                dialog: IntentDialog(stringLiteral: "\"\(last.eventTitle)\" has been removed."),
+                view: SiriEventCard(
+                    title: last.eventTitle,
+                    start: last.eventStart,
+                    end: last.eventEnd,
+                    calendarName: last.calendarName,
+                    isAllDay: last.isAllDay,
+                    deleted: true
+                )
+            )
 
-    /// Reconstructs an EKEvent from a `SiriDeletedEvent` snapshot and saves it to `store`.
-    private func recreateEvent(from deleted: SiriDeletedEvent, in store: EKEventStore) throws {
-        let event = EKEvent(eventStore: store)
-        event.title = deleted.title
-        event.startDate = deleted.start
-        event.endDate = deleted.end
-        event.isAllDay = deleted.isAllDay
-        event.location = deleted.location
-        event.notes = deleted.notes
-        if let calID = deleted.calendarIdentifier,
-           let cal = store.calendar(withIdentifier: calID) {
-            event.calendar = cal
-        } else {
-            event.calendar = store.defaultCalendarForNewEvents
+        case .updated, .rescheduled:
+            return .result(
+                dialog: "I can't undo event edits yet — open PocketMind to make changes manually.",
+                view: SiriEventCard(
+                    title: last.eventTitle,
+                    start: last.eventStart,
+                    end: last.eventEnd,
+                    calendarName: last.calendarName,
+                    isAllDay: last.isAllDay,
+                    deleted: false
+                )
+            )
         }
-        try store.save(event, span: .thisEvent)
     }
 }
 
-// MARK: - Siri snippet view
-
-struct SiriEventCard: View {
-    let title: String
-    let start: Date
-    let end: Date
-    let calendarName: String?
-    let isAllDay: Bool
-    let deleted: Bool
-
-    private static let monthFmt: DateFormatter = {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "MMM"
-        return f
-    }()
-    private static let dayFmt: DateFormatter = {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "d"
-        return f
-    }()
-    private static let timeFmt: DateFormatter = {
-        let f = DateFormatter()
-        f.dateStyle = .none
-        f.timeStyle = .short
-        return f
-    }()
-
-    var body: some View {
-        HStack(spacing: 12) {
-            // Date badge
-            VStack(spacing: 1) {
-                Text(Self.monthFmt.string(from: start).uppercased())
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 2)
-                    .background(deleted ? Color.gray : Color.red)
-                Text(Self.dayFmt.string(from: start))
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundStyle(deleted ? .secondary : .primary)
-                    .padding(.bottom, 4)
-            }
-            .frame(width: 44)
-            .background(Color(.systemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .stroke(Color(.systemGray4), lineWidth: 0.5)
-            )
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(deleted ? .secondary : .primary)
-                    .strikethrough(deleted, color: .secondary)
-                    .lineLimit(1)
-                Text(isAllDay ? "All day" : "\(Self.timeFmt.string(from: start)) – \(Self.timeFmt.string(from: end))")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                if let cal = calendarName {
-                    Text(cal)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            Spacer()
-
-            if deleted {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-            }
-        }
-        .padding(12)
-        .background(Color(.systemGray6))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .opacity(deleted ? 0.7 : 1)
-    }
-}

@@ -15,11 +15,12 @@ final class LLMService {
     private let llama = LlamaActor()
     private var currentTask: Task<Void, Never>?
 
-    func loadModel(at url: URL) async throws {
+    func loadModel(at url: URL, contextSize: UInt32) async throws {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
-        try await llama.load(path: url.path)
+        try await llama.load(path: url.path, contextSize: contextSize)
+        await llama.warmup()  // pre-compiles Metal shaders — eliminates first-message stutter
         isLoaded = true
     }
 

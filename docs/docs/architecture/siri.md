@@ -35,7 +35,7 @@ LLM generates CALENDAR_ACTION block → CalendarEventPreview shown
 | `AddCalendarEventIntent` | "Add [event] to PocketMind" | "Add [event] to my calendar" | `@Parameter event: String` |
 | `FindFreeTimeIntent` | "Find free time in PocketMind" | "Find a free 1-hour slot today" | — |
 | `DeleteCalendarEventIntent` | "Delete [event] in PocketMind" | — | `@Parameter eventName: String` |
-| `UndoLastDeletionIntent` | "Undo last deletion in PocketMind" | — | — |
+| `UndoLastDeletionIntent` | "Undo my last PocketMind action", "Undo what I just did in PocketMind", "Undo last PocketMind change" | — | — |
 
 ## Handoff Key
 
@@ -78,3 +78,56 @@ AppShortcut(
 ```
 
 On iOS < 16.4, the intents still work but users must add the shortcuts manually via the Shortcuts app.
+
+## SiriContextStore
+
+`SiriContextStore` is a lightweight persistence layer that records the last calendar action taken — whether triggered by Siri or performed inside the app. `UndoLastDeletionIntent` reads from this store to know what to reverse.
+
+### Data model
+
+```swift
+struct SiriLastAction: Codable {
+    let type: ActionType           // created | deleted | updated | rescheduled
+    let eventTitle: String
+    let eventStart: Date?
+    let eventEnd: Date?
+    let calendarName: String
+    let calendarIdentifier: String
+    let isAllDay: Bool
+    let location: String?
+    let notes: String?
+    let eventIdentifier: String    // EKEvent.eventIdentifier used for undo
+    let timestamp: Date
+}
+```
+
+`ActionType` is a `String` raw-value enum with four cases: `created`, `deleted`, `updated`, `rescheduled`.
+
+### Storage
+
+`SiriContextStore` is a caseless enum with three static methods backed by `UserDefaults` key `"pm_siri_last_action"`. JSON encoding/decoding uses `JSONEncoder` / `JSONDecoder`.
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `write` | `write(_ action: SiriLastAction)` | Encodes and persists the action |
+| `read` | `read() -> SiriLastAction?` | Decodes and returns the last action, or `nil` |
+| `clear` | `clear()` | Removes the stored value |
+
+### Write sites
+
+| Call site | Action type written |
+|-----------|-------------------|
+| `CalendarActionController.createEvent()` | `.created` (after EKEvent is saved) |
+| `ChatViewModel+CalendarConfirmation.confirmDeletion()` | `.deleted` (after user confirms delete card) |
+| `ChatViewModel+CalendarConfirmation.confirmUpdate()` | `.updated` or `.rescheduled` (after user confirms update card) |
+
+### UndoLastDeletionIntent behaviour
+
+`UndoLastDeletionIntent.perform()` reads `SiriContextStore.read()` then branches on `type`:
+
+| Type | Behaviour |
+|------|-----------|
+| `.deleted` | Recreates the event via `CalendarService`; asks user to confirm first |
+| `.created` | Deletes the event using `eventIdentifier`; asks user to confirm first |
+| `.updated` / `.rescheduled` | Returns a dialog informing the user that undo of edits is not yet supported |
+| `nil` (nothing stored) | Returns a dialog stating there is no recent action to undo |

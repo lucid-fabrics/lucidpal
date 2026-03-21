@@ -22,6 +22,20 @@ extension ChatViewModel {
         else { return }
         do {
             try calendarService.deleteEvent(identifier: identifier)
+            let preview = messages[msgIdx].calendarEventPreviews[previewIdx]
+            SiriContextStore.write(SiriLastAction(
+                type: .deleted,
+                eventTitle: preview.title,
+                eventStart: preview.start,
+                eventEnd: preview.end,
+                calendarName: preview.calendarName,
+                calendarIdentifier: nil,
+                isAllDay: preview.isAllDay,
+                location: preview.location,
+                notes: nil,
+                eventIdentifier: nil,
+                timestamp: .now
+            ))
             messages[msgIdx].calendarEventPreviews[previewIdx].state = .deleted
             hapticService.notifySuccess()
         } catch {
@@ -103,6 +117,20 @@ extension ChatViewModel {
         else { return }
         do {
             let newState = try calendarService.applyUpdate(pending, to: identifier)
+            let preview = messages[msgIdx].calendarEventPreviews[previewIdx]
+            SiriContextStore.write(SiriLastAction(
+                type: newState == .rescheduled ? .rescheduled : .updated,
+                eventTitle: pending.title ?? preview.title,
+                eventStart: pending.start ?? preview.start,
+                eventEnd: pending.end ?? preview.end,
+                calendarName: preview.calendarName,
+                calendarIdentifier: nil,
+                isAllDay: pending.isAllDay ?? preview.isAllDay,
+                location: pending.location ?? preview.location,
+                notes: pending.notes,
+                eventIdentifier: identifier,
+                timestamp: .now
+            ))
             // Mirror applied changes onto the preview so the card shows the updated values
             if let t = pending.title    { messages[msgIdx].calendarEventPreviews[previewIdx].title = t }
             if let s = pending.start    { messages[msgIdx].calendarEventPreviews[previewIdx].start = s }

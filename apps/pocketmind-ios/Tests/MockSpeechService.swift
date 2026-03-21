@@ -7,10 +7,12 @@ final class MockSpeechService: SpeechServiceProtocol {
     var isRecording: Bool = false
     var isAuthorized: Bool = true
     var transcript: String = ""
+    var isTranscribing: Bool = false
 
-    private let isRecordingSubject   = CurrentValueSubject<Bool, Never>(false)
-    private let isAuthorizedSubject  = CurrentValueSubject<Bool, Never>(true)
-    private let transcriptSubject    = CurrentValueSubject<String, Never>("")
+    private let isRecordingSubject    = CurrentValueSubject<Bool, Never>(false)
+    private let isAuthorizedSubject   = CurrentValueSubject<Bool, Never>(true)
+    private let transcriptSubject     = CurrentValueSubject<String, Never>("")
+    private let isTranscribingSubject = CurrentValueSubject<Bool, Never>(false)
 
     var isRecordingPublisher: AnyPublisher<Bool, Never> {
         isRecordingSubject.eraseToAnyPublisher()
@@ -20,6 +22,9 @@ final class MockSpeechService: SpeechServiceProtocol {
     }
     var transcriptPublisher: AnyPublisher<String, Never> {
         transcriptSubject.eraseToAnyPublisher()
+    }
+    var isTranscribingPublisher: AnyPublisher<Bool, Never> {
+        isTranscribingSubject.eraseToAnyPublisher()
     }
 
     var authorizationRequested = false

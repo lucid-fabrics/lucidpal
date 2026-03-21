@@ -14,7 +14,9 @@ enum LLMConstants {
     /// RAM threshold (GB) for selecting the larger context window.
     static let largeContextRAMThresholdGB = 6
     /// Maximum thread count offered to llama.cpp.
-    static let maxThreadCount: Int32 = 8
+    /// Capped at 4 — on Apple Silicon the performance cores are a minority and
+    /// extra threads add synchronization overhead, especially with Metal GPU offload active.
+    static let maxThreadCount: Int32 = 4
     /// Maximum tokens to generate per response.
     static let maxNewTokens: Int32 = 768
     /// Sampler temperature: lower = more deterministic, fewer hallucinated fields.
@@ -64,12 +66,14 @@ actor LlamaActor {
 
     // MARK: Load / Unload
 
-    func load(path: String) throws {
+    func load(path: String, contextSize: UInt32) throws {
         unload()
 
         var mp = llama_model_default_params()
 #if targetEnvironment(simulator)
         mp.n_gpu_layers = 0
+#else
+        mp.n_gpu_layers = 99  // offload all layers to Metal on device
 #endif
         guard let m = llama_model_load_from_file(path, mp) else {
             throw LLMError.loadFailed(underlying: NSError(
@@ -78,13 +82,13 @@ actor LlamaActor {
         }
 
         let nThreads = max(1, min(LLMConstants.maxThreadCount, Int32(ProcessInfo.processInfo.processorCount - 2)))
-        // Use 8 K context on devices with ≥6 GB RAM (4B model tier); 4 K otherwise.
-        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / LLMConstants.bytesPerGB)
         var cp = llama_context_default_params()
-        cp.n_ctx           = ramGB >= LLMConstants.largeContextRAMThresholdGB ? LLMConstants.largeContextSize : LLMConstants.smallContextSize
-        cp.n_batch         = cp.n_ctx   // must match n_ctx so full-prompt prefill fits in one decode call
+        cp.n_ctx           = contextSize
+        cp.n_batch         = contextSize  // must match n_ctx so full-prompt prefill fits in one decode call
         cp.n_threads       = nThreads
         cp.n_threads_batch = nThreads
+        cp.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_ENABLED  // halves KV cache memory, speeds up prefill
+        cp.offload_kqv     = true                           // keep KV cache in GPU memory
 
         guard let c = llama_init_from_model(m, cp) else {
             llama_model_free(m)
@@ -112,6 +116,21 @@ actor LlamaActor {
         if let m = model   { llama_model_free(m);   model   = nil }
         vocab = nil
         nCur  = 0
+    }
+
+    /// Decodes a single BOS token to warm up the Metal pipeline.
+    /// Eliminates the ~300 ms shader-compilation stutter on the first real user message.
+    /// KV cache is cleared afterwards so the warmup has no effect on responses.
+    func warmup() {
+        guard let ctx, let vocab else { return }
+        let bos = llama_vocab_bos(vocab)
+        guard bos >= 0 else { return }
+        batchClear()
+        batchAdd(id: bos, pos: 0, seqId: 0, logits: false)
+        _ = llama_decode(ctx, batch)
+        llama_synchronize(ctx)
+        llama_memory_clear(llama_get_memory(ctx), false)
+        nCur = 0
     }
 
     // MARK: Generate

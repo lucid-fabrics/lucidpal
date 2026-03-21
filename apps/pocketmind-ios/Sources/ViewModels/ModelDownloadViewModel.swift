@@ -86,7 +86,7 @@ final class ModelDownloadViewModel: ObservableObject {
         guard selectedModel.isDownloaded else { return }
         loadError = nil
         do {
-            try await llmService.loadModel(at: selectedModel.localURL)
+            try await llmService.loadModel(at: selectedModel.localURL, contextSize: UInt32(settings.contextSize))
             settings.selectedModelID = selectedModel.id
             downloader.resetState()  // Reset download state — clears stale "Load Model" button
         } catch {

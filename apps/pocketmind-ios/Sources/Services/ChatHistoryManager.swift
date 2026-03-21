@@ -1,4 +1,7 @@
 import Foundation
+import OSLog
+
+private let historyLogger = Logger(subsystem: "com.pocketmind", category: "ChatHistoryManager")
 
 @MainActor
 protocol ChatHistoryManagerProtocol {
@@ -26,13 +29,13 @@ final class ChatHistoryManager: ChatHistoryManagerProtocol {
         } catch let error as CocoaError where error.code == .fileReadNoSuchFile {
             return []  // expected on first launch — no history yet
         } catch {
-            print("[ChatHistoryManager] Failed to read history file: \(error)")
+            historyLogger.error("Failed to read history file: \(error)")
             return []
         }
         do {
             return try JSONDecoder().decode([ChatMessage].self, from: data)
         } catch {
-            print("[ChatHistoryManager] Failed to decode history: \(error)")
+            historyLogger.error("Failed to decode history: \(error)")
             return []
         }
     }
@@ -47,7 +50,7 @@ final class ChatHistoryManager: ChatHistoryManagerProtocol {
                 let data = try JSONEncoder().encode(filtered)
                 try data.write(to: ChatHistoryManager.historyURL, options: .atomic)
             } catch {
-                print("[ChatHistoryManager] Failed to write history: \(error)")
+                historyLogger.error("Failed to write history: \(error)")
             }
         }
     }
@@ -57,7 +60,7 @@ final class ChatHistoryManager: ChatHistoryManagerProtocol {
         do {
             try FileManager.default.removeItem(at: Self.historyURL)
         } catch {
-            print("[ChatHistoryManager] Failed to clear history: \(error)")
+            historyLogger.error("Failed to clear history: \(error)")
         }
     }
 }

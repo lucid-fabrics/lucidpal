@@ -13,7 +13,7 @@ struct PocketMindApp: App {
     private let settings = AppSettings()
     private let llmService = LLMService()
     private let calendarService = CalendarService()
-    private let speechService = SpeechService()
+    private let speechService = WhisperSpeechService()
     private let hapticService = HapticService()
     private let modelDownloader = ModelDownloader()
     private let calendarActionController: any CalendarActionControllerProtocol

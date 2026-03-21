@@ -1,5 +1,8 @@
 import Combine
 import Foundation
+import OSLog
+
+private let llmLogger = Logger(subsystem: "app.pocketmind", category: "LLM")
 
 @MainActor
 final class ChatViewModel: ObservableObject {
@@ -13,17 +16,10 @@ final class ChatViewModel: ObservableObject {
 
     @Published private(set) var isSpeechRecording = false
     @Published private(set) var isSpeechAvailable = false
+    @Published private(set) var isSpeechTranscribing = false
 
-    /// LLM-generated prompt suggestions shown in the empty state.
-    @Published var suggestedPrompts: [String] = [
-        "What's on my calendar this week?",
-        "Add a meeting tomorrow at 2pm",
-        "Find a free 1-hour slot today",
-        "Delete my next dentist appointment",
-    ]
+    @Published var suggestedPrompts: [String] = []
     @Published var isGeneratingSuggestions = false
-
-    var suggestionsTask: Task<Void, Never>?
 
     /// Navigation title — equals session title in session mode, "PocketMind" otherwise.
     @Published private(set) var sessionTitle: String
@@ -38,14 +34,18 @@ final class ChatViewModel: ObservableObject {
     var cancellables = Set<AnyCancellable>()
     // Prevents auto-submit when the user manually taps the mic button to stop recording
     var suppressSpeechAutoSend = false
+    // Set to true when voice auto-start triggered recording — preserves auto-send on manual stop
+    var voiceAutoStartActive = false
 
     /// If set, ChatView auto-sends this message on appear (used for Siri integration).
     var pendingInput: String?
+    /// If true, ChatView starts voice recording on appear regardless of voiceAutoStartEnabled.
+    var pendingVoiceStart = false
 
     // Session-mode properties — nil when operating in legacy single-history mode.
-    private let sessionID: UUID?
-    private let sessionCreatedAt: Date
-    private let sessionManager: (any SessionManagerProtocol)?
+    let sessionID: UUID?
+    let sessionCreatedAt: Date
+    let sessionManager: (any SessionManagerProtocol)?
     private var onSessionUpdated: ((@MainActor (ChatSessionMeta) -> Void))?
 
     init(
@@ -97,6 +97,9 @@ final class ChatViewModel: ObservableObject {
         speechService.isAuthorizedPublisher
             .sink { [weak self] in self?.isSpeechAvailable = $0 }
             .store(in: &cancellables)
+        speechService.isTranscribingPublisher
+            .sink { [weak self] in self?.isSpeechTranscribing = $0 }
+            .store(in: &cancellables)
 
         // Forward live transcript into the input field while recording
         speechService.transcriptPublisher
@@ -106,7 +109,7 @@ final class ChatViewModel: ObservableObject {
 
         // Persist messages on change — debounced on MainActor, disk write offloaded to background.
         $messages
-            .debounce(for: .seconds(ChatConstants.persistenceDebounceSeconds), scheduler: DispatchQueue.main)
+            .debounce(for: .seconds(ChatConstants.persistenceDebounceSeconds), scheduler: RunLoop.main)
             .sink { [weak self] msgs in
                 guard let self else { return }
                 if let sm = self.sessionManager, let sid = self.sessionID {
@@ -128,7 +131,7 @@ final class ChatViewModel: ObservableObject {
         speechService.isRecordingPublisher
             .removeDuplicates()
             .filter { !$0 }
-            .receive(on: DispatchQueue.main)
+            .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self else { return }
                 if self.suppressSpeechAutoSend {
@@ -152,8 +155,11 @@ final class ChatViewModel: ObservableObject {
 
     func toggleSpeech() {
         if speechService.isRecording {
-            // Manual stop — don't auto-submit; user controls sending themselves
-            suppressSpeechAutoSend = true
+            // Manual stop — suppress auto-send unless voice auto-start triggered the session
+            if !voiceAutoStartActive {
+                suppressSpeechAutoSend = true
+            }
+            voiceAutoStartActive = false
             speechService.stopRecording()
         } else {
             do {
@@ -208,6 +214,11 @@ final class ChatViewModel: ObservableObject {
                 guard let idx = messages.firstIndex(where: { $0.id == assistantID }) else { break }
                 applyStreamToken(token, rawBuffer: &raw, thinkDone: &thinkDone, showThinking: showThinking, idx: idx)
             }
+        // Log raw LLM output for debugging
+        if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
+            llmLogger.info("📤 USER: \(text, privacy: .public)")
+            llmLogger.info("🤖 RAW_LLM: \(self.messages[idx].content, privacy: .public)")
+        }
         } catch is CancellationError {
             // User cancelled — leave partial content visible
         } catch {
@@ -224,6 +235,7 @@ final class ChatViewModel: ObservableObject {
             messages[idx].content = content
             messages[idx].calendarEventPreviews = previews
             messages[idx].calendarFreeSlots = freeSlots
+            llmLogger.info("✅ FINAL: \(content, privacy: .public) | events=\(previews.count) slots=\(freeSlots.count)")
         }
     }
 
@@ -257,33 +269,6 @@ final class ChatViewModel: ObservableObject {
 
     func deleteMessage(id: UUID) {
         messages.removeAll { $0.id == id }
-    }
-
-    func clearHistory() {
-        llmService.cancelGeneration()
-        messages = []
-        if let sm = sessionManager, let sid = sessionID {
-            let session = ChatSession(
-                id: sid, title: sessionTitle,
-                createdAt: sessionCreatedAt, updatedAt: .now, messages: []
-            )
-            sm.save(session)
-        } else {
-            history.clear()
-        }
-    }
-
-    /// Immediately writes current messages to disk — call when app enters background.
-    func flushPersistence() {
-        if let sm = sessionManager, let sid = sessionID {
-            let session = ChatSession(
-                id: sid, title: sessionTitle,
-                createdAt: sessionCreatedAt, updatedAt: .now, messages: messages
-            )
-            sm.save(session)
-        } else {
-            history.save(messages)
-        }
     }
 
 }

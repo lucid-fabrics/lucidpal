@@ -13,6 +13,9 @@ packages:
     url: https://github.com/pointfreeco/swift-snapshot-testing
     from: "1.16.0"
     maxVersion: "1.16.99"
+  WhisperKit:
+    url: https://github.com/argmaxinc/WhisperKit
+    from: "0.1.0"
 
 targets:
   PocketMind:
@@ -34,6 +37,8 @@ targets:
     dependencies:
       - package: llama
         product: llama
+      - package: WhisperKit
+        product: WhisperKit
     entitlements:
       path: Sources/App/PocketMind.entitlements
       properties: {}

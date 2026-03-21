@@ -23,4 +23,8 @@ enum ChatConstants {
     static let maxSlotSearchHours: TimeInterval = 4
     /// Duration (hours) used for all-day event slot searches.
     static let allDaySlotSearchHours: TimeInterval = 2
+    /// Delay (ms) before auto-starting voice recording on ChatView appear.
+    static let voiceAutoStartDelayMilliseconds: Int = 300
+    /// Minutes per hour — used for event proximity thresholds.
+    static let minutesPerHour: Int = 60
 }

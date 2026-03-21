@@ -119,4 +119,117 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
             XCTAssertLessThan(slot.start, slot.end, "Slot start must be before end")
         }
     }
+
+    func testWeekendDaysAreSkipped() {
+        // Range spanning an entire week — engine must not emit slots on Sat/Sun
+        let monday = nextMonday()
+        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday)!
+        let rangeEnd = Calendar.current.date(byAdding: .day, value: 7, to: rangeStart)!
+
+        let slots = CalendarFreeSlotEngine.findSlots(
+            busyWindows: [],
+            rangeStart: rangeStart,
+            rangeEnd: rangeEnd,
+            duration: 3600
+        )
+        let cal = Calendar.current
+        for slot in slots {
+            let weekday = cal.component(.weekday, from: slot.start)
+            XCTAssertFalse([1, 7].contains(weekday), "Slots must not fall on weekends (weekday=\(weekday))")
+        }
+    }
+
+    func testOverlappingBusyWindowsAreHandled() {
+        // Two events that overlap — engine must not crash and must skip the combined window
+        let monday = nextMonday()
+        let busyStart = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: monday)!
+        let busyMid   = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: monday)!
+        let busyEnd   = Calendar.current.date(bySettingHour: 11, minute: 0, second: 0, of: monday)!
+        let rangeEnd  = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: monday)!
+
+        let slots = CalendarFreeSlotEngine.findSlots(
+            busyWindows: [
+                (start: busyStart, end: busyEnd),
+                (start: busyMid,   end: busyEnd)   // overlaps first
+            ],
+            rangeStart: busyStart,
+            rangeEnd: rangeEnd,
+            duration: 3600
+        )
+        for slot in slots {
+            XCTAssertGreaterThanOrEqual(slot.start, busyEnd, "Slot must start after the merged busy window")
+        }
+    }
+
+    func testDurationLongerThanWorkDayReturnsEmpty() {
+        // Requesting a 13-hour slot (longer than 8am–8pm window) must never match
+        let monday = nextMonday()
+        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday)!
+        let rangeEnd   = Calendar.current.date(bySettingHour: 23, minute: 59, second: 0, of: monday)!
+
+        let slots = CalendarFreeSlotEngine.findSlots(
+            busyWindows: [],
+            rangeStart: rangeStart,
+            rangeEnd: rangeEnd,
+            duration: 13 * 3600
+        )
+        XCTAssertTrue(slots.isEmpty, "No slot should fit a 13-hour duration in an 8am–8pm window")
+    }
+
+    func testConsecutiveMeetingsLeaveNoGap() {
+        // Back-to-back 1-hour meetings fill the whole day — no 1-hour slot should exist
+        let monday = nextMonday()
+        let cal = Calendar.current
+        var windows: [(start: Date, end: Date)] = []
+        var cursor = cal.date(bySettingHour: 8, minute: 0, second: 0, of: monday)!
+        let dayEnd  = cal.date(bySettingHour: 20, minute: 0, second: 0, of: monday)!
+        while cursor < dayEnd {
+            let next = cursor.addingTimeInterval(3600)
+            windows.append((start: cursor, end: min(next, dayEnd)))
+            cursor = next
+        }
+
+        let slots = CalendarFreeSlotEngine.findSlots(
+            busyWindows: windows,
+            rangeStart: cal.date(bySettingHour: 8, minute: 0, second: 0, of: monday)!,
+            rangeEnd: dayEnd,
+            duration: 3600
+        )
+        XCTAssertTrue(slots.isEmpty, "Back-to-back meetings should leave no free slot")
+    }
+
+    func testZeroDurationRangeReturnsEmpty() {
+        let monday = nextMonday()
+        let point = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: monday)!
+
+        let slots = CalendarFreeSlotEngine.findSlots(
+            busyWindows: [],
+            rangeStart: point,
+            rangeEnd: point,
+            duration: 3600
+        )
+        XCTAssertTrue(slots.isEmpty, "Zero-length range must return no slots")
+    }
+
+    func testSlotsDoNotExceedWorkingHours() {
+        // Even with an empty calendar, slots must stay within 8am–8pm
+        let monday = nextMonday()
+        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday)!
+        let rangeEnd   = Calendar.current.date(bySettingHour: 23, minute: 59, second: 0, of: monday)!
+
+        let slots = CalendarFreeSlotEngine.findSlots(
+            busyWindows: [],
+            rangeStart: rangeStart,
+            rangeEnd: rangeEnd,
+            duration: 3600
+        )
+        let cal = Calendar.current
+        for slot in slots {
+            let startHour = cal.component(.hour, from: slot.start)
+            let endHour   = cal.component(.hour, from: slot.end)
+            let endMin    = cal.component(.minute, from: slot.end)
+            XCTAssertGreaterThanOrEqual(startHour, 8, "Slot must not start before 8am")
+            XCTAssertTrue(endHour < 20 || (endHour == 20 && endMin == 0), "Slot must not end after 8pm")
+        }
+    }
 }

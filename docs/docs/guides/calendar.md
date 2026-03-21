@@ -113,7 +113,7 @@ A preview of the change appears for confirmation before anything is modified.
 
 > "Remove all my events on Saturday"
 
-A confirmation step appears before deletion. After deleting, an **Undo** button is shown on the card — tap it within the session to restore the event.
+A confirmation step appears before deletion. After deleting, an **Undo** button is shown on the card — tap it within the session to restore the event. You can also say *"Hey Siri, undo my last PocketMind action"* at any time to restore the most recently deleted event, even after the session ends.
 
 :::note
 On event cards for created, updated, or rescheduled events, you can also swipe left and tap **Delete** to remove the event directly. A confirmation dialog shows the event name before anything is deleted.

@@ -19,18 +19,18 @@ struct CalendarEventListCard: View {
         let count = events.count
         let noun = count == 1 ? "event" : "events"
 
-        if cal.isDateInToday(first.start)     { return "Today · \(count) \(noun)" }
-        if cal.isDateInTomorrow(first.start)  { return "Tomorrow · \(count) \(noun)" }
-
         let f = DateFormatter()
         f.dateFormat = "EEE, MMM d"
 
-        // Multi-day span: show range if start and end differ
+        // Multi-day span: show date range
         if let last = events.last,
            !cal.isDate(first.start, inSameDayAs: last.start) {
             return "\(f.string(from: first.start)) – \(f.string(from: last.start)) · \(count) \(noun)"
         }
 
+        // Single day
+        if cal.isDateInToday(first.start)    { return "Today · \(count) \(noun)" }
+        if cal.isDateInTomorrow(first.start) { return "Tomorrow · \(count) \(noun)" }
         return "\(f.string(from: first.start)) · \(count) \(noun)"
     }
 
@@ -144,10 +144,23 @@ struct CalendarEventListCard: View {
     // MARK: - Helpers
 
     private func timeText(_ event: CalendarEventPreview) -> String {
-        guard !event.isAllDay else { return "All day" }
+        let cal = Calendar.current
+        let isToday = cal.isDateInToday(event.start)
+        if event.isAllDay {
+            return isToday ? "All day" : "\(datePrefix(event.start)) · All day"
+        }
         let start = Self.timeFormatter.string(from: event.start)
         let end = Self.timeFormatter.string(from: event.end)
-        return "\(start) – \(end)"
+        let times = "\(start) – \(end)"
+        return isToday ? times : "\(datePrefix(event.start)) · \(times)"
+    }
+
+    private func datePrefix(_ date: Date) -> String {
+        let cal = Calendar.current
+        if cal.isDateInTomorrow(date) { return "Tomorrow" }
+        let f = DateFormatter()
+        f.dateFormat = "EEE, MMM d"
+        return f.string(from: date)
     }
 
     /// Cycles through a small palette so consecutive events feel distinct.

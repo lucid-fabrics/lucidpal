@@ -1,6 +1,9 @@
 import AVFoundation
 import Foundation
+import OSLog
 import Speech
+
+private let speechLogger = Logger(subsystem: "com.pocketmind", category: "SpeechService")
 
 @MainActor
 final class SpeechService {
@@ -15,6 +18,7 @@ final class SpeechService {
     private var silenceTimer: Timer?
 
     private static let silenceTimeoutSeconds: TimeInterval = 30
+    private static let audioBufferSize: AVAudioFrameCount = 1024
 
     func requestAuthorization() async {
         let micGranted = await Self.askMicrophonePermission()
@@ -58,7 +62,7 @@ final class SpeechService {
             request = req
 
             let node = audioEngine.inputNode
-            node.installTap(onBus: 0, bufferSize: 1024, format: node.outputFormat(forBus: 0)) { [weak self] buf, _ in
+            node.installTap(onBus: 0, bufferSize: Self.audioBufferSize, format: node.outputFormat(forBus: 0)) { [weak self] buf, _ in
                 self?.request?.append(buf)
             }
 
@@ -71,9 +75,7 @@ final class SpeechService {
             do {
                 try session.setActive(false, options: .notifyOthersOnDeactivation)
             } catch {
-                #if DEBUG
-                print("[SpeechService] Failed to deactivate audio session during error cleanup: \(error)")
-                #endif
+                speechLogger.error("Failed to deactivate audio session during error cleanup: \(error)")
             }
             throw error
         }
@@ -114,7 +116,7 @@ final class SpeechService {
         do {
             try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
-            print("[SpeechService] Failed to deactivate audio session: \(error)")
+            speechLogger.error("Failed to deactivate audio session: \(error)")
         }
     }
 }
