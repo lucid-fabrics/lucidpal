@@ -1,4 +1,7 @@
 import Foundation
+import OSLog
+
+private let sessionLogger = Logger(subsystem: "com.pocketmind", category: "SessionManager")
 
 @MainActor
 protocol SessionManagerProtocol {
@@ -30,7 +33,7 @@ final class SessionManager: SessionManagerProtocol {
                 withIntermediateDirectories: true
             )
         } catch {
-            print("[SessionManager] Failed to create sessions directory: \(error)")
+            sessionLogger.error("Failed to create sessions directory: \(error)")
         }
         migrate()
     }
@@ -44,13 +47,13 @@ final class SessionManager: SessionManagerProtocol {
         } catch let error as CocoaError where error.code == .fileReadNoSuchFile {
             return []  // expected on first launch — index has not been written yet
         } catch {
-            print("[SessionManager] Failed to read index file: \(error)")
+            sessionLogger.error("Failed to read index file: \(error)")
             return []
         }
         do {
             return try JSONDecoder().decode([ChatSessionMeta].self, from: data)
         } catch {
-            print("[SessionManager] Failed to decode index: \(error)")
+            sessionLogger.error("Failed to decode index: \(error)")
             return []
         }
     }
@@ -63,13 +66,13 @@ final class SessionManager: SessionManagerProtocol {
         } catch let error as CocoaError where error.code == .fileReadNoSuchFile {
             return nil  // session file absent — normal if session was deleted externally
         } catch {
-            print("[SessionManager] Failed to read session \(id): \(error)")
+            sessionLogger.error("Failed to read session \(id): \(error)")
             return nil
         }
         do {
             return try JSONDecoder().decode(ChatSession.self, from: data)
         } catch {
-            print("[SessionManager] Failed to decode session \(id): \(error)")
+            sessionLogger.error("Failed to decode session \(id): \(error)")
             return nil
         }
     }
@@ -90,7 +93,7 @@ final class SessionManager: SessionManagerProtocol {
                 let data = try JSONEncoder().encode(filtered)
                 try data.write(to: url, options: .atomic)
             } catch {
-                print("[SessionManager] Failed to save session \(filtered.id): \(error)")
+                sessionLogger.error("Failed to save session \(filtered.id): \(error)")
             }
         }
         updateIndex(with: session.meta)
@@ -101,7 +104,7 @@ final class SessionManager: SessionManagerProtocol {
         do {
             try FileManager.default.removeItem(at: sessionURL(for: id))
         } catch {
-            print("[SessionManager] Failed to delete session \(id): \(error)")
+            sessionLogger.error("Failed to delete session \(id): \(error)")
         }
         var index = loadIndex()
         index.removeAll { $0.id == id }
@@ -136,7 +139,7 @@ final class SessionManager: SessionManagerProtocol {
             let data = try JSONEncoder().encode(index)
             try data.write(to: indexURL, options: .atomic)
         } catch {
-            print("[SessionManager] Failed to save index: \(error)")
+            sessionLogger.error("Failed to save index: \(error)")
         }
     }
 
@@ -153,15 +156,15 @@ final class SessionManager: SessionManagerProtocol {
             data = try Data(contentsOf: legacyURL)
             messages = try JSONDecoder().decode([ChatMessage].self, from: data)
         } catch {
-            print("[SessionManager] Failed to read legacy history: \(error)")
+            sessionLogger.error("Failed to read legacy history: \(error)")
             do { try FileManager.default.removeItem(at: legacyURL) } catch {
-                print("[SessionManager] Failed to remove corrupt legacy file: \(error)")
+                sessionLogger.error("Failed to remove corrupt legacy file: \(error)")
             }
             return
         }
         guard !messages.isEmpty else {
             do { try FileManager.default.removeItem(at: legacyURL) } catch {
-                print("[SessionManager] Failed to remove empty legacy file: \(error)")
+                sessionLogger.error("Failed to remove empty legacy file: \(error)")
             }
             return
         }
@@ -177,7 +180,7 @@ final class SessionManager: SessionManagerProtocol {
         do {
             try FileManager.default.removeItem(at: legacyURL)
         } catch {
-            print("[SessionManager] Failed to remove legacy chat_history.json: \(error)")
+            sessionLogger.error("Failed to remove legacy chat_history.json: \(error)")
         }
     }
 }
