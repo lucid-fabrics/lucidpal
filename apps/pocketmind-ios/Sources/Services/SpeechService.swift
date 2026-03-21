@@ -1,6 +1,9 @@
 import AVFoundation
 import Foundation
+import OSLog
 import Speech
+
+private let speechLogger = Logger(subsystem: "com.pocketmind", category: "SpeechService")
 
 @MainActor
 final class SpeechService {
@@ -71,9 +74,7 @@ final class SpeechService {
             do {
                 try session.setActive(false, options: .notifyOthersOnDeactivation)
             } catch {
-                #if DEBUG
-                print("[SpeechService] Failed to deactivate audio session during error cleanup: \(error)")
-                #endif
+                speechLogger.error("Failed to deactivate audio session during error cleanup: \(error)")
             }
             throw error
         }
@@ -114,7 +115,7 @@ final class SpeechService {
         do {
             try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
-            print("[SpeechService] Failed to deactivate audio session: \(error)")
+            speechLogger.error("Failed to deactivate audio session: \(error)")
         }
     }
 }
