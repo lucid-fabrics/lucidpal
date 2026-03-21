@@ -41,4 +41,9 @@ final class SettingsViewModel: ObservableObject {
     func selectModel(_ model: ModelInfo) {
         settings.selectedModelID = model.id
     }
+
+    func setVoiceAutoStart(_ enabled: Bool) {
+        settings.voiceAutoStartEnabled = enabled
+        if enabled { settings.speechAutoSendEnabled = true }
+    }
 }

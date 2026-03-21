@@ -53,7 +53,7 @@ final class MockLLMService: LLMServiceProtocol {
         }
     }
 
-    func loadModel(at url: URL) async throws {
+    func loadModel(at url: URL, contextSize: UInt32) async throws {
         loadedURL = url
         isLoaded = true  // didSet fires isLoadedSubject
     }

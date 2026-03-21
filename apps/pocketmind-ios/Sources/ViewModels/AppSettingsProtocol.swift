@@ -12,6 +12,11 @@ protocol AppSettingsProtocol: AnyObject {
     var thinkingEnabled: Bool { get set }
     var defaultCalendarIdentifier: String { get set }
     var speechAutoSendEnabled: Bool { get set }
+    var voiceAutoStartEnabled: Bool { get set }
+    /// User-selected KV cache context window in tokens. Affects memory use and max conversation length.
+    var contextSize: Int { get set }
     var selectedModel: ModelInfo { get }
     var deviceRAMGB: Int { get }
+    /// Maximum context size this device can safely support.
+    var maxContextSize: Int { get }
 }

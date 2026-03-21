@@ -13,6 +13,7 @@ final class AppSettingsTests: XCTestCase {
     private static let allKeys = [
         "calendarAccessEnabled", "selectedModelID", "hasCompletedOnboarding",
         "thinkingEnabled", "defaultCalendarIdentifier", "speechAutoSendEnabled",
+        "voiceAutoStartEnabled", "contextSize",
     ]
 
     override func tearDown() {
@@ -64,5 +65,24 @@ final class AppSettingsTests: XCTestCase {
     func testDefaultCalendarIdentifierIsEmpty() {
         UserDefaults.standard.removeObject(forKey: "defaultCalendarIdentifier")
         XCTAssertEqual(AppSettings().defaultCalendarIdentifier, "")
+    }
+
+    func testDefaultContextSizeIs4096() {
+        UserDefaults.standard.removeObject(forKey: "contextSize")
+        XCTAssertEqual(AppSettings().contextSize, 4096)
+    }
+
+    func testContextSizePersistsToUserDefaults() {
+        settings.contextSize = 8192
+        XCTAssertEqual(AppSettings().contextSize, 8192)
+    }
+
+    func testMaxContextSizeIsAtLeast4096() {
+        XCTAssertGreaterThanOrEqual(settings.maxContextSize, 4096)
+    }
+
+    func testDefaultVoiceAutoStartEnabledIsFalse() {
+        UserDefaults.standard.removeObject(forKey: "voiceAutoStartEnabled")
+        XCTAssertFalse(AppSettings().voiceAutoStartEnabled)
     }
 }

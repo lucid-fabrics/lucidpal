@@ -7,11 +7,19 @@ final class SettingsViewModelTests: XCTestCase {
     var mockCalendar: MockCalendarService!
     var viewModel: SettingsViewModel!
 
+    private static let allKeys = ["voiceAutoStartEnabled", "speechAutoSendEnabled"]
+
     override func setUp() {
         super.setUp()
+        for key in Self.allKeys { UserDefaults.standard.removeObject(forKey: key) }
         settings = AppSettings()
         mockCalendar = MockCalendarService()
         viewModel = SettingsViewModel(settings: settings, calendarService: mockCalendar)
+    }
+
+    override func tearDown() {
+        for key in Self.allKeys { UserDefaults.standard.removeObject(forKey: key) }
+        super.tearDown()
     }
 
     func testInitSetsCalendarAuthStatus() {
@@ -62,5 +70,26 @@ final class SettingsViewModelTests: XCTestCase {
 
     func testAvailableModelsNotEmpty() {
         XCTAssertFalse(viewModel.availableModels.isEmpty)
+    }
+
+    func testSetVoiceAutoStartTrueEnablesSpeechAutoSend() {
+        settings.speechAutoSendEnabled = false
+        viewModel.setVoiceAutoStart(true)
+        XCTAssertTrue(settings.voiceAutoStartEnabled)
+        XCTAssertTrue(settings.speechAutoSendEnabled)
+    }
+
+    func testSetVoiceAutoStartFalseDoesNotChangeSpeechAutoSend() {
+        settings.speechAutoSendEnabled = false
+        viewModel.setVoiceAutoStart(false)
+        XCTAssertFalse(settings.voiceAutoStartEnabled)
+        XCTAssertFalse(settings.speechAutoSendEnabled)
+    }
+
+    func testSetVoiceAutoStartFalsePreservesExistingSpeechAutoSend() {
+        settings.speechAutoSendEnabled = true
+        viewModel.setVoiceAutoStart(false)
+        XCTAssertFalse(settings.voiceAutoStartEnabled)
+        XCTAssertTrue(settings.speechAutoSendEnabled)
     }
 }

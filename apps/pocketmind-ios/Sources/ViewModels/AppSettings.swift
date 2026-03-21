@@ -29,6 +29,14 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         didSet { UserDefaults.standard.set(speechAutoSendEnabled, forKey: UserDefaultsKeys.speechAutoSendEnabled) }
     }
 
+    @Published var voiceAutoStartEnabled: Bool {
+        didSet { UserDefaults.standard.set(voiceAutoStartEnabled, forKey: UserDefaultsKeys.voiceAutoStartEnabled) }
+    }
+
+    @Published var contextSize: Int {
+        didSet { UserDefaults.standard.set(contextSize, forKey: UserDefaultsKeys.contextSize) }
+    }
+
     // MARK: - Init
 
     init() {
@@ -39,6 +47,8 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         thinkingEnabled = defaults.object(forKey: UserDefaultsKeys.thinkingEnabled) as? Bool ?? true
         defaultCalendarIdentifier = defaults.string(forKey: UserDefaultsKeys.defaultCalendarIdentifier) ?? ""
         speechAutoSendEnabled = defaults.object(forKey: UserDefaultsKeys.speechAutoSendEnabled) as? Bool ?? true
+        voiceAutoStartEnabled = defaults.object(forKey: UserDefaultsKeys.voiceAutoStartEnabled) as? Bool ?? false
+        contextSize = defaults.object(forKey: UserDefaultsKeys.contextSize) as? Int ?? 4096
     }
 
     // MARK: - Computed Properties
@@ -50,6 +60,10 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
 
     var deviceRAMGB: Int {
         Int(ProcessInfo.processInfo.physicalMemory / Self.bytesPerGB)
+    }
+
+    var maxContextSize: Int {
+        deviceRAMGB >= 6 ? 8192 : 4096
     }
 
     // MARK: - Private Constants

@@ -1,4 +1,7 @@
 import Foundation
+import OSLog
+
+private let chatLogger = Logger(subsystem: "app.pocketmind", category: "Chat")
 
 // MARK: - System prompt construction + calendar action dispatch
 // Separated from the core ViewModel to keep each file under 300 lines.
@@ -41,10 +44,10 @@ extension ChatViewModel {
                 replacement = ""
                 previews.append(contentsOf: pending)
             case .queryResult(let slots):
-                replacement = ""
+                replacement = slots.isEmpty ? "No free slots found in that window." : ""
                 freeSlots.append(contentsOf: slots)
             case .listResult(let eventPreviews):
-                replacement = ""
+                replacement = eventPreviews.isEmpty ? "No events found in that range." : ""
                 previews.append(contentsOf: eventPreviews)
             case .failure(let msg):
                 replacement = msg
@@ -66,7 +69,9 @@ extension ChatViewModel {
         ]
         if calendarEnabled { parts.append(calendarToolInstructions()) }
         if calendarEnabled, let ctx = calendarContext() { parts.append(ctx) }
-        return parts.joined(separator: " ")
+        let prompt = parts.joined(separator: " ")
+        chatLogger.info("🧠 SYSTEM_PROMPT: \(prompt, privacy: .public)")
+        return prompt
     }
 
     /// The CALENDAR TOOL instruction block injected into the system prompt.
@@ -110,6 +115,14 @@ extension ChatViewModel {
 
     private func calendarCreateExamples() -> String {
         """
+            Example — ambiguous request, missing time:
+            User: add a meeting tomorrow
+            You: What time?
+
+            Example — ambiguous request, missing title and time:
+            User: schedule something next week
+            You: What's the event and when?
+
             Example — create request (no conflict):
             User: add a meeting tomorrow at 3pm
             You: [CALENDAR_ACTION:{"action":"create","title":"Meeting","start":"2026-03-18T15:00:00","end":"2026-03-18T16:00:00","location":"","notes":""}]
@@ -186,10 +199,15 @@ extension ChatViewModel {
             You: [CALENDAR_ACTION:{"action":"list","start":"2026-03-18T00:00:00","end":"2026-03-22T23:59:59"}]
             Here's your week.
 
+            Example — answer a question about events (the app renders them; do NOT re-list in text):
+            User: who is the best date for this month?
+            You: [CALENDAR_ACTION:{"action":"list","start":"2026-03-01T00:00:00","end":"2026-03-31T23:59:59"}]
+            March 20 and March 29 stand out — birthdays and fewer conflicts.
+
             Example — find free slots:
             User: find a free 2-hour slot this week
             You: [CALENDAR_ACTION:{"action":"query","start":"2026-03-17T00:00:00","end":"2026-03-21T23:59:59","durationMinutes":120}]
-            Here are the available windows.
+            Checked your week.
             """
     }
 
@@ -204,10 +222,12 @@ extension ChatViewModel {
             - isAllDay: include only for all-day events (holidays, birthdays, etc). Omit start/end time precision.
             - recurrence: "daily" | "weekly" | "monthly" | "yearly". Only include when user asks for a repeating event.
             - recurrenceEnd: ISO8601 date when recurrence stops. Omit for indefinite.
-            - NEVER skip the block. NEVER output text-only when an action is requested.
+            - Clarification before acting: If a create/update request is missing critical details, ask ONE short question before emitting the block. Missing title → ask "What should I call it?". Missing time with no qualifier → ask "What time?". Do NOT guess a time when none is given. Time qualifiers you may infer: "morning" = 9am, "afternoon" = 2pm, "evening" = 6pm, "noon" = 12pm, "lunch" = 12pm. If the date is also missing, ask for date and time together in one question.
+            - NEVER skip the block when you have enough info. NEVER output text-only when an action is requested and all required fields are known.
             - NEVER tell the user to make changes manually.
             - Conflict: if the system appends a conflict note (e.g. "Heads-up: overlaps with..."), acknowledge it naturally in your response and tell the user they can tap the card to keep, cancel, or reschedule to a free slot.
             - list: use to show events in a date range when the user asks "what's on my calendar", "show my meetings", etc. Do NOT use query for listing — query is only for finding free slots.
+            - NEVER enumerate events in prose when using a list or query action. The app renders the events in a card widget. Output ONLY the [CALENDAR_ACTION] block + one short sentence that directly answers the user's question (e.g. a recommendation, a count, or a summary). Do not bullet-list event titles or times.
             """
     }
 

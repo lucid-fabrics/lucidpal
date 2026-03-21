@@ -135,15 +135,47 @@ struct SettingsView: View {
                 Label("Thinking Mode", systemImage: "brain")
             }
             Toggle(isOn: Binding(
-                get: { viewModel.settings.speechAutoSendEnabled },
-                set: { viewModel.settings.speechAutoSendEnabled = $0 }
+                get: { viewModel.settings.voiceAutoStartEnabled },
+                set: { viewModel.setVoiceAutoStart($0) }
             )) {
-                Label("Auto-send after speech", systemImage: "mic.badge.auto")
+                Label("Start voice on open", systemImage: "waveform.and.mic")
             }
+            if !viewModel.settings.voiceAutoStartEnabled {
+                Toggle(isOn: Binding(
+                    get: { viewModel.settings.speechAutoSendEnabled },
+                    set: { viewModel.settings.speechAutoSendEnabled = $0 }
+                )) {
+                    Label("Auto-send after speech", systemImage: "mic.badge.auto")
+                }
+            }
+            contextSizePicker
         } header: {
             Text("Inference")
         } footer: {
-            Text("Thinking mode reasons before answering (slower but more accurate). Auto-send submits voice input automatically when speech recognition finishes.")
+            Text("Thinking mode reasons before answering (slower but more accurate). \"Start voice on open\" automatically starts listening when you open a new chat. Auto-send submits voice input when speech recognition finishes.")
+        }
+    }
+
+    @ViewBuilder
+    private var contextSizePicker: some View {
+        let maxCtx = viewModel.settings.maxContextSize
+        VStack(alignment: .leading, spacing: 0) {
+            Picker(selection: Binding(
+                get: { min(viewModel.settings.contextSize, maxCtx) },
+                set: { viewModel.settings.contextSize = $0 }
+            )) {
+                ForEach([2048, 4096, 8192].filter { $0 <= maxCtx }, id: \.self) { size in
+                    Text("\(size) tokens").tag(size)
+                }
+            } label: {
+                Label("Context Window", systemImage: "memorychip")
+            }
+            .pickerStyle(.menu)
+
+            Text("How many tokens the model keeps in memory. Larger = longer conversations but slower load and more RAM. Takes effect next time the model loads. Your device supports up to \(maxCtx) tokens.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .padding(.top, 4)
         }
     }
 

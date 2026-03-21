@@ -16,7 +16,7 @@ protocol LLMServiceProtocol: AnyObject {
     var isGeneratingPublisher: AnyPublisher<Bool, Never> { get }
 
     func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool) -> AsyncThrowingStream<String, Error>
-    func loadModel(at url: URL) async throws
+    func loadModel(at url: URL, contextSize: UInt32) async throws
     func cancelGeneration()
     func unloadModel()
 }
