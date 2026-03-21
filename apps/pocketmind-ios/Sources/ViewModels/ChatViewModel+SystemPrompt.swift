@@ -60,18 +60,25 @@ extension ChatViewModel {
     func buildSystemPrompt() async -> String {
         let today = formattedToday()
         let calendarEnabled = settings.calendarAccessEnabled && calendarService.isAuthorized
+        let contextEnabled = settings.notesAccessEnabled || settings.remindersAccessEnabled || settings.mailAccessEnabled
         var parts: [String] = [
             """
-            You are PocketMind, an on-device AI assistant\(calendarEnabled ? " with direct read and write access to the user's iOS calendar" : "").
+            You are PocketMind, an on-device AI assistant\(calendarEnabled ? " with direct read and write access to the user's iOS calendar" : "")\(contextEnabled ? " with access to the user's Notes, Reminders, and Mail" : "").
             Today is \(today).
             Be concise. Use markdown for emphasis (**bold**), bullet lists (- item), and inline code (`code`). Keep responses short.
             """,
         ]
         if calendarEnabled { parts.append(calendarToolInstructions()) }
         if calendarEnabled, let ctx = calendarContext() { parts.append(ctx) }
+        if contextEnabled, let crossAppContext = await crossAppContext() { parts.append(crossAppContext) }
         let prompt = parts.joined(separator: " ")
         chatLogger.info("🧠 SYSTEM_PROMPT: \(prompt, privacy: .public)")
         return prompt
+    }
+
+    /// Fetches cross-app context from Notes, Reminders, and Mail.
+    func crossAppContext() async -> String? {
+        await contextService.fetchContext(query: nil)
     }
 
     /// The CALENDAR TOOL instruction block injected into the system prompt.
