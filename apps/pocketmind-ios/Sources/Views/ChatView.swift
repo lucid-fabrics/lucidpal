@@ -17,6 +17,17 @@ struct ChatView: View {
             messageList
             inputBar
         }
+        .overlay {
+            if viewModel.isSpeechRecording {
+                VoiceRecordingOverlay(
+                    transcript: viewModel.inputText,
+                    isTranscribing: viewModel.isSpeechTranscribing,
+                    onStop: { viewModel.toggleSpeech() }
+                )
+                .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: viewModel.isSpeechRecording)
         .overlay(alignment: .bottom) {
             if let toast = viewModel.toast {
                 ToastView(item: toast)
@@ -45,7 +56,7 @@ struct ChatView: View {
             errorDismissTask?.cancel()
             guard msg != nil else { return }
             errorDismissTask = Task { @MainActor in
-                try? await Task.sleep(for: .seconds(5)) // safe: cancellation discarded; errorDismissTask?.cancel() handles early teardown
+                try? await Task.sleep(for: .seconds(ChatConstants.errorAutoDismissSeconds)) // safe: cancellation discarded; errorDismissTask?.cancel() handles early teardown
                 viewModel.errorMessage = nil
             }
         }
@@ -55,6 +66,17 @@ struct ChatView: View {
             viewModel.pendingInput = nil
             viewModel.inputText = query
             await viewModel.sendMessage()
+        }
+        .task(id: VoiceReadiness(modelLoaded: viewModel.isModelLoaded, speechAvailable: viewModel.isSpeechAvailable)) {
+            guard viewModel.settings.voiceAutoStartEnabled || viewModel.pendingVoiceStart,
+                  viewModel.messages.isEmpty,
+                  viewModel.isSpeechAvailable,
+                  viewModel.isModelLoaded,
+                  !viewModel.isSpeechRecording else { return }
+            viewModel.pendingVoiceStart = false
+            try? await Task.sleep(for: .milliseconds(ChatConstants.voiceAutoStartDelayMilliseconds))
+            viewModel.voiceAutoStartActive = true
+            viewModel.toggleSpeech()
         }
     }
 
@@ -185,7 +207,7 @@ struct ChatView: View {
                 isLoading: viewModel.isGeneratingSuggestions
             ) { prompt in
                 viewModel.inputText = prompt
-                inputFocused = true
+                Task { await viewModel.sendMessage() }
             }
             .padding(.horizontal, 24)
             Spacer()
@@ -210,8 +232,12 @@ struct ChatView: View {
                 Button {
                     viewModel.toggleSpeech()
                 } label: {
-                    MicButtonLabel(isRecording: viewModel.isSpeechRecording)
+                    MicButtonLabel(
+                        isRecording: viewModel.isSpeechRecording,
+                        isTranscribing: viewModel.isSpeechTranscribing
+                    )
                 }
+                .disabled(viewModel.isSpeechTranscribing)
             }
 
             TextField("Ask about your schedule…", text: $viewModel.inputText, axis: .vertical)
@@ -267,5 +293,10 @@ struct ChatView: View {
             proxy.scrollTo(last.id, anchor: .bottom)
         }
     }
+}
+
+private struct VoiceReadiness: Equatable {
+    let modelLoaded: Bool
+    let speechAvailable: Bool
 }
 
