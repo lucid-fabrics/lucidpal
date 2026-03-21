@@ -82,5 +82,52 @@ struct PocketMindShortcuts: AppShortcutsProvider {
             shortTitle: "Undo Last Action",
             systemImageName: "arrow.uturn.backward.circle"
         )
+
+        // Shortcuts-compatible: Create event (background, returns value)
+        AppShortcut(
+            intent: CreateEventShortcutIntent(),
+            phrases: [
+                "Create event in Shortcuts with \(.applicationName)",
+                "Make calendar event with \(.applicationName)",
+                "Schedule event via \(.applicationName)"
+            ],
+            shortTitle: "Create Event (Shortcuts)",
+            systemImageName: "calendar.badge.plus"
+        )
+
+        // Shortcuts-compatible: Check next meeting (background, returns value)
+        AppShortcut(
+            intent: CheckNextMeetingIntent(),
+            phrases: [
+                "When is my next meeting in \(.applicationName)",
+                "What's my next event in \(.applicationName)",
+                "Next appointment in \(.applicationName)"
+            ],
+            shortTitle: "Next Meeting",
+            systemImageName: "calendar.badge.clock"
+        )
+
+        // Shortcuts-compatible: Find free time (background, returns value)
+        AppShortcut(
+            intent: FindFreeTimeShortcutIntent(),
+            phrases: [
+                "Find available time with \(.applicationName)",
+                "Check free slots in \(.applicationName)",
+                "When am I available in \(.applicationName)"
+            ],
+            shortTitle: "Find Free Time (Shortcuts)",
+            systemImageName: "clock.badge.checkmark"
+        )
+
+        // Shortcuts-compatible: Ask PocketMind (background, opens app)
+        AppShortcut(
+            intent: AskPocketMindShortcutIntent(),
+            phrases: [
+                "Quick ask \(.applicationName)",
+                "Fast question for \(.applicationName)"
+            ],
+            shortTitle: "Quick Ask",
+            systemImageName: "brain.head.profile"
+        )
     }
 }

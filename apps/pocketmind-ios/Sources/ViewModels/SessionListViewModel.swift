@@ -22,6 +22,7 @@ final class SessionListViewModel: ObservableObject {
     let settings: any AppSettingsProtocol
     let speechService: any SpeechServiceProtocol
     let hapticService: any HapticServiceProtocol
+    let airPodsCoordinator: AirPodsVoiceCoordinator?
 
     init(
         sessionManager: any SessionManagerProtocol,
@@ -30,7 +31,8 @@ final class SessionListViewModel: ObservableObject {
         calendarActionController: any CalendarActionControllerProtocol,
         settings: any AppSettingsProtocol,
         speechService: any SpeechServiceProtocol,
-        hapticService: any HapticServiceProtocol
+        hapticService: any HapticServiceProtocol,
+        airPodsCoordinator: AirPodsVoiceCoordinator? = nil
     ) {
         self.sessionManager = sessionManager
         self.llmService = llmService
@@ -39,6 +41,7 @@ final class SessionListViewModel: ObservableObject {
         self.settings = settings
         self.speechService = speechService
         self.hapticService = hapticService
+        self.airPodsCoordinator = airPodsCoordinator
         self.sessions = sessionManager.loadIndex().sorted { $0.updatedAt > $1.updatedAt }
     }
 
@@ -78,10 +81,12 @@ final class SessionListViewModel: ObservableObject {
             llmService: llmService,
             calendarService: calendarService,
             calendarActionController: calendarActionController,
+            contextService: ContextService(settings: settings),
             settings: settings,
             speechService: speechService,
             hapticService: hapticService,
             historyManager: NoOpChatHistoryManager(),
+            airPodsCoordinator: airPodsCoordinator,
             session: session,
             sessionManager: sessionManager,
             onSessionUpdated: { [weak self] meta in

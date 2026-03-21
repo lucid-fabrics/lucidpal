@@ -17,6 +17,7 @@ final class ChatViewModel: ObservableObject {
     @Published private(set) var isSpeechRecording = false
     @Published private(set) var isSpeechAvailable = false
     @Published private(set) var isSpeechTranscribing = false
+    @Published private(set) var isAutoListening = false
 
     @Published var suggestedPrompts: [String] = []
     @Published var isGeneratingSuggestions = false
@@ -27,10 +28,12 @@ final class ChatViewModel: ObservableObject {
     let llmService: any LLMServiceProtocol
     let calendarService: any CalendarServiceProtocol
     let calendarActionController: any CalendarActionControllerProtocol
+    let contextService: any ContextServiceProtocol
     let settings: any AppSettingsProtocol
     let speechService: any SpeechServiceProtocol
     let hapticService: any HapticServiceProtocol
     let history: any ChatHistoryManagerProtocol
+    let airPodsCoordinator: AirPodsVoiceCoordinator?
     var cancellables = Set<AnyCancellable>()
     // Prevents auto-submit when the user manually taps the mic button to stop recording
     var suppressSpeechAutoSend = false
@@ -52,10 +55,12 @@ final class ChatViewModel: ObservableObject {
         llmService: any LLMServiceProtocol,
         calendarService: any CalendarServiceProtocol,
         calendarActionController: any CalendarActionControllerProtocol,
+        contextService: any ContextServiceProtocol,
         settings: any AppSettingsProtocol,
         speechService: any SpeechServiceProtocol,
         hapticService: any HapticServiceProtocol,
         historyManager: any ChatHistoryManagerProtocol,
+        airPodsCoordinator: AirPodsVoiceCoordinator? = nil,
         // Session-mode params — pass these to enable multi-session persistence.
         session: ChatSession? = nil,
         sessionManager: (any SessionManagerProtocol)? = nil,
@@ -65,10 +70,12 @@ final class ChatViewModel: ObservableObject {
         self.llmService = llmService
         self.calendarService = calendarService
         self.calendarActionController = calendarActionController
+        self.contextService = contextService
         self.settings = settings
         self.speechService = speechService
         self.hapticService = hapticService
         self.history = session != nil ? NoOpChatHistoryManager() : historyManager
+        self.airPodsCoordinator = airPodsCoordinator
         self.sessionID = session?.id
         self.sessionCreatedAt = session?.createdAt ?? .now
         self.sessionManager = sessionManager
@@ -105,6 +112,11 @@ final class ChatViewModel: ObservableObject {
         speechService.transcriptPublisher
             .filter { !$0.isEmpty }
             .sink { [weak self] in self?.inputText = $0 }
+            .store(in: &cancellables)
+
+        // Observe AirPods auto-listening state
+        airPodsCoordinator?.$isAutoListening
+            .sink { [weak self] in self?.isAutoListening = $0 }
             .store(in: &cancellables)
 
         // Persist messages on change — debounced on MainActor, disk write offloaded to background.

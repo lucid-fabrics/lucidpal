@@ -13,8 +13,12 @@ protocol AppSettingsProtocol: AnyObject {
     var defaultCalendarIdentifier: String { get set }
     var speechAutoSendEnabled: Bool { get set }
     var voiceAutoStartEnabled: Bool { get set }
+    var airpodsAutoVoiceEnabled: Bool { get set }
     /// User-selected KV cache context window in tokens. Affects memory use and max conversation length.
     var contextSize: Int { get set }
+    var notesAccessEnabled: Bool { get set }
+    var remindersAccessEnabled: Bool { get set }
+    var mailAccessEnabled: Bool { get set }
     var selectedModel: ModelInfo { get }
     var deviceRAMGB: Int { get }
     /// Maximum context size this device can safely support.

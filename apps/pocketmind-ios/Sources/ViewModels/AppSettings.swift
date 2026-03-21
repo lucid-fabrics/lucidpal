@@ -33,8 +33,24 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         didSet { UserDefaults.standard.set(voiceAutoStartEnabled, forKey: UserDefaultsKeys.voiceAutoStartEnabled) }
     }
 
+    @Published var airpodsAutoVoiceEnabled: Bool {
+        didSet { UserDefaults.standard.set(airpodsAutoVoiceEnabled, forKey: UserDefaultsKeys.airpodsAutoVoiceEnabled) }
+    }
+
     @Published var contextSize: Int {
         didSet { UserDefaults.standard.set(contextSize, forKey: UserDefaultsKeys.contextSize) }
+    }
+
+    @Published var notesAccessEnabled: Bool {
+        didSet { UserDefaults.standard.set(notesAccessEnabled, forKey: UserDefaultsKeys.notesAccessEnabled) }
+    }
+
+    @Published var remindersAccessEnabled: Bool {
+        didSet { UserDefaults.standard.set(remindersAccessEnabled, forKey: UserDefaultsKeys.remindersAccessEnabled) }
+    }
+
+    @Published var mailAccessEnabled: Bool {
+        didSet { UserDefaults.standard.set(mailAccessEnabled, forKey: UserDefaultsKeys.mailAccessEnabled) }
     }
 
     // MARK: - Init
@@ -48,7 +64,11 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         defaultCalendarIdentifier = defaults.string(forKey: UserDefaultsKeys.defaultCalendarIdentifier) ?? ""
         speechAutoSendEnabled = defaults.object(forKey: UserDefaultsKeys.speechAutoSendEnabled) as? Bool ?? true
         voiceAutoStartEnabled = defaults.object(forKey: UserDefaultsKeys.voiceAutoStartEnabled) as? Bool ?? false
+        airpodsAutoVoiceEnabled = defaults.object(forKey: UserDefaultsKeys.airpodsAutoVoiceEnabled) as? Bool ?? false
         contextSize = defaults.object(forKey: UserDefaultsKeys.contextSize) as? Int ?? 4096
+        notesAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.notesAccessEnabled)
+        remindersAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.remindersAccessEnabled)
+        mailAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.mailAccessEnabled)
     }
 
     // MARK: - Computed Properties

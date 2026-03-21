@@ -28,6 +28,10 @@
 	<string>PocketMind reads your calendar events to answer questions about your schedule. All processing happens on-device.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>PocketMind needs full calendar access to read and help you manage your events. All processing happens on-device.</string>
+	<key>NSRemindersUsageDescription</key>
+	<string>PocketMind reads your reminders to answer questions about your tasks and to-dos. All processing happens on-device.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>PocketMind needs full reminders access to help you manage your tasks. All processing happens on-device.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

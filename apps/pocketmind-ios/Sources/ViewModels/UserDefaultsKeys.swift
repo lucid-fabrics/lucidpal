@@ -9,7 +9,11 @@ enum UserDefaultsKeys {
     static let defaultCalendarIdentifier = "defaultCalendarIdentifier"
     static let speechAutoSendEnabled    = "speechAutoSendEnabled"
     static let voiceAutoStartEnabled    = "voiceAutoStartEnabled"
+    static let airpodsAutoVoiceEnabled  = "airpodsAutoVoiceEnabled"
     static let contextSize              = "contextSize"
+    static let notesAccessEnabled       = "notesAccessEnabled"
+    static let remindersAccessEnabled   = "remindersAccessEnabled"
+    static let mailAccessEnabled        = "mailAccessEnabled"
 
     static let siriPendingQuery         = "pm_siri_pending_query"
     static let siriPendingEvent         = "pm_siri_pending_event"
