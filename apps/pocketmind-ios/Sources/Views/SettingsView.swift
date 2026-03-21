@@ -12,6 +12,7 @@ struct SettingsView: View {
                 calendarSection
                 modelSection
                 inferenceSection
+                shortcutsSection
                 aboutSection
             }
             .navigationTitle("Settings")
@@ -140,6 +141,12 @@ struct SettingsView: View {
             )) {
                 Label("Start voice on open", systemImage: "waveform.and.mic")
             }
+            Toggle(isOn: Binding(
+                get: { viewModel.settings.airpodsAutoVoiceEnabled },
+                set: { viewModel.settings.airpodsAutoVoiceEnabled = $0 }
+            )) {
+                Label("AirPods auto-voice", systemImage: "airpodspro")
+            }
             if !viewModel.settings.voiceAutoStartEnabled {
                 Toggle(isOn: Binding(
                     get: { viewModel.settings.speechAutoSendEnabled },
@@ -152,7 +159,7 @@ struct SettingsView: View {
         } header: {
             Text("Inference")
         } footer: {
-            Text("Thinking mode reasons before answering (slower but more accurate). \"Start voice on open\" automatically starts listening when you open a new chat. Auto-send submits voice input when speech recognition finishes.")
+            Text("Thinking mode reasons before answering (slower but more accurate). \"Start voice on open\" automatically starts listening when you open a new chat. \"AirPods auto-voice\" starts listening automatically when AirPods are connected. Auto-send submits voice input when speech recognition finishes.")
         }
     }
 
@@ -176,6 +183,54 @@ struct SettingsView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .padding(.top, 4)
+        }
+    }
+
+    private var shortcutsSection: some View {
+        Section("Shortcuts Integration") {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("PocketMind actions are available in the Shortcuts app for automation.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                Divider()
+
+                VStack(alignment: .leading, spacing: 6) {
+                    shortcutRow(icon: "brain.head.profile", title: "Ask PocketMind", description: "Query AI assistant and get text response")
+                    shortcutRow(icon: "calendar.badge.plus", title: "Create Event", description: "Add calendar event with title, time, duration")
+                    shortcutRow(icon: "calendar.badge.clock", title: "Check Next Meeting", description: "Get details of upcoming calendar event")
+                    shortcutRow(icon: "clock.badge.checkmark", title: "Find Free Time", description: "Search for available time slots")
+                }
+            }
+            .padding(.vertical, 4)
+
+            Link(destination: URL(string: "shortcuts://")!) {
+                HStack {
+                    Label("Open Shortcuts App", systemImage: "link")
+                    Spacer()
+                    Image(systemName: "arrow.up.right.square")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func shortcutRow(icon: String, title: String, description: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: icon)
+                .font(.body)
+                .foregroundStyle(.blue)
+                .frame(width: 24)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                Text(description)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 

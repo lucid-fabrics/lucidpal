@@ -12,6 +12,9 @@ struct ChatView: View {
             if !viewModel.isModelLoaded {
                 modelNotLoadedBanner
             }
+            if viewModel.isAutoListening {
+                autoListeningBanner
+            }
             errorBanner
                 .animation(.easeInOut(duration: 0.2), value: viewModel.errorMessage)
             messageList
@@ -119,6 +122,25 @@ struct ChatView: View {
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.systemGray6))
+    }
+
+    private var autoListeningBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "airpodspro")
+                .foregroundStyle(.green)
+            Text("AirPods connected — auto-listening active")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Circle()
+                .fill(.green)
+                .frame(width: 8, height: 8)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
+        .background(Color(.systemGray6))
+        .transition(.move(edge: .top).combined(with: .opacity))
     }
 
     private var messageList: some View {
