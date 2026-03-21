@@ -18,6 +18,7 @@ final class SpeechService {
     private var silenceTimer: Timer?
 
     private static let silenceTimeoutSeconds: TimeInterval = 30
+    private static let audioBufferSize: AVAudioFrameCount = 1024
 
     func requestAuthorization() async {
         let micGranted = await Self.askMicrophonePermission()
@@ -61,7 +62,7 @@ final class SpeechService {
             request = req
 
             let node = audioEngine.inputNode
-            node.installTap(onBus: 0, bufferSize: 1024, format: node.outputFormat(forBus: 0)) { [weak self] buf, _ in
+            node.installTap(onBus: 0, bufferSize: Self.audioBufferSize, format: node.outputFormat(forBus: 0)) { [weak self] buf, _ in
                 self?.request?.append(buf)
             }
 

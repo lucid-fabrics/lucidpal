@@ -18,10 +18,10 @@ extension ChatViewModel {
     private static func buildPrompts(from service: CalendarServiceProtocol) -> [String] {
         guard service.isAuthorized else { return genericPrompts() }
 
-        let cal      = Calendar.current
-        let now      = Date.now
-        let hour     = cal.component(.hour, from: now)
-        let weekday  = cal.component(.weekday, from: now) // 1=Sun … 7=Sat
+        let cal     = Calendar.current
+        let now     = Date.now
+        let hour    = cal.component(.hour, from: now)
+        let weekday = cal.component(.weekday, from: now) // 1=Sun … 7=Sat
 
         let todayStart    = cal.startOfDay(for: now)
         let todayEnd      = cal.date(byAdding: .day, value: 1, to: todayStart) ?? todayStart
@@ -30,13 +30,13 @@ extension ChatViewModel {
         let weekendStart  = nextWeekendStart(after: now, cal: cal)
         let weekEnd       = cal.date(byAdding: .day, value: 7, to: todayStart) ?? todayStart
 
-        let remaining  = service.events(in: now, end: todayEnd)
+        let remaining = service.events(in: now, end: todayEnd)
             .filter { !$0.isAllDay }.sorted { $0.startDate < $1.startDate }
-        let tomorrow   = service.events(in: tomorrowStart, end: tomorrowEnd)
+        let tomorrow  = service.events(in: tomorrowStart, end: tomorrowEnd)
             .filter { !$0.isAllDay }.sorted { $0.startDate < $1.startDate }
-        let thisWeek   = service.events(in: now, end: weekEnd)
+        let thisWeek  = service.events(in: now, end: weekEnd)
             .filter { !$0.isAllDay }.sorted { $0.startDate < $1.startDate }
-        let nextEvent  = remaining.first ?? thisWeek.first
+        let nextEvent = remaining.first ?? thisWeek.first
 
         let isEvening  = hour >= 17
         let isMorning  = hour < 12
@@ -45,75 +45,95 @@ extension ChatViewModel {
         let isThursday = weekday == 5
         let isMonday   = weekday == 2
 
-        var prompts: [String] = []
+        return [
+            overviewPrompt(isEvening: isEvening, isMorning: isMorning, isMonday: isMonday,
+                           remaining: remaining, tomorrow: tomorrow),
+            nextEventPrompt(nextEvent: nextEvent, now: now, cal: cal, isMorning: isMorning),
+            tomorrowPrompt(isEvening: isEvening, isMorning: isMorning, tomorrow: tomorrow),
+            utilityPrompt(isEvening: isEvening, isMorning: isMorning, isMonday: isMonday,
+                          isThursday: isThursday, isFriday: isFriday, isWeekend: isWeekend,
+                          remaining: remaining, weekendStart: weekendStart, cal: cal, service: service),
+        ]
+    }
 
-        // ── Q1: Overview ────────────────────────────────────────────────────
+    // ── Q1: Overview ────────────────────────────────────────────────────────
+
+    private static func overviewPrompt(
+        isEvening: Bool, isMorning: Bool, isMonday: Bool,
+        remaining: [CalendarEventInfo], tomorrow: [CalendarEventInfo]
+    ) -> String {
         if isEvening {
-            prompts.append(tomorrow.isEmpty
-                ? "What does tomorrow look like?"
-                : "What's on my agenda tomorrow?")
+            return tomorrow.isEmpty ? "What does tomorrow look like?" : "What's on my agenda tomorrow?"
         } else if isMonday && isMorning {
-            prompts.append("What does my week look like?")
+            return "What does my week look like?"
         } else if remaining.isEmpty {
-            prompts.append("Do I have anything today?")
+            return "Do I have anything today?"
         } else if isMorning {
-            prompts.append("What's my day looking like?")
+            return "What's my day looking like?"
         } else {
-            prompts.append("What's left on my schedule today?")
+            return "What's left on my schedule today?"
         }
+    }
 
-        // ── Q2: Next specific event ─────────────────────────────────────────
-        if let event = nextEvent, let title = event.title, !title.isEmpty {
-            let short  = clamp(title, to: 20)
-            let minsUntil = Int(event.startDate.timeIntervalSince(now) / 60)
-            if minsUntil < ChatConstants.minutesPerHour {
-                prompts.append("How long until \(short)?")
-            } else if cal.isDateInToday(event.startDate) {
-                prompts.append("When does \(short) start?")
-            } else if cal.isDateInTomorrow(event.startDate) {
-                prompts.append("What time is \(short) tomorrow?")
-            } else {
-                prompts.append("When is \(short)?")
-            }
+    // ── Q2: Next specific event ──────────────────────────────────────────────
+
+    private static func nextEventPrompt(
+        nextEvent: CalendarEventInfo?, now: Date, cal: Calendar, isMorning: Bool
+    ) -> String {
+        guard let event = nextEvent, let title = event.title, !title.isEmpty else {
+            return isMorning ? "Am I free this afternoon?" : "Am I free tomorrow?"
+        }
+        let short = clamp(title, to: 20)
+        let minsUntil = Int(event.startDate.timeIntervalSince(now) / 60)
+        if minsUntil < ChatConstants.minutesPerHour {
+            return "How long until \(short)?"
+        } else if cal.isDateInToday(event.startDate) {
+            return "When does \(short) start?"
+        } else if cal.isDateInTomorrow(event.startDate) {
+            return "What time is \(short) tomorrow?"
         } else {
-            prompts.append(isMorning ? "Am I free this afternoon?" : "Am I free tomorrow?")
+            return "When is \(short)?"
         }
+    }
 
-        // ── Q3: Tomorrow / add ──────────────────────────────────────────────
+    // ── Q3: Tomorrow / add ───────────────────────────────────────────────────
+
+    private static func tomorrowPrompt(
+        isEvening: Bool, isMorning: Bool, tomorrow: [CalendarEventInfo]
+    ) -> String {
         if isEvening {
             if tomorrow.count == 1, let title = tomorrow.first?.title, !title.isEmpty {
-                prompts.append("What time is \(clamp(title, to: 20)) tomorrow?")
+                return "What time is \(clamp(title, to: 20)) tomorrow?"
             } else if tomorrow.isEmpty {
-                prompts.append("Add a meeting tomorrow morning")
+                return "Add a meeting tomorrow morning"
             } else {
-                prompts.append("What's my first meeting tomorrow?")
+                return "What's my first meeting tomorrow?"
             }
         } else if tomorrow.isEmpty {
-            prompts.append(isMorning ? "Add a meeting this afternoon" : "Add a meeting tomorrow")
+            return isMorning ? "Add a meeting this afternoon" : "Add a meeting tomorrow"
         } else {
-            prompts.append("What's happening tomorrow?")
+            return "What's happening tomorrow?"
         }
+    }
 
-        // ── Q4: Utility / contextual ────────────────────────────────────────
-        if (isThursday || isFriday) && !isWeekend,
-           let wsStart = weekendStart {
+    // ── Q4: Utility / contextual ─────────────────────────────────────────────
+
+    private static func utilityPrompt(
+        isEvening: Bool, isMorning: Bool, isMonday: Bool, isThursday: Bool,
+        isFriday: Bool, isWeekend: Bool, remaining: [CalendarEventInfo],
+        weekendStart: Date?, cal: Calendar, service: CalendarServiceProtocol
+    ) -> String {
+        if (isThursday || isFriday) && !isWeekend, let wsStart = weekendStart {
             let weekendEnd = cal.date(byAdding: .day, value: 2, to: wsStart) ?? wsStart
-            let weekendEvents = service.events(in: wsStart, end: weekendEnd)
-                .filter { !$0.isAllDay }
-            prompts.append(weekendEvents.isEmpty
-                ? "Am I free this weekend?"
-                : "What's on this weekend?")
+            let weekendEvents = service.events(in: wsStart, end: weekendEnd).filter { !$0.isAllDay }
+            return weekendEvents.isEmpty ? "Am I free this weekend?" : "What's on this weekend?"
         } else if isMonday && isMorning {
-            prompts.append("Find a free hour today")
+            return "Find a free hour today"
         } else if remaining.count >= 3 {
-            prompts.append("When am I free today?")
+            return "When am I free today?"
         } else {
-            prompts.append(isEvening
-                ? "Find a free hour tomorrow"
-                : "Find a free hour today")
+            return isEvening ? "Find a free hour tomorrow" : "Find a free hour today"
         }
-
-        return prompts
     }
 
     // MARK: - Helpers

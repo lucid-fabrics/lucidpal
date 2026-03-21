@@ -295,8 +295,4 @@ struct ChatView: View {
     }
 }
 
-private struct VoiceReadiness: Equatable {
-    let modelLoaded: Bool
-    let speechAvailable: Bool
-}
 

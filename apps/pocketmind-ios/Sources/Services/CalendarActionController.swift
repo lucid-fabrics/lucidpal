@@ -8,12 +8,12 @@ import Foundation
 /// Add new action types here without touching ChatViewModel.
 @MainActor
 final class CalendarActionController: CalendarActionControllerProtocol {
-    private let calendarService: any CalendarServiceProtocol
-    private let settings: AppSettings
+    let calendarService: any CalendarServiceProtocol
+    let settings: any AppSettingsProtocol
 
     /// Search window for update/delete by title — smaller than the default browse window
     /// to avoid matching stale events from years ago when names recur (e.g. "Dentist").
-    private static let actionSearchWindowDays = 60
+    static let actionSearchWindowDays = 60
 
     // Date formats the LLM might generate — tried in order
     private static let dateFormats: [String] = [
@@ -57,7 +57,7 @@ final class CalendarActionController: CalendarActionControllerProtocol {
         return d
     }()
 
-    init(calendarService: any CalendarServiceProtocol, settings: AppSettings) {
+    init(calendarService: any CalendarServiceProtocol, settings: any AppSettingsProtocol) {
         self.calendarService = calendarService
         self.settings = settings
     }
@@ -92,215 +92,4 @@ final class CalendarActionController: CalendarActionControllerProtocol {
         }
     }
 
-    // MARK: - Handlers
-
-    private func updateEvent(_ p: CalendarActionPayload) async -> CalendarActionResult {
-        guard let searchTitle = p.search, !searchTitle.isEmpty else {
-            return .failure("(No event title provided for update.)")
-        }
-        guard p.title != nil || p.start != nil || p.end != nil || p.location != nil || p.notes != nil || p.reminderMinutes != nil else {
-            return .failure("(No fields to update were provided.)")
-        }
-        let events = calendarService.findEvents(matching: searchTitle, windowDays: Self.actionSearchWindowDays)
-        guard let event = events.first(where: { ($0.title ?? "").localizedCaseInsensitiveContains(searchTitle) }) else {
-            return .failure("(Couldn't find an event called \"\(searchTitle)\" — please specify the exact name.)")
-        }
-
-        // Build pending snapshot — let user confirm before applying
-        var pending = PendingCalendarUpdate()
-        if let t = p.title    { pending.title = t }
-        if let s = p.start    { pending.start = s }
-        if let e = p.end      { pending.end = e }
-        if let l = p.location, !l.isEmpty { pending.location = l }
-        if let n = p.notes, !n.isEmpty    { pending.notes = n }
-        if let m = p.reminderMinutes      { pending.reminderMinutes = m }
-        if let a = p.isAllDay             { pending.isAllDay = a }
-        if let r = p.recurrence           { pending.recurrence = r }
-
-        // When rescheduling, check conflicts at the new time window
-        let newStart = pending.start ?? event.startDate
-        let newEnd = pending.end ?? event.endDate
-        let conflictSnapshots: [ConflictingEventSnapshot]
-        if pending.start != nil || pending.end != nil {
-            let rawConflicts = calendarService.findConflicts(
-                start: newStart, end: newEnd,
-                excludingIdentifier: event.eventIdentifier
-            )
-            conflictSnapshots = makeConflictSnapshots(from: rawConflicts)
-        } else {
-            conflictSnapshots = []
-        }
-
-        var preview = CalendarEventPreview(
-            title: event.title ?? searchTitle,
-            start: event.startDate,
-            end: event.endDate,
-            calendarName: event.calendarTitle,
-            state: .pendingUpdate,
-            eventIdentifier: event.eventIdentifier,
-            hasConflict: !conflictSnapshots.isEmpty,
-            conflictingEvents: conflictSnapshots
-        )
-        preview.pendingUpdate = pending
-        return .success("", preview)
-    }
-
-    private func findEventForDeletion(_ p: CalendarActionPayload) async -> CalendarActionResult {
-        guard let searchTitle = p.search, !searchTitle.isEmpty else {
-            return .failure("(No event title provided for deletion.)")
-        }
-        let events = calendarService.findEvents(matching: searchTitle, windowDays: Self.actionSearchWindowDays)
-        let lower = searchTitle.lowercased()
-
-        // 1. Exact substring match
-        var event = events.first(where: { ($0.title ?? "").lowercased().contains(lower) })
-
-        // 2. Word-based fallback: any meaningful word (>3 chars) from search appears in event title or vice versa
-        if event == nil {
-            let searchWords = lower.split(separator: " ").map(String.init).filter { $0.count > 3 }
-            event = events.first(where: { ev in
-                let t = (ev.title ?? "").lowercased()
-                let titleWords = t.split(separator: " ").map(String.init).filter { $0.count > 3 }
-                return searchWords.contains(where: { t.contains($0) })
-                    || titleWords.contains(where: { lower.contains($0) })
-            })
-        }
-
-        guard let event else {
-            return .failure("(Couldn't find an event called \"\(searchTitle)\" — please specify the exact name.)")
-        }
-        let preview = CalendarEventPreview(
-            title: event.title ?? searchTitle,
-            start: event.startDate,
-            end: event.endDate,
-            calendarName: event.calendarTitle,
-            state: .pendingDeletion,
-            eventIdentifier: event.eventIdentifier
-        )
-        return .success("", preview)
-    }
-
-    private func createEvent(_ p: CalendarActionPayload) async -> CalendarActionResult {
-        guard let title = p.title, let start = p.start, let end = p.end else {
-            return .failure("(Create requires title, start, and end.)")
-        }
-        do {
-            // Conflict check — capture snapshots before creating so we have rich info for the card
-            let rawConflicts = calendarService.findConflicts(start: start, end: end, excludingIdentifier: nil)
-            let conflictSnapshots = makeConflictSnapshots(from: rawConflicts)
-            let conflictNote = conflictSnapshots.isEmpty ? "" :
-                " Heads-up: this overlaps with \(conflictSnapshots.map { "\"\($0.title)\"" }.joined(separator: ", "))."
-
-            let calID = settings.defaultCalendarIdentifier.isEmpty ? nil : settings.defaultCalendarIdentifier
-            let identifier = try calendarService.createEvent(
-                title: title,
-                start: start,
-                end: end,
-                location: p.location,
-                notes: p.notes,
-                reminderMinutes: p.reminderMinutes,
-                calendarIdentifier: calID,
-                isAllDay: p.isAllDay ?? false,
-                recurrence: p.recurrence,
-                recurrenceEnd: p.recurrenceEnd
-            )
-            let calendarName = calendarService.calendarName(forEventIdentifier: identifier)
-                ?? calendarService.defaultCalendarInfo()?.title
-            let eventIdentifier = identifier.isEmpty ? nil : identifier
-            SiriContextStore.write(SiriLastAction(
-                type: .created,
-                eventTitle: title,
-                eventStart: start,
-                eventEnd: end,
-                calendarName: calendarName,
-                calendarIdentifier: calID,
-                isAllDay: p.isAllDay ?? false,
-                location: p.location,
-                notes: p.notes,
-                eventIdentifier: eventIdentifier,
-                timestamp: .now
-            ))
-            let preview = CalendarEventPreview(
-                title: title,
-                start: start,
-                end: end,
-                calendarName: calendarName,
-                eventIdentifier: eventIdentifier,
-                reminderMinutes: p.reminderMinutes,
-                isAllDay: p.isAllDay ?? false,
-                recurrence: p.recurrence,
-                location: p.location,
-                hasConflict: !conflictSnapshots.isEmpty,
-                conflictingEvents: conflictSnapshots
-            )
-            return .success("Added \"\(title)\" to your calendar.\(conflictNote)", preview)
-        } catch {
-            return .failure("(Couldn't save event: \(error.localizedDescription))")
-        }
-    }
-
-    private func findFreeSlots(_ p: CalendarActionPayload) async -> CalendarActionResult {
-        guard let rangeStart = p.start, let rangeEnd = p.end, rangeStart < rangeEnd else {
-            return .failure("(Free slot query requires a valid start and end range.)")
-        }
-        let requestedMinutes = p.durationMinutes ?? 60
-        guard requestedMinutes > 0 else {
-            return .failure("(Duration must be greater than 0 minutes.)")
-        }
-        let duration = TimeInterval(requestedMinutes * 60)
-        let events = calendarService.events(in: rangeStart, end: rangeEnd)
-            .sorted { $0.startDate < $1.startDate }
-
-        let merged = mergeBusyWindows(from: events)
-
-        let freeSlots = CalendarFreeSlotEngine.findSlots(
-            busyWindows: merged,
-            rangeStart: rangeStart,
-            rangeEnd: rangeEnd,
-            duration: duration
-        )
-        return .queryResult(freeSlots)
-    }
-
-    private func listEvents(_ p: CalendarActionPayload) async -> CalendarActionResult {
-        guard let rangeStart = p.start, let rangeEnd = p.end, rangeStart < rangeEnd else {
-            return .failure("(List requires a valid start and end date range.)")
-        }
-        let events = calendarService.events(in: rangeStart, end: rangeEnd)
-            .sorted { $0.startDate < $1.startDate }
-        let previews = events.map { event in
-            CalendarEventPreview(
-                title: event.title ?? "Untitled",
-                start: event.startDate,
-                end: event.endDate,
-                calendarName: event.calendarTitle,
-                state: .listed,
-                eventIdentifier: event.eventIdentifier,
-                isAllDay: event.isAllDay,
-                location: event.location
-            )
-        }
-        return .listResult(previews)
-    }
-
-    private func bulkFindEventsForDeletion(_ p: CalendarActionPayload) async -> CalendarActionResult {
-        guard let rangeStart = p.start, let rangeEnd = p.end else {
-            return .failure("(Bulk delete requires start and end dates.)")
-        }
-        let events = calendarService.events(in: rangeStart, end: rangeEnd)
-        guard !events.isEmpty else {
-            return .failure("(No events found in that date range.)")
-        }
-        let previews = events.map { event in
-            CalendarEventPreview(
-                title: event.title ?? "Untitled",
-                start: event.startDate,
-                end: event.endDate,
-                calendarName: event.calendarTitle,
-                state: .pendingDeletion,
-                eventIdentifier: event.eventIdentifier
-            )
-        }
-        return .bulkPending(previews)
-    }
 }

@@ -52,6 +52,8 @@ final class CalendarService {
 
     private(set) var authorizationStatus: CalendarAuthorizationStatus = .notDetermined
 
+    private static let eventFetchLimit = 50
+
     private static let eventFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateStyle = .medium
@@ -141,7 +143,7 @@ final class CalendarService {
         let predicate = store.predicateForEvents(withStart: start, end: end, calendars: nil)
         let events = store.events(matching: predicate)
             .sorted { $0.startDate < $1.startDate }
-            .prefix(50)
+            .prefix(Self.eventFetchLimit)
 
         if events.isEmpty {
             return "No events in the next \(days) days."
@@ -152,7 +154,8 @@ final class CalendarService {
     /// Searches for events within a ±windowDays window around today.
     /// Default is 180 days (±6 months) to cover typical planning horizons —
     /// e.g. "delete my summer vacation" needs to reach events months away.
-    func findEvents(matching title: String, windowDays: Int = 180) -> [CalendarEventInfo] {
+    static let defaultSearchWindowDays = 180
+    func findEvents(matching title: String, windowDays: Int = CalendarService.defaultSearchWindowDays) -> [CalendarEventInfo] {
         guard isAuthorized else { return [] }
         let windowStart = Calendar.current.date(byAdding: .day, value: -windowDays, to: .now) ?? .now
         let windowEnd   = Calendar.current.date(byAdding: .day, value:  windowDays, to: .now) ?? .now
