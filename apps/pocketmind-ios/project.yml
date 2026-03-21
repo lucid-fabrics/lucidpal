@@ -41,7 +41,9 @@ targets:
         product: WhisperKit
     entitlements:
       path: Sources/App/PocketMind.entitlements
-      properties: {}
+      properties:
+        com.apple.security.application-groups:
+          - group.app.pocketmind
 
   PocketMindTests:
     type: bundle.unit-test
@@ -61,11 +63,33 @@ targets:
       - package: SnapshotTesting
         product: SnapshotTesting
 
+  PocketMindWidget:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: WidgetExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.pocketmind.widget
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: "KRPUAN3FFA"
+    dependencies:
+      - target: PocketMind
+    entitlements:
+      path: WidgetExtension/PocketMindWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.app.pocketmind
+
 schemes:
   PocketMind:
     build:
       targets:
         PocketMind: all
+        PocketMindWidget: all
         PocketMindTests: all
     run:
       config: Debug
