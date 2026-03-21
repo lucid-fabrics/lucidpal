@@ -15,8 +15,10 @@ Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [lla
 - **Free time finder** — ask for a free slot and it checks your calendar for conflicts automatically
 - **Conflict detection** — when a new or rescheduled event overlaps an existing one, a conflict banner appears on the card; tap it to keep the event, cancel it, or find an available slot; recurring events are identified separately
 - **Multiple chat sessions** — create, rename, and switch between conversations; history is saved locally
-- **Voice input** — tap the mic and speak your question
+- **Voice input** — tap the mic and speak your question; transcription runs on-device via WhisperKit
+- **Voice auto-start** — optionally start listening automatically when opening a new chat
 - **Thinking mode** — shows the model's reasoning process before answering (collapsible)
+- **Configurable context window** — choose 2048, 4096, or 8192 tokens based on your device and conversation length
 - **Siri shortcuts** — ask a question, check your schedule, add an event, or find free time hands-free
 - **Copy messages** — long-press any bubble to copy the text
 
@@ -77,7 +79,7 @@ Tapping a free slot reschedules the event to that time instantly.
 
 ## Siri
 
-PocketMind registers four shortcuts automatically. Use them from Siri, the Shortcuts app, or the Lock Screen:
+PocketMind registers shortcuts automatically. Use them from Siri, the Shortcuts app, or the Lock Screen:
 
 | Phrase | What it does |
 |--------|--------------|
@@ -85,6 +87,10 @@ PocketMind registers four shortcuts automatically. Use them from Siri, the Short
 | *"Check my PocketMind schedule"* | Shows your upcoming calendar events |
 | *"Add a PocketMind event"* | Creates a calendar event via voice |
 | *"Find free time in PocketMind"* | Finds an open slot in your calendar |
+| *"Delete event in PocketMind"* | Deletes a named event with confirmation — no app required |
+| *"Undo my last PocketMind action"* | Reverses the last calendar change (in-app or via Siri) |
+
+The undo shortcut is context-aware: it knows whether your last action was a create, delete, or update — whether you did it inside PocketMind or through Siri — and reverses it with a confirmation card.
 
 ---
 
@@ -100,12 +106,27 @@ All models support Qwen3.5's built-in reasoning (thinking mode). Disable it in S
 
 ---
 
+## Settings
+
+| Setting | What it does |
+|---------|-------------|
+| Calendar access | Enable/disable calendar read & write in chat |
+| Default calendar | Which calendar new events are added to |
+| Thinking mode | Show the model's reasoning before its answer (slower, more accurate) |
+| Start voice on open | Auto-start the microphone when opening a new chat |
+| Auto-send after speech | Submit automatically when speech recognition finishes |
+| Context window | KV cache size in tokens (2048 / 4096 / 8192) — larger = longer conversations, more RAM |
+
+Context window changes take effect the next time the model loads. Your device's RAM determines the maximum available size.
+
+---
+
 ## Privacy
 
 - No analytics, no tracking, no accounts
 - The model file is stored in your app's private Documents folder
 - Calendar data never leaves the device
-- Microphone audio is processed on-device by Apple's Speech framework and discarded immediately
+- Microphone audio is transcribed on-device by [WhisperKit](https://github.com/argmaxinc/WhisperKit) and discarded immediately
 
 ---
 
