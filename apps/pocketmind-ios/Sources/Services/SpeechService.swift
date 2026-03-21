@@ -10,15 +10,27 @@ final class SpeechService {
     @Published private(set) var isRecording = false
     @Published private(set) var isAuthorized = false
     @Published private(set) var transcript = ""
+    @Published private(set) var isInterrupted = false
 
     private var recognizer: SFSpeechRecognizer?
     private var audioEngine = AVAudioEngine()
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
     private var silenceTimer: Timer?
+    private var interruptionObserver: Any?
 
     private static let silenceTimeoutSeconds: TimeInterval = 30
     private static let audioBufferSize: AVAudioFrameCount = 1024
+
+    init() {
+        observeInterruptions()
+    }
+
+    deinit {
+        if let observer = interruptionObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
 
     func requestAuthorization() async {
         let micGranted = await Self.askMicrophonePermission()
@@ -117,6 +129,43 @@ final class SpeechService {
             try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
             speechLogger.error("Failed to deactivate audio session: \(error)")
+        }
+    }
+
+    // MARK: - Audio Interruption Handling
+
+    private func observeInterruptions() {
+        interruptionObserver = NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance(),
+            queue: .main
+        ) { [weak self] notification in
+            self?.handleInterruption(notification)
+        }
+    }
+
+    private func handleInterruption(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+            return
+        }
+
+        switch type {
+        case .began:
+            speechLogger.debug("Audio interruption began")
+            isInterrupted = true
+            if isRecording {
+                stopRecording()
+            }
+
+        case .ended:
+            speechLogger.debug("Audio interruption ended")
+            isInterrupted = false
+            // Auto-resume is handled by AirPodsVoiceCoordinator if needed
+
+        @unknown default:
+            break
         }
     }
 }
