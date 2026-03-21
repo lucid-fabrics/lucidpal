@@ -17,7 +17,7 @@ PocketMind includes six built-in Siri shortcuts. You can trigger them with your 
 | Add Calendar Event | "Add dentist to PocketMind" | Starts an event creation |
 | Find Free Time | "Find free time in PocketMind" | Finds a free 1-hour slot today |
 | Delete Calendar Event | "Delete event in PocketMind" | Searches for an event, shows a preview, and deletes it after confirmation |
-| Undo Last Deletion | "Undo last deletion in PocketMind" | Restores the most recently Siri-deleted event after confirmation |
+| Undo Last Action | "Undo my last PocketMind action" | Reverses the most recent calendar action (create, delete, or update) — whether triggered by Siri or inside the app |
 
 ---
 
@@ -69,10 +69,16 @@ Siri replies: *"Which event would you like to delete?"*
 You say: *"Team standup tomorrow"*
 PocketMind shows a preview card of the matching event and asks you to confirm before deleting.
 
-**Undoing a deletion:**
-> "Hey Siri, undo last deletion in PocketMind"
+**Undoing your last action:**
+> "Hey Siri, undo my last PocketMind action"
 
-PocketMind shows the event that was most recently deleted via Siri and asks you to confirm before restoring it.
+PocketMind looks at what you did most recently — inside the app or via Siri — and reverses it:
+
+| Last action | What happens |
+|-------------|--------------|
+| Deleted an event | PocketMind asks you to confirm, then restores it |
+| Created an event | PocketMind asks you to confirm, then deletes it |
+| Updated / rescheduled an event | PocketMind informs you that undo of edits isn't supported yet |
 
 ---
 
@@ -82,4 +88,4 @@ PocketMind shows the event that was most recently deleted via Siri and asks you 
 - You can customize the trigger phrase to anything you like in the Shortcuts app.
 - The **Add Calendar Event** shortcut lets you dictate the full event detail in one sentence — Siri passes everything to PocketMind.
 - The **Delete Calendar Event** shortcut also responds to *"Delete a PocketMind event"* and *"Remove event from PocketMind"*.
-- The **Undo Last Deletion** shortcut also responds to *"Restore deleted event in PocketMind"* and *"Undo PocketMind deletion"*.
+- The **Undo Last Action** shortcut also responds to *"Undo what I just did in PocketMind"*, *"Undo last PocketMind change"*, *"Restore deleted event in PocketMind"*, and *"Undo PocketMind deletion"*.
