@@ -17,6 +17,8 @@ final class SpeechService {
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
     private var silenceTimer: Timer?
+    // Safety: written once in init on MainActor, then only read in deinit (nonisolated).
+    // AVAudioSession interruption token is thread-safe once assigned.
     nonisolated(unsafe) private var interruptionObserver: Any?
 
     private static let silenceTimeoutSeconds: TimeInterval = 30

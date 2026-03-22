@@ -27,13 +27,14 @@ final class ChatViewModel: ObservableObject {
 
     let llmService: any LLMServiceProtocol
     let calendarService: any CalendarServiceProtocol
-    let calendarActionController: any CalendarActionControllerProtocol
-    let contextService: any ContextServiceProtocol
     let settings: any AppSettingsProtocol
+    let systemPromptBuilder: any SystemPromptBuilderProtocol
+    let suggestedPromptsProvider: any SuggestedPromptsProviderProtocol
     let speechService: any SpeechServiceProtocol
     let hapticService: any HapticServiceProtocol
     let history: any ChatHistoryManagerProtocol
-    let airPodsCoordinator: AirPodsVoiceCoordinator?
+    let airPodsCoordinator: (any AirPodsVoiceCoordinatorProtocol)?
+    private var errorDismissTask: Task<Void, Never>?
     var cancellables = Set<AnyCancellable>()
     // Prevents auto-submit when the user manually taps the mic button to stop recording
     var suppressSpeechAutoSend = false
@@ -54,13 +55,13 @@ final class ChatViewModel: ObservableObject {
     init(
         llmService: any LLMServiceProtocol,
         calendarService: any CalendarServiceProtocol,
-        calendarActionController: any CalendarActionControllerProtocol,
-        contextService: any ContextServiceProtocol,
         settings: any AppSettingsProtocol,
+        systemPromptBuilder: any SystemPromptBuilderProtocol,
+        suggestedPromptsProvider: any SuggestedPromptsProviderProtocol,
         speechService: any SpeechServiceProtocol,
         hapticService: any HapticServiceProtocol,
         historyManager: any ChatHistoryManagerProtocol,
-        airPodsCoordinator: AirPodsVoiceCoordinator? = nil,
+        airPodsCoordinator: (any AirPodsVoiceCoordinatorProtocol)? = nil,
         // Session-mode params — pass these to enable multi-session persistence.
         session: ChatSession? = nil,
         sessionManager: (any SessionManagerProtocol)? = nil,
@@ -69,9 +70,9 @@ final class ChatViewModel: ObservableObject {
     ) {
         self.llmService = llmService
         self.calendarService = calendarService
-        self.calendarActionController = calendarActionController
-        self.contextService = contextService
         self.settings = settings
+        self.systemPromptBuilder = systemPromptBuilder
+        self.suggestedPromptsProvider = suggestedPromptsProvider
         self.speechService = speechService
         self.hapticService = hapticService
         self.history = session != nil ? NoOpChatHistoryManager() : historyManager
@@ -115,8 +116,20 @@ final class ChatViewModel: ObservableObject {
             .store(in: &cancellables)
 
         // Observe AirPods auto-listening state
-        airPodsCoordinator?.$isAutoListening
+        airPodsCoordinator?.isAutoListeningPublisher
             .sink { [weak self] in self?.isAutoListening = $0 }
+            .store(in: &cancellables)
+
+        // Auto-dismiss error banner after errorAutoDismissSeconds
+        $errorMessage
+            .sink { [weak self] msg in
+                self?.errorDismissTask?.cancel()
+                guard msg != nil else { return }
+                self?.errorDismissTask = Task { [weak self] in
+                    try? await Task.sleep(for: .seconds(ChatConstants.errorAutoDismissSeconds))
+                    self?.errorMessage = nil
+                }
+            }
             .store(in: &cancellables)
 
         // Persist messages on change — debounced on MainActor, disk write offloaded to background.
@@ -204,7 +217,7 @@ final class ChatViewModel: ObservableObject {
         // defer guarantees isPreparing resets even if buildSystemPrompt() is extended
         // in the future to be throwing or if Swift runtime unwinds this frame.
         defer { isPreparing = false }
-        let systemPrompt = await buildSystemPrompt()
+        let systemPrompt = await systemPromptBuilder.buildSystemPrompt()
 
         let assistantMsg = ChatMessage(role: .assistant, content: "")
         messages.append(assistantMsg)
@@ -243,7 +256,7 @@ final class ChatViewModel: ObservableObject {
         // After streaming, execute calendar actions (thinking already extracted live)
         if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
             messages[idx].isThinking = false
-            let (content, previews, freeSlots) = await executeCalendarActions(in: messages[idx].content)
+            let (content, previews, freeSlots) = await systemPromptBuilder.executeCalendarActions(in: messages[idx].content)
             messages[idx].content = content
             messages[idx].calendarEventPreviews = previews
             messages[idx].calendarFreeSlots = freeSlots
@@ -253,6 +266,15 @@ final class ChatViewModel: ObservableObject {
 
     func cancelGeneration() {
         llmService.cancelGeneration()
+    }
+
+    func cancelSuggestionsGeneration() {
+        isGeneratingSuggestions = false
+    }
+
+    func generateSuggestedPrompts() async {
+        guard !isGeneratingSuggestions else { return }
+        suggestedPrompts = suggestedPromptsProvider.buildPrompts()
     }
 
     /// Checks all active calendar event previews against EventKit and marks
@@ -281,6 +303,12 @@ final class ChatViewModel: ObservableObject {
 
     func deleteMessage(id: UUID) {
         messages.removeAll { $0.id == id }
+    }
+
+    func needsDateSeparator(at index: Int) -> Bool {
+        guard index < messages.count else { return false }
+        guard index > 0 else { return true }
+        return !Calendar.current.isDate(messages[index].timestamp, inSameDayAs: messages[index - 1].timestamp)
     }
 
 }

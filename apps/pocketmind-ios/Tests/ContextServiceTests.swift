@@ -133,17 +133,13 @@ final class ContextServiceTests: XCTestCase {
     // MARK: - Integration with AppSettings Tests
 
     func testRemindersAccessUpdatesSettings() async {
-        // Note: This test requires EKEventStore authorization which can't be mocked in unit tests.
-        // It would pass in integration tests with proper permissions.
-        // For unit tests, we verify the settings update path exists.
-
         mockSettings.remindersAccessEnabled = false
 
-        // The actual authorization requires device permissions
-        // In unit tests, this will return false without updating settings
-        _ = await sut.requestRemindersAccess()
+        // In unit tests EKEventStore denies access — result must be false
+        // and isRemindersEnabled must reflect that denial
+        let granted = await sut.requestRemindersAccess()
 
-        // We can't assert the result without actual permissions
-        // Integration test would verify this properly
+        XCTAssertFalse(granted, "EKEventStore must deny access in unit test environment")
+        XCTAssertEqual(sut.isRemindersEnabled, granted, "isRemindersEnabled must reflect the authorization result")
     }
 }

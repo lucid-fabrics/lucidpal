@@ -12,9 +12,9 @@ final class ChatViewModelMessageHandlingTests: XCTestCase {
         viewModel = ChatViewModel(
             llmService: llm,
             calendarService: MockCalendarService(),
-            calendarActionController: MockCalendarActionController(),
-            contextService: MockContextService(),
             settings: MockAppSettings(),
+            systemPromptBuilder: MockSystemPromptBuilder(),
+            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
             speechService: MockSpeechService(),
             hapticService: MockHapticService(),
             historyManager: MockChatHistoryManager()

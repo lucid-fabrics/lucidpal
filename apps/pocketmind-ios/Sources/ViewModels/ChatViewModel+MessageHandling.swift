@@ -3,6 +3,7 @@ import Foundation
 // MARK: - Token streaming + toast notifications
 // Separated from the core ViewModel to keep each file under 400 lines.
 
+@MainActor
 extension ChatViewModel {
 
     func showToast(_ message: String, systemImage: String) {

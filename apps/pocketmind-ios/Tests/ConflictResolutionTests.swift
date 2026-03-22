@@ -6,7 +6,6 @@ final class ConflictResolutionTests: XCTestCase {
 
     var llm: MockLLMService!
     var calendar: MockCalendarService!
-    var controller: MockCalendarActionController!
     var haptic: MockHapticService!
     var vm: ChatViewModel!
 
@@ -14,14 +13,13 @@ final class ConflictResolutionTests: XCTestCase {
         llm = MockLLMService()
         llm.isLoaded = true
         calendar = MockCalendarService()
-        controller = MockCalendarActionController()
         haptic = MockHapticService()
         vm = ChatViewModel(
             llmService: llm,
             calendarService: calendar,
-            calendarActionController: controller,
-            contextService: MockContextService(),
             settings: MockAppSettings(),
+            systemPromptBuilder: MockSystemPromptBuilder(),
+            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
             speechService: MockSpeechService(),
             hapticService: haptic,
             historyManager: NoOpChatHistoryManager()

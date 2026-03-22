@@ -5,16 +5,19 @@ import XCTest
 final class ChatHistoryManagerTests: XCTestCase {
     var manager: ChatHistoryManager!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         manager = ChatHistoryManager()
-        // Clean slate — remove any leftover file from previous test runs
+        // Clean slate — remove any leftover file from previous test runs (file may not exist)
         try? FileManager.default.removeItem(at: ChatHistoryManager.historyURL)
     }
 
-    override func tearDown() {
-        try? FileManager.default.removeItem(at: ChatHistoryManager.historyURL)
-        super.tearDown()
+    override func tearDown() async throws {
+        if FileManager.default.fileExists(atPath: ChatHistoryManager.historyURL.path) {
+            try FileManager.default.removeItem(at: ChatHistoryManager.historyURL)
+        }
+        manager = nil
+        try await super.tearDown()
     }
 
     func testLoadReturnsEmptyArrayWhenNoFileExists() {

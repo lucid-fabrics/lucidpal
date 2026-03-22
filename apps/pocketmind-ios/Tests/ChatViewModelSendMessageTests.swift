@@ -16,9 +16,9 @@ final class ChatViewModelSendMessageTests: XCTestCase {
         viewModel = ChatViewModel(
             llmService: llm,
             calendarService: mock,
-            calendarActionController: MockCalendarActionController(),
-            contextService: MockContextService(),
             settings: settings,
+            systemPromptBuilder: MockSystemPromptBuilder(),
+            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
             speechService: MockSpeechService(),
             hapticService: MockHapticService(),
             historyManager: MockChatHistoryManager()
@@ -33,9 +33,9 @@ final class ChatViewModelSendMessageTests: XCTestCase {
         let vm = ChatViewModel(
             llmService: mockLLM,
             calendarService: mock,
-            calendarActionController: MockCalendarActionController(),
-            contextService: MockContextService(),
             settings: settings,
+            systemPromptBuilder: MockSystemPromptBuilder(),
+            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
             speechService: speech,
             hapticService: MockHapticService(),
             historyManager: MockChatHistoryManager()

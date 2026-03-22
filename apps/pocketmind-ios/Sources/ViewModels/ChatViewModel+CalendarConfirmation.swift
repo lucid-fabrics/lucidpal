@@ -3,6 +3,7 @@ import OSLog
 
 private let calendarConfirmationLogger = Logger(subsystem: "com.pocketmind", category: "CalendarConfirmation")
 
+@MainActor
 // MARK: - Calendar event confirmation (deletion + update)
 // Separated from the core ViewModel to keep each file under 300 lines.
 

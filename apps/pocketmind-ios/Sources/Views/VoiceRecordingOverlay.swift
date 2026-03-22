@@ -9,12 +9,18 @@ private enum VoiceOverlayAnim {
     // Label easing
     static let stateLabelDuration: Double = 0.2
     static let transcriptLabelDuration: Double = 0.15
-    // Listening pulse
+    // Listening pulse durations
     static let pulseDuration: Double = 0.9
     static let ring1Duration: Double = 1.2
     static let ring1Delay: Double = 0.1
     static let ring2Duration: Double = 1.5
     static let ring2Delay: Double = 0.25
+    // Listening pulse animation targets
+    static let pulseTargetScale: CGFloat = 1.08
+    static let ring1TargetScale: CGFloat = 1.18
+    static let ring1TargetOpacity: Double = 0.15
+    static let ring2TargetScale: CGFloat = 1.32
+    static let ring2TargetOpacity: Double = 0.08
     // Waveform bars
     static let barDurations: [Double] = [0.5, 0.4, 0.6, 0.4, 0.5]
     static let barDelays: [Double]    = [0.0, 0.1, 0.2, 0.3, 0.4]
@@ -165,15 +171,15 @@ struct VoiceRecordingOverlay: View {
     private func startListeningAnimation() {
         guard !reduceMotion, !isTranscribing else { return }
         withAnimation(.easeInOut(duration: VoiceOverlayAnim.pulseDuration).repeatForever(autoreverses: true)) {
-            pulseScale = 1.08
+            pulseScale = VoiceOverlayAnim.pulseTargetScale
         }
         withAnimation(.easeInOut(duration: VoiceOverlayAnim.ring1Duration).repeatForever(autoreverses: true).delay(VoiceOverlayAnim.ring1Delay)) {
-            ring1Scale = 1.18
-            ring1Opacity = 0.15
+            ring1Scale = VoiceOverlayAnim.ring1TargetScale
+            ring1Opacity = VoiceOverlayAnim.ring1TargetOpacity
         }
         withAnimation(.easeInOut(duration: VoiceOverlayAnim.ring2Duration).repeatForever(autoreverses: true).delay(VoiceOverlayAnim.ring2Delay)) {
-            ring2Scale = 1.32
-            ring2Opacity = 0.08
+            ring2Scale = VoiceOverlayAnim.ring2TargetScale
+            ring2Opacity = VoiceOverlayAnim.ring2TargetOpacity
         }
     }
 

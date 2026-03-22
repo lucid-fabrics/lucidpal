@@ -22,8 +22,8 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
 
     func testNoEventsReturnsFreeWorkingSlots() {
         let monday = nextMonday()
-        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday)!
-        let rangeEnd = Calendar.current.date(bySettingHour: 23, minute: 59, second: 0, of: monday)!
+        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday) ?? monday
+        let rangeEnd = Calendar.current.date(bySettingHour: 23, minute: 59, second: 0, of: monday) ?? monday
 
         let slots = CalendarFreeSlotEngine.findSlots(
             busyWindows: [],
@@ -36,8 +36,8 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
 
     func testReturnsAtMostFiveSlots() {
         let monday = nextMonday()
-        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday)!
-        let rangeEnd = Calendar.current.date(byAdding: .day, value: 5, to: rangeStart)!
+        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday) ?? monday
+        let rangeEnd = Calendar.current.date(byAdding: .day, value: 5, to: rangeStart) ?? rangeStart
 
         let slots = CalendarFreeSlotEngine.findSlots(
             busyWindows: [],
@@ -50,8 +50,8 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
 
     func testBusyWindowBlocksSlot() {
         let monday = nextMonday()
-        let dayStart = Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: monday)!
-        let dayEnd = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: monday)!
+        let dayStart = Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: monday) ?? monday
+        let dayEnd = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: monday) ?? monday
         // Block entire working day
         let slots = CalendarFreeSlotEngine.findSlots(
             busyWindows: [(start: dayStart, end: dayEnd)],
@@ -64,11 +64,11 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
 
     func testDurationRequirementFiltersShortGaps() {
         let monday = nextMonday()
-        let dayStart = Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: monday)!
+        let dayStart = Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: monday) ?? monday
         // 30-minute gap at 9am
-        let busyEnd = Calendar.current.date(bySettingHour: 9, minute: 30, second: 0, of: monday)!
-        let busyStart2 = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: monday)!
-        let dayEnd = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: monday)!
+        let busyEnd = Calendar.current.date(bySettingHour: 9, minute: 30, second: 0, of: monday) ?? monday
+        let busyStart2 = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: monday) ?? monday
+        let dayEnd = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: monday) ?? monday
 
         let slots = CalendarFreeSlotEngine.findSlots(
             busyWindows: [
@@ -106,8 +106,8 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
 
     func testSlotStartAndEndAreOrdered() {
         let monday = nextMonday()
-        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday)!
-        let rangeEnd = Calendar.current.date(bySettingHour: 23, minute: 59, second: 0, of: monday)!
+        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday) ?? monday
+        let rangeEnd = Calendar.current.date(bySettingHour: 23, minute: 59, second: 0, of: monday) ?? monday
 
         let slots = CalendarFreeSlotEngine.findSlots(
             busyWindows: [],
@@ -123,8 +123,8 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
     func testWeekendDaysAreSkipped() {
         // Range spanning an entire week — engine must not emit slots on Sat/Sun
         let monday = nextMonday()
-        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday)!
-        let rangeEnd = Calendar.current.date(byAdding: .day, value: 7, to: rangeStart)!
+        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday) ?? monday
+        let rangeEnd = Calendar.current.date(byAdding: .day, value: 7, to: rangeStart) ?? rangeStart
 
         let slots = CalendarFreeSlotEngine.findSlots(
             busyWindows: [],
@@ -142,10 +142,10 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
     func testOverlappingBusyWindowsAreHandled() {
         // Two events that overlap — engine must not crash and must skip the combined window
         let monday = nextMonday()
-        let busyStart = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: monday)!
-        let busyMid   = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: monday)!
-        let busyEnd   = Calendar.current.date(bySettingHour: 11, minute: 0, second: 0, of: monday)!
-        let rangeEnd  = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: monday)!
+        let busyStart = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: monday) ?? monday
+        let busyMid   = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: monday) ?? monday
+        let busyEnd   = Calendar.current.date(bySettingHour: 11, minute: 0, second: 0, of: monday) ?? monday
+        let rangeEnd  = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: monday) ?? monday
 
         let slots = CalendarFreeSlotEngine.findSlots(
             busyWindows: [
@@ -164,8 +164,8 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
     func testDurationLongerThanWorkDayReturnsEmpty() {
         // Requesting a 13-hour slot (longer than 8am–8pm window) must never match
         let monday = nextMonday()
-        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday)!
-        let rangeEnd   = Calendar.current.date(bySettingHour: 23, minute: 59, second: 0, of: monday)!
+        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday) ?? monday
+        let rangeEnd   = Calendar.current.date(bySettingHour: 23, minute: 59, second: 0, of: monday) ?? monday
 
         let slots = CalendarFreeSlotEngine.findSlots(
             busyWindows: [],
@@ -181,8 +181,8 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
         let monday = nextMonday()
         let cal = Calendar.current
         var windows: [(start: Date, end: Date)] = []
-        var cursor = cal.date(bySettingHour: 8, minute: 0, second: 0, of: monday)!
-        let dayEnd  = cal.date(bySettingHour: 20, minute: 0, second: 0, of: monday)!
+        var cursor = cal.date(bySettingHour: 8, minute: 0, second: 0, of: monday) ?? monday
+        let dayEnd  = cal.date(bySettingHour: 20, minute: 0, second: 0, of: monday) ?? monday
         while cursor < dayEnd {
             let next = cursor.addingTimeInterval(3600)
             windows.append((start: cursor, end: min(next, dayEnd)))
@@ -191,7 +191,7 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
 
         let slots = CalendarFreeSlotEngine.findSlots(
             busyWindows: windows,
-            rangeStart: cal.date(bySettingHour: 8, minute: 0, second: 0, of: monday)!,
+            rangeStart: cal.date(bySettingHour: 8, minute: 0, second: 0, of: monday) ?? monday,
             rangeEnd: dayEnd,
             duration: 3600
         )
@@ -200,7 +200,7 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
 
     func testZeroDurationRangeReturnsEmpty() {
         let monday = nextMonday()
-        let point = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: monday)!
+        let point = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: monday) ?? monday
 
         let slots = CalendarFreeSlotEngine.findSlots(
             busyWindows: [],
@@ -214,8 +214,8 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
     func testSlotsDoNotExceedWorkingHours() {
         // Even with an empty calendar, slots must stay within 8am–8pm
         let monday = nextMonday()
-        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday)!
-        let rangeEnd   = Calendar.current.date(bySettingHour: 23, minute: 59, second: 0, of: monday)!
+        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday) ?? monday
+        let rangeEnd   = Calendar.current.date(bySettingHour: 23, minute: 59, second: 0, of: monday) ?? monday
 
         let slots = CalendarFreeSlotEngine.findSlots(
             busyWindows: [],

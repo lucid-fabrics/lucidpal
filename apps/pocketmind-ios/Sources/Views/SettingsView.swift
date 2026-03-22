@@ -204,13 +204,15 @@ struct SettingsView: View {
             }
             .padding(.vertical, 4)
 
-            Link(destination: URL(string: "shortcuts://")!) {
-                HStack {
-                    Label("Open Shortcuts App", systemImage: "link")
-                    Spacer()
-                    Image(systemName: "arrow.up.right.square")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            if let shortcutsURL = URL(string: "shortcuts://") {
+                Link(destination: shortcutsURL) {
+                    HStack {
+                        Label("Open Shortcuts App", systemImage: "link")
+                        Spacer()
+                        Image(systemName: "arrow.up.right.square")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
         }

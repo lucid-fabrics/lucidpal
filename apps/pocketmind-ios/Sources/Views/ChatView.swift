@@ -4,7 +4,6 @@ struct ChatView: View {
     @ObservedObject var viewModel: ChatViewModel
 
     @FocusState private var inputFocused: Bool
-    @State private var errorDismissTask: Task<Void, Never>?
     @State private var showClearConfirm = false
 
     var body: some View {
@@ -55,15 +54,6 @@ struct ChatView: View {
         } message: {
             Text("This will permanently delete all messages. This cannot be undone.")
         }
-        .onChange(of: viewModel.errorMessage) { _, msg in
-            errorDismissTask?.cancel()
-            guard msg != nil else { return }
-            errorDismissTask = Task { @MainActor in
-                try? await Task.sleep(for: .seconds(ChatConstants.errorAutoDismissSeconds)) // safe: cancellation discarded; errorDismissTask?.cancel() handles early teardown
-                viewModel.errorMessage = nil
-            }
-        }
-        .onDisappear { errorDismissTask?.cancel() }
         .task {
             guard let query = viewModel.pendingInput else { return }
             viewModel.pendingInput = nil
@@ -151,8 +141,7 @@ struct ChatView: View {
                 } else {
                     LazyVStack(spacing: 8) {
                         ForEach(Array(viewModel.messages.enumerated()), id: \.element.id) { index, message in
-                            let prev = index > 0 ? viewModel.messages[index - 1] : nil
-                            if needsDateSeparator(current: message, previous: prev) {
+                            if viewModel.needsDateSeparator(at: index) {
                                 DateSeparatorView(date: message.timestamp)
                                     .padding(.top, index == 0 ? 0 : 4)
                             }
@@ -241,11 +230,6 @@ struct ChatView: View {
     /// True only when generating a user-initiated response (not background suggestion generation).
     private var isUserGenerating: Bool {
         viewModel.isGenerating && !viewModel.isGeneratingSuggestions
-    }
-
-    private func needsDateSeparator(current: ChatMessage, previous: ChatMessage?) -> Bool {
-        guard let previous else { return true }
-        return !Calendar.current.isDate(current.timestamp, inSameDayAs: previous.timestamp)
     }
 
     private var inputBar: some View {

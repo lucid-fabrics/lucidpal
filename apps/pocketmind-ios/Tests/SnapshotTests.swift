@@ -14,9 +14,9 @@ final class SnapshotTests: XCTestCase {
         let vm = ChatViewModel(
             llmService: llm,
             calendarService: MockCalendarService(),
-            calendarActionController: MockCalendarActionController(),
-            contextService: MockContextService(),
             settings: MockAppSettings(),
+            systemPromptBuilder: MockSystemPromptBuilder(),
+            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
             speechService: MockSpeechService(),
             hapticService: MockHapticService(),
             historyManager: MockChatHistoryManager()
@@ -227,9 +227,9 @@ final class SnapshotTests: XCTestCase {
         let vm = ChatViewModel(
             llmService: llm,
             calendarService: MockCalendarService(),
-            calendarActionController: MockCalendarActionController(),
-            contextService: MockContextService(),
             settings: MockAppSettings(),
+            systemPromptBuilder: MockSystemPromptBuilder(),
+            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
             speechService: MockSpeechService(),
             hapticService: MockHapticService(),
             historyManager: MockChatHistoryManager()

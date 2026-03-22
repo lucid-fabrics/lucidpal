@@ -20,6 +20,8 @@ final class AudioRouteMonitor: ObservableObject, AudioRouteMonitorProtocol {
 
     var isAirPodsConnectedPublisher: AnyPublisher<Bool, Never> { $isAirPodsConnected.eraseToAnyPublisher() }
 
+    // Safety: written once in init on MainActor, then only removed in deinit (nonisolated).
+    // NotificationCenter token is an opaque NSObjectProtocol — safe to hold across isolation domains.
     nonisolated(unsafe) private var routeChangeObserver: Any?
 
     init() {

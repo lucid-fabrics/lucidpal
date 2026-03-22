@@ -54,14 +54,17 @@ final class CalendarDataProvider: @unchecked Sendable {
         )
     }
 
+    private enum WorkDay {
+        static let startHour = 9  // 9 AM
+        static let endHour = 17   // 5 PM
+    }
+
     private func calculateFreeSlots(events: [EKEvent], start: Date, end: Date) -> [FreeSlotSummary] {
         let calendar = Calendar.current
-        let workDayStart = 9  // 9 AM
-        let workDayEnd = 17   // 5 PM
 
         // Get work day boundaries
-        var cursor = max(start, calendar.date(bySettingHour: workDayStart, minute: 0, second: 0, of: start) ?? start)
-        let workEnd = calendar.date(bySettingHour: workDayEnd, minute: 0, second: 0, of: start) ?? end
+        var cursor = max(start, calendar.date(bySettingHour: WorkDay.startHour, minute: 0, second: 0, of: start) ?? start)
+        let workEnd = calendar.date(bySettingHour: WorkDay.endHour, minute: 0, second: 0, of: start) ?? end
         let searchEnd = min(end, workEnd)
 
         var freeSlots: [FreeSlotSummary] = []

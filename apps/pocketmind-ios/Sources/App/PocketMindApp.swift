@@ -3,6 +3,24 @@ import SwiftUI
 
 private let appLogger = Logger(subsystem: "com.pocketmind", category: "PocketMindApp")
 
+// Wrapper so the NotificationCenter token is removed in deinit.
+// PocketMindApp is a struct and cannot have deinit directly.
+private final class MemoryPressureObserver {
+    private let token: any NSObjectProtocol
+
+    init(onWarning: @escaping () -> Void) {
+        token = NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil,
+            queue: .main
+        ) { _ in onWarning() }
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(token)
+    }
+}
+
 @main
 struct PocketMindApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
@@ -26,8 +44,7 @@ struct PocketMindApp: App {
     private let settingsViewModel: SettingsViewModel
     private let downloadViewModel: ModelDownloadViewModel
 
-    // Stored so the system doesn't immediately deallocate the observer.
-    private var memoryWarningObserver: (any NSObjectProtocol)?
+    private let memoryWarningObserver: MemoryPressureObserver
 
     // MARK: - Environment
 
@@ -65,13 +82,8 @@ struct PocketMindApp: App {
         )
 
         // Cancel LLM generation on memory pressure to avoid Jetsam crash.
-        // Token is stored in memoryWarningObserver to prevent premature deallocation.
         let service = llmService
-        memoryWarningObserver = NotificationCenter.default.addObserver(
-            forName: UIApplication.didReceiveMemoryWarningNotification,
-            object: nil,
-            queue: .main
-        ) { _ in
+        memoryWarningObserver = MemoryPressureObserver {
             Task { @MainActor in service.cancelGeneration() }
         }
     }

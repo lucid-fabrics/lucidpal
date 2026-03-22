@@ -1,4 +1,5 @@
 import AVFoundation
+import Combine
 import XCTest
 @testable import PocketMind
 
@@ -24,10 +25,11 @@ final class AudioRouteMonitorTests: XCTestCase {
     // MARK: - Initialization Tests
 
     func testInit_setsInitialAudioRouteState() {
-        // AudioRouteMonitor initializes with current route state
-        // We can't control AVAudioSession in unit tests, so we just verify
-        // the properties are set (not nil/empty if there's a route)
-        XCTAssertNotNil(sut.currentAudioRoute)
+        // currentAudioRoute is a non-optional String populated from AVAudioSession.
+        // Verify it is stable across reads on the same actor (AVAudioSession is not
+        // controllable in unit tests, so consistency is the meaningful assertion here).
+        let route = sut.currentAudioRoute
+        XCTAssertEqual(route, sut.currentAudioRoute, "currentAudioRoute must return a consistent value")
     }
 
     func testInit_airPodsNotConnectedByDefault() {
@@ -43,18 +45,24 @@ final class AudioRouteMonitorTests: XCTestCase {
     // MARK: - Published Property Tests
 
     func testIsAirPodsConnected_isPublished() {
-        // Verify the property is marked as @Published by checking it's an ObservableObject
-        XCTAssertTrue(sut is ObservableObject)
+        // Verify $isAirPodsConnected publisher emits an initial value
+        var received: [Bool] = []
+        let cancellable = sut.isAirPodsConnectedPublisher.sink { received.append($0) }
+        XCTAssertEqual(received, [false], "Publisher must emit false as the initial value in test environment")
+        cancellable.cancel()
     }
 
     func testIsHomePodConnected_isPublished() {
-        // Verify the property is marked as @Published by checking it's an ObservableObject
-        XCTAssertTrue(sut is ObservableObject)
+        // isHomePodConnected and isAirPodsConnected are independently tracked
+        XCTAssertFalse(sut.isHomePodConnected, "HomePod must not be connected in test environment")
+        XCTAssertFalse(sut.isAirPodsConnected && sut.isHomePodConnected, "Both cannot be true simultaneously in test environment")
     }
 
     func testCurrentAudioRoute_isPublished() {
-        // Verify the property is marked as @Published by checking it's an ObservableObject
-        XCTAssertTrue(sut is ObservableObject)
+        // currentAudioRoute is a non-optional String — verify it is stable on the main actor
+        let route1 = sut.currentAudioRoute
+        let route2 = sut.currentAudioRoute
+        XCTAssertEqual(route1, route2, "currentAudioRoute must return a consistent value")
     }
 
     // NOTE: We cannot directly test AVAudioSession route changes in unit tests

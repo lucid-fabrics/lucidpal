@@ -10,9 +10,9 @@ final class ChatViewModelStreamTests: XCTestCase {
         viewModel = ChatViewModel(
             llmService: MockLLMService(),
             calendarService: MockCalendarService(),
-            calendarActionController: MockCalendarActionController(),
-            contextService: MockContextService(),
             settings: MockAppSettings(),
+            systemPromptBuilder: MockSystemPromptBuilder(),
+            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
             speechService: MockSpeechService(),
             hapticService: MockHapticService(),
             historyManager: MockChatHistoryManager()

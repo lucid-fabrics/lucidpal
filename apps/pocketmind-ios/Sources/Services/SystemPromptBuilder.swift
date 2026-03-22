@@ -1,24 +1,54 @@
 import Foundation
 import OSLog
 
-private let chatLogger = Logger(subsystem: "app.pocketmind", category: "Chat")
+private let systemPromptLogger = Logger(subsystem: "app.pocketmind", category: "Chat")
 
-// MARK: - System prompt construction + calendar action dispatch
-// Separated from the core ViewModel to keep each file under 300 lines.
+// MARK: - Protocol
 
-extension ChatViewModel {
+/// Single Responsibility: owns all LLM system-prompt generation and calendar action dispatch.
+/// ChatViewModel delegates here so it does not need to change when prompt logic evolves.
+@MainActor
+protocol SystemPromptBuilderProtocol {
+    func buildSystemPrompt() async -> String
+    func executeCalendarActions(in text: String) async -> (content: String, previews: [CalendarEventPreview], freeSlots: [CalendarFreeSlot])
+}
 
-    // Matches [CALENDAR_ACTION:{...}] — uses negative lookahead \}(?!\]) so that
-    // `}` characters inside JSON string values (e.g. notes, title) are allowed,
-    // while still correctly terminating at the closing `}]` sequence.
+// MARK: - Implementation
+
+@MainActor
+final class SystemPromptBuilder: SystemPromptBuilderProtocol {
+
+    private let calendarService: any CalendarServiceProtocol
+    private let contextService: any ContextServiceProtocol
+    private let settings: any AppSettingsProtocol
+    private let calendarActionController: any CalendarActionControllerProtocol
+
+    // Matches [CALENDAR_ACTION:{...}] — negative lookahead \}(?!\]) allows `}` inside JSON string values.
     static let actionPattern = #"\[CALENDAR_ACTION:(\{(?:[^}]|\}(?!\]))*\})\]"#
 
     private static let calendarActionRegex: NSRegularExpression = {
-        guard let regex = try? NSRegularExpression(pattern: actionPattern, options: [.dotMatchesLineSeparators]) else { // safe: pattern is a compile-time constant; failure is caught by preconditionFailure below
+        guard let regex = try? NSRegularExpression(
+            pattern: actionPattern,
+            options: [.dotMatchesLineSeparators]
+        ) else { // safe: pattern is a compile-time constant; failure caught by preconditionFailure
             preconditionFailure("Invalid calendarActionRegex pattern: \(actionPattern)")
         }
         return regex
     }()
+
+    init(
+        calendarService: any CalendarServiceProtocol,
+        contextService: any ContextServiceProtocol,
+        settings: any AppSettingsProtocol,
+        calendarActionController: any CalendarActionControllerProtocol
+    ) {
+        self.calendarService = calendarService
+        self.contextService = contextService
+        self.settings = settings
+        self.calendarActionController = calendarActionController
+    }
+
+    // MARK: - SystemPromptBuilderProtocol
 
     func executeCalendarActions(in text: String) async -> (content: String, previews: [CalendarEventPreview], freeSlots: [CalendarFreeSlot]) {
         let regex = Self.calendarActionRegex
@@ -33,7 +63,6 @@ extension ChatViewModel {
             guard let fullRange = Range(match.range, in: result),
                   let jsonRange = Range(match.range(at: 1), in: result) else { continue }
             let json = String(result[jsonRange])
-
             let actionResult = await calendarActionController.execute(json: json)
             let replacement: String
             switch actionResult {
@@ -70,19 +99,18 @@ extension ChatViewModel {
         ]
         if calendarEnabled { parts.append(calendarToolInstructions()) }
         if calendarEnabled, let ctx = calendarContext() { parts.append(ctx) }
-        if contextEnabled, let crossAppContext = await crossAppContext() { parts.append(crossAppContext) }
+        if contextEnabled, let cross = await crossAppContext() { parts.append(cross) }
         let prompt = parts.joined(separator: " ")
-        chatLogger.info("🧠 SYSTEM_PROMPT: \(prompt, privacy: .public)")
+        systemPromptLogger.info("🧠 SYSTEM_PROMPT: \(prompt, privacy: .public)")
         return prompt
     }
 
-    /// Fetches cross-app context from Notes, Reminders, and Mail.
-    func crossAppContext() async -> String? {
+    // MARK: - Private helpers
+
+    private func crossAppContext() async -> String? {
         await contextService.fetchContext(query: nil)
     }
 
-    /// The CALENDAR TOOL instruction block injected into the system prompt.
-    /// Assembled from three focused helpers to keep each section under 60 lines.
     func calendarToolInstructions() -> String {
         """
             CALENDAR TOOL
@@ -96,7 +124,6 @@ extension ChatViewModel {
             """
     }
 
-    /// Defines the supported [CALENDAR_ACTION:...] block formats and output structure.
     func calendarBlockFormats() -> String {
         """
             Block formats:
@@ -114,8 +141,7 @@ extension ChatViewModel {
             """
     }
 
-    /// Few-shot examples covering all action types for in-context learning.
-    func calendarActionExamples() -> String {
+    private func calendarActionExamples() -> String {
         [calendarCreateExamples(), calendarUpdateDeleteExamples(), calendarQueryExamples()]
             .joined(separator: "\n\n")
     }
@@ -218,7 +244,6 @@ extension ChatViewModel {
             """
     }
 
-    /// Hard rules that govern all calendar action output.
     func calendarActionRules() -> String {
         """
             Rules:
@@ -238,12 +263,9 @@ extension ChatViewModel {
             """
     }
 
-    /// Fetches the user's calendar events for the prompt context.
-    /// Returns nil if calendar access was revoked or there are no events.
-    func calendarContext() -> String? {
+    private func calendarContext() -> String? {
         let windowStart = Calendar.current.date(byAdding: .day, value: -2, to: .now) ?? .now
         let events = calendarService.fetchEvents(from: windowStart, days: 16)
-        // Sync revocation: if OS denied access between toggle and now, disable the setting.
         guard calendarService.isAuthorized else {
             settings.calendarAccessEnabled = false
             return nil
