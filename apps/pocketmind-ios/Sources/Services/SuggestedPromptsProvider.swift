@@ -94,7 +94,7 @@ final class SuggestedPromptsProvider: SuggestedPromptsProviderProtocol {
         guard let event = nextEvent, let title = event.title, !title.isEmpty else {
             return isMorning ? "Am I free this afternoon?" : "Am I free tomorrow?"
         }
-        let short = clamp(title, to: 20)
+        let short = clamp(title, to: ChatConstants.eventTitlePreviewLength)
         let minsUntil = Int(event.startDate.timeIntervalSince(now) / 60)
         if minsUntil < ChatConstants.minutesPerHour {
             return "How long until \(short)?"
@@ -114,7 +114,7 @@ final class SuggestedPromptsProvider: SuggestedPromptsProviderProtocol {
     ) -> String {
         if isEvening {
             if tomorrow.count == 1, let title = tomorrow.first?.title, !title.isEmpty {
-                return "What time is \(clamp(title, to: 20)) tomorrow?"
+                return "What time is \(clamp(title, to: ChatConstants.eventTitlePreviewLength)) tomorrow?"
             } else if tomorrow.isEmpty {
                 return "Add a meeting tomorrow morning"
             } else {

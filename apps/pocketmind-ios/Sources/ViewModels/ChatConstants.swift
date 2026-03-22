@@ -39,4 +39,6 @@ enum ChatConstants {
     static let largeContextSizeTokens = 8192
     /// Delay (ms) before resuming AirPods auto-voice after an audio interruption ends.
     static let airPodsAutoResumeDelayMilliseconds: Int = 500
+    /// Max characters to display for an event title in hints and suggested prompts.
+    static let eventTitlePreviewLength: Int = 20
 }

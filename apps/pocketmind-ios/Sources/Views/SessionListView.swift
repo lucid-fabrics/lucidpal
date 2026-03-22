@@ -139,7 +139,7 @@ struct SessionListView: View {
             return "Ask about your schedule, add events, or find free time"
         }
         let mins = Int(event.startDate.timeIntervalSince(now) / 60)
-        let short = title.count > 22 ? String(title.prefix(20)) + "…" : title
+        let short = title.count > ChatConstants.eventTitlePreviewLength + 2 ? String(title.prefix(ChatConstants.eventTitlePreviewLength)) + "…" : title
         if mins < 5  { return "\"\(short)\" is starting now" }
         if mins < 60 { return "Ask about \"\(short)\"" }
         return "Tap the mic to ask about your day"
