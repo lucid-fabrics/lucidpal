@@ -20,6 +20,7 @@ final class ConflictResolutionTests: XCTestCase {
             llmService: llm,
             calendarService: calendar,
             calendarActionController: controller,
+            contextService: MockContextService(),
             settings: MockAppSettings(),
             speechService: MockSpeechService(),
             hapticService: haptic,

@@ -7,7 +7,7 @@ final class SessionListViewModelTests: XCTestCase {
     var llm: MockLLMService!
     var calendarService: MockCalendarService!
     var controller: MockCalendarActionController!
-    var settings: AppSettings!
+    var settings: AppSettingsProtocol!
     var speech: MockSpeechService!
     var viewModel: SessionListViewModel!
 
@@ -16,7 +16,7 @@ final class SessionListViewModelTests: XCTestCase {
         llm = MockLLMService()
         calendarService = MockCalendarService()
         controller = MockCalendarActionController()
-        settings = AppSettings()
+        settings = MockAppSettings()
         speech = MockSpeechService()
         viewModel = SessionListViewModel(
             sessionManager: mock,

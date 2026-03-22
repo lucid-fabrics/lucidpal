@@ -5,14 +5,14 @@ import XCTest
 final class ModelDownloadViewModelTests: XCTestCase {
     var mockLLM: MockLLMService!
     var mockDownloader: MockModelDownloader!
-    var settings: AppSettings!
+    var settings: AppSettingsProtocol!
     var viewModel: ModelDownloadViewModel!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         mockLLM = MockLLMService()
         mockDownloader = MockModelDownloader()
-        settings = AppSettings()
+        settings = MockAppSettings()
         viewModel = ModelDownloadViewModel(llmService: mockLLM, settings: settings, downloader: mockDownloader)
     }
 

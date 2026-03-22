@@ -3,6 +3,7 @@ import XCTest
 
 /// Verifies UserDefaultsKeys constants are correct and distinct — guards against
 /// accidental key renames that would silently break persisted user preferences.
+@MainActor
 final class UserDefaultsKeysTests: XCTestCase {
 
     // MARK: - AppSettings keys

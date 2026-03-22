@@ -125,8 +125,10 @@ final class AirPodsVoiceCoordinatorTests: XCTestCase {
 // MARK: - Mock AudioRouteMonitor
 
 @MainActor
-final class MockAudioRouteMonitor: ObservableObject {
+final class MockAudioRouteMonitor: ObservableObject, AudioRouteMonitorProtocol {
     @Published var isAirPodsConnected = false
     @Published var isHomePodConnected = false
     @Published var currentAudioRoute = ""
+
+    var isAirPodsConnectedPublisher: AnyPublisher<Bool, Never> { $isAirPodsConnected.eraseToAnyPublisher() }
 }

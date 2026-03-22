@@ -5,14 +5,22 @@ import OSLog
 
 private let audioLogger = Logger(subsystem: "com.pocketmind", category: "AudioRouteMonitor")
 
+@MainActor
+protocol AudioRouteMonitorProtocol: AnyObject {
+    var isAirPodsConnected: Bool { get }
+    var isAirPodsConnectedPublisher: AnyPublisher<Bool, Never> { get }
+}
+
 /// Monitors audio route changes to detect AirPods and HomePod connections.
 @MainActor
-final class AudioRouteMonitor: ObservableObject {
+final class AudioRouteMonitor: ObservableObject, AudioRouteMonitorProtocol {
     @Published private(set) var isAirPodsConnected = false
     @Published private(set) var isHomePodConnected = false
     @Published private(set) var currentAudioRoute: String = ""
 
-    private var routeChangeObserver: Any?
+    var isAirPodsConnectedPublisher: AnyPublisher<Bool, Never> { $isAirPodsConnected.eraseToAnyPublisher() }
+
+    nonisolated(unsafe) private var routeChangeObserver: Any?
 
     init() {
         updateAudioRouteState()
@@ -32,18 +40,15 @@ final class AudioRouteMonitor: ObservableObject {
             forName: AVAudioSession.routeChangeNotification,
             object: AVAudioSession.sharedInstance(),
             queue: .main
-        ) { [weak self] notification in
-            self?.handleRouteChange(notification)
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.handleRouteChange()
+            }
         }
     }
 
-    private func handleRouteChange(_ notification: Notification) {
-        guard let reason = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt,
-              let changeReason = AVAudioSession.RouteChangeReason(rawValue: reason) else {
-            return
-        }
-
-        audioLogger.debug("Audio route changed: \(String(describing: changeReason))")
+    private func handleRouteChange() {
+        audioLogger.debug("Audio route changed")
         updateAudioRouteState()
     }
 

@@ -18,6 +18,7 @@ final class CalendarConfirmationTests: XCTestCase {
             llmService: llm,
             calendarService: calendar,
             calendarActionController: MockCalendarActionController(),
+            contextService: MockContextService(),
             settings: MockAppSettings(),
             speechService: MockSpeechService(),
             hapticService: haptic,

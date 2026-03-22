@@ -2,8 +2,7 @@ import EventKit
 import Foundation
 
 /// Provides calendar data for widgets without requiring main app dependencies
-@MainActor
-final class CalendarDataProvider {
+final class CalendarDataProvider: @unchecked Sendable {
     private let eventStore = EKEventStore()
 
     func fetchWidgetData() async -> (nextEvent: EventSummary?, freeSlots: [FreeSlotSummary], dayEvents: [EventSummary]) {

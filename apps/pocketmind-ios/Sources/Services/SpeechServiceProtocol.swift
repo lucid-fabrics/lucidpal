@@ -11,6 +11,7 @@ protocol SpeechServiceProtocol: AnyObject {
     /// True while audio has been captured and the STT engine is processing it.
     /// False for streaming engines (SFSpeechRecognizer) that produce results live.
     var isTranscribing: Bool { get }
+    var isInterrupted: Bool { get }
 
     /// Combine publishers — use these instead of `$property` when the
     /// consumer holds `any SpeechServiceProtocol` (existentials can't project `@Published`).
@@ -18,6 +19,7 @@ protocol SpeechServiceProtocol: AnyObject {
     var isAuthorizedPublisher: AnyPublisher<Bool, Never> { get }
     var transcriptPublisher: AnyPublisher<String, Never> { get }
     var isTranscribingPublisher: AnyPublisher<Bool, Never> { get }
+    var isInterruptedPublisher: AnyPublisher<Bool, Never> { get }
 
     func requestAuthorization() async
     func startRecording() throws
@@ -31,4 +33,5 @@ extension SpeechService: SpeechServiceProtocol {
     var isAuthorizedPublisher: AnyPublisher<Bool, Never> { $isAuthorized.eraseToAnyPublisher() }
     var transcriptPublisher: AnyPublisher<String, Never> { $transcript.eraseToAnyPublisher() }
     var isTranscribingPublisher: AnyPublisher<Bool, Never> { Just(false).eraseToAnyPublisher() }
+    var isInterruptedPublisher: AnyPublisher<Bool, Never> { $isInterrupted.eraseToAnyPublisher() }
 }

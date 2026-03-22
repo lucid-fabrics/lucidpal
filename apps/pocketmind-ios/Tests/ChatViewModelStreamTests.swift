@@ -11,7 +11,8 @@ final class ChatViewModelStreamTests: XCTestCase {
             llmService: MockLLMService(),
             calendarService: MockCalendarService(),
             calendarActionController: MockCalendarActionController(),
-            settings: AppSettings(),
+            contextService: MockContextService(),
+            settings: MockAppSettings(),
             speechService: MockSpeechService(),
             hapticService: MockHapticService(),
             historyManager: MockChatHistoryManager()

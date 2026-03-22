@@ -4,13 +4,13 @@ import XCTest
 @MainActor
 final class CalendarActionControllerHelpersTests: XCTestCase {
     var mock: MockCalendarService!
-    var settings: AppSettings!
+    var settings: AppSettingsProtocol!
     var controller: CalendarActionController!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         mock = MockCalendarService()
-        settings = AppSettings()
+        settings = MockAppSettings()
         controller = CalendarActionController(calendarService: mock, settings: settings)
     }
 

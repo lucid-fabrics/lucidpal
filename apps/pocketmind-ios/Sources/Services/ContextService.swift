@@ -7,7 +7,7 @@ private let contextLogger = Logger(subsystem: "app.pocketmind", category: "Conte
 /// Aggregates cross-app context from Notes, Reminders, and Mail.
 /// Respects user privacy opt-ins stored in UserDefaults.
 /// Not @MainActor — EventKit completion handlers run on background queue.
-final class ContextService: ObservableObject {
+final class ContextService: ObservableObject, @unchecked Sendable {
     @Published private(set) var isNotesEnabled = false
     @Published private(set) var isRemindersEnabled = false
     @Published private(set) var isMailEnabled = false
@@ -16,6 +16,7 @@ final class ContextService: ObservableObject {
     // EventKit for Reminders (EKReminder) — thread-safe per Apple docs
     private let eventStore = EKEventStore()
 
+    @MainActor
     init(settings: any AppSettingsProtocol) {
         self.settings = settings
         self.isNotesEnabled = settings.notesAccessEnabled
@@ -52,8 +53,8 @@ final class ContextService: ObservableObject {
 
     private func fetchNotesContext(query: String?) async -> [ContextItem] {
         // iOS 18+ has NotesKit, but it requires entitlements and App Store review.
-        // For now, return empty — Notes integration requires Apple approval.
-        // TODO: Implement CNNoteFetchRequest when entitlements are granted.
+        // Notes integration is blocked on Apple granting the com.apple.developer.notes.allow entitlement.
+        // Implement CNNoteFetchRequest once the entitlement is approved.
         contextLogger.info("📝 NOTES: Not available (requires App Store entitlements)")
         return []
     }
