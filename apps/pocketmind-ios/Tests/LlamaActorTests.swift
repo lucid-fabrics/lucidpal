@@ -4,6 +4,7 @@ import XCTest
 /// LlamaActor wraps llama.cpp C FFI. Full generate/load tests require a physical
 /// ARM64 device with a GGUF model file present. These tests cover observable state
 /// and configuration constants that are safe to verify without hardware.
+@MainActor
 final class LlamaActorTests: XCTestCase {
 
     // MARK: - Initial state

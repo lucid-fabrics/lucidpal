@@ -14,4 +14,6 @@ final class MockSystemPromptBuilder: SystemPromptBuilderProtocol {
         let result = executeCalendarActionsResult
         return (result.content.isEmpty ? text : result.content, result.previews, result.freeSlots)
     }
+
+    func extractWebSearchQuery(from text: String) -> (query: String, maxResults: Int)? { nil }
 }

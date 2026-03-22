@@ -14,6 +14,8 @@ enum UserDefaultsKeys {
     static let notesAccessEnabled       = "notesAccessEnabled"
     static let remindersAccessEnabled   = "remindersAccessEnabled"
     static let mailAccessEnabled        = "mailAccessEnabled"
+    static let webSearchEnabled         = "webSearchEnabled"
+    static let webSearchEndpoint        = "webSearchEndpoint"
 
     static let siriPendingQuery         = "pm_siri_pending_query"
     static let siriPendingEvent         = "pm_siri_pending_event"

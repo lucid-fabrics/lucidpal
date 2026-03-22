@@ -53,6 +53,14 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         didSet { UserDefaults.standard.set(mailAccessEnabled, forKey: UserDefaultsKeys.mailAccessEnabled) }
     }
 
+    @Published var webSearchEnabled: Bool {
+        didSet { UserDefaults.standard.set(webSearchEnabled, forKey: UserDefaultsKeys.webSearchEnabled) }
+    }
+
+    @Published var webSearchEndpoint: String {
+        didSet { UserDefaults.standard.set(webSearchEndpoint, forKey: UserDefaultsKeys.webSearchEndpoint) }
+    }
+
     // MARK: - Init
 
     init() {
@@ -69,6 +77,8 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         notesAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.notesAccessEnabled)
         remindersAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.remindersAccessEnabled)
         mailAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.mailAccessEnabled)
+        webSearchEnabled = defaults.bool(forKey: UserDefaultsKeys.webSearchEnabled)
+        webSearchEndpoint = defaults.string(forKey: UserDefaultsKeys.webSearchEndpoint) ?? ""
     }
 
     // MARK: - Computed Properties

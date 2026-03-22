@@ -37,6 +37,8 @@ struct PocketMindApp: App {
     private let calendarActionController: any CalendarActionControllerProtocol
     private let audioRouteMonitor = AudioRouteMonitor()
     private let airPodsCoordinator: AirPodsVoiceCoordinator
+    private let webSearchService: WebSearchService
+    private let contextService: ContextService
 
     // MARK: - ViewModels
 
@@ -60,6 +62,8 @@ struct PocketMindApp: App {
             speechService: speechService,
             settings: settings
         )
+        webSearchService = WebSearchService(settings: settings)
+        contextService = ContextService(settings: settings)
         let sessionManager = SessionManager()
         sessionListViewModel = SessionListViewModel(
             sessionManager: sessionManager,
@@ -69,7 +73,9 @@ struct PocketMindApp: App {
             settings: settings,
             speechService: speechService,
             hapticService: hapticService,
-            airPodsCoordinator: airPodsCoordinator
+            airPodsCoordinator: airPodsCoordinator,
+            webSearchService: webSearchService,
+            contextService: contextService
         )
         settingsViewModel = SettingsViewModel(
             settings: settings,

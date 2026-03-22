@@ -34,6 +34,7 @@ final class ChatViewModel: ObservableObject {
     let hapticService: any HapticServiceProtocol
     let history: any ChatHistoryManagerProtocol
     let airPodsCoordinator: (any AirPodsVoiceCoordinatorProtocol)?
+    let webSearchService: (any WebSearchServiceProtocol)?
     private var errorDismissTask: Task<Void, Never>?
     var cancellables = Set<AnyCancellable>()
     // Prevents auto-submit when the user manually taps the mic button to stop recording
@@ -62,6 +63,7 @@ final class ChatViewModel: ObservableObject {
         hapticService: any HapticServiceProtocol,
         historyManager: any ChatHistoryManagerProtocol,
         airPodsCoordinator: (any AirPodsVoiceCoordinatorProtocol)? = nil,
+        webSearchService: (any WebSearchServiceProtocol)? = nil,
         // Session-mode params — pass these to enable multi-session persistence.
         session: ChatSession? = nil,
         sessionManager: (any SessionManagerProtocol)? = nil,
@@ -77,6 +79,7 @@ final class ChatViewModel: ObservableObject {
         self.hapticService = hapticService
         self.history = session != nil ? NoOpChatHistoryManager() : historyManager
         self.airPodsCoordinator = airPodsCoordinator
+        self.webSearchService = webSearchService
         self.sessionID = session?.id
         self.sessionCreatedAt = session?.createdAt ?? .now
         self.sessionManager = sessionManager
@@ -230,10 +233,11 @@ final class ChatViewModel: ObservableObject {
         let historyLimit = ramGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeHistoryLimit : ChatConstants.smallHistoryLimit
         let historyMessages = Array(messages.dropLast().suffix(historyLimit))
 
+        let showThinking = settings.thinkingEnabled  // snapshot at send time — also used by web search re-generation
+
         do {
             var raw = ""           // full accumulated raw output
             var thinkDone = false  // have we seen </think> yet?
-            let showThinking = settings.thinkingEnabled  // snapshot at send time
 
             for try await token in llmService.generate(systemPrompt: systemPrompt, messages: historyMessages, thinkingEnabled: showThinking) {
                 guard let idx = messages.firstIndex(where: { $0.id == assistantID }) else { break }
@@ -253,14 +257,51 @@ final class ChatViewModel: ObservableObject {
             errorMessage = error.localizedDescription
         }
 
-        // After streaming, execute calendar actions (thinking already extracted live)
+        // Post-streaming: web search agentic loop (one iteration max) then calendar actions.
         if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
-            messages[idx].isThinking = false
-            let (content, previews, freeSlots) = await systemPromptBuilder.executeCalendarActions(in: messages[idx].content)
-            messages[idx].content = content
-            messages[idx].calendarEventPreviews = previews
-            messages[idx].calendarFreeSlots = freeSlots
-            llmLogger.info("✅ FINAL: \(content, privacy: .public) | events=\(previews.count) slots=\(freeSlots.count)")
+
+            // Web search: if LLM output contains [WEB_SEARCH:{...}], execute and re-generate.
+            if let searchSvc = webSearchService,
+               settings.webSearchEnabled,
+               let args = systemPromptBuilder.extractWebSearchQuery(from: messages[idx].content) {
+                messages[idx].content = ""
+                do {
+                    let results = try await searchSvc.search(query: args.query, maxResults: args.maxResults)
+                    let resultText = results.enumerated().map { i, r in
+                        "[\(i + 1)] \(r.title)\nURL: \(r.url)\n\(r.snippet)"
+                    }.joined(separator: "\n\n")
+                    let toolMsg = ChatMessage(
+                        role: .user,
+                        content: "[SEARCH_RESULTS for \"\(args.query)\"]:\n\(resultText)\n\nNow answer the original question based on these results."
+                    )
+                    var raw2 = ""
+                    var thinkDone2 = false
+                    for try await token in llmService.generate(
+                        systemPrompt: systemPrompt,
+                        messages: historyMessages + [toolMsg],
+                        thinkingEnabled: showThinking
+                    ) {
+                        guard let i = messages.firstIndex(where: { $0.id == assistantID }) else { break }
+                        applyStreamToken(token, rawBuffer: &raw2, thinkDone: &thinkDone2, showThinking: showThinking, idx: i)
+                    }
+                } catch is CancellationError {
+                    // User cancelled — leave partial content visible
+                } catch {
+                    if let i = messages.firstIndex(where: { $0.id == assistantID }) {
+                        messages[i].content = "Search failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+
+            // Calendar actions on final output (whether from first pass or post-search re-generation)
+            if let finalIdx = messages.firstIndex(where: { $0.id == assistantID }) {
+                messages[finalIdx].isThinking = false
+                let (content, previews, freeSlots) = await systemPromptBuilder.executeCalendarActions(in: messages[finalIdx].content)
+                messages[finalIdx].content = content
+                messages[finalIdx].calendarEventPreviews = previews
+                messages[finalIdx].calendarFreeSlots = freeSlots
+                llmLogger.info("✅ FINAL: \(content, privacy: .public) | events=\(previews.count) slots=\(freeSlots.count)")
+            }
         }
     }
 

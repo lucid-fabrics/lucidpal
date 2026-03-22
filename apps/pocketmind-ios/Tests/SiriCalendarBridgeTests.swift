@@ -1,6 +1,7 @@
 import XCTest
 @testable import PocketMind
 
+@MainActor
 final class SiriCalendarBridgeTests: XCTestCase {
 
     // MARK: - formatEvent
@@ -89,7 +90,7 @@ final class SiriCalendarBridgeTests: XCTestCase {
         XCTAssertNil(result)
     }
 
-    func testFindFirstFreeSlotReturnsSlotOnEmptyDay() {
+    func testFindFirstFreeSlotReturnsSlotOnEmptyDay() throws {
         let monday = nextMonday()
         let cal = Calendar.current
         let rangeStart = cal.date(bySettingHour: 0, minute: 0, second: 0, of: monday) ?? monday
@@ -100,10 +101,8 @@ final class SiriCalendarBridgeTests: XCTestCase {
             rangeEnd: rangeEnd,
             duration: 3600
         )
-        XCTAssertNotNil(result)
-        if let slot = result {
-            XCTAssertLessThan(slot.start, slot.end)
-        }
+        let slot = try XCTUnwrap(result, "Expected a free slot on an empty day")
+        XCTAssertLessThan(slot.start, slot.end)
     }
 
     func testFindFirstFreeSlotEndAfterStart() {

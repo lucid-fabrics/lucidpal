@@ -37,4 +37,6 @@ enum ChatConstants {
     static let defaultContextSizeTokens = 4096
     /// Maximum LLM context window size (tokens) on high-RAM devices (≥ largeContextRAMThresholdGB).
     static let largeContextSizeTokens = 8192
+    /// Delay (ms) before resuming AirPods auto-voice after an audio interruption ends.
+    static let airPodsAutoResumeDelayMilliseconds: Int = 500
 }

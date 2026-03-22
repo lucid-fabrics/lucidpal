@@ -11,6 +11,7 @@ private let systemPromptLogger = Logger(subsystem: "app.pocketmind", category: "
 protocol SystemPromptBuilderProtocol {
     func buildSystemPrompt() async -> String
     func executeCalendarActions(in text: String) async -> (content: String, previews: [CalendarEventPreview], freeSlots: [CalendarFreeSlot])
+    func extractWebSearchQuery(from text: String) -> (query: String, maxResults: Int)?
 }
 
 // MARK: - Implementation
@@ -32,6 +33,19 @@ final class SystemPromptBuilder: SystemPromptBuilderProtocol {
             options: [.dotMatchesLineSeparators]
         ) else { // safe: pattern is a compile-time constant; failure caught by preconditionFailure
             preconditionFailure("Invalid calendarActionRegex pattern: \(actionPattern)")
+        }
+        return regex
+    }()
+
+    // Matches [WEB_SEARCH:{...}] — same lookahead pattern as calendarActionRegex.
+    static let webSearchPattern = #"\[WEB_SEARCH:(\{(?:[^}]|\}(?!\]))*\})\]"#
+
+    private static let webSearchRegex: NSRegularExpression = {
+        guard let regex = try? NSRegularExpression(
+            pattern: webSearchPattern,
+            options: [.dotMatchesLineSeparators]
+        ) else {
+            preconditionFailure("Invalid webSearchRegex pattern: \(webSearchPattern)")
         }
         return regex
     }()
@@ -100,9 +114,35 @@ final class SystemPromptBuilder: SystemPromptBuilderProtocol {
         if calendarEnabled { parts.append(calendarToolInstructions()) }
         if calendarEnabled, let ctx = calendarContext() { parts.append(ctx) }
         if contextEnabled, let cross = await crossAppContext() { parts.append(cross) }
+        if settings.webSearchEnabled && !settings.webSearchEndpoint.isEmpty { parts.append(webSearchToolInstructions()) }
         let prompt = parts.joined(separator: " ")
         systemPromptLogger.info("🧠 SYSTEM_PROMPT: \(prompt, privacy: .public)")
         return prompt
+    }
+
+    func extractWebSearchQuery(from text: String) -> (query: String, maxResults: Int)? {
+        let nsText = text as NSString
+        let range = NSRange(location: 0, length: nsText.length)
+        guard let match = Self.webSearchRegex.firstMatch(in: text, range: range),
+              let jsonRange = Range(match.range(at: 1), in: text),
+              let data = String(text[jsonRange]).data(using: .utf8),
+              let payload = try? JSONDecoder().decode(WebSearchPayload.self, from: data) else { return nil }
+        return (query: payload.query, maxResults: payload.maxResults ?? 5)
+    }
+
+    func webSearchToolInstructions() -> String {
+        """
+            WEB SEARCH TOOL
+            When the user asks about current events, real-time data, or topics outside your training, output a [WEB_SEARCH:{...}] block. The app will execute the search and re-send you the results to synthesize.
+
+            Format: [WEB_SEARCH:{"query":"your search terms","maxResults":5}]
+
+            Rules:
+            - Use web search only when the question genuinely requires up-to-date information.
+            - Keep the query concise and specific.
+            - Output ONLY the [WEB_SEARCH:...] block — no other text in that response.
+            - After receiving [SEARCH_RESULTS ...], synthesize a clear answer from those results.
+            """
     }
 
     // MARK: - Private helpers
@@ -280,4 +320,11 @@ final class SystemPromptBuilder: SystemPromptBuilderProtocol {
         formatter.timeStyle = .short
         return formatter.string(from: .now)
     }
+}
+
+// MARK: - Web search payload
+
+private struct WebSearchPayload: Decodable {
+    let query: String
+    let maxResults: Int?
 }

@@ -94,7 +94,7 @@ final class AirPodsVoiceCoordinator: ObservableObject, AirPodsVoiceCoordinatorPr
             shouldAutoResume = false
             // Delay slightly to ensure audio session is ready
             Task { [weak self] in
-                try? await Task.sleep(for: .milliseconds(500))
+                try? await Task.sleep(for: .milliseconds(ChatConstants.airPodsAutoResumeDelayMilliseconds))
                 self?.startAutoVoice()
             }
         }

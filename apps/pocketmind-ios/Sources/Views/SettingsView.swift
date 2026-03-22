@@ -10,6 +10,7 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 calendarSection
+                webSearchSection
                 modelSection
                 inferenceSection
                 shortcutsSection
@@ -78,6 +79,30 @@ struct SettingsView: View {
             Text("Not granted")
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.orange)
+        }
+    }
+
+    private var webSearchSection: some View {
+        Section {
+            Toggle(isOn: Binding(
+                get: { viewModel.settings.webSearchEnabled },
+                set: { viewModel.settings.webSearchEnabled = $0 }
+            )) {
+                Label("Web Search", systemImage: "globe")
+            }
+            if viewModel.settings.webSearchEnabled {
+                TextField("SearXNG endpoint URL", text: Binding(
+                    get: { viewModel.settings.webSearchEndpoint },
+                    set: { viewModel.settings.webSearchEndpoint = $0 }
+                ))
+                .keyboardType(.URL)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+            }
+        } header: {
+            Text("Web Search")
+        } footer: {
+            Text("When enabled, PocketMind can search the web for up-to-date information. Requires a self-hosted SearXNG instance (e.g. http://192.168.1.190:8888).")
         }
     }
 

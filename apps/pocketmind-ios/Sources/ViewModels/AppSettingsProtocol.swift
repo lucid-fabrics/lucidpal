@@ -19,6 +19,8 @@ protocol AppSettingsProtocol: AnyObject {
     var notesAccessEnabled: Bool { get set }
     var remindersAccessEnabled: Bool { get set }
     var mailAccessEnabled: Bool { get set }
+    var webSearchEnabled: Bool { get set }
+    var webSearchEndpoint: String { get set }
     var selectedModel: ModelInfo { get }
     var deviceRAMGB: Int { get }
     /// Maximum context size this device can safely support.
