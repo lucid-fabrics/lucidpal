@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import OSLog
 
-private let settingsLogger = Logger(subsystem: "com.pocketmind", category: "SettingsViewModel")
+private let settingsLogger = Logger(subsystem: "app.pocketmind", category: "SettingsViewModel")
 
 @MainActor
 final class SettingsViewModel: ObservableObject {

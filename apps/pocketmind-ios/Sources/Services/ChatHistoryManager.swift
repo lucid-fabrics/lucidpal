@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-private let historyLogger = Logger(subsystem: "com.pocketmind", category: "ChatHistoryManager")
+private let historyLogger = Logger(subsystem: "app.pocketmind", category: "ChatHistoryManager")
 
 @MainActor
 protocol ChatHistoryManagerProtocol {

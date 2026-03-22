@@ -3,7 +3,7 @@ import EventKit
 import OSLog
 import SwiftUI
 
-private let intentLogger = Logger(subsystem: "com.pocketmind", category: "DeleteCalendarEventIntent")
+private let intentLogger = Logger(subsystem: "app.pocketmind", category: "DeleteCalendarEventIntent")
 
 // MARK: - DeleteCalendarEventIntent
 

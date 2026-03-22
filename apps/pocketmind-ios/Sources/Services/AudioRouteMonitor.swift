@@ -3,7 +3,7 @@ import Combine
 import Foundation
 import OSLog
 
-private let audioLogger = Logger(subsystem: "com.pocketmind", category: "AudioRouteMonitor")
+private let audioLogger = Logger(subsystem: "app.pocketmind", category: "AudioRouteMonitor")
 
 @MainActor
 protocol AudioRouteMonitorProtocol: AnyObject {

@@ -1,7 +1,7 @@
 import OSLog
 import SwiftUI
 
-private let appLogger = Logger(subsystem: "com.pocketmind", category: "PocketMindApp")
+private let appLogger = Logger(subsystem: "app.pocketmind", category: "PocketMindApp")
 
 // Wrapper so the NotificationCenter token is removed in deinit.
 // PocketMindApp is a struct and cannot have deinit directly.

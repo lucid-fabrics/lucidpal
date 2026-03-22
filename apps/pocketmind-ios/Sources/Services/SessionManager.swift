@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-private let sessionLogger = Logger(subsystem: "com.pocketmind", category: "SessionManager")
+private let sessionLogger = Logger(subsystem: "app.pocketmind", category: "SessionManager")
 
 @MainActor
 protocol SessionManagerProtocol {

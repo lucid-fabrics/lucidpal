@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import OSLog
 
-private let logger = Logger(subsystem: "com.pocketmind", category: "ModelDownloader")
+private let logger = Logger(subsystem: "app.pocketmind", category: "ModelDownloader")
 
 enum DownloadState: Equatable, Sendable {
     case idle

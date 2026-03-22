@@ -3,7 +3,7 @@ import Combine
 import Foundation
 import OSLog
 
-private let coordinatorLogger = Logger(subsystem: "com.pocketmind", category: "AirPodsVoiceCoordinator")
+private let coordinatorLogger = Logger(subsystem: "app.pocketmind", category: "AirPodsVoiceCoordinator")
 
 // MARK: - Protocol
 

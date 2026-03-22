@@ -31,4 +31,8 @@ enum ChatConstants {
     static let thinkOpenTag = "<think>"
     /// Closing tag emitted by Qwen3 models after their reasoning trace.
     static let thinkCloseTag = "</think>"
+    /// Default LLM context window size (tokens) on low-RAM devices.
+    static let defaultContextSizeTokens = 4096
+    /// Maximum LLM context window size (tokens) on high-RAM devices (≥ largeContextRAMThresholdGB).
+    static let largeContextSizeTokens = 8192
 }

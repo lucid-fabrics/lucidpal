@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import OSLog
 
-private let modelDownloadLogger = Logger(subsystem: "com.pocketmind", category: "ModelDownloadViewModel")
+private let modelDownloadLogger = Logger(subsystem: "app.pocketmind", category: "ModelDownloadViewModel")
 
 @MainActor
 final class ModelDownloadViewModel: ObservableObject {

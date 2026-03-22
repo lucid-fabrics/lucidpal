@@ -3,7 +3,7 @@ import Foundation
 import OSLog
 import Speech
 
-private let speechLogger = Logger(subsystem: "com.pocketmind", category: "SpeechService")
+private let speechLogger = Logger(subsystem: "app.pocketmind", category: "SpeechService")
 
 @MainActor
 final class SpeechService {

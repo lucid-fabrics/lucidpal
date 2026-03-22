@@ -65,7 +65,7 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         speechAutoSendEnabled = defaults.object(forKey: UserDefaultsKeys.speechAutoSendEnabled) as? Bool ?? true
         voiceAutoStartEnabled = defaults.object(forKey: UserDefaultsKeys.voiceAutoStartEnabled) as? Bool ?? false
         airpodsAutoVoiceEnabled = defaults.object(forKey: UserDefaultsKeys.airpodsAutoVoiceEnabled) as? Bool ?? false
-        contextSize = defaults.object(forKey: UserDefaultsKeys.contextSize) as? Int ?? 4096
+        contextSize = defaults.object(forKey: UserDefaultsKeys.contextSize) as? Int ?? ChatConstants.defaultContextSizeTokens
         notesAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.notesAccessEnabled)
         remindersAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.remindersAccessEnabled)
         mailAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.mailAccessEnabled)
@@ -83,7 +83,7 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
     }
 
     var maxContextSize: Int {
-        deviceRAMGB >= 6 ? 8192 : 4096
+        deviceRAMGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeContextSizeTokens : ChatConstants.defaultContextSizeTokens
     }
 
     // MARK: - Private Constants
