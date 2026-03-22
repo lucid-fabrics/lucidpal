@@ -131,7 +131,7 @@ final class CalendarConfirmationTests: XCTestCase {
         let msgID = addMessageWithPreviews([p1, p2])
         await vm.confirmAllDeletions(messageID: msgID)
         let states = vm.messages.last?.calendarEventPreviews.map(\.state) ?? []
-        XCTAssertTrue(states.allSatisfy { $0 == .deleted })
+        XCTAssertEqual(states, [.deleted, .deleted])
         XCTAssertEqual(Set(calendar.deletedIdentifiers), ["id-A", "id-B"])
     }
 

@@ -116,7 +116,7 @@ final class CalendarServiceProtocolTests: XCTestCase {
 
     func testDeleteEventRecordsDeletedIdentifier() throws {
         try service.deleteEvent(identifier: "evt-123")
-        XCTAssertTrue(service.deletedIdentifiers.contains("evt-123"))
+        XCTAssertEqual(service.deletedIdentifiers, ["evt-123"])
     }
 
     func testDeleteEventThrowsWhenConfigured() {

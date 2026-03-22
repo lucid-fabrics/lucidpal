@@ -98,8 +98,8 @@ final class CalendarActionControllerTests: XCTestCase {
             return XCTFail("Expected .bulkPending")
         }
         XCTAssertEqual(previews.count, 2)
-        XCTAssertTrue(previews.allSatisfy { $0.state == .pendingDeletion })
-        XCTAssertTrue(previews.allSatisfy { !$0.title.isEmpty })
+        XCTAssertEqual(previews.map(\.state), [.pendingDeletion, .pendingDeletion])
+        XCTAssertEqual(previews.map(\.title).sorted(), ["Event A", "Event B"])
     }
 
     // MARK: - Update
