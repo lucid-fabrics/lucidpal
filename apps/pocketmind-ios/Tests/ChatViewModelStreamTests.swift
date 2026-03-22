@@ -107,4 +107,30 @@ final class ChatViewModelStreamTests: XCTestCase {
         XCTAssertTrue(thinkDone)
         XCTAssertTrue(viewModel.messages[idx].content.isEmpty)
     }
+
+    // MARK: - Stream interruption
+
+    func testCancellationLeavesPartialContentVisible() async throws {
+        let llm = MockLLMService()
+        llm.isLoaded = true
+        llm.stubbedTokens = ["Partial"]
+        llm.shouldThrowOnGenerate = CancellationError()
+        let vm = ChatViewModel(
+            llmService: llm,
+            calendarService: MockCalendarService(),
+            settings: MockAppSettings(),
+            systemPromptBuilder: MockSystemPromptBuilder(),
+            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+            speechService: MockSpeechService(),
+            hapticService: MockHapticService(),
+            historyManager: MockChatHistoryManager()
+        )
+
+        vm.inputText = "Test cancellation"
+        await vm.sendMessage()
+
+        // Message slot must exist with partial content preserved, not cleared
+        let assistantMsg = vm.messages.last(where: { $0.role == .assistant })
+        XCTAssertEqual(assistantMsg?.content, "Partial")
+    }
 }

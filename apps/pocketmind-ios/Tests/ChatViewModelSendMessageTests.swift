@@ -45,12 +45,12 @@ final class ChatViewModelSendMessageTests: XCTestCase {
 
     // MARK: - cancelGeneration / handleSiriQuery
 
-    func testCancelGenerationCallsLLMService() {
+    func testCancelGenerationCallsLLMService() async throws {
         viewModel.cancelGeneration()
         XCTAssertTrue(llm.cancelCalled)
     }
 
-    func testHandleSiriQuerySetsInputText() {
+    func testHandleSiriQuerySetsInputText() async throws {
         viewModel.handleSiriQuery("What's on my calendar?")
         XCTAssertEqual(viewModel.inputText, "What's on my calendar?")
     }
@@ -115,14 +115,14 @@ final class ChatViewModelSendMessageTests: XCTestCase {
 
     // MARK: - toggleSpeech
 
-    func testToggleSpeechStartsRecordingWhenNotRecording() {
+    func testToggleSpeechStartsRecordingWhenNotRecording() async throws {
         let (vm, _, speech) = makeLoadedViewModel()
         speech.isAuthorized = true
         vm.toggleSpeech()
         XCTAssertTrue(speech.startCalled)
     }
 
-    func testToggleSpeechStopsRecordingWhenAlreadyRecording() {
+    func testToggleSpeechStopsRecordingWhenAlreadyRecording() async throws {
         let (vm, _, speech) = makeLoadedViewModel()
         speech.isRecording = true
         vm.toggleSpeech()
@@ -149,7 +149,7 @@ final class ChatViewModelSendMessageTests: XCTestCase {
 
     // MARK: - clearHistory
 
-    func testClearHistoryDuringGenerationCancelsLLM() {
+    func testClearHistoryDuringGenerationCancelsLLM() async throws {
         let (vm, mockLLM, _) = makeLoadedViewModel(tokens: ["a", "b"])
         mockLLM.isGenerating = true
         vm.clearHistory()
@@ -159,14 +159,14 @@ final class ChatViewModelSendMessageTests: XCTestCase {
 
     // MARK: - deleteMessage
 
-    func testDeleteMessageRemovesItFromMessages() {
+    func testDeleteMessageRemovesItFromMessages() async throws {
         let msg = ChatMessage(role: .assistant, content: "to delete")
         viewModel.messages = [msg]
         viewModel.deleteMessage(id: msg.id)
         XCTAssertTrue(viewModel.messages.isEmpty)
     }
 
-    func testDeleteMessageWithWrongIDIsNoOp() {
+    func testDeleteMessageWithWrongIDIsNoOp() async throws {
         let msg = ChatMessage(role: .assistant, content: "keep")
         viewModel.messages = [msg]
         viewModel.deleteMessage(id: UUID())

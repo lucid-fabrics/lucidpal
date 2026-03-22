@@ -1,3 +1,4 @@
+import CoreLocation
 import SwiftUI
 
 struct SettingsView: View {
@@ -10,6 +11,7 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 calendarSection
+                locationSection
                 webSearchSection
                 modelSection
                 inferenceSection
@@ -40,18 +42,15 @@ struct SettingsView: View {
                 }
                 .foregroundStyle(Color.accentColor)
             } else {
-                Toggle("Use calendar in chat", isOn: Binding(
-                    get: { viewModel.settings.calendarAccessEnabled },
-                    set: { viewModel.settings.calendarAccessEnabled = $0 }
-                ))
+                Toggle("Use calendar in chat", isOn: $viewModel.calendarAccessEnabled)
 
                 let calendars = viewModel.availableCalendars
                 if !calendars.isEmpty {
                     Picker("Default Calendar", selection: Binding(
                         get: {
-                            viewModel.settings.defaultCalendarIdentifier.isEmpty
+                            viewModel.defaultCalendarIdentifier.isEmpty
                                 ? nil
-                                : viewModel.settings.defaultCalendarIdentifier
+                                : viewModel.defaultCalendarIdentifier
                         },
                         set: { viewModel.setDefaultCalendar(id: $0) }
                     )) {
@@ -82,27 +81,70 @@ struct SettingsView: View {
         }
     }
 
-    private var webSearchSection: some View {
+    private var locationSection: some View {
         Section {
-            Toggle(isOn: Binding(
-                get: { viewModel.settings.webSearchEnabled },
-                set: { viewModel.settings.webSearchEnabled = $0 }
-            )) {
-                Label("Web Search", systemImage: "globe")
+            HStack {
+                Label("Location", systemImage: "location")
+                Spacer()
+                locationStatusBadge
             }
-            if viewModel.settings.webSearchEnabled {
-                TextField("SearXNG endpoint URL", text: Binding(
-                    get: { viewModel.settings.webSearchEndpoint },
-                    set: { viewModel.settings.webSearchEndpoint = $0 }
-                ))
-                .keyboardType(.URL)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
+
+            if viewModel.locationService == nil {
+                Text("Location service unavailable")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else if viewModel.locationStatus == .denied || viewModel.locationStatus == .restricted {
+                Text("Location access denied. Enable it in Settings → Privacy → Location Services.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                if viewModel.locationEnabled && !viewModel.userCity.isEmpty {
+                    Toggle("Include city in AI context", isOn: $viewModel.locationEnabled)
+                    LabeledContent("Detected city", value: viewModel.userCity)
+                    Button(viewModel.isResolvingCity ? "Detecting…" : "Refresh Location") {
+                        Task { await viewModel.requestLocationAccess() }
+                    }
+                    .disabled(viewModel.isResolvingCity)
+                } else {
+                    Button(viewModel.isResolvingCity ? "Detecting…" : "Enable Location") {
+                        Task { await viewModel.requestLocationAccess() }
+                    }
+                    .disabled(viewModel.isResolvingCity)
+                }
             }
         } header: {
-            Text("Web Search")
+            Text("Location")
         } footer: {
-            Text("When enabled, PocketMind can search the web for up-to-date information. Requires a self-hosted SearXNG instance (e.g. http://192.168.1.190:8888).")
+            Text("When enabled, your city is included in the AI prompt so responses like weather and local recommendations are relevant to you. Location is never stored on servers.")
+        }
+    }
+
+    @ViewBuilder
+    private var locationStatusBadge: some View {
+        if viewModel.locationEnabled && !viewModel.userCity.isEmpty {
+            Text("On · \(viewModel.userCity)")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.green)
+        } else {
+            Text("Off")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var webSearchSection: some View {
+        Section("Web Search") {
+            NavigationLink {
+                WebSearchSettingsView(viewModel: viewModel)
+            } label: {
+                HStack {
+                    Label("Web Search", systemImage: "globe")
+                    Spacer()
+                    Text(viewModel.webSearchSummary)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
     }
 
@@ -118,7 +160,7 @@ struct SettingsView: View {
                             .foregroundStyle(model.isDownloaded ? .green : .secondary)
                     }
                     Spacer()
-                    if viewModel.settings.selectedModelID == model.id && downloadViewModel.isModelLoaded {
+                    if viewModel.selectedModelID == model.id && downloadViewModel.isModelLoaded {
                         Image(systemName: "checkmark")
                             .foregroundStyle(Color.accentColor)
                     }
@@ -127,10 +169,10 @@ struct SettingsView: View {
                 .onTapGesture {
                     if model.isDownloaded {
                         viewModel.selectModel(model)
-                        downloadViewModel.selectModel(model)  // cancels prior download, updates selection
+                        downloadViewModel.selectModel(model)
                         Task { await downloadViewModel.loadModel() }
                     } else {
-                        downloadViewModel.selectModel(model)  // pre-selects for the download flow
+                        downloadViewModel.selectModel(model)
                     }
                 }
                 .swipeActions(edge: .trailing) {
@@ -148,35 +190,23 @@ struct SettingsView: View {
         } header: {
             Text("Model")
         } footer: {
-            Text("Device RAM: \(viewModel.settings.deviceRAMGB) GB · Free storage: \(viewModel.availableStorageGB.map { String(format: "%.1f GB free", $0) } ?? "Unknown")")
+            Text("Device RAM: \(viewModel.deviceRAMGB) GB · Free storage: \(viewModel.availableStorageGB.map { String(format: "%.1f GB free", $0) } ?? "Unknown")")
         }
     }
 
     private var inferenceSection: some View {
         Section {
             Toggle(isOn: Binding(
-                get: { viewModel.settings.thinkingEnabled },
-                set: { viewModel.settings.thinkingEnabled = $0 }
-            )) {
-                Label("Thinking Mode", systemImage: "brain")
-            }
-            Toggle(isOn: Binding(
-                get: { viewModel.settings.voiceAutoStartEnabled },
+                get: { viewModel.voiceAutoStartEnabled },
                 set: { viewModel.setVoiceAutoStart($0) }
             )) {
                 Label("Start voice on open", systemImage: "waveform.and.mic")
             }
-            Toggle(isOn: Binding(
-                get: { viewModel.settings.airpodsAutoVoiceEnabled },
-                set: { viewModel.settings.airpodsAutoVoiceEnabled = $0 }
-            )) {
+            Toggle(isOn: $viewModel.airpodsAutoVoiceEnabled) {
                 Label("AirPods auto-voice", systemImage: "airpodspro")
             }
-            if !viewModel.settings.voiceAutoStartEnabled {
-                Toggle(isOn: Binding(
-                    get: { viewModel.settings.speechAutoSendEnabled },
-                    set: { viewModel.settings.speechAutoSendEnabled = $0 }
-                )) {
+            if !viewModel.voiceAutoStartEnabled {
+                Toggle(isOn: $viewModel.speechAutoSendEnabled) {
                     Label("Auto-send after speech", systemImage: "mic.badge.auto")
                 }
             }
@@ -184,17 +214,17 @@ struct SettingsView: View {
         } header: {
             Text("Inference")
         } footer: {
-            Text("Thinking mode reasons before answering (slower but more accurate). \"Start voice on open\" automatically starts listening when you open a new chat. \"AirPods auto-voice\" starts listening automatically when AirPods are connected. Auto-send submits voice input when speech recognition finishes.")
+            Text("\"Start voice on open\" automatically starts listening when you open a new chat. \"AirPods auto-voice\" starts listening automatically when AirPods are connected. Auto-send submits voice input when speech recognition finishes. Thinking mode can be toggled per chat via the brain icon in the chat toolbar.")
         }
     }
 
     @ViewBuilder
     private var contextSizePicker: some View {
-        let maxCtx = viewModel.settings.maxContextSize
+        let maxCtx = viewModel.maxContextSize
         VStack(alignment: .leading, spacing: 0) {
             Picker(selection: Binding(
-                get: { min(viewModel.settings.contextSize, maxCtx) },
-                set: { viewModel.settings.contextSize = $0 }
+                get: { min(viewModel.contextSize, maxCtx) },
+                set: { viewModel.contextSize = $0 }
             )) {
                 ForEach([2048, 4096, 8192].filter { $0 <= maxCtx }, id: \.self) { size in
                     Text("\(size) tokens").tag(size)
@@ -267,6 +297,11 @@ struct SettingsView: View {
             LabeledContent("Inference", value: "On-device (llama.cpp)")
             if let url = Self.sourceURL {
                 Link("Source Code", destination: url)
+            }
+            NavigationLink {
+                DebugLogView()
+            } label: {
+                Label("Debug Logs", systemImage: "terminal")
             }
         }
     }

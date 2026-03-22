@@ -20,6 +20,8 @@ protocol SpeechServiceProtocol: AnyObject {
     var transcriptPublisher: AnyPublisher<String, Never> { get }
     var isTranscribingPublisher: AnyPublisher<Bool, Never> { get }
     var isInterruptedPublisher: AnyPublisher<Bool, Never> { get }
+    /// Emits a human-readable error string when transcription fails; nil otherwise.
+    var transcriptionErrorPublisher: AnyPublisher<String?, Never> { get }
 
     func requestAuthorization() async
     func startRecording() throws
@@ -34,4 +36,5 @@ extension SpeechService: SpeechServiceProtocol {
     var transcriptPublisher: AnyPublisher<String, Never> { $transcript.eraseToAnyPublisher() }
     var isTranscribingPublisher: AnyPublisher<Bool, Never> { Just(false).eraseToAnyPublisher() }
     var isInterruptedPublisher: AnyPublisher<Bool, Never> { $isInterrupted.eraseToAnyPublisher() }
+    var transcriptionErrorPublisher: AnyPublisher<String?, Never> { Just(nil).eraseToAnyPublisher() }
 }

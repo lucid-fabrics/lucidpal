@@ -8,6 +8,7 @@ final class MockSystemPromptBuilder: SystemPromptBuilderProtocol {
     var executeCalendarActionsCalled = false
 
     func buildSystemPrompt() async -> String { stubbedPrompt }
+    func buildSynthesisPrompt() async -> String { stubbedPrompt }
 
     func executeCalendarActions(in text: String) async -> (content: String, previews: [CalendarEventPreview], freeSlots: [CalendarFreeSlot]) {
         executeCalendarActionsCalled = true

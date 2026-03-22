@@ -10,6 +10,7 @@ final class MockSystemPromptBuilderWithSearch: SystemPromptBuilderProtocol {
     var extractResult: (query: String, maxResults: Int)?
 
     func buildSystemPrompt() async -> String { stubbedPrompt }
+    func buildSynthesisPrompt() async -> String { stubbedPrompt }
 
     func executeCalendarActions(in text: String) async -> (content: String, previews: [CalendarEventPreview], freeSlots: [CalendarFreeSlot]) {
         let r = executeCalendarActionsResult
@@ -119,8 +120,8 @@ final class ChatViewModelWebSearchTests: XCTestCase {
         viewModel.inputText = "Search with error"
         await viewModel.sendMessage()
 
-        let lastAssistant = viewModel.messages.last(where: { $0.role == .assistant })
-        XCTAssertTrue(lastAssistant?.content.contains("Search failed") == true)
+        let content = try XCTUnwrap(viewModel.messages.last(where: { $0.role == .assistant })?.content)
+        XCTAssertTrue(content.hasPrefix("Search failed:"))
     }
 
     func testSearchNotCalledWhenEndpointEmpty() async throws {
@@ -132,5 +133,18 @@ final class ChatViewModelWebSearchTests: XCTestCase {
         await viewModel.sendMessage()
 
         XCTAssertFalse(searchService.searchCalled)
+    }
+
+    func testEmptySearchResultsStillProducesAssistantMessage() async throws {
+        llm.stubbedTokens = ["[WEB_SEARCH:{\"query\":\"q\"}]"]
+        promptBuilder.extractResult = (query: "q", maxResults: 5)
+        searchService.stubbedResults = []
+        llm.secondStubbedTokens = ["No results found for your query."]
+
+        viewModel.inputText = "Search for something obscure"
+        await viewModel.sendMessage()
+
+        let lastAssistant = viewModel.messages.last(where: { $0.role == .assistant })
+        XCTAssertEqual(lastAssistant?.content, "No results found for your query.")
     }
 }

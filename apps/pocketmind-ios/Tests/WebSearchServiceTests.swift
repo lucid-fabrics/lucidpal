@@ -116,6 +116,20 @@ final class WebSearchServiceTests: XCTestCase {
         XCTAssertTrue(capturedURL?.query?.contains("format=json") == true)
     }
 
+    func testSearchEncodesSpecialCharactersInQuery() async throws {
+        var capturedURL: URL?
+        MockURLProtocol.requestHandler = { req in
+            capturedURL = req.url
+            return (self.makeResponse(statusCode: 200, url: req.url!), Data(#"{"results":[]}"#.utf8))
+        }
+
+        _ = try await service.search(query: "C++ & Swift", maxResults: 5)
+
+        let query = try XCTUnwrap(capturedURL?.query)
+        XCTAssertFalse(query.contains("C++ & Swift"), "Raw special chars must not appear in URL")
+        XCTAssertTrue(query.contains("format=json"))
+    }
+
     // MARK: - Error cases
 
     func testThrowsInvalidEndpointWhenEmpty() async throws {
@@ -182,6 +196,91 @@ final class WebSearchServiceTests: XCTestCase {
             _ = try await service.search(query: "test", maxResults: 5)
             XCTFail("Expected decoding error")
         } catch is DecodingError {
+            // pass
+        }
+    }
+
+    func testThrowsMissingCredentialsWhenBraveKeyEmpty() async throws {
+        settings.webSearchProvider = .brave
+        settings.braveApiKey = ""
+
+        do {
+            _ = try await service.search(query: "test", maxResults: 5)
+            XCTFail("Expected WebSearchError.missingCredentials")
+        } catch WebSearchError.missingCredentials {
+            // pass
+        }
+    }
+
+    func testThrowsOnTimeout() async throws {
+        MockURLProtocol.requestHandler = { _ in throw URLError(.timedOut) }
+
+        do {
+            _ = try await service.search(query: "test", maxResults: 5)
+            XCTFail("Expected URLError")
+        } catch let error as URLError {
+            XCTAssertEqual(error.code, .timedOut)
+        }
+    }
+
+    func testReturnsEmptyArrayWhenResultsMissing() async throws {
+        stubResponse(statusCode: 200, body: #"{"results":[]}"#)
+
+        let results = try await service.search(query: "obscure query", maxResults: 5)
+
+        XCTAssertEqual(results.count, 0)
+    }
+
+    // MARK: - SearXNG provider
+
+    func testSearXNGUsesSearchPathAndFormatJsonParam() async throws {
+        settings.webSearchProvider = .searxng
+        settings.webSearchEndpoint = "http://localhost:8888"
+        var capturedURL: URL?
+        MockURLProtocol.requestHandler = { req in
+            capturedURL = req.url
+            return (self.makeResponse(statusCode: 200, url: req.url!), Data(#"{"results":[]}"#.utf8))
+        }
+
+        _ = try await service.search(query: "swift concurrency", maxResults: 5)
+
+        XCTAssertEqual(capturedURL?.path, "/search")
+        XCTAssertTrue(capturedURL?.query?.contains("format=json") == true)
+        XCTAssertTrue(
+            capturedURL?.query?.contains("q=swift%20concurrency") == true
+            || capturedURL?.query?.contains("q=swift+concurrency") == true
+        )
+    }
+
+    func testSearXNGReturnsEmptyArrayWhenResultsEmpty() async throws {
+        settings.webSearchProvider = .searxng
+        stubResponse(statusCode: 200, body: #"{"results":[]}"#)
+
+        let results = try await service.search(query: "no hits", maxResults: 5)
+
+        XCTAssertTrue(results.isEmpty)
+    }
+
+    func testSearXNGThrowsDecodingErrorOnInvalidJSON() async throws {
+        settings.webSearchProvider = .searxng
+        stubResponse(statusCode: 200, body: "{ not valid json }")
+
+        do {
+            _ = try await service.search(query: "test", maxResults: 5)
+            XCTFail("Expected DecodingError")
+        } catch is DecodingError {
+            // pass
+        }
+    }
+
+    func testSearXNGThrowsSearxngJsonDisabledOn403() async throws {
+        settings.webSearchProvider = .searxng
+        stubResponse(statusCode: 403, body: "Forbidden")
+
+        do {
+            _ = try await service.search(query: "test", maxResults: 5)
+            XCTFail("Expected WebSearchError.searxngJsonDisabled")
+        } catch WebSearchError.searxngJsonDisabled {
             // pass
         }
     }

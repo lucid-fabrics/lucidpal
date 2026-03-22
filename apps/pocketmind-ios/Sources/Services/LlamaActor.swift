@@ -23,6 +23,9 @@ enum LLMConstants {
     static let samplerTemperature: Float = 0.35
     /// Bytes in one gigabyte — used for RAM-based context sizing.
     static let bytesPerGB: UInt64 = 1_073_741_824
+    /// GPU layers value that offloads the entire model to Metal on-device.
+    /// llama.cpp treats any value ≥ the model's actual layer count as "all layers".
+    static let allMetalGPULayers: Int32 = 99
 }
 
 // MARK: - LlamaActor
@@ -73,7 +76,7 @@ actor LlamaActor {
 #if targetEnvironment(simulator)
         mp.n_gpu_layers = 0
 #else
-        mp.n_gpu_layers = 99  // offload all layers to Metal on device
+        mp.n_gpu_layers = LLMConstants.allMetalGPULayers
 #endif
         guard let m = llama_model_load_from_file(path, mp) else {
             throw LLMError.loadFailed(underlying: NSError(

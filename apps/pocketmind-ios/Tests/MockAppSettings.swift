@@ -16,7 +16,11 @@ final class MockAppSettings: AppSettingsProtocol {
     var remindersAccessEnabled: Bool = false
     var mailAccessEnabled: Bool = false
     var webSearchEnabled: Bool = false
+    var webSearchProvider: WebSearchProvider = .brave
     var webSearchEndpoint: String = ""
+    var braveApiKey: String = ""
+    var locationEnabled: Bool = false
+    var userCity: String = ""
 
     var selectedModel: ModelInfo {
         [ModelInfo.qwen3_5_0B8, ModelInfo.qwen3_5_2B, ModelInfo.qwen3_5_4B]

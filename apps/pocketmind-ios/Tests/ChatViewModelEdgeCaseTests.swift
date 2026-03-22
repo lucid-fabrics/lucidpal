@@ -72,7 +72,7 @@ final class ChatViewModelEdgeCaseTests: XCTestCase {
 
     // MARK: - deleteMessage
 
-    func testDeleteMessageRemovesCorrectMessage() {
+    func testDeleteMessageRemovesCorrectMessage() async throws {
         let msg1 = ChatMessage(role: .user, content: "First")
         let msg2 = ChatMessage(role: .user, content: "Second")
         viewModel.messages = [msg1, msg2]
@@ -81,7 +81,7 @@ final class ChatViewModelEdgeCaseTests: XCTestCase {
         XCTAssertEqual(viewModel.messages.first?.content, "Second")
     }
 
-    func testDeleteMessageWithUnknownIDIsNoOp() {
+    func testDeleteMessageWithUnknownIDIsNoOp() async throws {
         viewModel.messages = [ChatMessage(role: .user, content: "A")]
         viewModel.deleteMessage(id: UUID())
         XCTAssertEqual(viewModel.messages.count, 1)
@@ -89,7 +89,7 @@ final class ChatViewModelEdgeCaseTests: XCTestCase {
 
     // MARK: - clearHistory
 
-    func testClearHistoryEmptiesMessages() {
+    func testClearHistoryEmptiesMessages() async throws {
         viewModel.messages = [
             ChatMessage(role: .user, content: "A"),
             ChatMessage(role: .assistant, content: "B")
@@ -100,7 +100,7 @@ final class ChatViewModelEdgeCaseTests: XCTestCase {
 
     // MARK: - applyStreamToken edge cases
 
-    func testApplyStreamTokenWithNoThinkTag() {
+    func testApplyStreamTokenWithNoThinkTag() async throws {
         var raw = ""
         var thinkDone = false
         viewModel.messages = [ChatMessage(role: .assistant, content: "")]
@@ -109,7 +109,7 @@ final class ChatViewModelEdgeCaseTests: XCTestCase {
         XCTAssertEqual(viewModel.messages[0].content, "Hello")
     }
 
-    func testApplyStreamTokenBuffersOpeningTag() {
+    func testApplyStreamTokenBuffersOpeningTag() async throws {
         var raw = ""
         var thinkDone = false
         viewModel.messages = [ChatMessage(role: .assistant, content: "")]
@@ -118,7 +118,7 @@ final class ChatViewModelEdgeCaseTests: XCTestCase {
         XCTAssertEqual(viewModel.messages[0].content, "")
     }
 
-    func testApplyStreamTokenExtractsThinkingContent() {
+    func testApplyStreamTokenExtractsThinkingContent() async throws {
         var raw = ""
         var thinkDone = false
         viewModel.messages = [ChatMessage(role: .assistant, content: "")]

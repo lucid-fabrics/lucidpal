@@ -26,12 +26,12 @@ final class AirPodsVoiceCoordinator: ObservableObject, AirPodsVoiceCoordinatorPr
 
     private let audioRouteMonitor: any AudioRouteMonitorProtocol
     private let speechService: any SpeechServiceProtocol
-    private let settings: any AppSettingsProtocol
+    private let settings: any VoiceSettingsProtocol
 
     private var cancellables = Set<AnyCancellable>()
     private var shouldAutoResume = false
 
-    init(audioRouteMonitor: any AudioRouteMonitorProtocol, speechService: any SpeechServiceProtocol, settings: any AppSettingsProtocol) {
+    init(audioRouteMonitor: any AudioRouteMonitorProtocol, speechService: any SpeechServiceProtocol, settings: any VoiceSettingsProtocol) {
         self.audioRouteMonitor = audioRouteMonitor
         self.speechService = speechService
         self.settings = settings
@@ -47,10 +47,11 @@ final class AirPodsVoiceCoordinator: ObservableObject, AirPodsVoiceCoordinatorPr
     }
 
     func stopMonitoring() {
-        isAutoListening = false
-        if speechService.isRecording {
+        // Only stop recording if auto-voice started it. Don't cancel user-initiated sessions.
+        if isAutoListening, speechService.isRecording {
             speechService.stopRecording()
         }
+        isAutoListening = false
     }
 
     // MARK: - Private Methods
@@ -122,7 +123,8 @@ final class AirPodsVoiceCoordinator: ObservableObject, AirPodsVoiceCoordinatorPr
     }
 
     private func stopAutoVoice() {
-        if speechService.isRecording {
+        // Only stop recording if auto-voice started it. Don't cancel user-initiated sessions.
+        if isAutoListening, speechService.isRecording {
             speechService.stopRecording()
         }
         isAutoListening = false

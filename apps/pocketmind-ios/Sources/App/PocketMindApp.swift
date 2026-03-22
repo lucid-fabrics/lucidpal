@@ -39,6 +39,7 @@ struct PocketMindApp: App {
     private let airPodsCoordinator: AirPodsVoiceCoordinator
     private let webSearchService: WebSearchService
     private let contextService: ContextService
+    private let locationService = LocationService()
 
     // MARK: - ViewModels
 
@@ -79,7 +80,8 @@ struct PocketMindApp: App {
         )
         settingsViewModel = SettingsViewModel(
             settings: settings,
-            calendarService: calendarService
+            calendarService: calendarService,
+            locationService: locationService
         )
         downloadViewModel = ModelDownloadViewModel(
             llmService: llmService,

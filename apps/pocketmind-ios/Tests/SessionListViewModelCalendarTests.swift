@@ -16,7 +16,8 @@ final class SessionListViewModelCalendarTests: XCTestCase {
             calendarActionController: MockCalendarActionController(),
             settings: MockAppSettings(),
             speechService: MockSpeechService(),
-            hapticService: MockHapticService()
+            hapticService: MockHapticService(),
+            contextService: MockContextService()
         )
     }
 

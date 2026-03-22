@@ -1,0 +1,4 @@
+module yyjson {
+umbrella header "/Users/wassimmehanna/Library/Developer/Xcode/DerivedData/PocketMind-dojmvlhkfqjlewcwqpzdlbiuxeyx/SourcePackages/checkouts/yyjson/src/yyjson.h"
+export *
+}

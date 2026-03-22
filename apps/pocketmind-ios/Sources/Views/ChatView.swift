@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ChatView: View {
     @ObservedObject var viewModel: ChatViewModel
@@ -17,14 +18,26 @@ struct ChatView: View {
             errorBanner
                 .animation(.easeInOut(duration: 0.2), value: viewModel.errorMessage)
             messageList
+            if viewModel.isGenerating || viewModel.isPreparing {
+                stopBar
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+            if let reply = viewModel.replyingTo {
+                replyPreviewBar(reply)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
             inputBar
         }
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isGenerating || viewModel.isPreparing)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.replyingTo?.id)
+        .background(NavPopGestureDisabler())
         .overlay {
             if viewModel.isSpeechRecording {
                 VoiceRecordingOverlay(
                     transcript: viewModel.inputText,
                     isTranscribing: viewModel.isSpeechTranscribing,
-                    onStop: { viewModel.toggleSpeech() }
+                    onConfirm: { viewModel.confirmSpeech() },
+                    onCancel: { viewModel.cancelSpeech() }
                 )
                 .transition(.opacity)
             }
@@ -41,7 +54,28 @@ struct ChatView: View {
         .navigationTitle(viewModel.sessionTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button {
+                    viewModel.thinkingEnabled.toggle()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: viewModel.thinkingEnabled ? "brain.fill" : "brain")
+                            .font(.caption.weight(.medium))
+                        Text("Thinking")
+                            .font(.caption.weight(.medium))
+                    }
+                    .foregroundStyle(viewModel.thinkingEnabled ? Color.accentColor : Color.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        viewModel.thinkingEnabled
+                            ? Color.accentColor.opacity(0.12)
+                            : Color(.systemGray5),
+                        in: Capsule()
+                    )
+                }
+                .buttonStyle(.plain)
+
                 if !viewModel.messages.isEmpty {
                     Button("Clear") { showClearConfirm = true }
                         .foregroundStyle(.secondary)
@@ -61,7 +95,7 @@ struct ChatView: View {
             await viewModel.sendMessage()
         }
         .task(id: VoiceReadiness(modelLoaded: viewModel.isModelLoaded, speechAvailable: viewModel.isSpeechAvailable)) {
-            guard viewModel.settings.voiceAutoStartEnabled || viewModel.pendingVoiceStart,
+            guard viewModel.voiceAutoStartEnabled || viewModel.pendingVoiceStart,
                   viewModel.messages.isEmpty,
                   viewModel.isSpeechAvailable,
                   viewModel.isModelLoaded,
@@ -145,8 +179,15 @@ struct ChatView: View {
                                 DateSeparatorView(date: message.timestamp)
                                     .padding(.top, index == 0 ? 0 : 4)
                             }
+                            let precedingUserPrompt = viewModel.messages[..<index]
+                                .last(where: { $0.role == .user })?.content
                             MessageBubbleView(
                                 message: message,
+                                userPrompt: precedingUserPrompt,
+                                onReply: { msg in
+                                    withAnimation { viewModel.replyingTo = msg }
+                                    inputFocused = true
+                                },
                                 onConfirmDeletion: { previewID in
                                     Task { await viewModel.confirmDeletion(messageID: message.id, previewID: previewID) }
                                 },
@@ -227,14 +268,33 @@ struct ChatView: View {
         .padding(.vertical, 40)
     }
 
+    private var stopBar: some View {
+        Button {
+            viewModel.cancelGeneration()
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "stop.circle.fill")
+                Text(viewModel.isPreparing ? "Cancel" : "Stop")
+                    .fontWeight(.medium)
+            }
+            .font(.subheadline)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 8)
+            .background(Color.red, in: Capsule())
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 6)
+        .background(Color(.systemBackground))
+    }
+
     private var inputBar: some View {
-        let isUserGenerating = viewModel.isGenerating && !viewModel.isGeneratingSuggestions
-        let sendButtonColor: Color = isUserGenerating ? .red
-            : viewModel.inputText.trimmingCharacters(in: .whitespaces).isEmpty ? Color(.systemGray3)
-            : .accentColor
+        let isEmpty = viewModel.inputText.trimmingCharacters(in: .whitespaces).isEmpty
+        let sendButtonColor: Color = isEmpty ? Color(.systemGray3) : .accentColor
         return HStack(spacing: 10) {
             if viewModel.isSpeechAvailable {
                 Button {
+                    inputFocused = false
                     viewModel.toggleSpeech()
                 } label: {
                     MicButtonLabel(
@@ -255,32 +315,53 @@ struct ChatView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
 
             Button {
-                if isUserGenerating {
-                    viewModel.cancelGeneration()
-                } else {
-                    if viewModel.isSpeechRecording { viewModel.toggleSpeech() }
-                    Task { await viewModel.sendMessage() }
-                    inputFocused = false
-                }
+                if viewModel.isSpeechRecording { viewModel.toggleSpeech() }
+                Task { await viewModel.sendMessage() }
+                inputFocused = false
             } label: {
-                if viewModel.isPreparing {
-                    Image(systemName: "hourglass.circle.fill")
-                        .font(.system(size: 32))
-                        .foregroundStyle(.orange)
-                } else {
-                    Image(systemName: isUserGenerating ? "stop.circle.fill" : "arrow.up.circle.fill")
-                        .font(.system(size: 32))
-                        .foregroundStyle(sendButtonColor)
-                }
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.system(size: 32))
+                    .foregroundStyle(sendButtonColor)
             }
-            .disabled(viewModel.isPreparing)
-            .disabled(!viewModel.isModelLoaded && !isUserGenerating)
-            .disabled(
-                viewModel.inputText.trimmingCharacters(in: .whitespaces).isEmpty
-                && !isUserGenerating
-            )
+            .disabled(!viewModel.isModelLoaded)
+            .disabled(viewModel.isGenerating || viewModel.isPreparing)
+            .disabled(isEmpty)
         }
         .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Color(.systemBackground))
+        .overlay(alignment: .top) { Divider() }
+    }
+
+    @ViewBuilder
+    private func replyPreviewBar(_ message: ChatMessage) -> some View {
+        HStack(spacing: 10) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(Color.accentColor)
+                .frame(width: 3, height: 32)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(message.isUser ? "You" : "PocketMind")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.accentColor)
+                Text(message.displayContent.prefix(60))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+
+            Spacer()
+
+            Button {
+                withAnimation { viewModel.replyingTo = nil }
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(Color(.systemGray3))
+            }
+        }
+        .padding(.horizontal, 14)
         .padding(.vertical, 8)
         .background(Color(.systemBackground))
         .overlay(alignment: .top) { Divider() }
@@ -290,6 +371,17 @@ struct ChatView: View {
         guard let last = viewModel.messages.last else { return }
         withAnimation(.easeOut(duration: 0.15)) {
             proxy.scrollTo(last.id, anchor: .bottom)
+        }
+    }
+}
+
+// MARK: - Disable swipe-back navigation
+
+private struct NavPopGestureDisabler: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UIViewController { UIViewController() }
+    func updateUIViewController(_ vc: UIViewController, context: Context) {
+        Task { @MainActor in
+            vc.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         }
     }
 }

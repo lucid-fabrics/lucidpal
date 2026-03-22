@@ -2,6 +2,13 @@ import SwiftUI
 
 // MARK: - Mic button label
 
+private enum VoiceRingConstants {
+    static let ring1Scale: CGFloat = 1.5
+    static let ring2Scale: CGFloat = 1.7
+    static let animationDuration: Double = 0.9
+    static let ring2Delay: Double = 0.3
+}
+
 struct MicButtonLabel: View {
     let isRecording: Bool
     let isTranscribing: Bool
@@ -48,8 +55,8 @@ struct MicButtonLabel: View {
         .onChange(of: isRecording) { _, recording in
             guard !reduceMotion else { return }
             if recording {
-                withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { ring1Scale = 1.5 }
-                withAnimation(.easeInOut(duration: 0.9).delay(0.3).repeatForever(autoreverses: true)) { ring2Scale = 1.7 }
+                withAnimation(.easeInOut(duration: VoiceRingConstants.animationDuration).repeatForever(autoreverses: true)) { ring1Scale = VoiceRingConstants.ring1Scale }
+                withAnimation(.easeInOut(duration: VoiceRingConstants.animationDuration).delay(VoiceRingConstants.ring2Delay).repeatForever(autoreverses: true)) { ring2Scale = VoiceRingConstants.ring2Scale }
             } else {
                 ring1Scale = 1
                 ring2Scale = 1
@@ -57,8 +64,8 @@ struct MicButtonLabel: View {
         }
         .onAppear {
             guard isRecording && !reduceMotion else { return }
-            withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { ring1Scale = 1.5 }
-            withAnimation(.easeInOut(duration: 0.9).delay(0.3).repeatForever(autoreverses: true)) { ring2Scale = 1.7 }
+            withAnimation(.easeInOut(duration: VoiceRingConstants.animationDuration).repeatForever(autoreverses: true)) { ring1Scale = VoiceRingConstants.ring1Scale }
+            withAnimation(.easeInOut(duration: VoiceRingConstants.animationDuration).delay(VoiceRingConstants.ring2Delay).repeatForever(autoreverses: true)) { ring2Scale = VoiceRingConstants.ring2Scale }
         }
     }
 }

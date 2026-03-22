@@ -23,6 +23,7 @@ struct DeleteCalendarEventIntent: AppIntent {
     var eventName: String
 
     func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
+        // Direct EventKit access — CalendarService requires @MainActor but intents run off-main
         let store = EKEventStore()
         let granted: Bool
         if #available(iOS 17.0, *) {

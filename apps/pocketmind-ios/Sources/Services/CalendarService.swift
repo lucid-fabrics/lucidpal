@@ -222,7 +222,7 @@ final class CalendarService {
         if let n = update.notes,   !n.isEmpty  { event.notes = n }
         if let m = update.reminderMinutes {
             event.alarms?.forEach { event.removeAlarm($0) }
-            event.addAlarm(EKAlarm(relativeOffset: -TimeInterval(m * ChatConstants.secondsPerMinute)))
+            event.addAlarm(EKAlarm(relativeOffset: -TimeInterval(m * 60)))
         }
         if let a = update.isAllDay { event.isAllDay = a }
         if let recurrence = update.recurrence {
@@ -265,7 +265,7 @@ final class CalendarService {
         if let location, !location.isEmpty { event.location = location }
         if let notes, !notes.isEmpty { event.notes = notes }
         if let minutes = reminderMinutes {
-            event.addAlarm(EKAlarm(relativeOffset: -TimeInterval(minutes * ChatConstants.secondsPerMinute)))
+            event.addAlarm(EKAlarm(relativeOffset: -TimeInterval(minutes * 60)))
         }
         if let id = calendarIdentifier, let cal = store.calendar(withIdentifier: id) {
             event.calendar = cal

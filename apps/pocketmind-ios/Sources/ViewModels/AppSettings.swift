@@ -57,8 +57,24 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         didSet { UserDefaults.standard.set(webSearchEnabled, forKey: UserDefaultsKeys.webSearchEnabled) }
     }
 
+    @Published var webSearchProvider: WebSearchProvider {
+        didSet { UserDefaults.standard.set(webSearchProvider.rawValue, forKey: UserDefaultsKeys.webSearchProvider) }
+    }
+
     @Published var webSearchEndpoint: String {
         didSet { UserDefaults.standard.set(webSearchEndpoint, forKey: UserDefaultsKeys.webSearchEndpoint) }
+    }
+
+    @Published var braveApiKey: String {
+        didSet { UserDefaults.standard.set(braveApiKey, forKey: UserDefaultsKeys.braveApiKey) }
+    }
+
+    @Published var locationEnabled: Bool {
+        didSet { UserDefaults.standard.set(locationEnabled, forKey: UserDefaultsKeys.locationEnabled) }
+    }
+
+    @Published var userCity: String {
+        didSet { UserDefaults.standard.set(userCity, forKey: UserDefaultsKeys.userCity) }
     }
 
     // MARK: - Init
@@ -78,7 +94,11 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         remindersAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.remindersAccessEnabled)
         mailAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.mailAccessEnabled)
         webSearchEnabled = defaults.bool(forKey: UserDefaultsKeys.webSearchEnabled)
+        webSearchProvider = WebSearchProvider(rawValue: defaults.string(forKey: UserDefaultsKeys.webSearchProvider) ?? "") ?? .brave
         webSearchEndpoint = defaults.string(forKey: UserDefaultsKeys.webSearchEndpoint) ?? ""
+        braveApiKey = defaults.string(forKey: UserDefaultsKeys.braveApiKey) ?? ""
+        locationEnabled = defaults.bool(forKey: UserDefaultsKeys.locationEnabled)
+        userCity = defaults.string(forKey: UserDefaultsKeys.userCity) ?? ""
     }
 
     // MARK: - Computed Properties

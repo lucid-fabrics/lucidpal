@@ -29,7 +29,8 @@ private enum VoiceOverlayAnim {
 struct VoiceRecordingOverlay: View {
     let transcript: String
     let isTranscribing: Bool
-    let onStop: () -> Void
+    let onConfirm: () -> Void
+    let onCancel: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -72,9 +73,9 @@ struct VoiceRecordingOverlay: View {
 
                 Spacer()
 
-                // Stop button — hidden while transcribing
+                // Action buttons — hidden while transcribing
                 if !isTranscribing {
-                    stopButton
+                    actionButtons
                         .transition(.opacity.combined(with: .scale(scale: 0.9)))
                 }
             }
@@ -149,20 +150,29 @@ struct VoiceRecordingOverlay: View {
         }
     }
 
-    // MARK: - Stop button
+    // MARK: - Action buttons (cancel / confirm)
 
-    private var stopButton: some View {
-        Button(action: onStop) {
-            HStack(spacing: 10) {
-                Image(systemName: "stop.fill")
-                    .font(.system(size: 14, weight: .semibold))
-                Text("Stop")
-                    .font(.body.weight(.semibold))
+    private var actionButtons: some View {
+        HStack(spacing: 24) {
+            // Cancel — discard the recording
+            Button(action: onCancel) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .frame(width: 56, height: 56)
+                    .background(Color(.systemGray5), in: Circle())
             }
-            .foregroundStyle(.white)
-            .padding(.horizontal, 36)
-            .padding(.vertical, 16)
-            .background(Color.accentColor, in: Capsule())
+            .accessibilityLabel("Cancel recording")
+
+            // Confirm — accept the transcript
+            Button(action: onConfirm) {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 56, height: 56)
+                    .background(Color.accentColor, in: Circle())
+            }
+            .accessibilityLabel("Confirm recording")
         }
     }
 

@@ -1,4 +1,5 @@
 import Combine
+import CoreLocation
 import Foundation
 import OSLog
 
@@ -6,49 +7,181 @@ private let settingsLogger = Logger(subsystem: "app.pocketmind", category: "Sett
 
 @MainActor
 final class SettingsViewModel: ObservableObject {
+
+    // MARK: - Calendar (already mirrored)
     @Published var calendarAuthStatus: CalendarAuthorizationStatus = .notDetermined
+    @Published var calendarAccessEnabled: Bool = false
+    @Published var defaultCalendarIdentifier: String = ""
+
+    // MARK: - Location
+    @Published var locationStatus: CLAuthorizationStatus = .notDetermined
+    @Published var isResolvingCity = false
+    @Published var locationEnabled: Bool = false
+    @Published var userCity: String = ""
+
+    // MARK: - Voice / Inference
+    @Published var voiceAutoStartEnabled: Bool = false
+    @Published var airpodsAutoVoiceEnabled: Bool = false
+    @Published var speechAutoSendEnabled: Bool = false
+    @Published var contextSize: Int = 4096
+
+    // MARK: - Web Search
+    @Published var webSearchEnabled: Bool = false
+    @Published var webSearchProvider: WebSearchProvider = .searxng
+    @Published var braveApiKey: String = ""
+    @Published var webSearchEndpoint: String = ""
+
+    // MARK: - Model list
     @Published var availableModels: [ModelInfo] = []
 
-    let settings: any AppSettingsProtocol
-    let calendarService: any CalendarServiceProtocol
+    // MARK: - Computed pass-throughs (read-only display; changed via selectModel / other VMs)
+    var maxContextSize: Int { settings.maxContextSize }
+    var deviceRAMGB: Int { settings.deviceRAMGB }
+    var selectedModelID: String { settings.selectedModelID }
+    var webSearchSummary: String {
+        webSearchEnabled ? webSearchProvider.displayName : "Off"
+    }
 
-    init(settings: any AppSettingsProtocol, calendarService: any CalendarServiceProtocol) {
+    // MARK: - Private
+    private let settings: any AppSettingsProtocol
+    let calendarService: any CalendarServiceProtocol
+    let locationService: (any LocationServiceProtocol)?
+    private var cancellables = Set<AnyCancellable>()
+
+    init(
+        settings: any AppSettingsProtocol,
+        calendarService: any CalendarServiceProtocol,
+        locationService: (any LocationServiceProtocol)? = nil
+    ) {
         self.settings = settings
         self.calendarService = calendarService
+        self.locationService = locationService
+
+        // Seed published state from settings
         self.calendarAuthStatus = calendarService.authorizationStatus
+        self.locationStatus = locationService?.authorizationStatus ?? .notDetermined
         self.availableModels = ModelInfo.available(physicalRAMGB: settings.deviceRAMGB)
+        self.calendarAccessEnabled = settings.calendarAccessEnabled
+        self.defaultCalendarIdentifier = settings.defaultCalendarIdentifier
+        self.locationEnabled = settings.locationEnabled
+        self.userCity = settings.userCity
+        self.voiceAutoStartEnabled = settings.voiceAutoStartEnabled
+        self.airpodsAutoVoiceEnabled = settings.airpodsAutoVoiceEnabled
+        self.speechAutoSendEnabled = settings.speechAutoSendEnabled
+        self.contextSize = settings.contextSize
+        self.webSearchEnabled = settings.webSearchEnabled
+        self.webSearchProvider = settings.webSearchProvider
+        self.braveApiKey = settings.braveApiKey
+        self.webSearchEndpoint = settings.webSearchEndpoint
 
-        if availableModels.isEmpty {
-            availableModels = [.qwen3_5_2B]
-        }
+        if availableModels.isEmpty { availableModels = [.qwen3_5_2B] }
+
+        setupPublishers()
     }
 
-    var isCalendarAuthorized: Bool {
-        calendarService.isAuthorized
+    // MARK: - Private setup
+
+    private func setupPublishers() {
+        // Calendar mirrors → settings
+        $calendarAccessEnabled.dropFirst()
+            .sink { [weak self] in self?.settings.calendarAccessEnabled = $0 }
+            .store(in: &cancellables)
+        $defaultCalendarIdentifier.dropFirst()
+            .sink { [weak self] in self?.settings.defaultCalendarIdentifier = $0 }
+            .store(in: &cancellables)
+
+        // Location mirror → settings
+        $locationEnabled.dropFirst()
+            .sink { [weak self] in self?.settings.locationEnabled = $0 }
+            .store(in: &cancellables)
+
+        // Web Search mirrors → settings
+        $webSearchEnabled.dropFirst()
+            .sink { [weak self] in self?.settings.webSearchEnabled = $0 }
+            .store(in: &cancellables)
+        $webSearchProvider.dropFirst()
+            .sink { [weak self] in self?.settings.webSearchProvider = $0 }
+            .store(in: &cancellables)
+        $braveApiKey.dropFirst()
+            .sink { [weak self] in self?.settings.braveApiKey = $0 }
+            .store(in: &cancellables)
+        $webSearchEndpoint.dropFirst()
+            .sink { [weak self] in self?.settings.webSearchEndpoint = $0 }
+            .store(in: &cancellables)
+
+        // Voice mirrors → settings
+        $airpodsAutoVoiceEnabled.dropFirst()
+            .sink { [weak self] in self?.settings.airpodsAutoVoiceEnabled = $0 }
+            .store(in: &cancellables)
+        $speechAutoSendEnabled.dropFirst()
+            .sink { [weak self] in self?.settings.speechAutoSendEnabled = $0 }
+            .store(in: &cancellables)
+        $contextSize.dropFirst()
+            .sink { [weak self] in self?.settings.contextSize = $0 }
+            .store(in: &cancellables)
     }
 
-    var availableCalendars: [CalendarInfo] {
-        calendarService.writableCalendars()
-    }
+    // MARK: - Calendar
+
+    var isCalendarAuthorized: Bool { calendarService.isAuthorized }
+
+    var availableCalendars: [CalendarInfo] { calendarService.writableCalendars() }
 
     func setDefaultCalendar(id: String?) {
-        settings.defaultCalendarIdentifier = id ?? ""
+        defaultCalendarIdentifier = id ?? ""
     }
 
     func requestCalendarAccess() async {
         _ = await calendarService.requestAccess()
         calendarAuthStatus = calendarService.authorizationStatus
-        settings.calendarAccessEnabled = calendarService.isAuthorized
+        calendarAccessEnabled = calendarService.isAuthorized
     }
+
+    // MARK: - Model
 
     func selectModel(_ model: ModelInfo) {
         settings.selectedModelID = model.id
     }
 
+    // MARK: - Voice
+
     func setVoiceAutoStart(_ enabled: Bool) {
+        voiceAutoStartEnabled = enabled
         settings.voiceAutoStartEnabled = enabled
-        if enabled { settings.speechAutoSendEnabled = true }
+        if enabled {
+            speechAutoSendEnabled = true
+            settings.speechAutoSendEnabled = true
+        }
     }
+
+    // MARK: - Location
+
+    func requestLocationAccess() async {
+        guard let svc = locationService else { return }
+        isResolvingCity = true
+        defer { isResolvingCity = false }
+        let city = await svc.requestCity()
+        locationStatus = svc.authorizationStatus
+        if let city {
+            settings.userCity = city
+            settings.locationEnabled = true
+            userCity = city
+            locationEnabled = true
+        } else if svc.authorizationStatus == .denied || svc.authorizationStatus == .restricted {
+            settings.locationEnabled = false
+            locationEnabled = false
+        }
+    }
+
+    // MARK: - Web Search
+
+    /// Creates a WebSearchService scoped to the current web search settings.
+    /// Used by WebSearchSettingsView for connection testing without exposing settings directly.
+    func makeWebSearchService() -> WebSearchService {
+        WebSearchService(settings: settings)
+    }
+
+    // MARK: - Storage
 
     var availableStorageGB: Double? {
         do {

@@ -25,6 +25,8 @@ final class SessionListViewModel: ObservableObject {
     let airPodsCoordinator: (any AirPodsVoiceCoordinatorProtocol)?
     let webSearchService: (any WebSearchServiceProtocol)?
     private let contextService: any ContextServiceProtocol
+    private let makeSystemPromptBuilder: () -> any SystemPromptBuilderProtocol
+    private let makeSuggestedPromptsProvider: () -> any SuggestedPromptsProviderProtocol
 
     init(
         sessionManager: any SessionManagerProtocol,
@@ -36,7 +38,9 @@ final class SessionListViewModel: ObservableObject {
         hapticService: any HapticServiceProtocol,
         airPodsCoordinator: (any AirPodsVoiceCoordinatorProtocol)? = nil,
         webSearchService: (any WebSearchServiceProtocol)? = nil,
-        contextService: (any ContextServiceProtocol)? = nil
+        contextService: any ContextServiceProtocol,
+        makeSystemPromptBuilder: ((() -> any SystemPromptBuilderProtocol))? = nil,
+        makeSuggestedPromptsProvider: ((() -> any SuggestedPromptsProviderProtocol))? = nil
     ) {
         self.sessionManager = sessionManager
         self.llmService = llmService
@@ -47,7 +51,18 @@ final class SessionListViewModel: ObservableObject {
         self.hapticService = hapticService
         self.airPodsCoordinator = airPodsCoordinator
         self.webSearchService = webSearchService
-        self.contextService = contextService ?? ContextService(settings: settings)
+        self.contextService = contextService
+        self.makeSystemPromptBuilder = makeSystemPromptBuilder ?? {
+            SystemPromptBuilder(
+                calendarService: calendarService,
+                contextService: contextService,
+                settings: settings,
+                calendarActionController: calendarActionController
+            )
+        }
+        self.makeSuggestedPromptsProvider = makeSuggestedPromptsProvider ?? {
+            SuggestedPromptsProvider(calendarService: calendarService)
+        }
         self.sessions = sessionManager.loadIndex().sorted { $0.updatedAt > $1.updatedAt }
     }
 
@@ -83,13 +98,8 @@ final class SessionListViewModel: ObservableObject {
     // MARK: - ChatViewModel Factory
 
     func makeChatViewModel(for session: ChatSession, initialQuery: String? = nil, startWithVoice: Bool = false) -> ChatViewModel {
-        let promptBuilder = SystemPromptBuilder(
-            calendarService: calendarService,
-            contextService: contextService,
-            settings: settings,
-            calendarActionController: calendarActionController
-        )
-        let promptsProvider = SuggestedPromptsProvider(calendarService: calendarService)
+        let promptBuilder = makeSystemPromptBuilder()
+        let promptsProvider = makeSuggestedPromptsProvider()
         let vm = ChatViewModel(
             llmService: llmService,
             calendarService: calendarService,

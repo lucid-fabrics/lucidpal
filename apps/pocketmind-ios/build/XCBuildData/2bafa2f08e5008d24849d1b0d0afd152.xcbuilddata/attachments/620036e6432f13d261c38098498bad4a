@@ -1,0 +1,819 @@
+{
+  "" : {
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMind-primary.dia",
+    "emit-module-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMind-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMind-primary-emit-module.dia",
+    "pch" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMind-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMind-primary.swiftdeps"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/App/AppDelegate.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppDelegate.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppDelegate.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppDelegate.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppDelegate.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppDelegate.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppDelegate.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppDelegate.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppDelegate~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/App/ContentView.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContentView.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContentView.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContentView.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContentView~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/App/PocketMindApp.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindApp.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindApp.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindApp.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindApp.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindApp.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindApp.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindApp.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindApp~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Intents/AskPocketMindIntent.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindIntent.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindIntent.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindIntent.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindIntent.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindIntent.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindIntent.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindIntent.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindIntent~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Intents/AskPocketMindShortcutIntent.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindShortcutIntent.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindShortcutIntent.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindShortcutIntent.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindShortcutIntent.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindShortcutIntent.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindShortcutIntent.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindShortcutIntent.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AskPocketMindShortcutIntent~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Intents/CheckNextMeetingIntent.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CheckNextMeetingIntent.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CheckNextMeetingIntent.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CheckNextMeetingIntent.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CheckNextMeetingIntent.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CheckNextMeetingIntent.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CheckNextMeetingIntent.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CheckNextMeetingIntent.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CheckNextMeetingIntent~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Intents/CreateEventShortcutIntent.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventShortcutIntent.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventShortcutIntent.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventShortcutIntent.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventShortcutIntent.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventShortcutIntent.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventShortcutIntent.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventShortcutIntent.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventShortcutIntent~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Intents/DeleteCalendarEventIntent.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DeleteCalendarEventIntent.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DeleteCalendarEventIntent.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DeleteCalendarEventIntent.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DeleteCalendarEventIntent.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DeleteCalendarEventIntent.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DeleteCalendarEventIntent.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DeleteCalendarEventIntent.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DeleteCalendarEventIntent~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Intents/FindFreeTimeShortcutIntent.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/FindFreeTimeShortcutIntent.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/FindFreeTimeShortcutIntent.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/FindFreeTimeShortcutIntent.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/FindFreeTimeShortcutIntent.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/FindFreeTimeShortcutIntent.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/FindFreeTimeShortcutIntent.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/FindFreeTimeShortcutIntent.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/FindFreeTimeShortcutIntent~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Intents/PocketMindShortcuts.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindShortcuts.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindShortcuts.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindShortcuts.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindShortcuts.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindShortcuts.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindShortcuts.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindShortcuts.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/PocketMindShortcuts~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Intents/SiriCalendarBridge.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriCalendarBridge.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriCalendarBridge.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriCalendarBridge.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriCalendarBridge.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriCalendarBridge.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriCalendarBridge.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriCalendarBridge.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriCalendarBridge~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Intents/SiriContextStore.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriContextStore.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriContextStore.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriContextStore.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriContextStore.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriContextStore.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriContextStore.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriContextStore.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriContextStore~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Models/CalendarActionModels.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionModels.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionModels.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionModels.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionModels.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionModels.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionModels.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionModels.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionModels~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Models/ChatMessage.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatMessage.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatMessage.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatMessage.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatMessage.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatMessage.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatMessage.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatMessage.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatMessage~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Models/ChatSession.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSession.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSession.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSession.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSession.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSession.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSession.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSession.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSession~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Models/ContextItem.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextItem.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextItem.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextItem.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextItem.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextItem.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextItem.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextItem.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextItem~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Models/ModelInfo.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelInfo.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelInfo.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelInfo.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelInfo.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelInfo.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelInfo.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelInfo.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelInfo~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/AirPodsVoiceCoordinator.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AirPodsVoiceCoordinator.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AirPodsVoiceCoordinator.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AirPodsVoiceCoordinator.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AirPodsVoiceCoordinator.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AirPodsVoiceCoordinator.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AirPodsVoiceCoordinator.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AirPodsVoiceCoordinator.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AirPodsVoiceCoordinator~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/AudioRouteMonitor.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AudioRouteMonitor.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AudioRouteMonitor.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AudioRouteMonitor.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AudioRouteMonitor.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AudioRouteMonitor.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AudioRouteMonitor.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AudioRouteMonitor.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AudioRouteMonitor~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/CalendarActionController+Helpers.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController+Helpers.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController+Helpers.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController+Helpers.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController+Helpers.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController+Helpers.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController+Helpers.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController+Helpers.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController+Helpers~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/CalendarActionController.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionController~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/CalendarError.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarError.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarError.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarError.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarError.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarError.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarError.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarError.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarError~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/CalendarFreeSlotEngine.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarFreeSlotEngine.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarFreeSlotEngine.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarFreeSlotEngine.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarFreeSlotEngine.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarFreeSlotEngine.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarFreeSlotEngine.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarFreeSlotEngine.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarFreeSlotEngine~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/CalendarService.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarService.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarService.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarService.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarService.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarService.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarService.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarService.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarService~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/CalendarServiceProtocol.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarServiceProtocol.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarServiceProtocol.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarServiceProtocol.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarServiceProtocol.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarServiceProtocol.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarServiceProtocol.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarServiceProtocol.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarServiceProtocol~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/ChatHistoryManager.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatHistoryManager.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatHistoryManager.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatHistoryManager.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatHistoryManager.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatHistoryManager.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatHistoryManager.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatHistoryManager.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatHistoryManager~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/ContextService.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextService.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextService.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextService.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextService.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextService.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextService.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextService.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextService~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/ContextServiceProtocol.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextServiceProtocol.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextServiceProtocol.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextServiceProtocol.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextServiceProtocol.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextServiceProtocol.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextServiceProtocol.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextServiceProtocol.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ContextServiceProtocol~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/DebugLogStore.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogStore.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogStore.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogStore.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogStore.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogStore.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogStore.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogStore.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogStore~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/HapticService.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/HapticService.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/HapticService.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/HapticService.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/HapticService.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/HapticService.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/HapticService.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/HapticService.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/HapticService~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/LLMService.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMService.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMService.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMService.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMService.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMService.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMService.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMService.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMService~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/LLMServiceProtocol.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMServiceProtocol.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMServiceProtocol.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMServiceProtocol.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMServiceProtocol.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMServiceProtocol.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMServiceProtocol.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMServiceProtocol.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LLMServiceProtocol~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/LlamaActor.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LlamaActor.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LlamaActor.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LlamaActor.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LlamaActor.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LlamaActor.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LlamaActor.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LlamaActor.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LlamaActor~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/LocationService.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LocationService.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LocationService.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LocationService.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LocationService.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LocationService.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LocationService.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LocationService.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/LocationService~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/ModelDownloader.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloader.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloader.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloader.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloader.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloader.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloader.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloader.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloader~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/SessionManager.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionManager.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionManager.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionManager.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionManager.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionManager.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionManager.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionManager.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionManager~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/SpeechService.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechService.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechService.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechService.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechService.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechService.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechService.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechService.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechService~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/SpeechServiceProtocol.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechServiceProtocol.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechServiceProtocol.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechServiceProtocol.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechServiceProtocol.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechServiceProtocol.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechServiceProtocol.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechServiceProtocol.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SpeechServiceProtocol~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/SuggestedPromptsProvider.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsProvider.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsProvider.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsProvider.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsProvider.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsProvider.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsProvider.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsProvider.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsProvider~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/SystemPromptBuilder.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SystemPromptBuilder.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SystemPromptBuilder.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SystemPromptBuilder.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SystemPromptBuilder.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SystemPromptBuilder.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SystemPromptBuilder.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SystemPromptBuilder.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SystemPromptBuilder~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/WebSearchService.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchService.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchService.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchService.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchService.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchService.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchService.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchService.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchService~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Services/WhisperSpeechService.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WhisperSpeechService.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WhisperSpeechService.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WhisperSpeechService.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WhisperSpeechService.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WhisperSpeechService.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WhisperSpeechService.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WhisperSpeechService.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WhisperSpeechService~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/ViewModels/AppSettings.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettings.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettings.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettings.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettings.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettings.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettings.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettings.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettings~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/ViewModels/AppSettingsProtocol.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettingsProtocol.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettingsProtocol.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettingsProtocol.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettingsProtocol.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettingsProtocol.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettingsProtocol.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettingsProtocol.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/AppSettingsProtocol~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/ViewModels/ChatConstants.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatConstants.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatConstants.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatConstants.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatConstants.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatConstants.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatConstants.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatConstants.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatConstants~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/ViewModels/ChatViewModel+CalendarConfirmation.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+CalendarConfirmation.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+CalendarConfirmation.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+CalendarConfirmation.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+CalendarConfirmation.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+CalendarConfirmation.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+CalendarConfirmation.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+CalendarConfirmation.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+CalendarConfirmation~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/ViewModels/ChatViewModel+MessageHandling.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+MessageHandling.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+MessageHandling.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+MessageHandling.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+MessageHandling.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+MessageHandling.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+MessageHandling.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+MessageHandling.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+MessageHandling~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/ViewModels/ChatViewModel+Persistence.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+Persistence.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+Persistence.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+Persistence.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+Persistence.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+Persistence.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+Persistence.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+Persistence.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel+Persistence~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/ViewModels/ChatViewModel.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatViewModel~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/ViewModels/ModelDownloadViewModel.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadViewModel.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadViewModel.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadViewModel.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadViewModel.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadViewModel.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadViewModel.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadViewModel.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadViewModel~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/ViewModels/SessionListViewModel.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListViewModel.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListViewModel.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListViewModel.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListViewModel.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListViewModel.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListViewModel.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListViewModel.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListViewModel~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/ViewModels/SettingsViewModel.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsViewModel.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsViewModel.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsViewModel.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsViewModel.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsViewModel.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsViewModel.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsViewModel.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsViewModel~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/ViewModels/UserDefaultsKeys.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/UserDefaultsKeys.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/UserDefaultsKeys.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/UserDefaultsKeys.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/UserDefaultsKeys.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/UserDefaultsKeys.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/UserDefaultsKeys.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/UserDefaultsKeys.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/UserDefaultsKeys~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/BulkDeletionBar.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/BulkDeletionBar.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/BulkDeletionBar.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/BulkDeletionBar.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/BulkDeletionBar.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/BulkDeletionBar.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/BulkDeletionBar.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/BulkDeletionBar.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/BulkDeletionBar~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/CalendarActionPill.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionPill.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionPill.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionPill.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionPill.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionPill.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionPill.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionPill.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarActionPill~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/CalendarEventCard+Pending.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Pending.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Pending.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Pending.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Pending.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Pending.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Pending.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Pending.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Pending~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/CalendarEventCard+Subviews.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Subviews.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Subviews.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Subviews.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Subviews.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Subviews.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Subviews.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Subviews.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard+Subviews~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/CalendarEventCard.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventCard~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/CalendarEventListCard.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventListCard.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventListCard.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventListCard.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventListCard.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventListCard.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventListCard.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventListCard.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarEventListCard~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/CalendarQueryResultCard.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarQueryResultCard.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarQueryResultCard.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarQueryResultCard.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarQueryResultCard.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarQueryResultCard.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarQueryResultCard.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarQueryResultCard.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CalendarQueryResultCard~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/ChatSessionContainer.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSessionContainer.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSessionContainer.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSessionContainer.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSessionContainer.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSessionContainer.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSessionContainer.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSessionContainer.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatSessionContainer~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/ChatView+Subviews.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView+Subviews.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView+Subviews.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView+Subviews.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView+Subviews.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView+Subviews.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView+Subviews.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView+Subviews.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView+Subviews~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/ChatView.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ChatView~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/ConflictDetailSheet.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ConflictDetailSheet.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ConflictDetailSheet.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ConflictDetailSheet.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ConflictDetailSheet.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ConflictDetailSheet.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ConflictDetailSheet.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ConflictDetailSheet.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ConflictDetailSheet~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/CreateEventSheet.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventSheet.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventSheet.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventSheet.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventSheet.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventSheet.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventSheet.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventSheet.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/CreateEventSheet~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/DebugLogView.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogView.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogView.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogView.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogView.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogView.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogView.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogView.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DebugLogView~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/DesignConstants.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DesignConstants.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DesignConstants.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DesignConstants.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DesignConstants.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DesignConstants.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DesignConstants.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DesignConstants.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/DesignConstants~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/MessageBubbleView.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/MessageBubbleView.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/MessageBubbleView.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/MessageBubbleView.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/MessageBubbleView.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/MessageBubbleView.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/MessageBubbleView.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/MessageBubbleView.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/MessageBubbleView~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/ModelDownloadView.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadView.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadView.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadView.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadView.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadView.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadView.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadView.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ModelDownloadView~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/OnboardingCarouselView.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingCarouselView.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingCarouselView.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingCarouselView.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingCarouselView.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingCarouselView.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingCarouselView.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingCarouselView.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingCarouselView~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/OnboardingView.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingView.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingView.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingView.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingView.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingView.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingView.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingView.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/OnboardingView~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/SessionListView+Subviews.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView+Subviews.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView+Subviews.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView+Subviews.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView+Subviews.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView+Subviews.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView+Subviews.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView+Subviews.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView+Subviews~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/SessionListView.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SessionListView~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/SettingsView.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsView.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsView.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsView.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsView.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsView.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsView.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsView.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SettingsView~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/SiriEventCard.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriEventCard.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriEventCard.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriEventCard.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriEventCard.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriEventCard.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriEventCard.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriEventCard.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SiriEventCard~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/SuggestedPromptsView.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsView.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsView.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsView.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsView.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsView.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsView.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsView.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/SuggestedPromptsView~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/ThinkingDisclosure.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ThinkingDisclosure.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ThinkingDisclosure.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ThinkingDisclosure.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ThinkingDisclosure.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ThinkingDisclosure.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ThinkingDisclosure.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ThinkingDisclosure.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ThinkingDisclosure~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/ToastView.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ToastView.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ToastView.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ToastView.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ToastView.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ToastView.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ToastView.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ToastView.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/ToastView~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/VoiceRecordingOverlay.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/VoiceRecordingOverlay.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/VoiceRecordingOverlay.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/VoiceRecordingOverlay.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/VoiceRecordingOverlay.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/VoiceRecordingOverlay.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/VoiceRecordingOverlay.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/VoiceRecordingOverlay.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/VoiceRecordingOverlay~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/Sources/Views/WebSearchSettingsView.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchSettingsView.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchSettingsView.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchSettingsView.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchSettingsView.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchSettingsView.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchSettingsView.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchSettingsView.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/WebSearchSettingsView~partial.swiftmodule"
+  },
+  "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/wassimmehanna/git/pocketmind/apps/pocketmind-ios/build/PocketMind.build/Debug-iphoneos/PocketMind.build/Objects-normal/arm64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}

@@ -22,6 +22,12 @@ final class ChatViewModel: ObservableObject {
     @Published var suggestedPrompts: [String] = []
     @Published var isGeneratingSuggestions = false
 
+    /// Per-session thinking mode toggle — true means the model reasons before answering.
+    @Published var thinkingEnabled: Bool = false
+
+    /// Message the user is replying to — shown as a quote strip above the input bar.
+    @Published var replyingTo: ChatMessage? = nil
+
     /// Navigation title — equals session title in session mode, "PocketMind" otherwise.
     @Published private(set) var sessionTitle: String
 
@@ -41,6 +47,11 @@ final class ChatViewModel: ObservableObject {
     var suppressSpeechAutoSend = false
     // Set to true when voice auto-start triggered recording — preserves auto-send on manual stop
     var voiceAutoStartActive = false
+    // When true, the next transcript result is discarded instead of written to inputText
+    var discardNextTranscript = false
+
+    /// Mirrors settings.voiceAutoStartEnabled — exposed so ChatView never touches settings directly.
+    @Published private(set) var voiceAutoStartEnabled: Bool
 
     /// If set, ChatView auto-sends this message on appear (used for Siri integration).
     var pendingInput: String?
@@ -86,11 +97,26 @@ final class ChatViewModel: ObservableObject {
         self.onSessionUpdated = onSessionUpdated
         self.sessionTitle = session?.title ?? "PocketMind"
         self.pendingInput = pendingInput
+        self.voiceAutoStartEnabled = settings.voiceAutoStartEnabled
         self.isModelLoaded = llmService.isLoaded
 
         // Load messages: from session if in session mode, else from history file.
-        self.messages = session?.messages ?? historyManager.load()
+        var loaded = session?.messages ?? historyManager.load()
+        ChatViewModel.sanitizeStaleState(&loaded)
+        self.messages = loaded
 
+        setupPublishers()
+
+        // Request speech permissions on launch
+        Task { [weak self] in await self?.speechService.requestAuthorization() }
+
+        // If model is already loaded and there's nothing to show, kick off suggestions.
+        if llmService.isLoaded && messages.isEmpty && pendingInput == nil {
+            Task { [weak self] in await self?.generateSuggestedPrompts() }
+        }
+    }
+
+    private func setupPublishers() {
         // Publishers — sink used instead of assign(to:) because existentials can't project @Published.
         llmService.isLoadedPublisher
             .sink { [weak self] loaded in
@@ -111,11 +137,18 @@ final class ChatViewModel: ObservableObject {
         speechService.isTranscribingPublisher
             .sink { [weak self] in self?.isSpeechTranscribing = $0 }
             .store(in: &cancellables)
+        speechService.transcriptionErrorPublisher
+            .compactMap { $0 }
+            .sink { [weak self] in self?.errorMessage = $0 }
+            .store(in: &cancellables)
 
         // Forward live transcript into the input field while recording
         speechService.transcriptPublisher
             .filter { !$0.isEmpty }
-            .sink { [weak self] in self?.inputText = $0 }
+            .sink { [weak self] in
+                guard let self, !self.discardNextTranscript else { return }
+                self.inputText = $0
+            }
             .store(in: &cancellables)
 
         // Observe AirPods auto-listening state
@@ -162,6 +195,12 @@ final class ChatViewModel: ObservableObject {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self else { return }
+                if self.discardNextTranscript {
+                    self.discardNextTranscript = false
+                    self.inputText = ""
+                    self.suppressSpeechAutoSend = false
+                    return
+                }
                 if self.suppressSpeechAutoSend {
                     self.suppressSpeechAutoSend = false
                     return
@@ -171,25 +210,13 @@ final class ChatViewModel: ObservableObject {
                 Task { [weak self] in await self?.sendMessage() }
             }
             .store(in: &cancellables)
-
-        // Request speech permissions on launch
-        Task { [weak self] in await self?.speechService.requestAuthorization() }
-
-        // If model is already loaded and there's nothing to show, kick off suggestions.
-        if llmService.isLoaded && messages.isEmpty && pendingInput == nil {
-            Task { [weak self] in await self?.generateSuggestedPrompts() }
-        }
     }
 
     func toggleSpeech() {
         if speechService.isRecording {
-            // Manual stop — suppress auto-send unless voice auto-start triggered the session
-            if !voiceAutoStartActive {
-                suppressSpeechAutoSend = true
-            }
-            voiceAutoStartActive = false
-            speechService.stopRecording()
+            confirmSpeech()
         } else {
+            discardNextTranscript = false
             do {
                 try speechService.startRecording()
                 hapticService.impact(.light)
@@ -199,6 +226,22 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
+    /// Stops recording and accepts the transcript. Auto-sends if the setting is enabled.
+    func confirmSpeech() {
+        guard speechService.isRecording else { return }
+        voiceAutoStartActive = false
+        speechService.stopRecording()
+    }
+
+    /// Stops recording and discards the transcript. Never auto-sends.
+    func cancelSpeech() {
+        guard speechService.isRecording else { return }
+        suppressSpeechAutoSend = true
+        discardNextTranscript = true
+        voiceAutoStartActive = false
+        speechService.stopRecording()
+    }
+
     func sendMessage() async {
         cancelSuggestionsGeneration()
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -206,7 +249,9 @@ final class ChatViewModel: ObservableObject {
 
         hapticService.impact(.light)
         inputText = ""
+        replyingTo = nil
         messages.append(ChatMessage(role: .user, content: text))
+        DebugLogStore.shared.log("USER: \(text)", category: "LLM")
 
         // Auto-title: derive session title from the first user message.
         if sessionManager != nil && sessionTitle == "New Chat" {
@@ -233,21 +278,21 @@ final class ChatViewModel: ObservableObject {
         let historyLimit = ramGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeHistoryLimit : ChatConstants.smallHistoryLimit
         let historyMessages = Array(messages.dropLast().suffix(historyLimit))
 
-        let showThinking = settings.thinkingEnabled  // snapshot at send time — also used by web search re-generation
+        let showThinking = thinkingEnabled  // snapshot at send time — also used by web search re-generation
 
         do {
-            var raw = ""           // full accumulated raw output
-            var thinkDone = false  // have we seen </think> yet?
-
-            for try await token in llmService.generate(systemPrompt: systemPrompt, messages: historyMessages, thinkingEnabled: showThinking) {
-                guard let idx = messages.firstIndex(where: { $0.id == assistantID }) else { break }
-                applyStreamToken(token, rawBuffer: &raw, thinkDone: &thinkDone, showThinking: showThinking, idx: idx)
+            try await streamLLMResponse(
+                systemPrompt: systemPrompt,
+                messages: historyMessages,
+                assistantID: assistantID,
+                showThinking: showThinking
+            )
+            // Log raw LLM output for debugging
+            if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
+                llmLogger.info("📤 USER: \(text, privacy: .public)")
+                llmLogger.info("RAW_LLM: \(self.messages[idx].content, privacy: .public)")
+                DebugLogStore.shared.log("RAW_LLM: \(messages[idx].content)", category: "LLM")
             }
-        // Log raw LLM output for debugging
-        if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
-            llmLogger.info("📤 USER: \(text, privacy: .public)")
-            llmLogger.info("🤖 RAW_LLM: \(self.messages[idx].content, privacy: .public)")
-        }
         } catch is CancellationError {
             // User cancelled — leave partial content visible
         } catch {
@@ -265,32 +310,16 @@ final class ChatViewModel: ObservableObject {
                settings.webSearchEnabled,
                let args = systemPromptBuilder.extractWebSearchQuery(from: messages[idx].content) {
                 messages[idx].content = ""
-                do {
-                    let results = try await searchSvc.search(query: args.query, maxResults: args.maxResults)
-                    let resultText = results.enumerated().map { i, r in
-                        "[\(i + 1)] \(r.title)\nURL: \(r.url)\n\(r.snippet)"
-                    }.joined(separator: "\n\n")
-                    let toolMsg = ChatMessage(
-                        role: .user,
-                        content: "[SEARCH_RESULTS for \"\(args.query)\"]:\n\(resultText)\n\nNow answer the original question based on these results."
-                    )
-                    var raw2 = ""
-                    var thinkDone2 = false
-                    for try await token in llmService.generate(
-                        systemPrompt: systemPrompt,
-                        messages: historyMessages + [toolMsg],
-                        thinkingEnabled: showThinking
-                    ) {
-                        guard let i = messages.firstIndex(where: { $0.id == assistantID }) else { break }
-                        applyStreamToken(token, rawBuffer: &raw2, thinkDone: &thinkDone2, showThinking: showThinking, idx: i)
-                    }
-                } catch is CancellationError {
-                    // User cancelled — leave partial content visible
-                } catch {
-                    if let i = messages.firstIndex(where: { $0.id == assistantID }) {
-                        messages[i].content = "Search failed: \(error.localizedDescription)"
-                    }
-                }
+                await performWebSearch(
+                    query: args.query,
+                    maxResults: args.maxResults,
+                    searchSvc: searchSvc,
+                    assistantID: assistantID,
+                    showThinking: showThinking
+                )
+            } else if messages[idx].content.contains("[WEB_SEARCH:") {
+                let rawContent = String(messages[idx].content.prefix(ChatConstants.rawLogPreviewLength))
+                llmLogger.warning("🔍 WEB_SEARCH block detected but extractWebSearchQuery returned nil — content: '\(rawContent, privacy: .public)'")
             }
 
             // Calendar actions on final output (whether from first pass or post-search re-generation)
@@ -301,6 +330,74 @@ final class ChatViewModel: ObservableObject {
                 messages[finalIdx].calendarEventPreviews = previews
                 messages[finalIdx].calendarFreeSlots = freeSlots
                 llmLogger.info("✅ FINAL: \(content, privacy: .public) | events=\(previews.count) slots=\(freeSlots.count)")
+                DebugLogStore.shared.log("FINAL: events=\(previews.count) slots=\(freeSlots.count) — \(String(content.prefix(ChatConstants.rawLogPreviewLength)))", category: "LLM")
+            }
+        }
+    }
+
+    private func streamLLMResponse(
+        systemPrompt: String,
+        messages historyMessages: [ChatMessage],
+        assistantID: UUID,
+        showThinking: Bool
+    ) async throws {
+        var raw = ""           // full accumulated raw output
+        var thinkDone = false  // have we seen </think> yet?
+
+        for try await token in llmService.generate(systemPrompt: systemPrompt, messages: historyMessages, thinkingEnabled: showThinking) {
+            guard let idx = messages.firstIndex(where: { $0.id == assistantID }) else { break }
+            applyStreamToken(token, rawBuffer: &raw, thinkDone: &thinkDone, showThinking: showThinking, idx: idx)
+        }
+    }
+
+    private func performWebSearch(
+        query: String,
+        maxResults: Int,
+        searchSvc: any WebSearchServiceProtocol,
+        assistantID: UUID,
+        showThinking: Bool
+    ) async {
+        llmLogger.info("🔍 WEB_SEARCH extracted query='\(query, privacy: .public)' maxResults=\(maxResults)")
+        DebugLogStore.shared.log("WEB_SEARCH query='\(query)' maxResults=\(maxResults)", category: "Search")
+        do {
+            let results = try await searchSvc.search(query: query, maxResults: maxResults)
+            llmLogger.info("🔍 WEB_SEARCH got \(results.count) results for '\(query, privacy: .public)'")
+            DebugLogStore.shared.log("WEB_SEARCH got \(results.count) results for '\(query)'", category: "Search")
+            let resultText = results.enumerated().map { i, r in
+                "[\(i + 1)] \(r.title)\nURL: \(r.url)\n\(r.snippet)"
+            }.joined(separator: "\n\n")
+            let toolMsg = ChatMessage(
+                role: .user,
+                content: "[SEARCH_RESULTS for \"\(query)\"]:\n\(resultText)\n\nAnswer the original question directly. No preamble. No disclaimers. Be concise. Use location/timezone from context."
+            )
+            let synthesisPrompt = await systemPromptBuilder.buildSynthesisPrompt()
+            llmLogger.info("🔍 WEB_SEARCH starting synthesis pass")
+            DebugLogStore.shared.log("WEB_SEARCH starting synthesis pass", category: "Search")
+            var raw2 = ""
+            var thinkDone2 = false
+            // Pass only toolMsg (not historyMessages) to synthesis so the model has
+            // fewer input tokens and more room to finish its <think> block + produce an answer.
+            for try await token in llmService.generate(
+                systemPrompt: synthesisPrompt,
+                messages: [toolMsg],
+                thinkingEnabled: showThinking
+            ) {
+                guard let i = messages.firstIndex(where: { $0.id == assistantID }) else { break }
+                applyStreamToken(token, rawBuffer: &raw2, thinkDone: &thinkDone2, showThinking: showThinking, idx: i)
+            }
+            let synthesisPreview = String(messages.first(where: { $0.id == assistantID })?.content.prefix(ChatConstants.synthesisLogPreviewLength) ?? "")
+            llmLogger.info("🔍 WEB_SEARCH synthesis done, content='\(synthesisPreview, privacy: .public)'")
+            DebugLogStore.shared.log("WEB_SEARCH synthesis done: '\(synthesisPreview)'", category: "Search")
+            if let i = messages.firstIndex(where: { $0.id == assistantID }) {
+                messages[i].isWebSearchResult = true
+            }
+        } catch is CancellationError {
+            // User cancelled — leave partial content visible
+        } catch {
+            llmLogger.error("🔍 WEB_SEARCH failed: \(error.localizedDescription, privacy: .public)")
+            DebugLogStore.shared.log("WEB_SEARCH failed: \(error.localizedDescription)", category: "Search", level: .error)
+            if let i = messages.firstIndex(where: { $0.id == assistantID }) {
+                messages[i].content = "Search failed: \(error.localizedDescription)"
             }
         }
     }
@@ -350,6 +447,40 @@ final class ChatViewModel: ObservableObject {
         guard index < messages.count else { return false }
         guard index > 0 else { return true }
         return !Calendar.current.isDate(messages[index].timestamp, inSameDayAs: messages[index - 1].timestamp)
+    }
+
+    // MARK: - Session load cleanup
+
+    /// Clears in-flight flags persisted when the app was killed mid-generation.
+    private static func sanitizeStaleState(_ messages: inout [ChatMessage]) {
+        for i in messages.indices where messages[i].role == .assistant {
+            // Clear stuck thinking flag
+            messages[i].isThinking = false
+
+            // Web search tag present but synthesis never ran → mark interrupted
+            if messages[i].isStreamingWebSearch {
+                messages[i].content = "*(Search was interrupted.)*"
+                messages[i].isWebSearchResult = true
+            }
+
+            // Calendar action tag present but never executed → strip the raw block
+            if messages[i].isStreamingAction {
+                let stripped = messages[i].content
+                    .components(separatedBy: "\n")
+                    .filter { !$0.contains("[CALENDAR_ACTION:") }
+                    .joined(separator: "\n")
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                messages[i].content = stripped.isEmpty ? "*(Action was interrupted.)*" : stripped
+            }
+        }
+
+        // Remove dangling empty assistant messages (killed before any token was written)
+        messages.removeAll {
+            $0.role == .assistant
+            && $0.content.isEmpty
+            && $0.calendarEventPreviews.isEmpty
+            && $0.calendarFreeSlots.isEmpty
+        }
     }
 
 }
