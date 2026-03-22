@@ -27,6 +27,8 @@ enum ChatConstants {
     static let voiceAutoStartDelayMilliseconds: Int = 300
     /// Minutes per hour — used for event proximity thresholds.
     static let minutesPerHour: Int = 60
+    /// Seconds in one minute — used for converting reminder minutes to EKAlarm offsets.
+    static let secondsPerMinute: Int = 60
     /// Opening tag emitted by Qwen3 models before their reasoning trace.
     static let thinkOpenTag = "<think>"
     /// Closing tag emitted by Qwen3 models after their reasoning trace.

@@ -130,6 +130,16 @@ final class CalendarServiceProtocolTests: XCTestCase {
         XCTAssertTrue(service.deletedIdentifiers.isEmpty)
     }
 
+    func testDeleteEventThrowsEventNotFound() {
+        service.shouldThrowOnDelete = true
+        XCTAssertThrowsError(try service.deleteEvent(identifier: "missing-id")) { error in
+            guard case CalendarError.eventNotFound = error else {
+                XCTFail("Expected CalendarError.eventNotFound, got \(error)")
+                return
+            }
+        }
+    }
+
     // MARK: - applyUpdate
 
     func testApplyUpdateReturnsTitleOnlyState() throws {
@@ -162,6 +172,26 @@ final class CalendarServiceProtocolTests: XCTestCase {
         var update = PendingCalendarUpdate()
         update.title = "Test"
         XCTAssertThrowsError(try service.applyUpdate(update, to: "evt-123"))
+    }
+
+    func testApplyUpdateThrowsEventNotFound() {
+        service.shouldThrowOnApplyUpdate = true
+        var update = PendingCalendarUpdate()
+        update.title = "Test"
+        XCTAssertThrowsError(try service.applyUpdate(update, to: "missing-id")) { error in
+            guard case CalendarError.eventNotFound = error else {
+                XCTFail("Expected CalendarError.eventNotFound, got \(error)")
+                return
+            }
+        }
+    }
+
+    func testApplyUpdateDoesNotRecordOnThrow() {
+        service.shouldThrowOnApplyUpdate = true
+        var update = PendingCalendarUpdate()
+        update.title = "Test"
+        _ = try? service.applyUpdate(update, to: "evt-123")
+        XCTAssertTrue(service.appliedUpdates.isEmpty)
     }
 
     func testApplyUpdateRecordsAppliedUpdate() throws {

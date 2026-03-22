@@ -227,13 +227,12 @@ struct ChatView: View {
         .padding(.vertical, 40)
     }
 
-    /// True only when generating a user-initiated response (not background suggestion generation).
-    private var isUserGenerating: Bool {
-        viewModel.isGenerating && !viewModel.isGeneratingSuggestions
-    }
-
     private var inputBar: some View {
-        HStack(spacing: 10) {
+        let isUserGenerating = viewModel.isGenerating && !viewModel.isGeneratingSuggestions
+        let sendButtonColor: Color = isUserGenerating ? .red
+            : viewModel.inputText.trimmingCharacters(in: .whitespaces).isEmpty ? Color(.systemGray3)
+            : .accentColor
+        return HStack(spacing: 10) {
             if viewModel.isSpeechAvailable {
                 Button {
                     viewModel.toggleSpeech()
@@ -287,12 +286,6 @@ struct ChatView: View {
         .overlay(alignment: .top) { Divider() }
     }
 
-    private var sendButtonColor: Color {
-        if isUserGenerating { return .red }
-        if viewModel.inputText.trimmingCharacters(in: .whitespaces).isEmpty { return Color(.systemGray3) }
-        return .accentColor
-    }
-
     private func scrollToBottom(proxy: ScrollViewProxy) {
         guard let last = viewModel.messages.last else { return }
         withAnimation(.easeOut(duration: 0.15)) {
@@ -300,5 +293,3 @@ struct ChatView: View {
         }
     }
 }
-
-

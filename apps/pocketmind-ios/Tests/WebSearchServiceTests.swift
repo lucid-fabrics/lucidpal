@@ -129,6 +129,19 @@ final class WebSearchServiceTests: XCTestCase {
         }
     }
 
+    func testThrowsInvalidEndpointWhenMalformedURL() async throws {
+        // A non-empty string that cannot produce a valid URL (e.g. contains only spaces).
+        // This exercises the nil-URL guard branch independently of the empty-string guard.
+        settings.webSearchEndpoint = "   "
+
+        do {
+            _ = try await service.search(query: "test", maxResults: 5)
+            XCTFail("Expected WebSearchError.invalidEndpoint")
+        } catch WebSearchError.invalidEndpoint {
+            // pass
+        }
+    }
+
     func testThrowsHTTPErrorOn4xx() async throws {
         stubResponse(statusCode: 404, body: "Not Found")
 

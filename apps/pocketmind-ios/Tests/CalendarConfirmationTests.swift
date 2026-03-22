@@ -235,4 +235,77 @@ final class CalendarConfirmationTests: XCTestCase {
         await vm.confirmUpdate(messageID: msgID, previewID: p.id)
         XCTAssertTrue(haptic.notifySuccessCalled)
     }
+
+    func testConfirmUpdateEventNotFoundClearsPendingUpdate() async {
+        calendar.shouldThrowOnApplyUpdate = true
+        var p = preview(state: .pendingUpdate)
+        var update = PendingCalendarUpdate()
+        update.title = "Oops"
+        p.pendingUpdate = update
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmUpdate(messageID: msgID, previewID: p.id)
+        XCTAssertNil(vm.messages.last?.calendarEventPreviews.first?.pendingUpdate)
+    }
+
+    func testConfirmUpdateErrorSetsNonEmptyMessage() async throws {
+        // Verifies that errorMessage is non-empty on any applyUpdate failure.
+        // MockCalendarService throws CalendarError.eventNotFound, which sets a
+        // hardcoded non-empty message in the .eventNotFound catch branch.
+        calendar.shouldThrowOnApplyUpdate = true
+        var p = preview(state: .pendingUpdate)
+        var update = PendingCalendarUpdate()
+        update.title = "Fail"
+        p.pendingUpdate = update
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmUpdate(messageID: msgID, previewID: p.id)
+        let errorMsg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
+    }
+
+    // MARK: - cancelConflict error path
+
+    func testCancelConflictThrowSetsErrorMessage() async throws {
+        calendar.shouldThrowOnDelete = true
+        let p = preview(state: .pendingDeletion)
+        let msgID = addMessageWithPreviews([p])
+        await vm.cancelConflict(messageID: msgID, previewID: p.id)
+        let errorMsg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
+    }
+
+    func testCancelConflictThrowDoesNotMarkDeleted() async {
+        calendar.shouldThrowOnDelete = true
+        let p = preview(state: .pendingDeletion)
+        let msgID = addMessageWithPreviews([p])
+        await vm.cancelConflict(messageID: msgID, previewID: p.id)
+        XCTAssertNotEqual(vm.messages.last?.calendarEventPreviews.first?.state, .deleted)
+    }
+
+    // MARK: - rescheduleConflict error path
+
+    func testRescheduleConflictThrowSetsErrorMessage() async throws {
+        calendar.shouldThrowOnApplyUpdate = true
+        let p = preview(state: .pendingUpdate)
+        let msgID = addMessageWithPreviews([p])
+        let slot = CalendarFreeSlot(
+            start: Date(timeIntervalSinceNow: 3600),
+            end: Date(timeIntervalSinceNow: 7200)
+        )
+        await vm.rescheduleConflict(messageID: msgID, previewID: p.id, to: slot)
+        let errorMsg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
+    }
+
+    func testRescheduleConflictThrowDoesNotUpdatePreviewDates() async {
+        calendar.shouldThrowOnApplyUpdate = true
+        let p = preview(state: .pendingUpdate)
+        let originalStart = p.start
+        let msgID = addMessageWithPreviews([p])
+        let slot = CalendarFreeSlot(
+            start: Date(timeIntervalSinceNow: 86400),
+            end: Date(timeIntervalSinceNow: 90000)
+        )
+        await vm.rescheduleConflict(messageID: msgID, previewID: p.id, to: slot)
+        XCTAssertEqual(vm.messages.last?.calendarEventPreviews.first?.start, originalStart)
+    }
 }
