@@ -68,7 +68,11 @@ final class WhisperSpeechService {
             rec.record()
             recorder = rec
         } catch {
-            try? session.setActive(false, options: .notifyOthersOnDeactivation)
+            do {
+                try session.setActive(false, options: .notifyOthersOnDeactivation)
+            } catch let deactivationError {
+                whisperLogger.error("Failed to deactivate audio session after recording error: \(deactivationError)")
+            }
             throw error
         }
 
@@ -154,8 +158,10 @@ final class WhisperSpeechService {
 // MARK: - SpeechServiceProtocol conformance
 
 extension WhisperSpeechService: SpeechServiceProtocol {
+    var isInterrupted: Bool { false }
     var isRecordingPublisher: AnyPublisher<Bool, Never> { $isRecording.eraseToAnyPublisher() }
     var isAuthorizedPublisher: AnyPublisher<Bool, Never> { $isAuthorized.eraseToAnyPublisher() }
     var transcriptPublisher: AnyPublisher<String, Never> { $transcript.eraseToAnyPublisher() }
     var isTranscribingPublisher: AnyPublisher<Bool, Never> { $isTranscribing.eraseToAnyPublisher() }
+    var isInterruptedPublisher: AnyPublisher<Bool, Never> { Just(false).eraseToAnyPublisher() }
 }

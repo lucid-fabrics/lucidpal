@@ -6,19 +6,20 @@ final class ChatViewModelEdgeCaseTests: XCTestCase {
     var llm: MockLLMService!
     var calendarService: MockCalendarService!
     var controller: MockCalendarActionController!
-    var settings: AppSettings!
+    var settings: AppSettingsProtocol!
     var viewModel: ChatViewModel!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         llm = MockLLMService()
         calendarService = MockCalendarService()
         controller = MockCalendarActionController()
-        settings = AppSettings()
+        settings = MockAppSettings()
         viewModel = ChatViewModel(
             llmService: llm,
             calendarService: calendarService,
             calendarActionController: controller,
+            contextService: MockContextService(),
             settings: settings,
             speechService: MockSpeechService(),
             hapticService: MockHapticService(),

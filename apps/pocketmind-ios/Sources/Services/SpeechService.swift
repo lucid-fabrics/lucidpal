@@ -17,7 +17,7 @@ final class SpeechService {
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
     private var silenceTimer: Timer?
-    private var interruptionObserver: Any?
+    nonisolated(unsafe) private var interruptionObserver: Any?
 
     private static let silenceTimeoutSeconds: TimeInterval = 30
     private static let audioBufferSize: AVAudioFrameCount = 1024
@@ -140,14 +140,15 @@ final class SpeechService {
             object: AVAudioSession.sharedInstance(),
             queue: .main
         ) { [weak self] notification in
-            self?.handleInterruption(notification)
+            let typeValue = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
+            MainActor.assumeIsolated {
+                self?.handleInterruption(typeValue: typeValue)
+            }
         }
     }
 
-    private func handleInterruption(_ notification: Notification) {
-        guard let userInfo = notification.userInfo,
-              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
-              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+    private func handleInterruption(typeValue: UInt?) {
+        guard let typeValue, let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
             return
         }
 

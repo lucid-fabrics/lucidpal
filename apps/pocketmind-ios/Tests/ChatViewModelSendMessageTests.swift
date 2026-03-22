@@ -4,19 +4,20 @@ import XCTest
 @MainActor
 final class ChatViewModelSendMessageTests: XCTestCase {
     var mock: MockCalendarService!
-    var settings: AppSettings!
+    var settings: AppSettingsProtocol!
     var viewModel: ChatViewModel!
     var llm: MockLLMService!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         mock = MockCalendarService()
-        settings = AppSettings()
+        settings = MockAppSettings()
         llm = MockLLMService()
         viewModel = ChatViewModel(
             llmService: llm,
             calendarService: mock,
             calendarActionController: MockCalendarActionController(),
+            contextService: MockContextService(),
             settings: settings,
             speechService: MockSpeechService(),
             hapticService: MockHapticService(),
@@ -33,6 +34,7 @@ final class ChatViewModelSendMessageTests: XCTestCase {
             llmService: mockLLM,
             calendarService: mock,
             calendarActionController: MockCalendarActionController(),
+            contextService: MockContextService(),
             settings: settings,
             speechService: speech,
             hapticService: MockHapticService(),

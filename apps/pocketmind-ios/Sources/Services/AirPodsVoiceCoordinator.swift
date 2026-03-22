@@ -10,14 +10,14 @@ private let coordinatorLogger = Logger(subsystem: "com.pocketmind", category: "A
 final class AirPodsVoiceCoordinator: ObservableObject {
     @Published private(set) var isAutoListening = false
 
-    private let audioRouteMonitor: AudioRouteMonitor
-    private let speechService: SpeechService
+    private let audioRouteMonitor: any AudioRouteMonitorProtocol
+    private let speechService: any SpeechServiceProtocol
     private let settings: AppSettingsProtocol
 
     private var cancellables = Set<AnyCancellable>()
     private var shouldAutoResume = false
 
-    init(audioRouteMonitor: AudioRouteMonitor, speechService: SpeechService, settings: AppSettingsProtocol) {
+    init(audioRouteMonitor: any AudioRouteMonitorProtocol, speechService: any SpeechServiceProtocol, settings: AppSettingsProtocol) {
         self.audioRouteMonitor = audioRouteMonitor
         self.speechService = speechService
         self.settings = settings
@@ -42,7 +42,7 @@ final class AirPodsVoiceCoordinator: ObservableObject {
     // MARK: - Private Methods
 
     private func observeAudioRoute() {
-        audioRouteMonitor.$isAirPodsConnected
+        audioRouteMonitor.isAirPodsConnectedPublisher
             .sink { [weak self] isConnected in
                 self?.handleAirPodsConnectionChange(isConnected)
             }
@@ -50,7 +50,7 @@ final class AirPodsVoiceCoordinator: ObservableObject {
     }
 
     private func observeInterruptions() {
-        speechService.$isInterrupted
+        speechService.isInterruptedPublisher
             .sink { [weak self] isInterrupted in
                 self?.handleInterruptionChange(isInterrupted)
             }

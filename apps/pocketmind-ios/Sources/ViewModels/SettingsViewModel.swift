@@ -46,4 +46,11 @@ final class SettingsViewModel: ObservableObject {
         settings.voiceAutoStartEnabled = enabled
         if enabled { settings.speechAutoSendEnabled = true }
     }
+
+    var availableStorageGB: Double? {
+        let attrs = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory())
+        guard let free = attrs?[.systemFreeSize] as? Int64 else { return nil }
+        let bytesPerGB: Double = 1_073_741_824
+        return Double(free) / bytesPerGB
+    }
 }

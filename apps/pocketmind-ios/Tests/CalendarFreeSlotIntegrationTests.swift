@@ -6,12 +6,12 @@ import XCTest
 final class CalendarFreeSlotIntegrationTests: XCTestCase {
     var controller: CalendarActionController!
     var calendarService: MockCalendarService!
-    var settings: AppSettings!
+    var settings: AppSettingsProtocol!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         calendarService = MockCalendarService()
-        settings = AppSettings()
+        settings = MockAppSettings()
         controller = CalendarActionController(calendarService: calendarService, settings: settings)
     }
 

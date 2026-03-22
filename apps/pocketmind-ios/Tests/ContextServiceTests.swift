@@ -1,6 +1,7 @@
 import XCTest
 @testable import PocketMind
 
+@MainActor
 final class ContextServiceTests: XCTestCase {
 
     var sut: ContextService!

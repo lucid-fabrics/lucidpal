@@ -3,7 +3,7 @@ import Foundation
 /// Protocol abstraction for ContextService — enables mocking in unit tests
 /// and decouples ViewModels from the concrete cross-app context implementation.
 /// Not @MainActor — EventKit operations run on background queue.
-protocol ContextServiceProtocol: AnyObject {
+protocol ContextServiceProtocol: AnyObject, Sendable {
     var isNotesEnabled: Bool { get }
     var isRemindersEnabled: Bool { get }
     var isMailEnabled: Bool { get }

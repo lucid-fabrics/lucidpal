@@ -123,7 +123,7 @@ struct SettingsView: View {
         } header: {
             Text("Model")
         } footer: {
-            Text("Device RAM: \(viewModel.settings.deviceRAMGB) GB · Free storage: \(Self.freeStorageString)")
+            Text("Device RAM: \(viewModel.settings.deviceRAMGB) GB · Free storage: \(viewModel.availableStorageGB.map { String(format: "%.1f GB free", $0) } ?? "Unknown")")
         }
     }
 
@@ -242,13 +242,6 @@ struct SettingsView: View {
                 Link("Source Code", destination: url)
             }
         }
-    }
-
-    private static var freeStorageString: String {
-        let attrs = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory()) // safe: returns nil on failure
-        let free = (attrs?[.systemFreeSize] as? Int64) ?? 0
-        let bytesPerGB: Double = 1_073_741_824
-        return String(format: "%.1f GB free", Double(free) / bytesPerGB)
     }
 
     private static var appVersion: String {

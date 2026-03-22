@@ -35,6 +35,20 @@
                ReferencedContainer = "container:PocketMind.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "E70148F2092D4893D580A62E"
+               BuildableName = "PocketMindWidget.appex"
+               BlueprintName = "PocketMindWidget"
+               ReferencedContainer = "container:PocketMind.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

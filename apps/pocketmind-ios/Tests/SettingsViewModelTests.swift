@@ -3,16 +3,16 @@ import XCTest
 
 @MainActor
 final class SettingsViewModelTests: XCTestCase {
-    var settings: AppSettings!
+    var settings: AppSettingsProtocol!
     var mockCalendar: MockCalendarService!
     var viewModel: SettingsViewModel!
 
     private static let allKeys = ["voiceAutoStartEnabled", "speechAutoSendEnabled"]
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         for key in Self.allKeys { UserDefaults.standard.removeObject(forKey: key) }
-        settings = AppSettings()
+        settings = MockAppSettings()
         mockCalendar = MockCalendarService()
         viewModel = SettingsViewModel(settings: settings, calendarService: mockCalendar)
     }

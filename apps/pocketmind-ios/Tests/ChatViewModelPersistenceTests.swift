@@ -15,7 +15,8 @@ final class ChatViewModelPersistenceTests: XCTestCase {
             llmService: llm,
             calendarService: MockCalendarService(),
             calendarActionController: MockCalendarActionController(),
-            settings: AppSettings(),
+            contextService: MockContextService(),
+            settings: MockAppSettings(),
             speechService: MockSpeechService(),
             hapticService: MockHapticService(),
             historyManager: history

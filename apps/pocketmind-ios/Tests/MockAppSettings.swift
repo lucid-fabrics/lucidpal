@@ -10,7 +10,11 @@ final class MockAppSettings: AppSettingsProtocol {
     var defaultCalendarIdentifier: String = ""
     var speechAutoSendEnabled: Bool = true
     var voiceAutoStartEnabled: Bool = false
+    var airpodsAutoVoiceEnabled: Bool = false
     var contextSize: Int = 4096
+    var notesAccessEnabled: Bool = false
+    var remindersAccessEnabled: Bool = false
+    var mailAccessEnabled: Bool = false
 
     var selectedModel: ModelInfo {
         [ModelInfo.qwen3_5_0B8, ModelInfo.qwen3_5_2B, ModelInfo.qwen3_5_4B]

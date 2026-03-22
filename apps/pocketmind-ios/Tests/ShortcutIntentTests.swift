@@ -15,7 +15,7 @@ final class ShortcutIntentTests: XCTestCase {
         intent.durationMinutes = 60
 
         let result = try await intent.perform()
-        XCTAssertTrue(result.value.isEmpty, "Expected empty value for invalid title")
+        XCTAssertTrue(result.value?.isEmpty ?? true, "Expected empty value for invalid title")
     }
 
     func testCreateEventShortcutIntentTrimsTitle() async throws {
@@ -115,7 +115,7 @@ final class ShortcutIntentTests: XCTestCase {
         let stored = UserDefaults.standard.string(forKey: UserDefaultsKeys.siriPendingQuery)
 
         XCTAssertEqual(stored, "What's the weather?")
-        XCTAssertFalse(result.value.isEmpty)
+        XCTAssertFalse(result.value?.isEmpty ?? true)
     }
 
     func testAskPocketMindShortcutIntentTrimsQuery() async throws {
@@ -133,7 +133,7 @@ final class ShortcutIntentTests: XCTestCase {
         intent.query = "   "
 
         let result = try await intent.perform()
-        XCTAssertTrue(result.value.isEmpty, "Expected empty result for invalid query")
+        XCTAssertTrue(result.value?.isEmpty ?? true, "Expected empty result for invalid query")
     }
 
     override func tearDown() {

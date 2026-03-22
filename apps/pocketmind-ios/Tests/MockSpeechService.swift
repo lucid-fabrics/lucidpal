@@ -8,11 +8,13 @@ final class MockSpeechService: SpeechServiceProtocol {
     var isAuthorized: Bool = true
     var transcript: String = ""
     var isTranscribing: Bool = false
+    var isInterrupted: Bool = false
 
     private let isRecordingSubject    = CurrentValueSubject<Bool, Never>(false)
     private let isAuthorizedSubject   = CurrentValueSubject<Bool, Never>(true)
     private let transcriptSubject     = CurrentValueSubject<String, Never>("")
     private let isTranscribingSubject = CurrentValueSubject<Bool, Never>(false)
+    private let isInterruptedSubject  = CurrentValueSubject<Bool, Never>(false)
 
     var isRecordingPublisher: AnyPublisher<Bool, Never> {
         isRecordingSubject.eraseToAnyPublisher()
@@ -26,10 +28,15 @@ final class MockSpeechService: SpeechServiceProtocol {
     var isTranscribingPublisher: AnyPublisher<Bool, Never> {
         isTranscribingSubject.eraseToAnyPublisher()
     }
+    var isInterruptedPublisher: AnyPublisher<Bool, Never> {
+        isInterruptedSubject.eraseToAnyPublisher()
+    }
 
     var authorizationRequested = false
     var startCalled = false
     var stopCalled = false
+    var startRecordingCallCount = 0
+    var stopRecordingCallCount = 0
     var shouldThrowOnStart: Error? = nil
 
     func requestAuthorization() async {
@@ -41,12 +48,14 @@ final class MockSpeechService: SpeechServiceProtocol {
         isRecording = true
         isRecordingSubject.send(true)
         startCalled = true
+        startRecordingCallCount += 1
     }
 
     func stopRecording() {
         isRecording = false
         isRecordingSubject.send(false)
         stopCalled = true
+        stopRecordingCallCount += 1
     }
 
     /// Simulates a transcript update (call from tests to drive speech input).

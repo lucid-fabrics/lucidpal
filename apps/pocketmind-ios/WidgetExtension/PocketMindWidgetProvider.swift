@@ -1,7 +1,7 @@
 import WidgetKit
 import SwiftUI
 
-struct PocketMindWidgetProvider: TimelineProvider {
+struct PocketMindWidgetProvider: TimelineProvider, Sendable {
     private let dataProvider = CalendarDataProvider()
 
     func placeholder(in context: Context) -> PocketMindWidgetEntry {
@@ -25,8 +25,8 @@ struct PocketMindWidgetProvider: TimelineProvider {
         )
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (PocketMindWidgetEntry) -> Void) {
-        Task { @MainActor in
+    func getSnapshot(in context: Context, completion: @escaping @Sendable (PocketMindWidgetEntry) -> Void) {
+        Task {
             if context.isPreview {
                 completion(placeholder(in: context))
             } else {
@@ -42,8 +42,8 @@ struct PocketMindWidgetProvider: TimelineProvider {
         }
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<PocketMindWidgetEntry>) -> Void) {
-        Task { @MainActor in
+    func getTimeline(in context: Context, completion: @escaping @Sendable (Timeline<PocketMindWidgetEntry>) -> Void) {
+        Task {
             let (nextEvent, freeSlots, dayEvents) = await dataProvider.fetchWidgetData()
             let currentDate = Date.now
             let entry = PocketMindWidgetEntry(
