@@ -35,7 +35,7 @@ final class HapticServiceProtocolTests: XCTestCase {
 
     func testMultipleImpactCallsRecordLastStyle() {
         haptic.impact(.light)
-        haptic.impact(.rigid)
-        XCTAssertEqual(haptic.lastImpactStyle, .rigid)
+        haptic.impact(.heavy)
+        XCTAssertEqual(haptic.lastImpactStyle, .heavy)
     }
 }

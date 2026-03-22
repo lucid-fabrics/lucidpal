@@ -1,13 +1,12 @@
-import UIKit
 @testable import PocketMind
 
 @MainActor
 final class MockHapticService: HapticServiceProtocol {
     private(set) var impactCalled = false
-    private(set) var lastImpactStyle: UIImpactFeedbackGenerator.FeedbackStyle?
+    private(set) var lastImpactStyle: HapticStyle?
     private(set) var notifySuccessCalled = false
 
-    func impact(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
+    func impact(_ style: HapticStyle) {
         impactCalled = true
         lastImpactStyle = style
     }

@@ -6,17 +6,18 @@ private let contextLogger = Logger(subsystem: "app.pocketmind", category: "Conte
 
 /// Aggregates cross-app context from Notes, Reminders, and Mail.
 /// Respects user privacy opt-ins stored in UserDefaults.
-/// Not @MainActor — EventKit completion handlers run on background queue.
-final class ContextService: ObservableObject, @unchecked Sendable {
+/// @MainActor — EventKit fetchReminders callback only captures Sendable locals
+/// (continuation, query, contextLogger); no self access inside the callback.
+@MainActor
+final class ContextService: ObservableObject {
     @Published private(set) var isNotesEnabled = false
     @Published private(set) var isRemindersEnabled = false
     @Published private(set) var isMailEnabled = false
 
     private let settings: any AppSettingsProtocol
-    // EventKit for Reminders (EKReminder) — thread-safe per Apple docs
+    // EKEventStore is thread-safe per Apple docs; called from MainActor context.
     private let eventStore = EKEventStore()
 
-    @MainActor
     init(settings: any AppSettingsProtocol) {
         self.settings = settings
         self.isNotesEnabled = settings.notesAccessEnabled

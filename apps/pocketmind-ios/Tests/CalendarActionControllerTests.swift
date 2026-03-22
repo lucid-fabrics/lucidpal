@@ -278,6 +278,38 @@ final class CalendarActionControllerTests: XCTestCase {
         XCTAssertEqual(preview.title, "FarFuture")
     }
 
+    // MARK: - Malformed JSON
+
+    func testEmptyJsonStringReturnsFailed() async throws {
+        let result = await controller.execute(json: "")
+        guard case .failure = result else {
+            return XCTFail("Expected .failure for empty JSON string")
+        }
+    }
+
+    func testMalformedJsonSyntaxReturnsFailed() async throws {
+        let result = await controller.execute(json: "{not valid json{{")
+        guard case .failure = result else {
+            return XCTFail("Expected .failure for malformed JSON syntax")
+        }
+    }
+
+    func testUnknownActionReturnsFailed() async throws {
+        let json = #"{"action":"teleport","title":"Beam me up"}"#
+        let result = await controller.execute(json: json)
+        guard case .failure = result else {
+            return XCTFail("Expected .failure for unknown action type")
+        }
+    }
+
+    func testMissingActionKeyReturnsFailed() async throws {
+        let json = #"{"title":"Meeting","start":"2026-06-01T10:00:00","end":"2026-06-01T11:00:00"}"#
+        let result = await controller.execute(json: json)
+        guard case .failure = result else {
+            return XCTFail("Expected .failure when action key is missing")
+        }
+    }
+
     // MARK: - Helpers
 
     private func makeEvent(title: String) -> CalendarEventInfo {
