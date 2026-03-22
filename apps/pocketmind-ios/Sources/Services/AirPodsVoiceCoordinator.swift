@@ -79,9 +79,9 @@ final class AirPodsVoiceCoordinator: ObservableObject {
             coordinatorLogger.debug("Audio interruption ended — resuming auto-voice")
             shouldAutoResume = false
             // Delay slightly to ensure audio session is ready
-            Task {
+            Task { [weak self] in
                 try? await Task.sleep(for: .milliseconds(500))
-                self.startAutoVoice()
+                self?.startAutoVoice()
             }
         }
     }
