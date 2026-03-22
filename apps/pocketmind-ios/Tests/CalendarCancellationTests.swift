@@ -17,9 +17,9 @@ final class CalendarCancellationTests: XCTestCase {
         vm = ChatViewModel(
             llmService: llm,
             calendarService: calendar,
-            calendarActionController: MockCalendarActionController(),
-            contextService: MockContextService(),
             settings: MockAppSettings(),
+            systemPromptBuilder: MockSystemPromptBuilder(),
+            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
             speechService: MockSpeechService(),
             hapticService: haptic,
             historyManager: NoOpChatHistoryManager()

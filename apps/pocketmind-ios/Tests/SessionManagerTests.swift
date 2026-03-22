@@ -15,7 +15,7 @@ final class SessionManagerTests: XCTestCase {
 
     override func tearDown() async throws {
         manager = nil
-        try? FileManager.default.removeItem(at: tempDirectory)
+        try FileManager.default.removeItem(at: tempDirectory)
         tempDirectory = nil
     }
 

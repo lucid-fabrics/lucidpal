@@ -1,21 +1,32 @@
 import Foundation
 
-// MARK: - Suggested prompts (algorithmic, derived from calendar — no LLM)
+// MARK: - Protocol
 
-extension ChatViewModel {
+/// Single Responsibility: derives context-aware suggested prompts from calendar state.
+/// ChatViewModel delegates here so prompt logic can evolve and be tested independently.
+@MainActor
+protocol SuggestedPromptsProviderProtocol {
+    func buildPrompts() -> [String]
+}
 
-    func cancelSuggestionsGeneration() {
-        isGeneratingSuggestions = false
+// MARK: - Implementation
+
+@MainActor
+final class SuggestedPromptsProvider: SuggestedPromptsProviderProtocol {
+
+    private let calendarService: any CalendarServiceProtocol
+
+    init(calendarService: any CalendarServiceProtocol) {
+        self.calendarService = calendarService
     }
 
-    func generateSuggestedPrompts() async {
-        guard !isGeneratingSuggestions else { return }
-        suggestedPrompts = Self.buildPrompts(from: calendarService)
+    func buildPrompts() -> [String] {
+        Self.build(from: calendarService)
     }
 
     // MARK: - Algorithm
 
-    private static func buildPrompts(from service: CalendarServiceProtocol) -> [String] {
+    private static func build(from service: any CalendarServiceProtocol) -> [String] {
         guard service.isAuthorized else { return genericPrompts() }
 
         let cal     = Calendar.current
@@ -121,7 +132,7 @@ extension ChatViewModel {
     private static func utilityPrompt(
         isEvening: Bool, isMorning: Bool, isMonday: Bool, isThursday: Bool,
         isFriday: Bool, isWeekend: Bool, remaining: [CalendarEventInfo],
-        weekendStart: Date?, cal: Calendar, service: CalendarServiceProtocol
+        weekendStart: Date?, cal: Calendar, service: any CalendarServiceProtocol
     ) -> String {
         if (isThursday || isFriday) && !isWeekend, let wsStart = weekendStart {
             let weekendEnd = cal.date(byAdding: .day, value: 2, to: wsStart) ?? wsStart
@@ -143,9 +154,8 @@ extension ChatViewModel {
     }
 
     private static func nextWeekendStart(after date: Date, cal: Calendar) -> Date? {
-        // Returns the upcoming Saturday (weekday 7) from `date`.
         var comps = DateComponents()
-        comps.weekday = 7
+        comps.weekday = 7 // Saturday
         return cal.nextDate(after: date, matching: comps, matchingPolicy: .nextTime)
     }
 

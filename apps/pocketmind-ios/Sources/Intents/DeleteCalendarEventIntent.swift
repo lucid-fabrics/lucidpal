@@ -133,45 +133,35 @@ struct UndoLastDeletionIntent: AppIntent {
         }
 
         switch last.type {
-
         case .deleted:
             try await requestConfirmation(
                 output: .result(
                     dialog: IntentDialog(stringLiteral: "Restore \"\(last.eventTitle)\"?"),
                     view: SiriEventCard(
-                        title: last.eventTitle,
-                        start: last.eventStart,
-                        end: last.eventEnd,
-                        calendarName: last.calendarName,
-                        isAllDay: last.isAllDay,
-                        deleted: false
+                        title: last.eventTitle, start: last.eventStart, end: last.eventEnd,
+                        calendarName: last.calendarName, isAllDay: last.isAllDay, deleted: false
                     )
                 )
             )
-            let event = EKEvent(eventStore: store)
-            event.title = last.eventTitle
-            event.startDate = last.eventStart
-            event.endDate = last.eventEnd
-            event.isAllDay = last.isAllDay
-            event.location = last.location
-            event.notes = last.notes
-            if let calID = last.calendarIdentifier,
-               let cal = store.calendar(withIdentifier: calID) {
-                event.calendar = cal
+            let restored = EKEvent(eventStore: store)
+            restored.title = last.eventTitle
+            restored.startDate = last.eventStart
+            restored.endDate = last.eventEnd
+            restored.isAllDay = last.isAllDay
+            restored.location = last.location
+            restored.notes = last.notes
+            if let calID = last.calendarIdentifier, let cal = store.calendar(withIdentifier: calID) {
+                restored.calendar = cal
             } else {
-                event.calendar = store.defaultCalendarForNewEvents
+                restored.calendar = store.defaultCalendarForNewEvents
             }
-            try store.save(event, span: .thisEvent)
+            try store.save(restored, span: .thisEvent)
             SiriContextStore.clear()
             return .result(
                 dialog: IntentDialog(stringLiteral: "\"\(last.eventTitle)\" has been restored."),
                 view: SiriEventCard(
-                    title: last.eventTitle,
-                    start: last.eventStart,
-                    end: last.eventEnd,
-                    calendarName: last.calendarName,
-                    isAllDay: last.isAllDay,
-                    deleted: false
+                    title: last.eventTitle, start: last.eventStart, end: last.eventEnd,
+                    calendarName: last.calendarName, isAllDay: last.isAllDay, deleted: false
                 )
             )
 
@@ -184,12 +174,8 @@ struct UndoLastDeletionIntent: AppIntent {
                 output: .result(
                     dialog: IntentDialog(stringLiteral: "Delete \"\(last.eventTitle)\"?"),
                     view: SiriEventCard(
-                        title: last.eventTitle,
-                        start: last.eventStart,
-                        end: last.eventEnd,
-                        calendarName: last.calendarName,
-                        isAllDay: last.isAllDay,
-                        deleted: false
+                        title: last.eventTitle, start: last.eventStart, end: last.eventEnd,
+                        calendarName: last.calendarName, isAllDay: last.isAllDay, deleted: false
                     )
                 )
             )
@@ -198,12 +184,8 @@ struct UndoLastDeletionIntent: AppIntent {
             return .result(
                 dialog: IntentDialog(stringLiteral: "\"\(last.eventTitle)\" has been removed."),
                 view: SiriEventCard(
-                    title: last.eventTitle,
-                    start: last.eventStart,
-                    end: last.eventEnd,
-                    calendarName: last.calendarName,
-                    isAllDay: last.isAllDay,
-                    deleted: true
+                    title: last.eventTitle, start: last.eventStart, end: last.eventEnd,
+                    calendarName: last.calendarName, isAllDay: last.isAllDay, deleted: true
                 )
             )
 
@@ -211,12 +193,8 @@ struct UndoLastDeletionIntent: AppIntent {
             return .result(
                 dialog: "I can't undo event edits yet — open PocketMind to make changes manually.",
                 view: SiriEventCard(
-                    title: last.eventTitle,
-                    start: last.eventStart,
-                    end: last.eventEnd,
-                    calendarName: last.calendarName,
-                    isAllDay: last.isAllDay,
-                    deleted: false
+                    title: last.eventTitle, start: last.eventStart, end: last.eventEnd,
+                    calendarName: last.calendarName, isAllDay: last.isAllDay, deleted: false
                 )
             )
         }

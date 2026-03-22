@@ -2,22 +2,18 @@ import XCTest
 @testable import PocketMind
 
 @MainActor
-final class ChatViewModelSystemPromptTests: XCTestCase {
+final class SystemPromptBuilderTests: XCTestCase {
 
     var calendar: MockCalendarService!
-    var vm: ChatViewModel!
+    var builder: SystemPromptBuilder!
 
     override func setUp() async throws {
         calendar = MockCalendarService()
-        vm = ChatViewModel(
-            llmService: MockLLMService(),
+        builder = SystemPromptBuilder(
             calendarService: calendar,
-            calendarActionController: MockCalendarActionController(),
             contextService: MockContextService(),
             settings: MockAppSettings(),
-            speechService: MockSpeechService(),
-            hapticService: MockHapticService(),
-            historyManager: NoOpChatHistoryManager()
+            calendarActionController: MockCalendarActionController()
         )
     }
 
@@ -25,7 +21,7 @@ final class ChatViewModelSystemPromptTests: XCTestCase {
 
     func testActionPatternMatchesSimpleCreateBlock() {
         let text = #"[CALENDAR_ACTION:{"action":"create","title":"Meeting"}]"#
-        let regex = try? NSRegularExpression(pattern: ChatViewModel.actionPattern, options: [])
+        let regex = try? NSRegularExpression(pattern: SystemPromptBuilder.actionPattern, options: [])
         let range = NSRange(text.startIndex..., in: text)
         let matches = regex?.matches(in: text, range: range) ?? []
         XCTAssertEqual(matches.count, 1)
@@ -33,7 +29,7 @@ final class ChatViewModelSystemPromptTests: XCTestCase {
 
     func testActionPatternMatchesMultipleBlocks() {
         let text = #"[CALENDAR_ACTION:{"action":"delete","search":"X"}] ok [CALENDAR_ACTION:{"action":"create","title":"Y"}]"#
-        let regex = try? NSRegularExpression(pattern: ChatViewModel.actionPattern, options: [])
+        let regex = try? NSRegularExpression(pattern: SystemPromptBuilder.actionPattern, options: [])
         let range = NSRange(text.startIndex..., in: text)
         let matches = regex?.matches(in: text, range: range) ?? []
         XCTAssertEqual(matches.count, 2)
@@ -41,7 +37,7 @@ final class ChatViewModelSystemPromptTests: XCTestCase {
 
     func testActionPatternDoesNotMatchMalformedBlock() {
         let text = "CALENDAR_ACTION no brackets here"
-        let regex = try? NSRegularExpression(pattern: ChatViewModel.actionPattern, options: [])
+        let regex = try? NSRegularExpression(pattern: SystemPromptBuilder.actionPattern, options: [])
         let range = NSRange(text.startIndex..., in: text)
         let matches = regex?.matches(in: text, range: range) ?? []
         XCTAssertEqual(matches.count, 0)
@@ -50,50 +46,45 @@ final class ChatViewModelSystemPromptTests: XCTestCase {
     // MARK: - formattedToday
 
     func testFormattedTodayIsNonEmpty() {
-        XCTAssertFalse(vm.formattedToday().isEmpty)
+        XCTAssertFalse(builder.formattedToday().isEmpty)
     }
 
     func testFormattedTodayContainsCurrentYear() {
         let year = Calendar.current.component(.year, from: Date())
-        XCTAssertTrue(vm.formattedToday().contains(String(year)))
+        XCTAssertTrue(builder.formattedToday().contains(String(year)))
     }
 
     // MARK: - calendarToolInstructions
 
     func testCalendarToolInstructionsContainsCreateAction() {
-        let instructions = vm.calendarToolInstructions()
-        XCTAssertTrue(instructions.contains("create"))
+        XCTAssertTrue(builder.calendarToolInstructions().contains("create"))
     }
 
     func testCalendarToolInstructionsContainsDeleteAction() {
-        let instructions = vm.calendarToolInstructions()
-        XCTAssertTrue(instructions.contains("delete"))
+        XCTAssertTrue(builder.calendarToolInstructions().contains("delete"))
     }
 
     func testCalendarToolInstructionsContainsQueryAction() {
-        let instructions = vm.calendarToolInstructions()
-        XCTAssertTrue(instructions.contains("query"))
+        XCTAssertTrue(builder.calendarToolInstructions().contains("query"))
     }
 
     // MARK: - calendarBlockFormats
 
     func testCalendarBlockFormatsContainsISO8601Format() {
-        let formats = vm.calendarBlockFormats()
-        XCTAssertTrue(formats.contains("YYYY-MM-DDTHH:MM:SS"))
+        XCTAssertTrue(builder.calendarBlockFormats().contains("YYYY-MM-DDTHH:MM:SS"))
     }
 
     // MARK: - calendarActionRules
 
     func testCalendarActionRulesContainsMandatoryRule() {
-        let rules = vm.calendarActionRules()
-        XCTAssertTrue(rules.contains("NEVER skip the block"))
+        XCTAssertTrue(builder.calendarActionRules().contains("NEVER skip the block"))
     }
 
     // MARK: - executeCalendarActions (no-op when no blocks present)
 
     func testExecuteCalendarActionsPassesThroughPlainText() async {
         let plain = "Hello, here are your events for today."
-        let (content, previews, slots) = await vm.executeCalendarActions(in: plain)
+        let (content, previews, slots) = await builder.executeCalendarActions(in: plain)
         XCTAssertEqual(content, plain)
         XCTAssertTrue(previews.isEmpty)
         XCTAssertTrue(slots.isEmpty)
@@ -104,17 +95,13 @@ final class ChatViewModelSystemPromptTests: XCTestCase {
     func testBuildSystemPromptContainsTodaysDate() async {
         let settings = MockAppSettings()
         settings.calendarAccessEnabled = false
-        let calVM = ChatViewModel(
-            llmService: MockLLMService(),
+        let b = SystemPromptBuilder(
             calendarService: calendar,
-            calendarActionController: MockCalendarActionController(),
             contextService: MockContextService(),
             settings: settings,
-            speechService: MockSpeechService(),
-            hapticService: MockHapticService(),
-            historyManager: NoOpChatHistoryManager()
+            calendarActionController: MockCalendarActionController()
         )
-        let prompt = await calVM.buildSystemPrompt()
+        let prompt = await b.buildSystemPrompt()
         let year = String(Calendar.current.component(.year, from: Date()))
         XCTAssertTrue(prompt.contains(year))
     }
@@ -122,17 +109,13 @@ final class ChatViewModelSystemPromptTests: XCTestCase {
     func testBuildSystemPromptWithCalendarDisabledOmitsToolInstructions() async {
         let settings = MockAppSettings()
         settings.calendarAccessEnabled = false
-        let calVM = ChatViewModel(
-            llmService: MockLLMService(),
+        let b = SystemPromptBuilder(
             calendarService: calendar,
-            calendarActionController: MockCalendarActionController(),
             contextService: MockContextService(),
             settings: settings,
-            speechService: MockSpeechService(),
-            hapticService: MockHapticService(),
-            historyManager: NoOpChatHistoryManager()
+            calendarActionController: MockCalendarActionController()
         )
-        let prompt = await calVM.buildSystemPrompt()
+        let prompt = await b.buildSystemPrompt()
         XCTAssertFalse(prompt.contains("CALENDAR TOOL"))
     }
 }

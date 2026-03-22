@@ -22,7 +22,8 @@ final class SessionListViewModel: ObservableObject {
     let settings: any AppSettingsProtocol
     let speechService: any SpeechServiceProtocol
     let hapticService: any HapticServiceProtocol
-    let airPodsCoordinator: AirPodsVoiceCoordinator?
+    let airPodsCoordinator: (any AirPodsVoiceCoordinatorProtocol)?
+    private let contextService: any ContextServiceProtocol
 
     init(
         sessionManager: any SessionManagerProtocol,
@@ -32,7 +33,8 @@ final class SessionListViewModel: ObservableObject {
         settings: any AppSettingsProtocol,
         speechService: any SpeechServiceProtocol,
         hapticService: any HapticServiceProtocol,
-        airPodsCoordinator: AirPodsVoiceCoordinator? = nil
+        airPodsCoordinator: (any AirPodsVoiceCoordinatorProtocol)? = nil,
+        contextService: (any ContextServiceProtocol)? = nil
     ) {
         self.sessionManager = sessionManager
         self.llmService = llmService
@@ -42,6 +44,7 @@ final class SessionListViewModel: ObservableObject {
         self.speechService = speechService
         self.hapticService = hapticService
         self.airPodsCoordinator = airPodsCoordinator
+        self.contextService = contextService ?? ContextService(settings: settings)
         self.sessions = sessionManager.loadIndex().sorted { $0.updatedAt > $1.updatedAt }
     }
 
@@ -77,12 +80,19 @@ final class SessionListViewModel: ObservableObject {
     // MARK: - ChatViewModel Factory
 
     func makeChatViewModel(for session: ChatSession, initialQuery: String? = nil, startWithVoice: Bool = false) -> ChatViewModel {
+        let promptBuilder = SystemPromptBuilder(
+            calendarService: calendarService,
+            contextService: contextService,
+            settings: settings,
+            calendarActionController: calendarActionController
+        )
+        let promptsProvider = SuggestedPromptsProvider(calendarService: calendarService)
         let vm = ChatViewModel(
             llmService: llmService,
             calendarService: calendarService,
-            calendarActionController: calendarActionController,
-            contextService: ContextService(settings: settings),
             settings: settings,
+            systemPromptBuilder: promptBuilder,
+            suggestedPromptsProvider: promptsProvider,
             speechService: speechService,
             hapticService: hapticService,
             historyManager: NoOpChatHistoryManager(),
@@ -121,7 +131,7 @@ final class SessionListViewModel: ObservableObject {
     func nextUpcomingEvent() -> CalendarEventInfo? {
         guard calendarService.isAuthorized else { return nil }
         let now = Date.now
-        let end = Calendar.current.date(byAdding: .hour, value: 24, to: now) ?? now.addingTimeInterval(86400)
+        let end = Calendar.current.date(byAdding: .hour, value: 24, to: now) ?? now.addingTimeInterval(24 * ChatConstants.secondsPerHour)
         return calendarService.events(in: now, end: end)
             .filter { !$0.isAllDay }
             .sorted { $0.startDate < $1.startDate }
@@ -132,7 +142,7 @@ final class SessionListViewModel: ObservableObject {
         guard calendarService.isAuthorized else { return 0 }
         let cal = Calendar.current
         let start = cal.startOfDay(for: .now)
-        let end = cal.date(byAdding: .day, value: 1, to: start) ?? start.addingTimeInterval(86400)
+        let end = cal.date(byAdding: .day, value: 1, to: start) ?? start.addingTimeInterval(24 * ChatConstants.secondsPerHour)
         return calendarService.events(in: start, end: end)
             .filter { !$0.isAllDay }
             .count

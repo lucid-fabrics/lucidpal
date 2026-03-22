@@ -5,19 +5,33 @@ import OSLog
 
 private let coordinatorLogger = Logger(subsystem: "com.pocketmind", category: "AirPodsVoiceCoordinator")
 
+// MARK: - Protocol
+
+@MainActor
+protocol AirPodsVoiceCoordinatorProtocol: AnyObject {
+    var isAutoListening: Bool { get }
+    var isAutoListeningPublisher: AnyPublisher<Bool, Never> { get }
+    func startMonitoring()
+    func stopMonitoring()
+}
+
+// MARK: - Implementation
+
 /// Coordinates auto-voice activation based on AirPods connection state and user settings.
 @MainActor
-final class AirPodsVoiceCoordinator: ObservableObject {
+final class AirPodsVoiceCoordinator: ObservableObject, AirPodsVoiceCoordinatorProtocol {
     @Published private(set) var isAutoListening = false
+
+    var isAutoListeningPublisher: AnyPublisher<Bool, Never> { $isAutoListening.eraseToAnyPublisher() }
 
     private let audioRouteMonitor: any AudioRouteMonitorProtocol
     private let speechService: any SpeechServiceProtocol
-    private let settings: AppSettingsProtocol
+    private let settings: any AppSettingsProtocol
 
     private var cancellables = Set<AnyCancellable>()
     private var shouldAutoResume = false
 
-    init(audioRouteMonitor: any AudioRouteMonitorProtocol, speechService: any SpeechServiceProtocol, settings: AppSettingsProtocol) {
+    init(audioRouteMonitor: any AudioRouteMonitorProtocol, speechService: any SpeechServiceProtocol, settings: any AppSettingsProtocol) {
         self.audioRouteMonitor = audioRouteMonitor
         self.speechService = speechService
         self.settings = settings

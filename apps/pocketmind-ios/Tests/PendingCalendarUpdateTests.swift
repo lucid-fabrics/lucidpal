@@ -74,6 +74,7 @@ final class PendingCalendarUpdateTests: XCTestCase {
         let decoded = try JSONDecoder().decode([ChatMessage].self, from: data)
 
         XCTAssertEqual(decoded.count, 2)
-        XCTAssertTrue(decoded.allSatisfy { $0.role != .system })
+        XCTAssertEqual(decoded[0].role, .user)
+        XCTAssertEqual(decoded[1].role, .assistant)
     }
 }

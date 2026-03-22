@@ -21,7 +21,7 @@ protocol LLMServiceProtocol: AnyObject {
     func unloadModel()
 }
 
-extension LLMService: LLMServiceProtocol {
+extension LLMService {
     var isLoadedPublisher: AnyPublisher<Bool, Never> {
         $isLoaded.eraseToAnyPublisher()
     }

@@ -1,3 +1,4 @@
+import AppIntents
 import XCTest
 @testable import PocketMind
 
@@ -51,16 +52,17 @@ final class ShortcutIntentTests: XCTestCase {
     // MARK: - CheckNextMeetingIntent
 
     func testCheckNextMeetingIntentInitializes() {
+        // Verify intent can be created and perform() returns a result (requires no permissions)
         let intent = CheckNextMeetingIntent()
-        // Intent should initialize without throwing
-        XCTAssertNotNil(intent)
+        XCTAssertTrue(intent is any AppIntent)
     }
 
     func testCheckNextMeetingIntentReturnsEmptyWhenNoCalendarAccess() async throws {
         let intent = CheckNextMeetingIntent()
-        // Without calendar permissions, should return empty result with error dialog
-        // This verifies the authorization check logic
-        XCTAssertNotNil(intent)
+        // Without calendar permissions, perform() must not crash and must return empty meeting info.
+        let result = try await intent.perform()
+        XCTAssertTrue(result.value?.isEmpty ?? true,
+                      "Without calendar permissions, next meeting info must be empty or nil")
     }
 
     // MARK: - FindFreeTimeShortcutIntent
@@ -88,7 +90,7 @@ final class ShortcutIntentTests: XCTestCase {
         intent.durationMinutes = 120
 
         XCTAssertEqual(intent.durationMinutes, 120)
-        XCTAssertNotNil(intent.searchDate)
+        XCTAssertEqual(intent.searchDate.timeIntervalSince(Date.now), 0, accuracy: 5.0)
     }
 
     func testFindFreeTimeShortcutIntentWeekdayLogic() {

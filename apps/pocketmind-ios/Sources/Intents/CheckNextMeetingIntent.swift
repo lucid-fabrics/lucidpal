@@ -31,15 +31,8 @@ struct CheckNextMeetingIntent: AppIntent {
             return .result(value: "", dialog: "No upcoming events in the next 7 days.")
         }
 
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-
         let title = nextEvent.title ?? "Untitled"
-        let startStr = formatter.string(from: nextEvent.startDate)
-        let location = nextEvent.location.flatMap { $0.isEmpty ? nil : " at \($0)" } ?? ""
-
-        let response = "\(title)\(location) — \(startStr)"
+        let response = SiriCalendarBridge.formatEvent(title: title, start: nextEvent.startDate, location: nextEvent.location)
         return .result(value: response, dialog: IntentDialog(stringLiteral: response))
     }
 }

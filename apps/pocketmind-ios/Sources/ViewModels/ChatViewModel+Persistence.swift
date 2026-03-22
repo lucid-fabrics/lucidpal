@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 extension ChatViewModel {
 
     func clearHistory() {

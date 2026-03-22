@@ -1,5 +1,8 @@
 import Combine
 import Foundation
+import OSLog
+
+private let settingsLogger = Logger(subsystem: "com.pocketmind", category: "SettingsViewModel")
 
 @MainActor
 final class SettingsViewModel: ObservableObject {
@@ -48,9 +51,13 @@ final class SettingsViewModel: ObservableObject {
     }
 
     var availableStorageGB: Double? {
-        let attrs = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory())
-        guard let free = attrs?[.systemFreeSize] as? Int64 else { return nil }
-        let bytesPerGB: Double = 1_073_741_824
-        return Double(free) / bytesPerGB
+        do {
+            let attrs = try FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory())
+            guard let free = attrs[.systemFreeSize] as? Int64 else { return nil }
+            return Double(free) / Double(ChatConstants.bytesPerGB)
+        } catch {
+            settingsLogger.warning("Failed to read filesystem attributes: \(error)")
+            return nil
+        }
     }
 }

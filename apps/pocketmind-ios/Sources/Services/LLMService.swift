@@ -7,7 +7,7 @@ import llama
 // by any View. State is surfaced to ViewModels via the protocol's AnyPublisher
 // properties (isLoadedPublisher, isGeneratingPublisher, isLoadingPublisher).
 @MainActor
-final class LLMService {
+final class LLMService: LLMServiceProtocol {
     @Published private(set) var isLoaded    = false
     @Published private(set) var isLoading   = false
     @Published private(set) var isGenerating = false
