@@ -24,11 +24,13 @@ extension ChatViewModel {
         idx: Int
     ) {
         rawBuffer += token
+        let openTag  = ChatConstants.thinkOpenTag
+        let closeTag = ChatConstants.thinkCloseTag
         if thinkDone {
             messages[idx].content += token
-        } else if rawBuffer.hasPrefix("<think>") {
-            if let closeRange = rawBuffer.range(of: "</think>") {
-                let thinkText = String(rawBuffer[rawBuffer.index(rawBuffer.startIndex, offsetBy: "<think>".count) ..< closeRange.lowerBound])
+        } else if rawBuffer.hasPrefix(openTag) {
+            if let closeRange = rawBuffer.range(of: closeTag) {
+                let thinkText = String(rawBuffer[rawBuffer.index(rawBuffer.startIndex, offsetBy: openTag.count) ..< closeRange.lowerBound])
                 let response  = String(rawBuffer[closeRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
                 if showThinking {
                     messages[idx].thinkingContent = thinkText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -40,10 +42,10 @@ extension ChatViewModel {
                 // Still inside <think> — buffer or show depending on setting
                 if showThinking {
                     messages[idx].isThinking = true
-                    messages[idx].thinkingContent = String(rawBuffer.dropFirst("<think>".count))
+                    messages[idx].thinkingContent = String(rawBuffer.dropFirst(openTag.count))
                 }
             }
-        } else if "<think>".hasPrefix(rawBuffer) {
+        } else if openTag.hasPrefix(rawBuffer) {
             // Still buffering opening tag — don't display yet
         } else {
             thinkDone = true

@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-private let calendarConfirmationLogger = Logger(subsystem: "com.pocketmind", category: "CalendarConfirmation")
+private let calendarConfirmationLogger = Logger(subsystem: "app.pocketmind", category: "CalendarConfirmation")
 
 @MainActor
 // MARK: - Calendar event confirmation (deletion + update)
@@ -90,8 +90,10 @@ extension ChatViewModel {
                 try calendarService.deleteEvent(identifier: identifier)
                 messages[msgIdx].calendarEventPreviews[idx].state = .deleted
             } catch {
+                let failedTitle = messages[msgIdx].calendarEventPreviews[idx].title
+                calendarConfirmationLogger.error("confirmAllDeletions: delete failed for '\(failedTitle, privacy: .public)': \(error)")
                 messages[msgIdx].calendarEventPreviews[idx].state = .deletionCancelled
-                failures.append(messages[msgIdx].calendarEventPreviews[idx].title)
+                failures.append(failedTitle)
             }
         }
         if failures.isEmpty {
