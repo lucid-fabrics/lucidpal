@@ -82,7 +82,7 @@ struct ModelDownloadView: View {
     private var actionButton: some View {
         switch viewModel.downloadState {
         case .idle:
-            if viewModel.isModelLoaded && viewModel.settings.selectedModelID == viewModel.selectedModel.id {
+            if viewModel.isModelLoaded && (viewModel.settings.selectedTextModelID == viewModel.selectedModel.id || viewModel.settings.selectedVisionModelID == viewModel.selectedModel.id) {
                 Label("Loaded", systemImage: "checkmark.circle.fill")
                     .foregroundStyle(.green)
                     .font(.subheadline.weight(.medium))

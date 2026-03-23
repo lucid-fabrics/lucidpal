@@ -9,8 +9,14 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         didSet { UserDefaults.standard.set(calendarAccessEnabled, forKey: UserDefaultsKeys.calendarAccessEnabled) }
     }
 
-    @Published var selectedModelID: String {
-        didSet { UserDefaults.standard.set(selectedModelID, forKey: UserDefaultsKeys.selectedModelID) }
+    /// ID of the selected text inference model.
+    @Published var selectedTextModelID: String {
+        didSet { UserDefaults.standard.set(selectedTextModelID, forKey: UserDefaultsKeys.selectedTextModelID) }
+    }
+
+    /// ID of the selected vision model (may be the same as text model if integrated).
+    @Published var selectedVisionModelID: String {
+        didSet { UserDefaults.standard.set(selectedVisionModelID, forKey: UserDefaultsKeys.selectedVisionModelID) }
     }
 
     @Published var hasCompletedOnboarding: Bool {
@@ -81,12 +87,21 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         didSet { UserDefaults.standard.set(visionEnabled, forKey: UserDefaultsKeys.visionEnabled) }
     }
 
-    // MARK: - Init
+    // MARK: - Init (with migration from legacy selectedModelID)
 
     init() {
         let defaults = UserDefaults.standard
+        let legacyModelID = defaults.string(forKey: UserDefaultsKeys.selectedModelID)
+
+        // Migrate: prefer new keys, fall back to legacy for first launch
+        selectedTextModelID = defaults.string(forKey: UserDefaultsKeys.selectedTextModelID)
+            ?? legacyModelID
+            ?? ModelInfo.qwen3_5_2B.id
+
+        selectedVisionModelID = defaults.string(forKey: UserDefaultsKeys.selectedVisionModelID)
+            ?? ModelInfo.qwen3_5_vision.id
+
         calendarAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.calendarAccessEnabled)
-        selectedModelID = defaults.string(forKey: UserDefaultsKeys.selectedModelID) ?? ModelInfo.qwen3_5_2B.id
         hasCompletedOnboarding = defaults.bool(forKey: UserDefaultsKeys.hasCompletedOnboarding)
         thinkingEnabled = defaults.object(forKey: UserDefaultsKeys.thinkingEnabled) as? Bool ?? true
         defaultCalendarIdentifier = defaults.string(forKey: UserDefaultsKeys.defaultCalendarIdentifier) ?? ""
@@ -108,9 +123,16 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
 
     // MARK: - Computed Properties
 
-    var selectedModel: ModelInfo {
-        [ModelInfo.qwen3_5_0B8, ModelInfo.qwen3_5_2B, ModelInfo.qwen3_5_4B, ModelInfo.qwen3_5_vision]
-            .first { $0.id == selectedModelID } ?? .qwen3_5_2B
+    var selectedTextModel: ModelInfo {
+        ModelInfo.available(physicalRAMGB: deviceRAMGB)
+            .first { $0.id == selectedTextModelID }
+            ?? ModelInfo.qwen3_5_2B
+    }
+
+    var selectedVisionModel: ModelInfo {
+        ModelInfo.visionModels(physicalRAMGB: deviceRAMGB)
+            .first { $0.id == selectedVisionModelID }
+            ?? ModelInfo.qwen3_5_vision
     }
 
     var deviceRAMGB: Int {
@@ -120,6 +142,15 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
     var maxContextSize: Int {
         deviceRAMGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeContextSizeTokens : ChatConstants.defaultContextSizeTokens
     }
+
+    // Backwards-compat alias for existing code that reads selectedModelID
+    var selectedModelID: String {
+        get { selectedTextModelID }
+        set { selectedTextModelID = newValue }
+    }
+
+    // Backwards-compat alias for existing code that reads selectedModel
+    var selectedModel: ModelInfo { selectedTextModel }
 
     // MARK: - Private Constants
 

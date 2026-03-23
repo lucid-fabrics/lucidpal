@@ -76,6 +76,9 @@ actor LlamaActor {
     // Current active role
     private var activeRole: ModelType?
 
+    /// True when the text model is an integrated vision model (handles both text and vision).
+    private var textModelSupportsVision: Bool = false
+
     var isTextModelLoaded: Bool { textModel != nil }
     var isVisionModelLoaded: Bool { visionModel != nil }
 
@@ -117,6 +120,8 @@ actor LlamaActor {
         switch role {
         case .text:
             try loadSingleModel(at: path, contextSize: contextSize, into: &textModel, &textCtx, &textVocab, &textSampler)
+            // Detect integrated vision models by filename convention
+            textModelSupportsVision = path.localizedCaseInsensitiveContains("vision")
         case .vision:
             try loadSingleModel(at: path, contextSize: contextSize, into: &visionModel, &visionCtx, &visionVocab, &visionSampler)
         }
@@ -183,6 +188,7 @@ actor LlamaActor {
             if let c = textCtx { llama_free(c); textCtx = nil }
             if let m = textModel { llama_model_free(m); textModel = nil }
             textVocab = nil
+            textModelSupportsVision = false
         case .vision:
             if let s = visionSampler { llama_sampler_free(s); visionSampler = nil }
             if let c = visionCtx { llama_free(c); visionCtx = nil }
@@ -219,9 +225,24 @@ actor LlamaActor {
     // MARK: - Generate
 
     func generate(prompt: String, role: ModelType, continuation: AsyncThrowingStream<String, Error>.Continuation) async {
-        let ctx = role == .text ? textCtx : visionCtx
-        let vocab = role == .text ? textVocab : visionVocab
-        let sampler = role == .text ? textSampler : visionSampler
+        // Determine which model slot to use.
+        // Fallback: if vision requested but vision slot empty, use text slot if it supports vision.
+        let useTextSlotForVision = role == .vision && visionCtx == nil && textModelSupportsVision && textCtx != nil
+        let actualCtx: OpaquePointer?
+        let actualVocab: OpaquePointer?
+        let actualSampler: UnsafeMutablePointer<llama_sampler>?
+        if useTextSlotForVision {
+            actualCtx = textCtx
+            actualVocab = textVocab
+            actualSampler = textSampler
+        } else {
+            actualCtx = role == .text ? textCtx : visionCtx
+            actualVocab = role == .text ? textVocab : visionVocab
+            actualSampler = role == .text ? textSampler : visionSampler
+        }
+        let ctx = actualCtx
+        let vocab = actualVocab
+        let sampler = actualSampler
 
         guard let ctx, let vocab, let sampler else {
             continuation.finish(throwing: LLMError.modelNotLoaded)
