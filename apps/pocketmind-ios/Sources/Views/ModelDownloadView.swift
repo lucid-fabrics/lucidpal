@@ -35,6 +35,10 @@ struct ModelDownloadView: View {
             }
         }
         .padding(24)
+        .onAppear {
+            viewModel.capabilityFilter = capabilityFilter
+            viewModel.refreshAvailableModels(filter: capabilityFilter)
+        }
     }
 
     private var modelPicker: some View {

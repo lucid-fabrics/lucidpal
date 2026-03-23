@@ -19,35 +19,22 @@ final class ModelDownloadViewModel: ObservableObject {
     let settings: any AppSettingsProtocol
     private var cancellables = Set<AnyCancellable>()
 
-    /// Optional capability filter — if set, only models matching this capability are shown.
-    private let capabilityFilter: ModelCapability?
+    /// Controls which models appear: .text for text-only, .vision for any vision-capable.
+    /// Set by ModelDownloadView on appear to filter the shared viewModel instance.
+    @Published var capabilityFilter: ModelCapability?
 
     init(
         llmService: any LLMServiceProtocol,
         settings: any AppSettingsProtocol,
-        downloader: any ModelDownloaderProtocol,
-        capabilityFilter: ModelCapability? = nil
+        downloader: any ModelDownloaderProtocol
     ) {
         self.llmService = llmService
         self.settings = settings
         self.downloader = downloader
-        self.capabilityFilter = capabilityFilter
 
+        // Pre-populate availableModels with no filter — will be re-filtered when capabilityFilter is set.
         let ram = settings.deviceRAMGB
-        let allModels = ModelInfo.available(physicalRAMGB: ram)
-        let filteredModels: [ModelInfo]
-        if let filter = capabilityFilter {
-            // For .text: show only text-only models (no vision capability at all)
-            // For .vision: show any model with vision (visionOnly or integrated)
-            if filter == .text {
-                filteredModels = allModels.filter { $0.capabilities == .text }
-            } else {
-                filteredModels = allModels.filter { $0.capabilities.contains(.vision) }
-            }
-        } else {
-            filteredModels = allModels
-        }
-        self.availableModels = filteredModels.isEmpty ? [.qwen3_5_2B] : filteredModels
+        self.availableModels = ModelInfo.available(physicalRAMGB: ram)
 
         // Pre-select the user's saved text model, or fall back to recommended.
         let savedTextModel = settings.selectedTextModel
@@ -80,6 +67,30 @@ final class ModelDownloadViewModel: ObservableObject {
         if settings.selectedTextModel.isDownloaded && !llmService.isLoaded {
             Task { [weak self] in await self?.loadModel() }
         }
+
+        // Re-filter availableModels whenever capabilityFilter changes.
+        $capabilityFilter
+            .sink { [weak self] filter in
+                self?.refreshAvailableModels(filter: filter)
+            }
+            .store(in: &cancellables)
+    }
+
+    /// Refreshes availableModels based on the current capabilityFilter.
+    func refreshAvailableModels(filter: ModelCapability?) {
+        let ram = settings.deviceRAMGB
+        let allModels = ModelInfo.available(physicalRAMGB: ram)
+        let filteredModels: [ModelInfo]
+        if let filter = filter {
+            if filter == .text {
+                filteredModels = allModels.filter { $0.capabilities == .text }
+            } else {
+                filteredModels = allModels.filter { $0.capabilities.contains(.vision) }
+            }
+        } else {
+            filteredModels = allModels
+        }
+        availableModels = filteredModels.isEmpty ? [.qwen3_5_2B] : filteredModels
     }
 
     /// Select a model for download. Cancels any in-flight download for the previous selection.
