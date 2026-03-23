@@ -95,6 +95,11 @@ struct MessageBubbleView: View {
                                 }
                             }
                         }
+
+                    // Image thumbnails for user messages with image attachments
+                    if message.isUser && !message.imageAttachments.isEmpty {
+                        imageThumbnails(message.imageAttachments, isUserMessage: message.isUser)
+                    }
                 } else if !message.isUser && !message.isStreamingAction && message.calendarEventPreviews.isEmpty {
                     GeneratingStatusView(userPrompt: userPrompt)
                 }
@@ -308,4 +313,33 @@ private struct GeneratingStatusView: View {
             }
         }
     }
+}
+
+// MARK: - Image thumbnails
+
+@ViewBuilder
+private func imageThumbnails(_ attachments: [AttachedImage], isUserMessage: Bool) -> some View {
+    ScrollView(.horizontal, showsIndicators: false) {
+        HStack(spacing: 6) {
+            ForEach(attachments) { attachment in
+                if let thumbnailData = attachment.thumbnailData,
+                   let uiImage = UIImage(data: thumbnailData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 56, height: 56)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                } else {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(.systemGray5))
+                        .frame(width: 56, height: 56)
+                        .overlay {
+                            Image(systemName: "photo")
+                                .foregroundStyle(Color(.systemGray3))
+                        }
+                }
+            }
+        }
+    }
+    .frame(maxWidth: .infinity, alignment: isUserMessage ? .trailing : .leading)
 }

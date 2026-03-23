@@ -23,6 +23,11 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
         FileManager.default.fileExists(atPath: localURL.path)
     }
 
+    /// True when this model has vision capability (filename contains "vision" or "Vision").
+    var isVisionModel: Bool {
+        filename.localizedCaseInsensitiveContains("vision")
+    }
+
     // MARK: - Available Models
 
     static let qwen3_5_0B8 = ModelInfo(
@@ -52,8 +57,20 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
         minimumRAMGB: 5
     )
 
+    /// Qwen3.5 Vision 4B — requires Qwen3.5-4B.BF16-mmproj.gguf to be downloaded alongside this file.
+    /// The mmproj file is available at:
+    /// https://huggingface.co/bjivanovich/Qwen3.5-4B-Vision-GGUF/resolve/main/Qwen3.5-4B.BF16-mmproj.gguf
+    static let qwen3_5_vision = ModelInfo(
+        id: "qwen3.5-4b-vision-q4km",
+        displayName: "Qwen3.5 Vision 4B (Q4_K_M) · ~2.5 GB",
+        downloadURL: knownURL("https://huggingface.co/bjivanovich/Qwen3.5-4B-Vision-GGUF/resolve/main/Qwen3.5-4B.Q4_K_M.gguf"),
+        filename: "Qwen3.5-4B.Q4_K_M.gguf",
+        fileSizeGB: 2.5,
+        minimumRAMGB: 5
+    )
+
     static func available(physicalRAMGB: Int) -> [ModelInfo] {
-        [.qwen3_5_0B8, .qwen3_5_2B, .qwen3_5_4B].filter { $0.minimumRAMGB <= physicalRAMGB }
+        [.qwen3_5_0B8, .qwen3_5_2B, .qwen3_5_4B, .qwen3_5_vision].filter { $0.minimumRAMGB <= physicalRAMGB }
     }
 
     static func recommended(physicalRAMGB: Int) -> ModelInfo {

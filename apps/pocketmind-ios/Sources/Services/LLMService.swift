@@ -15,18 +15,31 @@ final class LLMService: LLMServiceProtocol {
     private let llama = LlamaActor()
     private var currentTask: Task<Void, Never>?
 
-    func loadModel(at url: URL, contextSize: UInt32) async throws {
+    func loadModel(at url: URL, contextSize: UInt32, role: ModelType) async throws {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
-        try await llama.load(path: url.path, contextSize: contextSize)
-        await llama.warmup()  // pre-compiles Metal shaders — eliminates first-message stutter
+        try await llama.loadModel(at: url.path, contextSize: contextSize, role: role)
+        await llama.warmup(role: role)
         isLoaded = true
     }
 
-    func unloadModel() {
+    func unloadModel(role: ModelType) {
         cancelGeneration()
-        let actor = llama  // capture actor reference directly — avoids extending LLMService lifetime
+        let actor = llama
+        Task { [weak self] in
+            await actor.unloadModel(role: role)
+            let textLoaded = await actor.isTextModelLoaded
+            let visionLoaded = await actor.isVisionModelLoaded
+            await MainActor.run {
+                self?.isLoaded = textLoaded || visionLoaded
+            }
+        }
+    }
+
+    func unload() {
+        cancelGeneration()
+        let actor = llama
         Task { await actor.unload() }
         isLoaded = false
     }
@@ -37,7 +50,7 @@ final class LLMService: LLMServiceProtocol {
         isGenerating = false
     }
 
-    func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true) -> AsyncThrowingStream<String, Error> {
+    func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true, modelRole: ModelType) -> AsyncThrowingStream<String, Error> {
         guard !isGenerating else {
             return AsyncThrowingStream { $0.finish(throwing: LLMError.generationInProgress) }
         }
@@ -47,11 +60,15 @@ final class LLMService: LLMServiceProtocol {
 
         isGenerating = true
 
-        let prompt = Self.buildPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
+        let prompt: String
+        if modelRole == .vision {
+            // Build vision prompt with image tags
+            prompt = Self.buildVisionPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
+        } else {
+            prompt = Self.buildPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
+        }
         let llamaRef = llama
 
-        // AsyncThrowingStream closure runs synchronously on @MainActor (generate() is @MainActor-isolated),
-        // so MainActor.assumeIsolated is safe for assigning currentTask.
         return AsyncThrowingStream { continuation in
             let task = Task {
                 defer {
@@ -60,10 +77,9 @@ final class LLMService: LLMServiceProtocol {
                         self?.currentTask  = nil
                     }
                 }
-                await llamaRef.generate(prompt: prompt, continuation: continuation)
+                await llamaRef.generate(prompt: prompt, role: modelRole, continuation: continuation)
             }
             MainActor.assumeIsolated { [weak self] in self?.currentTask = task }
-            // Cancel inflight generation when caller drops the stream.
             continuation.onTermination = { _ in task.cancel() }
         }
     }
@@ -99,6 +115,56 @@ final class LLMService: LLMServiceProtocol {
             let suffix = thinkingEnabled ? "" : " /no_think"
             parts.append("<|im_start|>user\n\(sanitize(last.content))\(suffix)<|im_end|>")
         }
+
+        parts.append("<|im_start|>assistant\n")
+        return parts.joined(separator: "\n")
+    }
+
+    /// Builds a vision prompt for Qwen3.5-Vision using <|vision_start|><|image_pad|><|vision_end|> tags.
+    /// Format:
+    /// <|im_start|>user
+    /// <|vision_start|><|image_pad|><|vision_end|>
+    /// Picture 1: <|vision_start|><|image_pad|><|vision_end|>
+    /// {user text}<|im_end|>
+    /// <|im_start|>assistant
+    private static func buildVisionPrompt(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true) -> String {
+        var parts: [String] = []
+
+        if !systemPrompt.isEmpty {
+            parts.append("<|im_start|>system\n\(sanitize(systemPrompt))<|im_end|>")
+        }
+
+        // Find the last user message with image attachments
+        let body = messages.filter { $0.role != .system }
+        guard let lastUserMessage = body.last(where: { $0.role == .user }) else {
+            return buildPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
+        }
+
+        // Build image tags for vision model
+        let imageCount = lastUserMessage.imageAttachments.count
+        var imageSection = "<|vision_start|><|image_pad|><|vision_end|>\n"
+        for idx in 1...imageCount {
+            imageSection += "Picture \(idx): <|vision_start|><|image_pad|><|vision_end|>\n"
+        }
+
+        // System context for prior messages (without images)
+        let priorMessages = body.filter { $0.id != lastUserMessage.id }
+        var i = 0
+        while i + 1 < priorMessages.count {
+            if priorMessages[i].role == .user && priorMessages[i + 1].role == .assistant {
+                parts.append("<|im_start|>user\n\(sanitize(priorMessages[i].content))<|im_end|>")
+                parts.append("<|im_start|>assistant\n\(sanitize(priorMessages[i + 1].content))<|im_end|>")
+                i += 2
+            } else {
+                i += 1
+            }
+        }
+
+        // Last user message with vision images
+        let suffix = thinkingEnabled ? "" : " /no_think"
+        parts.append("<|im_start|>user")
+        parts.append(imageSection)
+        parts.append("\(sanitize(lastUserMessage.content))\(suffix)<|im_end|>")
 
         parts.append("<|im_start|>assistant\n")
         return parts.joined(separator: "\n")

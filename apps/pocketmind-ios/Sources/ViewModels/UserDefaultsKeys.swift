@@ -20,6 +20,7 @@ enum UserDefaultsKeys {
     static let braveApiKey              = "braveApiKey"
     static let locationEnabled          = "locationEnabled"
     static let userCity                 = "userCity"
+    static let visionEnabled            = "visionEnabled"
 
     static let siriPendingQuery         = "pm_siri_pending_query"
     static let siriPendingEvent         = "pm_siri_pending_event"

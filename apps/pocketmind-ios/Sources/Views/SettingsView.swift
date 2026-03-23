@@ -13,6 +13,7 @@ struct SettingsView: View {
                 calendarSection
                 locationSection
                 webSearchSection
+                visionSection
                 modelSection
                 inferenceSection
                 shortcutsSection
@@ -149,13 +150,32 @@ struct SettingsView: View {
         }
     }
 
+    private var visionSection: some View {
+        Section {
+            Toggle(isOn: $viewModel.visionEnabled) {
+                Label("Vision Model", systemImage: "camera.viewfinder")
+            }
+        } header: {
+            Text("Vision")
+        } footer: {
+            Text("When enabled and a vision-capable model is downloaded, photo attachments are processed by the on-device vision model.")
+        }
+    }
+
     private var modelSection: some View {
         Section {
             ForEach(downloadViewModel.availableModels, id: \.id) { model in
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(model.displayName)
-                            .font(.subheadline)
+                        HStack(spacing: 4) {
+                            Text(model.displayName)
+                                .font(.subheadline)
+                            if model.isVisionModel {
+                                Image(systemName: "camera.viewfinder")
+                                    .font(.caption2)
+                                    .foregroundStyle(Color.accentColor)
+                            }
+                        }
                         Text(model.isDownloaded ? "On device" : "Not downloaded")
                             .font(.caption)
                             .foregroundStyle(model.isDownloaded ? .green : .secondary)

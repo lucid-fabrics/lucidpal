@@ -77,6 +77,10 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         didSet { UserDefaults.standard.set(userCity, forKey: UserDefaultsKeys.userCity) }
     }
 
+    @Published var visionEnabled: Bool {
+        didSet { UserDefaults.standard.set(visionEnabled, forKey: UserDefaultsKeys.visionEnabled) }
+    }
+
     // MARK: - Init
 
     init() {
@@ -99,12 +103,13 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         braveApiKey = defaults.string(forKey: UserDefaultsKeys.braveApiKey) ?? ""
         locationEnabled = defaults.bool(forKey: UserDefaultsKeys.locationEnabled)
         userCity = defaults.string(forKey: UserDefaultsKeys.userCity) ?? ""
+        visionEnabled = defaults.object(forKey: UserDefaultsKeys.visionEnabled) as? Bool ?? true
     }
 
     // MARK: - Computed Properties
 
     var selectedModel: ModelInfo {
-        [ModelInfo.qwen3_5_0B8, ModelInfo.qwen3_5_2B, ModelInfo.qwen3_5_4B]
+        [ModelInfo.qwen3_5_0B8, ModelInfo.qwen3_5_2B, ModelInfo.qwen3_5_4B, ModelInfo.qwen3_5_vision]
             .first { $0.id == selectedModelID } ?? .qwen3_5_2B
     }
 

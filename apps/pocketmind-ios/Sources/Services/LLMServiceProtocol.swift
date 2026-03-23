@@ -15,10 +15,17 @@ protocol LLMServiceProtocol: AnyObject {
     var isLoadingPublisher: AnyPublisher<Bool, Never> { get }
     var isGeneratingPublisher: AnyPublisher<Bool, Never> { get }
 
-    func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool) -> AsyncThrowingStream<String, Error>
-    func loadModel(at url: URL, contextSize: UInt32) async throws
+    /// Generates a response using the specified model role.
+    func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool, modelRole: ModelType) -> AsyncThrowingStream<String, Error>
+
+    /// Loads the model at the given URL for the specified role.
+    func loadModel(at url: URL, contextSize: UInt32, role: ModelType) async throws
+
+    /// Unloads the model for the specified role.
+    func unloadModel(role: ModelType)
+
     func cancelGeneration()
-    func unloadModel()
+    func unload()
 }
 
 extension LLMService {

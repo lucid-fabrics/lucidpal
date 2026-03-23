@@ -44,6 +44,12 @@ protocol LocationSettingsProtocol: AnyObject {
     var userCity: String { get set }
 }
 
+/// Vision model settings.
+@MainActor
+protocol VisionSettingsProtocol: AnyObject {
+    var visionEnabled: Bool { get set }
+}
+
 // MARK: - Composite protocol
 
 /// Full settings contract used at the composition root and by components that
@@ -54,7 +60,8 @@ protocol AppSettingsProtocol: CalendarSettingsProtocol,
                                InferenceSettingsProtocol,
                                VoiceSettingsProtocol,
                                WebSearchSettingsProtocol,
-                               LocationSettingsProtocol {
+                               LocationSettingsProtocol,
+                               VisionSettingsProtocol {
     var hasCompletedOnboarding: Bool { get set }
     var notesAccessEnabled: Bool { get set }
     var remindersAccessEnabled: Bool { get set }

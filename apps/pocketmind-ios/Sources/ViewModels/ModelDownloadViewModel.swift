@@ -49,7 +49,7 @@ final class ModelDownloadViewModel: ObservableObject {
             .sink { [weak self] in self?.isModelLoading = $0 }
             .store(in: &cancellables)
 
-        // Auto-load immediately when download finishes — removes the need for a "Load Model" tap.
+        // Auto-load immediately when download finishes.
         downloader.statePublisher
             .compactMap { state -> URL? in
                 if case .completed(let url) = state { return url }
@@ -61,7 +61,6 @@ final class ModelDownloadViewModel: ObservableObject {
             .store(in: &cancellables)
 
         // Auto-load the previously selected model on launch if already on disk.
-        // Task is enqueued after init completes — self is fully initialized when body runs.
         if settings.selectedModel.isDownloaded && !llmService.isLoaded {
             Task { [weak self] in await self?.loadModel() }
         }
@@ -70,7 +69,7 @@ final class ModelDownloadViewModel: ObservableObject {
     /// Select a model. Cancels any in-flight download for the previous selection.
     func selectModel(_ model: ModelInfo) {
         guard model.id != selectedModel.id else { return }
-        cancelDownload()  // Clear stale progress from the previous model
+        cancelDownload()
         selectedModel = model
     }
 
@@ -86,20 +85,22 @@ final class ModelDownloadViewModel: ObservableObject {
         guard selectedModel.isDownloaded else { return }
         loadError = nil
         do {
-            try await llmService.loadModel(at: selectedModel.localURL, contextSize: UInt32(settings.contextSize))
+            let role: ModelType = selectedModel.isVisionModel ? .vision : .text
+            try await llmService.loadModel(at: selectedModel.localURL, contextSize: UInt32(settings.contextSize), role: role)
             settings.selectedModelID = selectedModel.id
-            downloader.resetState()  // Reset download state — clears stale "Load Model" button
+            downloader.resetState()
         } catch {
             modelDownloadLogger.error("loadModel failed: \(error)")
             loadError = error.localizedDescription
-            downloader.resetState()  // Reset download UI — don't leave it stuck in "Load Model" state
+            downloader.resetState()
         }
     }
 
     func deleteModel(_ model: ModelInfo) {
         deleteError = nil
         if llmService.isLoaded && settings.selectedModelID == model.id {
-            llmService.unloadModel()
+            let role: ModelType = model.isVisionModel ? .vision : .text
+            llmService.unloadModel(role: role)
         }
         do {
             try downloader.deleteModel(model)

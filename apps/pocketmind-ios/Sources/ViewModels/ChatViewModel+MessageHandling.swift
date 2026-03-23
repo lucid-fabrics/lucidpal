@@ -1,24 +1,15 @@
+import Combine
 import Foundation
 import OSLog
 
-// MARK: - Token streaming + toast notifications
-// Separated from the core ViewModel to keep each file under 400 lines.
+private let messageHandlingLogger = Logger(subsystem: "app.pocketmind", category: "Chat")
 
-private let messageHandlingLogger = Logger(subsystem: "app.pocketmind", category: "LLM")
-
-@MainActor
 extension ChatViewModel {
 
-    func showToast(_ message: String, systemImage: String) {
-        toast = ToastItem(message: message, systemImage: systemImage)
-        Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .seconds(2.5)) // safe: cancellation discarded intentionally
-            self?.toast = nil
-        }
-    }
+    // MARK: - Stream token helper
 
-    /// Applies one streamed token to the assistant message at `idx`, handling
-    /// the <think>...</think> wrapper that Qwen3 emits before its response.
+    /// Parses a token from the LLM stream and updates the assistant message in-place.
+    /// `thinkDone` tracks whether we've exited Qwen3's <think>...</think> wrapper that Qwen3 emits before its response.
     func applyStreamToken(
         _ token: String,
         rawBuffer: inout String,
@@ -61,13 +52,23 @@ extension ChatViewModel {
     func sendMessage() async {
         cancelSuggestionsGeneration()
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty, !isGenerating, isModelLoaded else { return }
+        let attachments = imageAttachments
+        guard !text.isEmpty || !attachments.isEmpty, !isGenerating, isModelLoaded else { return }
 
         hapticService.impact(.light)
         inputText = ""
+        imageAttachments.removeAll()
         replyingTo = nil
-        messages.append(ChatMessage(role: .user, content: text))
-        DebugLogStore.shared.log("USER: \(text)", category: "LLM")
+
+        // Build user message with image attachments
+        let userMessage = ChatMessage(
+            role: .user,
+            content: text,
+            imageAttachments: attachments,
+            processedWithVision: false
+        )
+        messages.append(userMessage)
+        DebugLogStore.shared.log("USER: \(text) | images: \(attachments.count)", category: "LLM")
 
         // Auto-title: derive session title from the first user message.
         if sessionManager != nil && sessionTitle == "New Chat" {
@@ -75,36 +76,38 @@ extension ChatViewModel {
         }
         errorMessage = nil
 
-        // Build system prompt before showing the assistant placeholder —
-        // prevents a visible empty bubble during the calendar fetch.
+        // Build system prompt before showing the assistant placeholder.
         isPreparing = true
-        // defer guarantees isPreparing resets even if buildSystemPrompt() is extended
-        // in the future to be throwing or if Swift runtime unwinds this frame.
         defer { isPreparing = false }
         let systemPrompt = await systemPromptBuilder.buildSystemPrompt()
 
         let assistantMsg = ChatMessage(role: .assistant, content: "")
         messages.append(assistantMsg)
-        let assistantID = assistantMsg.id  // Capture ID — safe against clearHistory() mid-stream
+        let assistantID = assistantMsg.id
 
         // Snapshot history without the empty assistant placeholder.
-        // Cap based on device RAM: 8 K context devices get more history (50 msgs ≈ 5000 tokens),
-        // 4 K context devices use 20 msgs ≈ 2000 tokens, leaving headroom for system prompt + reply.
         let ramGB = Int(ProcessInfo.processInfo.physicalMemory / ChatConstants.bytesPerGB)
         let historyLimit = ramGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeHistoryLimit : ChatConstants.smallHistoryLimit
         let historyMessages = Array(messages.dropLast().suffix(historyLimit))
 
-        let showThinking = thinkingEnabled  // snapshot at send time — also used by web search re-generation
+        let showThinking = thinkingEnabled
+
+        // Determine model role: vision if images attached and vision is enabled
+        let hasImages = !attachments.isEmpty
+        let useVision = hasImages && settings.visionEnabled
+        let modelRole: ModelType = useVision ? .vision : .text
 
         do {
             try await streamLLMResponse(
                 systemPrompt: systemPrompt,
                 messages: historyMessages,
                 assistantID: assistantID,
-                showThinking: showThinking
+                showThinking: showThinking,
+                modelRole: modelRole
             )
-            // Log raw LLM output for debugging
+            // Mark message as processed with vision if applicable
             if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
+                messages[idx].processedWithVision = useVision
                 messageHandlingLogger.info("📤 USER: \(text, privacy: .public)")
                 messageHandlingLogger.info("RAW_LLM: \(self.messages[idx].content, privacy: .public)")
                 DebugLogStore.shared.log("RAW_LLM: \(messages[idx].content)", category: "LLM")
@@ -143,7 +146,7 @@ extension ChatViewModel {
             messageHandlingLogger.warning("🔍 WEB_SEARCH block detected but extractWebSearchQuery returned nil — content: '\(rawContent, privacy: .public)'")
         }
 
-        // Calendar actions on final output (whether from first pass or post-search re-generation)
+        // Calendar actions on final output
         if let finalIdx = messages.firstIndex(where: { $0.id == assistantID }) {
             messages[finalIdx].isThinking = false
             let (content, previews, freeSlots) = await systemPromptBuilder.executeCalendarActions(in: messages[finalIdx].content)
@@ -151,7 +154,6 @@ extension ChatViewModel {
             messages[finalIdx].calendarEventPreviews = previews
             messages[finalIdx].calendarFreeSlots = freeSlots
             messageHandlingLogger.info("✅ FINAL: \(content, privacy: .public) | events=\(previews.count) slots=\(freeSlots.count)")
-            // swiftlint:disable:next line_length
             DebugLogStore.shared.log("FINAL: events=\(previews.count) slots=\(freeSlots.count) — \(String(content.prefix(ChatConstants.rawLogPreviewLength)))", category: "LLM")
         }
     }
@@ -162,12 +164,13 @@ extension ChatViewModel {
         systemPrompt: String,
         messages historyMessages: [ChatMessage],
         assistantID: UUID,
-        showThinking: Bool
+        showThinking: Bool,
+        modelRole: ModelType
     ) async throws {
-        var raw = ""           // full accumulated raw output
-        var thinkDone = false  // have we seen </think> yet?
+        var raw = ""
+        var thinkDone = false
 
-        for try await token in llmService.generate(systemPrompt: systemPrompt, messages: historyMessages, thinkingEnabled: showThinking) {
+        for try await token in llmService.generate(systemPrompt: systemPrompt, messages: historyMessages, thinkingEnabled: showThinking, modelRole: modelRole) {
             guard let idx = messages.firstIndex(where: { $0.id == assistantID }) else { break }
             applyStreamToken(token, rawBuffer: &raw, thinkDone: &thinkDone, showThinking: showThinking, idx: idx)
         }
@@ -189,23 +192,20 @@ extension ChatViewModel {
             let resultText = results.enumerated().map { i, r in
                 "[\(i + 1)] \(r.title)\nURL: \(r.url)\n\(r.snippet)"
             }.joined(separator: "\n\n")
-            // swiftlint:disable line_length
             let toolMsg = ChatMessage(
                 role: .user,
                 content: "[SEARCH_RESULTS for \"\(query)\"]:\n\(resultText)\n\nAnswer the original question directly. No preamble. No disclaimers. Be concise. Use location/timezone from context."
             )
-            // swiftlint:enable line_length
             let synthesisPrompt = await systemPromptBuilder.buildSynthesisPrompt()
             messageHandlingLogger.info("🔍 WEB_SEARCH starting synthesis pass")
             DebugLogStore.shared.log("WEB_SEARCH starting synthesis pass", category: "Search")
             var raw2 = ""
             var thinkDone2 = false
-            // Pass only toolMsg (not historyMessages) to synthesis so the model has
-            // fewer input tokens and more room to finish its <think> block + produce an answer.
             for try await token in llmService.generate(
                 systemPrompt: synthesisPrompt,
                 messages: [toolMsg],
-                thinkingEnabled: showThinking
+                thinkingEnabled: showThinking,
+                modelRole: .text
             ) {
                 guard let i = messages.firstIndex(where: { $0.id == assistantID }) else { break }
                 applyStreamToken(token, rawBuffer: &raw2, thinkDone: &thinkDone2, showThinking: showThinking, idx: i)
