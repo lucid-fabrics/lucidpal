@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import PocketMind
 
 // MARK: - MockSystemPromptBuilderWithSearch
@@ -42,15 +43,18 @@ final class ChatViewModelWebSearchTests: XCTestCase {
         settings.webSearchEndpoint = "http://localhost:8888"
 
         viewModel = ChatViewModel(
-            llmService: llm,
-            calendarService: MockCalendarService(),
-            settings: settings,
-            systemPromptBuilder: promptBuilder,
-            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
-            speechService: MockSpeechService(),
-            hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager(),
-            webSearchService: searchService
+            dependencies: ChatViewModelDependencies(
+                llmService: llm,
+                calendarService: MockCalendarService(),
+                settings: settings,
+                systemPromptBuilder: promptBuilder,
+                suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+                speechService: MockSpeechService(),
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: searchService
+            )
         )
     }
 
@@ -146,5 +150,22 @@ final class ChatViewModelWebSearchTests: XCTestCase {
 
         let lastAssistant = viewModel.messages.last(where: { $0.role == .assistant })
         XCTAssertEqual(lastAssistant?.content, "No results found for your query.")
+    }
+
+    func testSearchSucceedsButSynthesisProducesEmptyContent() async throws {
+        // Search returns results but LLM synthesis streams a single empty token.
+        // The assistant message must exist with empty string content, not be absent.
+        llm.stubbedTokens = ["[WEB_SEARCH:{\"query\":\"q\"}]"]
+        promptBuilder.extractResult = (query: "q", maxResults: 3)
+        searchService.stubbedResults = [
+            WebSearchResult(title: "Page", url: "https://example.com", snippet: "Info")
+        ]
+        llm.secondStubbedTokens = [""]  // LLM synthesis produces empty token
+
+        viewModel.inputText = "Search something"
+        await viewModel.sendMessage()
+
+        let lastAssistant = try XCTUnwrap(viewModel.messages.last(where: { $0.role == .assistant }))
+        XCTAssertEqual(lastAssistant.content, "", "Empty synthesis token should yield empty string content")
     }
 }

@@ -42,7 +42,7 @@ struct NextEventCard: View {
 
     private var timeUntil: String {
         let mins = Int(event.startDate.timeIntervalSince(now) / 60)
-        if mins < 1  { return "Starting now" }
+        if mins < 1 { return "Starting now" }
         if mins < 60 { return "in \(mins) min" }
         let h = mins / 60, m = mins % 60
         return m == 0 ? "in \(h)h" : "in \(h)h \(m)m"

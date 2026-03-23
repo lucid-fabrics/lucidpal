@@ -13,6 +13,7 @@ protocol CalendarServiceProtocol: AnyObject {
     func findConflicts(start: Date, end: Date, excludingIdentifier: String?) -> [CalendarEventInfo]
     func events(in start: Date, end: Date) -> [CalendarEventInfo]
     @discardableResult
+    // swiftlint:disable:next function_parameter_count
     func createEvent(
         title: String,
         start: Date,

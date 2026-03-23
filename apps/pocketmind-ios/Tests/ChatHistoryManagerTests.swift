@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class ChatHistoryManagerTests: XCTestCase {
@@ -79,7 +79,7 @@ final class ChatHistoryManagerTests: XCTestCase {
     }
 
     func testLoadReturnsFallbackWhenFileMalformed() throws {
-        try XCTUnwrap("not valid json {{{".data(using: .utf8)).write(to: ChatHistoryManager.historyURL)
+        try Data("not valid json {{{".utf8).write(to: ChatHistoryManager.historyURL)
         let messages = manager.load()
         XCTAssertTrue(messages.isEmpty)
     }

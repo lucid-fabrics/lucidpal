@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 // MARK: - MockURLProtocol
 
@@ -8,8 +8,8 @@ final class MockURLProtocol: URLProtocol {
     // but tests set this only from the main actor via setUp/tearDown, so there is no data race in practice.
     nonisolated(unsafe) static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
 
-    override class func canInit(with request: URLRequest) -> Bool { true }
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override static func canInit(with request: URLRequest) -> Bool { true }
+    override static func canonicalRequest(for request: URLRequest) -> URLRequest { request }
 
     override func startLoading() {
         guard let handler = MockURLProtocol.requestHandler else {
@@ -105,22 +105,22 @@ final class WebSearchServiceTests: XCTestCase {
         MockURLProtocol.requestHandler = { req in
             capturedURL = req.url
             let json = #"{"results":[]}"#
-            return (self.makeResponse(statusCode: 200, url: req.url!), Data(json.utf8))
+            return (self.makeResponse(statusCode: 200, url: try XCTUnwrap(req.url)), Data(json.utf8))
         }
 
         _ = try await service.search(query: "hello world", maxResults: 3)
 
         XCTAssertEqual(capturedURL?.path, "/search")
-        XCTAssertTrue(capturedURL?.query?.contains("q=hello%20world") == true
-                      || capturedURL?.query?.contains("q=hello+world") == true)
-        XCTAssertTrue(capturedURL?.query?.contains("format=json") == true)
+        let query = try XCTUnwrap(capturedURL?.query)
+        XCTAssertTrue(query.contains("q=hello%20world") || query.contains("q=hello+world"))
+        XCTAssertTrue(query.contains("format=json"))
     }
 
     func testSearchEncodesSpecialCharactersInQuery() async throws {
         var capturedURL: URL?
         MockURLProtocol.requestHandler = { req in
             capturedURL = req.url
-            return (self.makeResponse(statusCode: 200, url: req.url!), Data(#"{"results":[]}"#.utf8))
+            return (self.makeResponse(statusCode: 200, url: try XCTUnwrap(req.url)), Data(#"{"results":[]}"#.utf8))
         }
 
         _ = try await service.search(query: "C++ & Swift", maxResults: 5)
@@ -164,6 +164,17 @@ final class WebSearchServiceTests: XCTestCase {
             XCTFail("Expected WebSearchError.httpError")
         } catch WebSearchError.httpError(let code) {
             XCTAssertEqual(code, 404)
+        }
+    }
+
+    func testReturnsHTTPErrorForUnauthorizedResponse() async throws {
+        stubResponse(statusCode: 401, body: "Unauthorized")
+
+        do {
+            _ = try await service.search(query: "test", maxResults: 5)
+            XCTFail("Expected WebSearchError.httpError(401)")
+        } catch WebSearchError.httpError(let code) {
+            XCTAssertEqual(code, 401)
         }
     }
 
@@ -239,17 +250,15 @@ final class WebSearchServiceTests: XCTestCase {
         var capturedURL: URL?
         MockURLProtocol.requestHandler = { req in
             capturedURL = req.url
-            return (self.makeResponse(statusCode: 200, url: req.url!), Data(#"{"results":[]}"#.utf8))
+            return (self.makeResponse(statusCode: 200, url: try XCTUnwrap(req.url)), Data(#"{"results":[]}"#.utf8))
         }
 
         _ = try await service.search(query: "swift concurrency", maxResults: 5)
 
         XCTAssertEqual(capturedURL?.path, "/search")
-        XCTAssertTrue(capturedURL?.query?.contains("format=json") == true)
-        XCTAssertTrue(
-            capturedURL?.query?.contains("q=swift%20concurrency") == true
-            || capturedURL?.query?.contains("q=swift+concurrency") == true
-        )
+        let searxQuery = try XCTUnwrap(capturedURL?.query)
+        XCTAssertTrue(searxQuery.contains("format=json"))
+        XCTAssertTrue(searxQuery.contains("q=swift%20concurrency") || searxQuery.contains("q=swift+concurrency"))
     }
 
     func testSearXNGReturnsEmptyArrayWhenResultsEmpty() async throws {
@@ -258,7 +267,7 @@ final class WebSearchServiceTests: XCTestCase {
 
         let results = try await service.search(query: "no hits", maxResults: 5)
 
-        XCTAssertTrue(results.isEmpty)
+        XCTAssertEqual(results.count, 0)
     }
 
     func testSearXNGThrowsDecodingErrorOnInvalidJSON() async throws {
@@ -290,11 +299,14 @@ final class WebSearchServiceTests: XCTestCase {
     private func stubResponse(statusCode: Int, body: String) {
         MockURLProtocol.requestHandler = { [weak self] req in
             guard let self else { throw URLError(.cancelled) }
-            return (makeResponse(statusCode: statusCode, url: req.url!), Data(body.utf8))
+            return (makeResponse(statusCode: statusCode, url: try XCTUnwrap(req.url)), Data(body.utf8))
         }
     }
 
     private func makeResponse(statusCode: Int, url: URL) -> HTTPURLResponse {
-        HTTPURLResponse(url: url, statusCode: statusCode, httpVersion: nil, headerFields: nil)!
+        guard let response = HTTPURLResponse(url: url, statusCode: statusCode, httpVersion: nil, headerFields: nil) else {
+            preconditionFailure("HTTPURLResponse init failed for url: \(url), statusCode: \(statusCode)")
+        }
+        return response
     }
 }

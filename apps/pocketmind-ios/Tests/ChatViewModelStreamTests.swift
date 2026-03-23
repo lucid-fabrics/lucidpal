@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class ChatViewModelStreamTests: XCTestCase {
@@ -8,14 +8,18 @@ final class ChatViewModelStreamTests: XCTestCase {
     override func setUp() {
         super.setUp()
         viewModel = ChatViewModel(
-            llmService: MockLLMService(),
-            calendarService: MockCalendarService(),
-            settings: MockAppSettings(),
-            systemPromptBuilder: MockSystemPromptBuilder(),
-            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
-            speechService: MockSpeechService(),
-            hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
+            dependencies: ChatViewModelDependencies(
+                llmService: MockLLMService(),
+                calendarService: MockCalendarService(),
+                settings: MockAppSettings(),
+                systemPromptBuilder: MockSystemPromptBuilder(),
+                suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+                speechService: MockSpeechService(),
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: nil
+            )
         )
     }
 
@@ -116,14 +120,18 @@ final class ChatViewModelStreamTests: XCTestCase {
         llm.stubbedTokens = ["Partial"]
         llm.shouldThrowOnGenerate = CancellationError()
         let vm = ChatViewModel(
-            llmService: llm,
-            calendarService: MockCalendarService(),
-            settings: MockAppSettings(),
-            systemPromptBuilder: MockSystemPromptBuilder(),
-            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
-            speechService: MockSpeechService(),
-            hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
+            dependencies: ChatViewModelDependencies(
+                llmService: llm,
+                calendarService: MockCalendarService(),
+                settings: MockAppSettings(),
+                systemPromptBuilder: MockSystemPromptBuilder(),
+                suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+                speechService: MockSpeechService(),
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: nil
+            )
         )
 
         vm.inputText = "Test cancellation"

@@ -50,6 +50,7 @@ final class SystemPromptBuilder: SystemPromptBuilderProtocol {
     static let actionPattern = #"\[CALENDAR_ACTION:(\{(?:[^}]|\}(?!\]))*\})\]"#
 
     private static let calendarActionRegex: NSRegularExpression = {
+        // safe: literal regex pattern — preconditionFailure guards nil; failure is a programming error
         guard let regex = try? NSRegularExpression(
             pattern: actionPattern,
             options: [.dotMatchesLineSeparators]

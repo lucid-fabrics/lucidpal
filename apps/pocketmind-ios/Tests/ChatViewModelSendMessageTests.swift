@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import PocketMind
 
 @MainActor
@@ -14,14 +15,18 @@ final class ChatViewModelSendMessageTests: XCTestCase {
         settings = MockAppSettings()
         llm = MockLLMService()
         viewModel = ChatViewModel(
-            llmService: llm,
-            calendarService: mock,
-            settings: settings,
-            systemPromptBuilder: MockSystemPromptBuilder(),
-            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
-            speechService: MockSpeechService(),
-            hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
+            dependencies: ChatViewModelDependencies(
+                llmService: llm,
+                calendarService: mock,
+                settings: settings,
+                systemPromptBuilder: MockSystemPromptBuilder(),
+                suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+                speechService: MockSpeechService(),
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: nil
+            )
         )
     }
 
@@ -31,14 +36,18 @@ final class ChatViewModelSendMessageTests: XCTestCase {
         mockLLM.stubbedTokens = tokens
         let speech = MockSpeechService()
         let vm = ChatViewModel(
-            llmService: mockLLM,
-            calendarService: mock,
-            settings: settings,
-            systemPromptBuilder: MockSystemPromptBuilder(),
-            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
-            speechService: speech,
-            hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
+            dependencies: ChatViewModelDependencies(
+                llmService: mockLLM,
+                calendarService: mock,
+                settings: settings,
+                systemPromptBuilder: MockSystemPromptBuilder(),
+                suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+                speechService: speech,
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: nil
+            )
         )
         return (vm, mockLLM, speech)
     }

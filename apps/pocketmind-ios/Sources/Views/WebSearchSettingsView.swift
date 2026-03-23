@@ -1,32 +1,7 @@
 import SwiftUI
 
-private enum TestState {
-    case idle
-    case testing
-    case success(Int)   // result count
-    case failure(String)
-
-    var label: String {
-        switch self {
-        case .idle:              return "Test Connection"
-        case .testing:           return "Testing…"
-        case .success(let n):    return "✓ Connected — \(n) result\(n == 1 ? "" : "s") returned"
-        case .failure(let msg):  return "✗ \(msg)"
-        }
-    }
-
-    var color: Color {
-        switch self {
-        case .idle, .testing: return .accentColor
-        case .success:        return .green
-        case .failure:        return .red
-        }
-    }
-}
-
 struct WebSearchSettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
-    @State private var testState: TestState = .idle
     @State private var showJsonInfo = false
 
     var body: some View {
@@ -168,27 +143,33 @@ struct WebSearchSettingsView: View {
 
     private var testButton: some View {
         Button {
-            Task { await runTest() }
+            Task { await viewModel.runConnectionTest() }
         } label: {
             HStack {
-                if case .testing = testState {
+                if case .testing = viewModel.connectionTestResult {
                     ProgressView().scaleEffect(0.8)
                 }
-                Text(testState.label)
-                    .foregroundStyle(testState.color)
+                Text(testButtonLabel)
+                    .foregroundStyle(testButtonColor)
             }
         }
-        .disabled({ if case .testing = testState { return true }; return false }())
+        .disabled({ if case .testing = viewModel.connectionTestResult { return true }; return false }())
     }
 
-    private func runTest() async {
-        testState = .testing
-        let svc = viewModel.makeWebSearchService()
-        do {
-            let results = try await svc.search(query: "test", maxResults: 3)
-            testState = .success(results.count)
-        } catch {
-            testState = .failure(error.localizedDescription)
+    private var testButtonLabel: String {
+        switch viewModel.connectionTestResult {
+        case .idle:              return "Test Connection"
+        case .testing:           return "Testing…"
+        case .success(let n):    return "✓ Connected — \(n) result\(n == 1 ? "" : "s") returned"
+        case .failure(let msg):  return "✗ \(msg)"
+        }
+    }
+
+    private var testButtonColor: Color {
+        switch viewModel.connectionTestResult {
+        case .idle, .testing: return .accentColor
+        case .success:        return .green
+        case .failure:        return .red
         }
     }
 }

@@ -1,5 +1,5 @@
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
 struct PocketMindWidgetProvider: TimelineProvider, Sendable {
     private let dataProvider = CalendarDataProvider()
@@ -11,14 +11,14 @@ struct PocketMindWidgetProvider: TimelineProvider, Sendable {
                 id: "placeholder",
                 title: "Team Standup",
                 startDate: Date.now.addingTimeInterval(1800),
-                endDate: Date.now.addingTimeInterval(3600),
+                endDate: Date.now.addingTimeInterval(WidgetConstants.oneHourSeconds),
                 location: "Conference Room A",
                 isAllDay: false
             ),
             freeSlots: [
                 FreeSlotSummary(
                     startDate: Date.now,
-                    endDate: Date.now.addingTimeInterval(3600)
+                    endDate: Date.now.addingTimeInterval(WidgetConstants.oneHourSeconds)
                 )
             ],
             dayEvents: []
@@ -58,7 +58,8 @@ struct PocketMindWidgetProvider: TimelineProvider, Sendable {
             if let next = nextEvent, next.startDate > currentDate {
                 refreshDate = next.startDate
             } else {
-                refreshDate = Calendar.current.date(byAdding: .minute, value: 15, to: currentDate) ?? currentDate.addingTimeInterval(900)
+                // swiftlint:disable:next line_length
+                refreshDate = Calendar.current.date(byAdding: .minute, value: WidgetConstants.refreshIntervalMinutes, to: currentDate) ?? currentDate.addingTimeInterval(WidgetConstants.fifteenMinutesSeconds)
             }
 
             let timeline = Timeline(entries: [entry], policy: .after(refreshDate))

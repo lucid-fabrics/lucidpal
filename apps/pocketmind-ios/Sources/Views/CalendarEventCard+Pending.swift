@@ -29,6 +29,7 @@ extension CalendarEventCard {
         }
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous))
+        // swiftlint:disable:next line_length
         .overlay(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous).stroke(Color.red.opacity(DesignConstants.Opacity.conflictBorder), lineWidth: 1))
     }
 
@@ -39,7 +40,7 @@ extension CalendarEventCard {
                 VStack(alignment: .leading, spacing: 3) {
                     if let t = p.title { diffRow(label: "Title", from: preview.title, to: t) }
                     if let s = p.start { diffRow(label: "Start", from: Self.timeFormatter.string(from: preview.start), to: Self.timeFormatter.string(from: s)) }
-                    if let e = p.end   { diffRow(label: "End",   from: Self.timeFormatter.string(from: preview.end),   to: Self.timeFormatter.string(from: e)) }
+                    if let e = p.end { diffRow(label: "End", from: Self.timeFormatter.string(from: preview.end), to: Self.timeFormatter.string(from: e)) }
                     if let l = p.location { diffRow(label: "Location", from: "", to: l) }
                     if let m = p.reminderMinutes { diffRow(label: "Reminder", from: "", to: reminderLabel(m)) }
                 }
@@ -68,6 +69,7 @@ extension CalendarEventCard {
         }
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous))
+        // swiftlint:disable:next line_length
         .overlay(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous).stroke(Color.accentColor.opacity(DesignConstants.Opacity.updateBorder), lineWidth: 1))
     }
 

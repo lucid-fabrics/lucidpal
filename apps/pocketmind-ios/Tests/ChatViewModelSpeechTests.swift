@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 /// Tests for the speech recording lifecycle in ChatViewModel:
 /// toggleSpeech / confirmSpeech / cancelSpeech and their interaction
@@ -16,14 +16,18 @@ final class ChatViewModelSpeechTests: XCTestCase {
         speech = MockSpeechService()
         settings = MockAppSettings()
         viewModel = ChatViewModel(
-            llmService: MockLLMService(),
-            calendarService: MockCalendarService(),
-            settings: settings,
-            systemPromptBuilder: MockSystemPromptBuilder(),
-            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
-            speechService: speech,
-            hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
+            dependencies: ChatViewModelDependencies(
+                llmService: MockLLMService(),
+                calendarService: MockCalendarService(),
+                settings: settings,
+                systemPromptBuilder: MockSystemPromptBuilder(),
+                suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+                speechService: speech,
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: nil
+            )
         )
     }
 
@@ -54,7 +58,7 @@ final class ChatViewModelSpeechTests: XCTestCase {
         }
         speech.shouldThrowOnStart = FakeError()
         viewModel.toggleSpeech()
-        XCTAssertEqual(viewModel.errorMessage, "fake")
+        XCTAssertEqual(viewModel.errorMessage, "Microphone error: fake")
         XCTAssertFalse(viewModel.isSpeechRecording)
     }
 
@@ -97,14 +101,18 @@ final class ChatViewModelSpeechTests: XCTestCase {
         let llm = MockLLMService()
         llm.isLoaded = true
         let vm = ChatViewModel(
-            llmService: llm,
-            calendarService: MockCalendarService(),
-            settings: settings,
-            systemPromptBuilder: MockSystemPromptBuilder(),
-            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
-            speechService: speech,
-            hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
+            dependencies: ChatViewModelDependencies(
+                llmService: llm,
+                calendarService: MockCalendarService(),
+                settings: settings,
+                systemPromptBuilder: MockSystemPromptBuilder(),
+                suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+                speechService: speech,
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: nil
+            )
         )
         settings.speechAutoSendEnabled = true
         vm.toggleSpeech()

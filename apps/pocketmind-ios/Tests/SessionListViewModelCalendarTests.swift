@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class SessionListViewModelCalendarTests: XCTestCase {
@@ -11,13 +11,15 @@ final class SessionListViewModelCalendarTests: XCTestCase {
         calendarService = MockCalendarService()
         viewModel = SessionListViewModel(
             sessionManager: MockSessionManager(),
-            llmService: MockLLMService(),
-            calendarService: calendarService,
-            calendarActionController: MockCalendarActionController(),
-            settings: MockAppSettings(),
-            speechService: MockSpeechService(),
-            hapticService: MockHapticService(),
-            contextService: MockContextService()
+            dependencies: SessionListViewModelDependencies(
+                llmService: MockLLMService(),
+                calendarService: calendarService,
+                calendarActionController: MockCalendarActionController(),
+                settings: MockAppSettings(),
+                speechService: MockSpeechService(),
+                hapticService: MockHapticService(),
+                contextService: MockContextService()
+            )
         )
     }
 
@@ -37,24 +39,23 @@ final class SessionListViewModelCalendarTests: XCTestCase {
     func testCreateCalendarEventPassesLocation() throws {
         let start = Date(timeIntervalSinceNow: 0)
         let end = Date(timeIntervalSinceNow: 3600)
-        // MockCalendarService doesn't capture location but verifying no throw is sufficient.
-        XCTAssertNoThrow(
-            try viewModel.createCalendarEvent(
-                title: "Offsite", start: start, end: end,
-                isAllDay: false, location: "Montreal", notes: nil
-            )
+        try viewModel.createCalendarEvent(
+            title: "Offsite", start: start, end: end,
+            isAllDay: false, location: "Montreal", notes: nil
         )
+        XCTAssertEqual(calendarService.createdEvents.count, 1)
+        XCTAssertEqual(calendarService.createdEvents.first?.title, "Offsite")
     }
 
     func testCreateCalendarEventPassesNotes() throws {
         let start = Date(timeIntervalSinceNow: 0)
         let end = Date(timeIntervalSinceNow: 3600)
-        XCTAssertNoThrow(
-            try viewModel.createCalendarEvent(
-                title: "Review", start: start, end: end,
-                isAllDay: false, location: nil, notes: "Bring slides"
-            )
+        try viewModel.createCalendarEvent(
+            title: "Review", start: start, end: end,
+            isAllDay: false, location: nil, notes: "Bring slides"
         )
+        XCTAssertEqual(calendarService.createdEvents.count, 1)
+        XCTAssertEqual(calendarService.createdEvents.first?.title, "Review")
     }
 
     func testCreateCalendarEventAllDayPassesFlag() throws {
@@ -90,18 +91,16 @@ final class SessionListViewModelCalendarTests: XCTestCase {
 
     // MARK: - createCalendarEvent error propagation
 
-    func testCreateCalendarEventThrowsWhenServiceThrows() {
+    func testCreateCalendarEventThrowsWhenServiceThrows() throws {
         calendarService.shouldThrowOnDelete = false  // unrelated flag — use createEvent throw path
         // Subclass mock to make createEvent throw
         // Instead: verify CalendarError.eventNotFound propagates via shouldThrowOnDelete variant not available for create.
         // MockCalendarService.createEvent never throws by default.
         // We test the propagation guard: shouldThrowOnDelete is separate; for create we verify
         // the happy path creates one entry.
-        XCTAssertNoThrow(
-            try viewModel.createCalendarEvent(
-                title: "OK", start: .now, end: .now,
-                isAllDay: false, location: nil, notes: nil
-            )
+        try viewModel.createCalendarEvent(
+            title: "OK", start: .now, end: .now,
+            isAllDay: false, location: nil, notes: nil
         )
         XCTAssertEqual(calendarService.createdEvents.count, 1)
     }

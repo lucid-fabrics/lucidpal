@@ -179,6 +179,7 @@ final class WhisperSpeechService {
             return
         }
 
+        // safe: failure is handled by the guard's else branch — error is logged, transcription is skipped
         guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
               let fileSize = attrs[.size] as? Int else {
             whisperLogger.error("WhisperSpeech: could not read recording file attributes")

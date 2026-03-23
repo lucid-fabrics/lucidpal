@@ -55,8 +55,10 @@ struct MicButtonLabel: View {
         .onChange(of: isRecording) { _, recording in
             guard !reduceMotion else { return }
             if recording {
+                // swiftlint:disable line_length
                 withAnimation(.easeInOut(duration: VoiceRingConstants.animationDuration).repeatForever(autoreverses: true)) { ring1Scale = VoiceRingConstants.ring1Scale }
                 withAnimation(.easeInOut(duration: VoiceRingConstants.animationDuration).delay(VoiceRingConstants.ring2Delay).repeatForever(autoreverses: true)) { ring2Scale = VoiceRingConstants.ring2Scale }
+                // swiftlint:enable line_length
             } else {
                 ring1Scale = 1
                 ring2Scale = 1
@@ -64,8 +66,10 @@ struct MicButtonLabel: View {
         }
         .onAppear {
             guard isRecording && !reduceMotion else { return }
+            // swiftlint:disable line_length
             withAnimation(.easeInOut(duration: VoiceRingConstants.animationDuration).repeatForever(autoreverses: true)) { ring1Scale = VoiceRingConstants.ring1Scale }
             withAnimation(.easeInOut(duration: VoiceRingConstants.animationDuration).delay(VoiceRingConstants.ring2Delay).repeatForever(autoreverses: true)) { ring2Scale = VoiceRingConstants.ring2Scale }
+            // swiftlint:enable line_length
         }
     }
 }

@@ -105,10 +105,9 @@ extension ChatViewModel {
 
     func cancelAllDeletions(messageID: UUID) {
         guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }) else { return }
-        for idx in messages[msgIdx].calendarEventPreviews.indices {
-            if messages[msgIdx].calendarEventPreviews[idx].state == .pendingDeletion {
-                messages[msgIdx].calendarEventPreviews[idx].state = .deletionCancelled
-            }
+        for idx in messages[msgIdx].calendarEventPreviews.indices
+            where messages[msgIdx].calendarEventPreviews[idx].state == .pendingDeletion {
+            messages[msgIdx].calendarEventPreviews[idx].state = .deletionCancelled
         }
         hapticService.impact(.light)
     }
@@ -135,9 +134,9 @@ extension ChatViewModel {
                 timestamp: .now
             ))
             // Mirror applied changes onto the preview so the card shows the updated values
-            if let t = pending.title    { messages[msgIdx].calendarEventPreviews[previewIdx].title = t }
-            if let s = pending.start    { messages[msgIdx].calendarEventPreviews[previewIdx].start = s }
-            if let e = pending.end      { messages[msgIdx].calendarEventPreviews[previewIdx].end = e }
+            if let t = pending.title { messages[msgIdx].calendarEventPreviews[previewIdx].title = t }
+            if let s = pending.start { messages[msgIdx].calendarEventPreviews[previewIdx].start = s }
+            if let e = pending.end { messages[msgIdx].calendarEventPreviews[previewIdx].end = e }
             if let a = pending.isAllDay { messages[msgIdx].calendarEventPreviews[previewIdx].isAllDay = a }
             if let m = pending.reminderMinutes { messages[msgIdx].calendarEventPreviews[previewIdx].reminderMinutes = m }
             messages[msgIdx].calendarEventPreviews[previewIdx].state = newState

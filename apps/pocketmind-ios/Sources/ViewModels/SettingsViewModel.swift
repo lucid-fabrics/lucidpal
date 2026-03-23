@@ -5,6 +5,13 @@ import OSLog
 
 private let settingsLogger = Logger(subsystem: "app.pocketmind", category: "SettingsViewModel")
 
+enum ConnectionTestResult {
+    case idle
+    case testing
+    case success(Int)
+    case failure(String)
+}
+
 @MainActor
 final class SettingsViewModel: ObservableObject {
 
@@ -23,7 +30,7 @@ final class SettingsViewModel: ObservableObject {
     @Published var voiceAutoStartEnabled: Bool = false
     @Published var airpodsAutoVoiceEnabled: Bool = false
     @Published var speechAutoSendEnabled: Bool = false
-    @Published var contextSize: Int = 4096
+    @Published var contextSize: Int = ChatConstants.defaultContextSizeTokens
 
     // MARK: - Web Search
     @Published var webSearchEnabled: Bool = false
@@ -175,9 +182,27 @@ final class SettingsViewModel: ObservableObject {
 
     // MARK: - Web Search
 
+    // MARK: - Web Search Connection Test
+
+    @Published private(set) var connectionTestResult: ConnectionTestResult = .idle
+
+    func runConnectionTest() async {
+        connectionTestResult = .testing
+        let svc = makeWebSearchService()
+        do {
+            let results = try await svc.search(query: "test", maxResults: 3)
+            connectionTestResult = .success(results.count)
+        } catch {
+            connectionTestResult = .failure(error.localizedDescription)
+        }
+    }
+
+    var isLocationServiceUnavailable: Bool { locationService == nil }
+
+    // DIP-exempt: WebSearchService has no protocol-injected path here; factory is app-internal
+    // and only used for live connection tests triggered by the user from Settings UI.
     /// Creates a WebSearchService scoped to the current web search settings.
-    /// Used by WebSearchSettingsView for connection testing without exposing settings directly.
-    func makeWebSearchService() -> WebSearchService {
+    private func makeWebSearchService() -> any WebSearchServiceProtocol {
         WebSearchService(settings: settings)
     }
 

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import PocketMind
 
 /// LlamaActor wraps llama.cpp C FFI. Full generate/load tests require a physical
@@ -9,7 +10,7 @@ final class LlamaActorTests: XCTestCase {
 
     // MARK: - Initial state
 
-    func testInitialStateIsNotLoaded() async {
+    func testInitialStateIsNotLoaded() async throws {
         let actor = LlamaActor()
         let loaded = await actor.isLoaded
         XCTAssertFalse(loaded, "LlamaActor must report isLoaded=false before a model is loaded")

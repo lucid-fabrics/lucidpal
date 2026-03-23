@@ -73,35 +73,45 @@ struct SessionListView: View {
         let event = viewModel.nextUpcomingEvent()
         let count = viewModel.todayEventCount()
         return VStack(spacing: 0) {
+            heroHeader(now: now, count: count)
+            heroNextEventCard(event: event, now: now)
+            heroActions(event: event, now: now)
+        }
+        .frame(maxWidth: .infinity)
+    }
 
-            // Date + event count
-            VStack(spacing: 4) {
-                Text(now, format: .dateTime.weekday(.wide).month(.wide).day())
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.secondary)
-                Group {
-                    if count == 0 {
-                        Text("Free today")
-                    } else {
-                        Text("\(count) event\(count == 1 ? "" : "s") today")
-                    }
+    private func heroHeader(now: Date, count: Int) -> some View {
+        VStack(spacing: 4) {
+            Text(now, format: .dateTime.weekday(.wide).month(.wide).day())
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.secondary)
+            Group {
+                if count == 0 {
+                    Text("Free today")
+                } else {
+                    Text("\(count) event\(count == 1 ? "" : "s") today")
                 }
-                .font(.title3.weight(.bold))
             }
-            .padding(.top, 28)
+            .font(.title3.weight(.bold))
+        }
+        .padding(.top, 28)
+    }
 
-            // Next event card
-            if let event, let title = event.title, !title.isEmpty {
-                NextEventCard(event: event, title: title, now: now) {
-                    let session = viewModel.createSession()
-                    pendingVoiceSessionID = nil
-                    navigationPath.append(session.meta)
-                }
-                .padding(.top, 16)
-                .padding(.horizontal, 16)
+    @ViewBuilder
+    private func heroNextEventCard(event: CalendarEventInfo?, now: Date) -> some View {
+        if let event, let title = event.title, !title.isEmpty {
+            NextEventCard(event: event, title: title, now: now) {
+                let session = viewModel.createSession()
+                pendingVoiceSessionID = nil
+                navigationPath.append(session.meta)
             }
+            .padding(.top, 16)
+            .padding(.horizontal, 16)
+        }
+    }
 
-            // Mic button
+    private func heroActions(event: CalendarEventInfo?, now: Date) -> some View {
+        VStack(spacing: 0) {
             PulsingMicButton {
                 let session = viewModel.createSession()
                 pendingVoiceSessionID = session.meta.id
@@ -109,7 +119,6 @@ struct SessionListView: View {
             }
             .padding(.top, event != nil ? 24 : 32)
 
-            // Contextual hint
             Text(contextualHint(event: event, now: now))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
@@ -117,7 +126,6 @@ struct SessionListView: View {
                 .padding(.horizontal, 32)
                 .padding(.top, 10)
 
-            // New text chat
             Button {
                 let session = viewModel.createSession()
                 pendingVoiceSessionID = nil
@@ -131,7 +139,6 @@ struct SessionListView: View {
             .padding(.top, 16)
             .padding(.bottom, 32)
         }
-        .frame(maxWidth: .infinity)
     }
 
     private func contextualHint(event: CalendarEventInfo?, now: Date) -> String {
@@ -140,7 +147,7 @@ struct SessionListView: View {
         }
         let mins = Int(event.startDate.timeIntervalSince(now) / 60)
         let short = title.count > ChatConstants.eventTitlePreviewLength + 2 ? String(title.prefix(ChatConstants.eventTitlePreviewLength)) + "…" : title
-        if mins < 5  { return "\"\(short)\" is starting now" }
+        if mins < 5 { return "\"\(short)\" is starting now" }
         if mins < 60 { return "Ask about \"\(short)\"" }
         return "Tap the mic to ask about your day"
     }
@@ -181,6 +188,5 @@ struct SessionListView: View {
             }
         }
     }
-
 
 }

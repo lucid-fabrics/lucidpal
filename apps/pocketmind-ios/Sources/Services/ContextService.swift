@@ -1,5 +1,5 @@
-import Foundation
 import EventKit
+import Foundation
 import OSLog
 
 private let contextLogger = Logger(subsystem: "app.pocketmind", category: "Context")

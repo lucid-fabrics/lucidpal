@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class ChatViewModelEdgeCaseTests: XCTestCase {
@@ -14,14 +14,18 @@ final class ChatViewModelEdgeCaseTests: XCTestCase {
         calendarService = MockCalendarService()
         settings = MockAppSettings()
         viewModel = ChatViewModel(
-            llmService: llm,
-            calendarService: calendarService,
-            settings: settings,
-            systemPromptBuilder: MockSystemPromptBuilder(),
-            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
-            speechService: MockSpeechService(),
-            hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
+            dependencies: ChatViewModelDependencies(
+                llmService: llm,
+                calendarService: calendarService,
+                settings: settings,
+                systemPromptBuilder: MockSystemPromptBuilder(),
+                suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+                speechService: MockSpeechService(),
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: nil
+            )
         )
     }
 
@@ -127,5 +131,29 @@ final class ChatViewModelEdgeCaseTests: XCTestCase {
         XCTAssertTrue(thinkDone)
         XCTAssertEqual(viewModel.messages[0].thinkingContent, "reasoning here")
         XCTAssertEqual(viewModel.messages[0].content, "Answer")
+    }
+
+    // MARK: - needsDateSeparator
+
+    func testNeedsDateSeparatorAtIndexZeroAlwaysReturnsTrue() {
+        viewModel.messages = [ChatMessage(role: .user, content: "Hello")]
+        XCTAssertTrue(viewModel.needsDateSeparator(at: 0))
+    }
+
+    func testNeedsDateSeparatorSameDayReturnsFalse() {
+        let base = Date(timeIntervalSinceReferenceDate: 0)
+        let msg1 = ChatMessage(role: .user, content: "First", timestamp: base)
+        let msg2 = ChatMessage(role: .assistant, content: "Second", timestamp: base.addingTimeInterval(3600))
+        viewModel.messages = [msg1, msg2]
+        XCTAssertFalse(viewModel.needsDateSeparator(at: 1))
+    }
+
+    func testNeedsDateSeparatorDifferentDayReturnsTrue() {
+        let day1 = Date(timeIntervalSinceReferenceDate: 0)
+        let day2 = day1.addingTimeInterval(86400)
+        let msg1 = ChatMessage(role: .user, content: "Yesterday", timestamp: day1)
+        let msg2 = ChatMessage(role: .assistant, content: "Today", timestamp: day2)
+        viewModel.messages = [msg1, msg2]
+        XCTAssertTrue(viewModel.needsDateSeparator(at: 1))
     }
 }

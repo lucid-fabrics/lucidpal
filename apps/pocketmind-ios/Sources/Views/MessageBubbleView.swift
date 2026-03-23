@@ -23,6 +23,11 @@ struct MessageBubbleView: View {
     @State private var swipeOffset: CGFloat = 0
     @State private var replyTriggered = false
 
+    private enum AnimationConstants {
+        /// Minimum opacity for the pulsing dot in the generating status view.
+        static let dotInitialOpacity: Double = 0.2
+    }
+
     private let replyThreshold: CGFloat = 60
     /// Max swipe travel expressed as a multiple of replyThreshold (30% overshoot).
     private let swipeExtentFactor: CGFloat = 1.3
@@ -124,14 +129,14 @@ struct MessageBubbleView: View {
                 ForEach(message.calendarEventPreviews.filter { $0.state != .listed }, id: \.id) { preview in
                     CalendarEventCard(
                         preview: preview,
-                        onConfirm:        { onConfirmDeletion?(preview.id) },
-                        onCancel:         { onCancelDeletion?(preview.id) },
-                        onUndo:           { onUndoDeletion?(preview.id) },
-                        onConfirmUpdate:  { onConfirmUpdate?(preview.id) },
-                        onCancelUpdate:   { onCancelUpdate?(preview.id) },
-                        onKeepConflict:   { onKeepConflict?(preview.id) },
+                        onConfirm: { onConfirmDeletion?(preview.id) },
+                        onCancel: { onCancelDeletion?(preview.id) },
+                        onUndo: { onUndoDeletion?(preview.id) },
+                        onConfirmUpdate: { onConfirmUpdate?(preview.id) },
+                        onCancelUpdate: { onCancelUpdate?(preview.id) },
+                        onKeepConflict: { onKeepConflict?(preview.id) },
                         onCancelConflict: { await onCancelConflict?(preview.id) },
-                        onFindFreeSlots:  { await onFindFreeSlots?(preview.id) ?? [] },
+                        onFindFreeSlots: { await onFindFreeSlots?(preview.id) ?? [] },
                         onRescheduleToSlot: { slot in await onRescheduleToSlot?(preview.id, slot) }
                     )
                 }
@@ -141,7 +146,7 @@ struct MessageBubbleView: View {
                     BulkDeletionBar(
                         count: pendingDeletionCount,
                         onDeleteAll: { onConfirmAllDeletions?() },
-                        onKeepAll:   { onCancelAllDeletions?() }
+                        onKeepAll: { onCancelAllDeletions?() }
                     )
                 }
 
@@ -187,7 +192,6 @@ struct MessageBubbleView: View {
 
 // MARK: - Markdown bubble text
 
-
 /// Renders message text with inline markdown (bold, italic, code, links).
 /// Converts leading `- ` list markers to `•` before parsing.
 /// Falls back to plain text if AttributedString parsing fails.
@@ -196,8 +200,8 @@ private func bubbleTextView(_ text: String, isUser: Bool) -> some View {
     let processed = text
         .components(separatedBy: "\n")
         .map { line -> String in
-            if line.hasPrefix("* ")  { return "• " + line.dropFirst(2) }
-            if line.hasPrefix("- ")  { return "• " + line.dropFirst(2) }
+            if line.hasPrefix("* ") { return "• " + line.dropFirst(2) }
+            if line.hasPrefix("- ") { return "• " + line.dropFirst(2) }
             return line
         }
         .joined(separator: "\n")
@@ -234,7 +238,7 @@ private struct GeneratingStatusView: View {
                                 "who is", "what is", "how to", "price", "score",
                                 "define", "translate", "find", "look up"]
         if calendarKeywords.contains(where: { prompt.contains($0) }) { return .calendar }
-        if searchKeywords.contains(where:  { prompt.contains($0) }) { return .webSearch }
+        if searchKeywords.contains(where: { prompt.contains($0) }) { return .webSearch }
         return .generic
     }
 
@@ -293,7 +297,7 @@ private struct GeneratingStatusView: View {
         }
         .padding(.horizontal, DesignConstants.Padding.bubbleHorizontal)
         .padding(.vertical, DesignConstants.Padding.bubbleVertical)
-        .onAppear { if !reduceMotion { dotOpacity = 0.2 } }
+        .onAppear { if !reduceMotion { dotOpacity = AnimationConstants.dotInitialOpacity } }
         .task {
             guard !reduceMotion else { return }
             while !Task.isCancelled {

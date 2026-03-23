@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class ChatViewModelSuggestedPromptsTests: XCTestCase {
@@ -10,14 +10,18 @@ final class ChatViewModelSuggestedPromptsTests: XCTestCase {
         super.setUp()
         calendar = MockCalendarService()
         viewModel = ChatViewModel(
-            llmService: MockLLMService(),
-            calendarService: calendar,
-            settings: MockAppSettings(),
-            systemPromptBuilder: MockSystemPromptBuilder(),
-            suggestedPromptsProvider: SuggestedPromptsProvider(calendarService: calendar),
-            speechService: MockSpeechService(),
-            hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
+            dependencies: ChatViewModelDependencies(
+                llmService: MockLLMService(),
+                calendarService: calendar,
+                settings: MockAppSettings(),
+                systemPromptBuilder: MockSystemPromptBuilder(),
+                suggestedPromptsProvider: SuggestedPromptsProvider(calendarService: calendar),
+                speechService: MockSpeechService(),
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: nil
+            )
         )
     }
 

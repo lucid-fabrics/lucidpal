@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class ModelDownloaderTests: XCTestCase {
@@ -67,6 +67,10 @@ final class ModelDownloaderTests: XCTestCase {
 
         // Verify the method exists and can be called without error
         XCTAssertNoThrow(try sut.deleteModel(model))
+        XCTAssertFalse(
+            FileManager.default.fileExists(atPath: model.localURL.path),
+            "File at model.localURL should be deleted after deleteModel"
+        )
     }
 
     func testDeleteModelNoOpWhenFileAbsent() throws {
@@ -74,6 +78,10 @@ final class ModelDownloaderTests: XCTestCase {
         // localURL should not exist in test environment
         if !FileManager.default.fileExists(atPath: model.localURL.path) {
             XCTAssertNoThrow(try sut.deleteModel(model))
+            XCTAssertFalse(
+                FileManager.default.fileExists(atPath: model.localURL.path),
+                "File should not exist before or after no-op deleteModel"
+            )
         }
     }
 

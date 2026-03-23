@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 /// Integration tests for CalendarActionController free-slot and list actions using MockCalendarService.
 @MainActor
@@ -27,9 +27,9 @@ final class CalendarFreeSlotIntegrationTests: XCTestCase {
 
     // MARK: - query action
 
-    func testQueryActionWithValidRangeReturnsQueryResult() async {
+    func testQueryActionWithValidRangeReturnsQueryResult() async throws {
         let start = nextMonday(hour: 8)
-        let end = Calendar.current.date(byAdding: .hour, value: 10, to: start)!
+        let end = try XCTUnwrap(Calendar.current.date(byAdding: .hour, value: 10, to: start))
         let json = """
         {"action":"query","start":"\(isoString(start))","end":"\(isoString(end))","durationMinutes":60}
         """
@@ -55,9 +55,9 @@ final class CalendarFreeSlotIntegrationTests: XCTestCase {
         }
     }
 
-    func testQueryActionWithZeroDurationReturnsFailure() async {
+    func testQueryActionWithZeroDurationReturnsFailure() async throws {
         let start = nextMonday(hour: 8)
-        let end = Calendar.current.date(byAdding: .hour, value: 4, to: start)!
+        let end = try XCTUnwrap(Calendar.current.date(byAdding: .hour, value: 4, to: start))
         let json = """
         {"action":"query","start":"\(isoString(start))","end":"\(isoString(end))","durationMinutes":0}
         """
@@ -71,9 +71,9 @@ final class CalendarFreeSlotIntegrationTests: XCTestCase {
 
     // MARK: - list action
 
-    func testListActionReturnsListResult() async {
+    func testListActionReturnsListResult() async throws {
         let start = nextMonday(hour: 0)
-        let end = Calendar.current.date(byAdding: .hour, value: 24, to: start)!
+        let end = try XCTUnwrap(Calendar.current.date(byAdding: .hour, value: 24, to: start))
         let json = """
         {"action":"list","start":"\(isoString(start))","end":"\(isoString(end))"}
         """
@@ -110,10 +110,10 @@ final class CalendarFreeSlotIntegrationTests: XCTestCase {
         }
     }
 
-    func testMissingActionDefaultsToCreate() async {
+    func testMissingActionDefaultsToCreate() async throws {
         // Missing "action" field — CalendarActionController defaults to .create
         let start = nextMonday(hour: 14)
-        let end = Calendar.current.date(byAdding: .hour, value: 1, to: start)!
+        let end = try XCTUnwrap(Calendar.current.date(byAdding: .hour, value: 1, to: start))
         let json = """
         {"title":"Inferred Create","start":"\(isoString(start))","end":"\(isoString(end))"}
         """

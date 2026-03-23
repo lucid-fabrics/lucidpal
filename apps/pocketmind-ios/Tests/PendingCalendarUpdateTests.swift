@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import PocketMind
 
 @MainActor
@@ -44,7 +45,7 @@ final class PendingCalendarUpdateTests: XCTestCase {
         let preview = CalendarEventPreview(
             title: "Standup",
             start: Date(timeIntervalSinceReferenceDate: 800_000),
-            end:   Date(timeIntervalSinceReferenceDate: 801_800),
+            end: Date(timeIntervalSinceReferenceDate: 801_800),
             calendarName: "Work",
             state: .pendingDeletion,
             eventIdentifier: "abc-123",

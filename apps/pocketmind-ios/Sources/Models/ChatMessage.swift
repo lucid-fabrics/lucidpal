@@ -151,6 +151,7 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
     /// True when this assistant message was produced via an agentic web search round-trip.
     var isWebSearchResult: Bool
 
+    // swiftlint:disable:next line_length
     init(id: UUID = UUID(), role: MessageRole, content: String, thinkingContent: String? = nil, isThinking: Bool = false, calendarEventPreviews: [CalendarEventPreview] = [], calendarFreeSlots: [CalendarFreeSlot] = [], isWebSearchResult: Bool = false, timestamp: Date = .now) {
         self.id = id
         self.role = role
@@ -203,6 +204,7 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
     // Compiled once — NSRegularExpression is thread-safe for matching.
     private static let actionBlockRegex: NSRegularExpression = {
         let pattern = #"\[CALENDAR_ACTION:\{(?:[^}]|\}(?!\]))*\}\]"#
+        // swiftlint:disable:next line_length
         guard let regex = try? NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators) else { // safe: pattern is a compile-time constant; failure is caught by preconditionFailure below
             preconditionFailure("Invalid actionBlockRegex pattern")
         }
@@ -211,6 +213,7 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
 
     private static let webSearchBlockRegex: NSRegularExpression = {
         let pattern = #"\[WEB_SEARCH:\{(?:[^}]|\}(?!\]))*\}\]"#
+        // safe: literal regex pattern — preconditionFailure guards nil; failure is a programming error
         guard let regex = try? NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators) else {
             preconditionFailure("Invalid webSearchBlockRegex pattern")
         }

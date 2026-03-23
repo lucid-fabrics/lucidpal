@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class ContextServiceTests: XCTestCase {
@@ -33,7 +33,7 @@ final class ContextServiceTests: XCTestCase {
 
     // MARK: - fetchContext Tests
 
-    func testFetchContextReturnsNilWhenAllSourcesDisabled() async {
+    func testFetchContextReturnsNilWhenAllSourcesDisabled() async throws {
         mockSettings.notesAccessEnabled = false
         mockSettings.remindersAccessEnabled = false
         mockSettings.mailAccessEnabled = false
@@ -43,7 +43,7 @@ final class ContextServiceTests: XCTestCase {
         XCTAssertNil(context)
     }
 
-    func testFetchContextReturnsNilWhenNoItemsFound() async {
+    func testFetchContextReturnsNilWhenNoItemsFound() async throws {
         mockSettings.remindersAccessEnabled = true
 
         let context = await sut.fetchContext(query: nil)
@@ -52,7 +52,7 @@ final class ContextServiceTests: XCTestCase {
         XCTAssertNil(context)
     }
 
-    func testFetchContextWithQueryPassesQueryCorrectly() async {
+    func testFetchContextWithQueryPassesQueryCorrectly() async throws {
         mockSettings.remindersAccessEnabled = true
 
         _ = await sut.fetchContext(query: "Montreal trip")
@@ -62,14 +62,14 @@ final class ContextServiceTests: XCTestCase {
 
     // MARK: - Permission Request Tests
 
-    func testRequestNotesAccessReturnsFalse() async {
+    func testRequestNotesAccessReturnsFalse() async throws {
         let granted = await sut.requestNotesAccess()
 
         XCTAssertFalse(granted)
         XCTAssertFalse(sut.isNotesEnabled)
     }
 
-    func testRequestMailAccessReturnsFalse() async {
+    func testRequestMailAccessReturnsFalse() async throws {
         let granted = await sut.requestMailAccess()
 
         XCTAssertFalse(granted)
@@ -132,7 +132,7 @@ final class ContextServiceTests: XCTestCase {
 
     // MARK: - Integration with AppSettings Tests
 
-    func testRemindersAccessUpdatesSettings() async {
+    func testRemindersAccessUpdatesSettings() async throws {
         mockSettings.remindersAccessEnabled = false
 
         // In unit tests EKEventStore denies access — result must be false

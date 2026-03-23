@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class CalendarFreeSlotEngineTests: XCTestCase {
@@ -150,7 +150,7 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
         let slots = CalendarFreeSlotEngine.findSlots(
             busyWindows: [
                 (start: busyStart, end: busyEnd),
-                (start: busyMid,   end: busyEnd)   // overlaps first
+                (start: busyMid, end: busyEnd)   // overlaps first
             ],
             rangeStart: busyStart,
             rangeEnd: rangeEnd,

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import PocketMind
 
 @MainActor
@@ -87,14 +88,14 @@ final class ConflictResolutionTests: XCTestCase {
 
     // MARK: - cancelConflict
 
-    func testCancelConflictDeletesEventFromCalendar() async {
+    func testCancelConflictDeletesEventFromCalendar() async throws {
         let p = makeConflictingPreview(identifier: "evt-001")
         let (msgID, previewID) = addMessage(with: p)
         await vm.cancelConflict(messageID: msgID, previewID: previewID)
         XCTAssertTrue(calendar.deletedIdentifiers.contains("evt-001"))
     }
 
-    func testCancelConflictSetsStateToDeleted() async {
+    func testCancelConflictSetsStateToDeleted() async throws {
         let p = makeConflictingPreview()
         let (msgID, previewID) = addMessage(with: p)
         await vm.cancelConflict(messageID: msgID, previewID: previewID)
@@ -110,7 +111,7 @@ final class ConflictResolutionTests: XCTestCase {
         XCTAssertFalse(errorMsg.isEmpty)
     }
 
-    func testCancelConflictNoOpWhenEventIdentifierNil() async {
+    func testCancelConflictNoOpWhenEventIdentifierNil() async throws {
         var p = makeConflictingPreview()
         p.eventIdentifier = nil
         let (msgID, previewID) = addMessage(with: p)
@@ -120,7 +121,7 @@ final class ConflictResolutionTests: XCTestCase {
 
     // MARK: - findFreeSlotsForConflict
 
-    func testFindFreeSlotsReturnsAvailableSlots() async {
+    func testFindFreeSlotsReturnsAvailableSlots() async throws {
         calendar.stubbedEvents = []
         let p = makeConflictingPreview()
         let (msgID, previewID) = addMessage(with: p)
@@ -128,7 +129,7 @@ final class ConflictResolutionTests: XCTestCase {
         XCTAssertFalse(slots.isEmpty)
     }
 
-    func testFindFreeSlotsReturnsEmptyForUnknownID() async {
+    func testFindFreeSlotsReturnsEmptyForUnknownID() async throws {
         let slots = await vm.findFreeSlotsForConflict(messageID: UUID(), previewID: UUID())
         XCTAssertTrue(slots.isEmpty)
     }
@@ -147,7 +148,7 @@ final class ConflictResolutionTests: XCTestCase {
         XCTAssertEqual(update.end, slotEnd)
     }
 
-    func testRescheduleConflictClearsConflictFlag() async {
+    func testRescheduleConflictClearsConflictFlag() async throws {
         let p = makeConflictingPreview()
         let (msgID, previewID) = addMessage(with: p)
         await vm.rescheduleConflict(
@@ -157,7 +158,7 @@ final class ConflictResolutionTests: XCTestCase {
         XCTAssertEqual(vm.messages.last?.calendarEventPreviews.first?.hasConflict, false)
     }
 
-    func testRescheduleConflictSetsStateToRescheduled() async {
+    func testRescheduleConflictSetsStateToRescheduled() async throws {
         let p = makeConflictingPreview()
         let (msgID, previewID) = addMessage(with: p)
         await vm.rescheduleConflict(
@@ -167,7 +168,7 @@ final class ConflictResolutionTests: XCTestCase {
         XCTAssertEqual(vm.messages.last?.calendarEventPreviews.first?.state, .rescheduled)
     }
 
-    func testRescheduleConflictNoOpForUnknownID() async {
+    func testRescheduleConflictNoOpForUnknownID() async throws {
         await vm.rescheduleConflict(
             messageID: UUID(), previewID: UUID(),
             to: CalendarFreeSlot(start: Date(), end: Date())
@@ -187,7 +188,7 @@ final class ConflictResolutionTests: XCTestCase {
         XCTAssertFalse(errorMsg.isEmpty)
     }
 
-    func testRescheduleConflictPreservesStateOnFailure() async {
+    func testRescheduleConflictPreservesStateOnFailure() async throws {
         calendar.shouldThrowOnApplyUpdate = true
         let p = makeConflictingPreview()
         let (msgID, previewID) = addMessage(with: p)

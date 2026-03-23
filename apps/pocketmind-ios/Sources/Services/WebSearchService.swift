@@ -3,12 +3,17 @@ import OSLog
 
 private let searchLogger = Logger(subsystem: "app.pocketmind", category: "WebSearch")
 
+private enum HTTPStatus {
+    /// HTTP 403 Forbidden — returned by SearXNG when JSON format is disabled.
+    static let forbidden = 403
+}
+
 // MARK: - Provider
 
 enum WebSearchProvider: String, CaseIterable, Identifiable {
     var id: String { rawValue }
-    case brave   = "brave"
-    case searxng = "searxng"
+    case brave
+    case searxng
 
     var displayName: String {
         switch self {
@@ -105,7 +110,7 @@ final class WebSearchService: WebSearchServiceProtocol {
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             let code = (response as? HTTPURLResponse)?.statusCode ?? 0
-            throw code == 403 ? WebSearchError.searxngJsonDisabled : WebSearchError.httpError(code)
+            throw code == HTTPStatus.forbidden ? WebSearchError.searxngJsonDisabled : WebSearchError.httpError(code)
         }
         let payload = try JSONDecoder().decode(SearXNGResponse.self, from: data)
         return payload.results.prefix(maxResults).map {

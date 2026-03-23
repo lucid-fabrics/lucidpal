@@ -37,13 +37,17 @@ final class DebugLogStore: ObservableObject {
     // MARK: - Storage
 
     @Published private(set) var entries: [Entry] = []
-    private let maxEntries = 500
+
+    private enum Constants {
+        /// Maximum number of log entries retained in the ring buffer before eviction.
+        static let maxEntries = 500
+    }
 
     // MARK: - API
 
     func log(_ message: String, category: String, level: Entry.Level = .info) {
         entries.append(Entry(category: category, level: level, message: message))
-        if entries.count > maxEntries { entries.removeFirst() }
+        if entries.count > Constants.maxEntries { entries.removeFirst() }
     }
 
     func clear() { entries.removeAll() }

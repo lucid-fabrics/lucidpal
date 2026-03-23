@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 /// Verifies UserDefaultsKeys constants are correct and distinct — guards against
 /// accidental key renames that would silently break persisted user preferences.

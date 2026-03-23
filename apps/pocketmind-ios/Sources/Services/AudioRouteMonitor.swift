@@ -66,7 +66,7 @@ final class AudioRouteMonitor: ObservableObject, AudioRouteMonitorProtocol {
             routeNames.append(output.portName)
 
             // AirPods detection: port type is BluetoothA2DP or BluetoothHFP, name contains "AirPods"
-            if (output.portType == .bluetoothA2DP || output.portType == .bluetoothHFP),
+            if output.portType == .bluetoothA2DP || output.portType == .bluetoothHFP,
                output.portName.contains("AirPods") {
                 detectedAirPods = true
             }

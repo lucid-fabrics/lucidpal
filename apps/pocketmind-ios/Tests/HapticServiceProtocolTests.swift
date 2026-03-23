@@ -1,6 +1,6 @@
-import XCTest
-import UIKit
 @testable import PocketMind
+import UIKit
+import XCTest
 
 /// Tests the HapticServiceProtocol contract using MockHapticService.
 @MainActor
