@@ -11,7 +11,7 @@ final class SnapshotTests: XCTestCase {
     private func makeViewModel(loaded: Bool = true, messages: [ChatMessage] = []) -> ChatViewModel {
         let llm = MockLLMService()
         llm.isLoaded = loaded
-        let vm = ChatViewModel(
+        let vm = ChatViewModel(dependencies: ChatViewModelDependencies(
             llmService: llm,
             calendarService: MockCalendarService(),
             settings: MockAppSettings(),
@@ -19,8 +19,10 @@ final class SnapshotTests: XCTestCase {
             suggestedPromptsProvider: MockSuggestedPromptsProvider(),
             speechService: MockSpeechService(),
             hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
-        )
+            historyManager: MockChatHistoryManager(),
+            airPodsCoordinator: nil,
+            webSearchService: nil
+        ))
         vm.messages = messages
         return vm
     }
@@ -231,7 +233,7 @@ final class SnapshotTests: XCTestCase {
         let llm = MockLLMService()
         llm.isLoaded = true
         llm.isGenerating = true
-        let vm = ChatViewModel(
+        let vm = ChatViewModel(dependencies: ChatViewModelDependencies(
             llmService: llm,
             calendarService: MockCalendarService(),
             settings: MockAppSettings(),
@@ -239,8 +241,10 @@ final class SnapshotTests: XCTestCase {
             suggestedPromptsProvider: MockSuggestedPromptsProvider(),
             speechService: MockSpeechService(),
             hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
-        )
+            historyManager: MockChatHistoryManager(),
+            airPodsCoordinator: nil,
+            webSearchService: nil
+        ))
         vm.messages = [
             ChatMessage(role: .user, content: "Summarize the history of the internet."),
             ChatMessage(role: .assistant, content: ""),   // streaming skeleton

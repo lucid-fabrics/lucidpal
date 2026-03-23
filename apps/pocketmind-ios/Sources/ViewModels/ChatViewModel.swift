@@ -8,16 +8,16 @@ private let llmLogger = Logger(subsystem: "app.pocketmind", category: "LLM")
 final class ChatViewModel: ObservableObject {
     @Published var messages: [ChatMessage] = []
     @Published var inputText: String = ""
-    @Published private(set) var isGenerating = false
-    @Published private(set) var isPreparing = false
-    @Published private(set) var isModelLoaded = false
+    @Published var isGenerating = false
+    @Published var isPreparing = false
+    @Published var isModelLoaded = false
     @Published var errorMessage: String?
     @Published var toast: ToastItem?
 
-    @Published private(set) var isSpeechRecording = false
-    @Published private(set) var isSpeechAvailable = false
-    @Published private(set) var isSpeechTranscribing = false
-    @Published private(set) var isAutoListening = false
+    @Published var isSpeechRecording = false
+    @Published var isSpeechAvailable = false
+    @Published var isSpeechTranscribing = false
+    @Published var isAutoListening = false
 
     @Published var suggestedPrompts: [String] = []
     @Published var isGeneratingSuggestions = false
@@ -29,7 +29,7 @@ final class ChatViewModel: ObservableObject {
     @Published var replyingTo: ChatMessage? = nil
 
     /// Navigation title — equals session title in session mode, "PocketMind" otherwise.
-    @Published private(set) var sessionTitle: String
+    @Published var sessionTitle: String
 
     let llmService: any LLMServiceProtocol
     let calendarService: any CalendarServiceProtocol
@@ -41,7 +41,7 @@ final class ChatViewModel: ObservableObject {
     let history: any ChatHistoryManagerProtocol
     let airPodsCoordinator: (any AirPodsVoiceCoordinatorProtocol)?
     let webSearchService: (any WebSearchServiceProtocol)?
-    private var errorDismissTask: Task<Void, Never>?
+    var errorDismissTask: Task<Void, Never>?
     var cancellables = Set<AnyCancellable>()
     // Prevents auto-submit when the user manually taps the mic button to stop recording
     var suppressSpeechAutoSend = false
@@ -51,7 +51,7 @@ final class ChatViewModel: ObservableObject {
     var discardNextTranscript = false
 
     /// Mirrors settings.voiceAutoStartEnabled — exposed so ChatView never touches settings directly.
-    @Published private(set) var voiceAutoStartEnabled: Bool
+    @Published var voiceAutoStartEnabled: Bool
 
     /// If set, ChatView auto-sends this message on appear (used for Siri integration).
     var pendingInput: String?
@@ -62,7 +62,7 @@ final class ChatViewModel: ObservableObject {
     let sessionID: UUID?
     let sessionCreatedAt: Date
     let sessionManager: (any SessionManagerProtocol)?
-    private var onSessionUpdated: ((@MainActor (ChatSessionMeta) -> Void))?
+    var onSessionUpdated: ((@MainActor (ChatSessionMeta) -> Void))?
 
     init(
         dependencies: ChatViewModelDependencies,
