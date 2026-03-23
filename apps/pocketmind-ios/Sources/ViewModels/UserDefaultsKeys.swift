@@ -14,6 +14,12 @@ enum UserDefaultsKeys {
     static let notesAccessEnabled       = "notesAccessEnabled"
     static let remindersAccessEnabled   = "remindersAccessEnabled"
     static let mailAccessEnabled        = "mailAccessEnabled"
+    static let webSearchEnabled         = "webSearchEnabled"
+    static let webSearchProvider        = "webSearchProvider"
+    static let webSearchEndpoint        = "webSearchEndpoint"
+    static let braveApiKey              = "braveApiKey"
+    static let locationEnabled          = "locationEnabled"
+    static let userCity                 = "userCity"
 
     static let siriPendingQuery         = "pm_siri_pending_query"
     static let siriPendingEvent         = "pm_siri_pending_event"

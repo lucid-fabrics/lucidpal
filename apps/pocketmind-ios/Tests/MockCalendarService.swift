@@ -60,6 +60,7 @@ final class MockCalendarService: CalendarServiceProtocol {
     }
 
     @discardableResult
+    // swiftlint:disable:next function_parameter_count
     func createEvent(
         title: String,
         start: Date,

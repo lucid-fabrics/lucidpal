@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-private let calendarConfirmationLogger = Logger(subsystem: "com.pocketmind", category: "CalendarConfirmation")
+private let calendarConfirmationLogger = Logger(subsystem: "app.pocketmind", category: "CalendarConfirmation")
 
 @MainActor
 // MARK: - Calendar event confirmation (deletion + update)
@@ -90,8 +90,10 @@ extension ChatViewModel {
                 try calendarService.deleteEvent(identifier: identifier)
                 messages[msgIdx].calendarEventPreviews[idx].state = .deleted
             } catch {
+                let failedTitle = messages[msgIdx].calendarEventPreviews[idx].title
+                calendarConfirmationLogger.error("confirmAllDeletions: delete failed for '\(failedTitle, privacy: .public)': \(error)")
                 messages[msgIdx].calendarEventPreviews[idx].state = .deletionCancelled
-                failures.append(messages[msgIdx].calendarEventPreviews[idx].title)
+                failures.append(failedTitle)
             }
         }
         if failures.isEmpty {
@@ -103,10 +105,9 @@ extension ChatViewModel {
 
     func cancelAllDeletions(messageID: UUID) {
         guard let msgIdx = messages.firstIndex(where: { $0.id == messageID }) else { return }
-        for idx in messages[msgIdx].calendarEventPreviews.indices {
-            if messages[msgIdx].calendarEventPreviews[idx].state == .pendingDeletion {
-                messages[msgIdx].calendarEventPreviews[idx].state = .deletionCancelled
-            }
+        for idx in messages[msgIdx].calendarEventPreviews.indices
+            where messages[msgIdx].calendarEventPreviews[idx].state == .pendingDeletion {
+            messages[msgIdx].calendarEventPreviews[idx].state = .deletionCancelled
         }
         hapticService.impact(.light)
     }
@@ -133,9 +134,9 @@ extension ChatViewModel {
                 timestamp: .now
             ))
             // Mirror applied changes onto the preview so the card shows the updated values
-            if let t = pending.title    { messages[msgIdx].calendarEventPreviews[previewIdx].title = t }
-            if let s = pending.start    { messages[msgIdx].calendarEventPreviews[previewIdx].start = s }
-            if let e = pending.end      { messages[msgIdx].calendarEventPreviews[previewIdx].end = e }
+            if let t = pending.title { messages[msgIdx].calendarEventPreviews[previewIdx].title = t }
+            if let s = pending.start { messages[msgIdx].calendarEventPreviews[previewIdx].start = s }
+            if let e = pending.end { messages[msgIdx].calendarEventPreviews[previewIdx].end = e }
             if let a = pending.isAllDay { messages[msgIdx].calendarEventPreviews[previewIdx].isAllDay = a }
             if let m = pending.reminderMinutes { messages[msgIdx].calendarEventPreviews[previewIdx].reminderMinutes = m }
             messages[msgIdx].calendarEventPreviews[previewIdx].state = newState

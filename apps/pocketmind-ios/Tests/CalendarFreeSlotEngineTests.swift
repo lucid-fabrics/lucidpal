@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class CalendarFreeSlotEngineTests: XCTestCase {
@@ -150,7 +150,7 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
         let slots = CalendarFreeSlotEngine.findSlots(
             busyWindows: [
                 (start: busyStart, end: busyEnd),
-                (start: busyMid,   end: busyEnd)   // overlaps first
+                (start: busyMid, end: busyEnd)   // overlaps first
             ],
             rangeStart: busyStart,
             rangeEnd: rangeEnd,
@@ -209,6 +209,38 @@ final class CalendarFreeSlotEngineTests: XCTestCase {
             duration: 3600
         )
         XCTAssertTrue(slots.isEmpty, "Zero-length range must return no slots")
+    }
+
+    func testSlotDurationMatchesRequest() {
+        // Each returned slot must have exactly the requested duration (validates DST-safe arithmetic)
+        let monday = nextMonday()
+        let rangeStart = Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: monday) ?? monday
+        let rangeEnd   = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: monday) ?? monday
+        let requestedDuration: TimeInterval = 5400 // 90 min
+
+        let slots = CalendarFreeSlotEngine.findSlots(
+            busyWindows: [], rangeStart: rangeStart, rangeEnd: rangeEnd, duration: requestedDuration
+        )
+        for (i, slot) in slots.enumerated() {
+            XCTAssertEqual(
+                slot.end.timeIntervalSince(slot.start), requestedDuration, accuracy: 1.0,
+                "Slot \(i) must have exactly the requested duration"
+            )
+        }
+    }
+
+    func testSlotsDoNotOverlap() {
+        // Consecutive slots must not overlap each other
+        let monday = nextMonday()
+        let rangeStart = Calendar.current.date(bySettingHour: 0, minute: 0, second: 0, of: monday) ?? monday
+        let rangeEnd   = Calendar.current.date(byAdding: .day, value: 7, to: rangeStart) ?? rangeStart
+
+        let slots = CalendarFreeSlotEngine.findSlots(
+            busyWindows: [], rangeStart: rangeStart, rangeEnd: rangeEnd, duration: 3600
+        )
+        for i in 1..<slots.count {
+            XCTAssertLessThanOrEqual(slots[i - 1].end, slots[i].start, "Slots \(i-1) and \(i) must not overlap")
+        }
     }
 
     func testSlotsDoNotExceedWorkingHours() {

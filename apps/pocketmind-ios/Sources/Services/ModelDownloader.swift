@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import OSLog
 
-private let logger = Logger(subsystem: "com.pocketmind", category: "ModelDownloader")
+private let logger = Logger(subsystem: "app.pocketmind", category: "ModelDownloader")
 
 enum DownloadState: Equatable, Sendable {
     case idle
@@ -47,6 +47,8 @@ final class ModelDownloader: NSObject {
     // Called in urlSessionDidFinishEvents to signal the OS that processing is complete.
     // nonisolated(unsafe): written once from AppDelegate before concurrent URLSession callbacks begin.
     nonisolated(unsafe) static var backgroundSessionCompletion: (() -> Void)?
+
+    private let minimumExpectedModelBytes: Int64 = 10 * 1024 * 1024
 
     func download(model: ModelInfo) {
         // Idempotency guard — prevent double-download race condition
@@ -119,7 +121,7 @@ extension ModelDownloader: URLSessionDownloadDelegate {
         }
 
         // Sanity-check file size: reject files under 10 MB (an HTML error page is a few KB).
-        let minExpectedBytes: Int64 = 10 * 1024 * 1024
+        let minExpectedBytes: Int64 = minimumExpectedModelBytes
         let rawSize = try? FileManager.default.attributesOfItem(atPath: location.path)[.size] as? Int64 // safe: returns nil on failure
         if rawSize == nil { logger.warning("Could not read temp file attributes at \(location.path)") }
         let downloadedSize = rawSize ?? 0

@@ -1,6 +1,8 @@
 import XCTest
+
 @testable import PocketMind
 
+// swiftlint:disable file_length type_body_length
 @MainActor
 final class SessionListViewModelTests: XCTestCase {
     var mock: MockSessionManager!
@@ -20,12 +22,15 @@ final class SessionListViewModelTests: XCTestCase {
         speech = MockSpeechService()
         viewModel = SessionListViewModel(
             sessionManager: mock,
-            llmService: llm,
-            calendarService: calendarService,
-            calendarActionController: controller,
-            settings: settings,
-            speechService: speech,
-            hapticService: MockHapticService()
+            dependencies: SessionListViewModelDependencies(
+                llmService: llm,
+                calendarService: calendarService,
+                calendarActionController: controller,
+                settings: settings,
+                speechService: speech,
+                hapticService: MockHapticService(),
+                contextService: MockContextService()
+            )
         )
     }
 
@@ -40,12 +45,15 @@ final class SessionListViewModelTests: XCTestCase {
 
         let vm = SessionListViewModel(
             sessionManager: mock,
-            llmService: llm,
-            calendarService: calendarService,
-            calendarActionController: controller,
-            settings: settings,
-            speechService: speech,
-            hapticService: MockHapticService()
+            dependencies: SessionListViewModelDependencies(
+                llmService: llm,
+                calendarService: calendarService,
+                calendarActionController: controller,
+                settings: settings,
+                speechService: speech,
+                hapticService: MockHapticService(),
+                contextService: MockContextService()
+            )
         )
         XCTAssertEqual(vm.sessions.first?.id, recent.id)
         XCTAssertEqual(vm.sessions.last?.id, old.id)
@@ -233,6 +241,102 @@ final class SessionListViewModelTests: XCTestCase {
         XCTAssertEqual(calendarService.createdEvents.first?.end, end)
     }
 
+    // MARK: - groupedSessions
+
+    func testGroupedSessionsEmptyWhenNoSessions() {
+        XCTAssertTrue(viewModel.groupedSessions(searchText: "").isEmpty)
+    }
+
+    func testGroupedSessionsTodayBucket() {
+        let session = viewModel.createSession()
+        // createSession sets updatedAt = .now, so it should land in "Today"
+        let groups = viewModel.groupedSessions(searchText: "")
+        XCTAssertEqual(groups.count, 1)
+        XCTAssertEqual(groups.first?.title, "Today")
+        XCTAssertEqual(groups.first?.sessions.first?.id, session.id)
+    }
+
+    func testGroupedSessionsEarlierBucket() throws {
+        // Manually insert a session with an old updatedAt
+        let id = UUID()
+        let old = ChatSession(
+            id: id,
+            title: "Old Chat",
+            createdAt: Date(timeIntervalSinceNow: -30 * 86400),
+            updatedAt: Date(timeIntervalSinceNow: -30 * 86400),
+            messages: []
+        )
+        mock.save(old)
+        viewModel.sessions.insert(old.meta, at: 0)
+        let groups = viewModel.groupedSessions(searchText: "")
+        XCTAssertTrue(groups.contains { $0.title == "Earlier" })
+        let earlierGroup = try XCTUnwrap(groups.first { $0.title == "Earlier" })
+        XCTAssertTrue(earlierGroup.sessions.contains { $0.id == id })
+    }
+
+    // MARK: - filteredSessions
+
+    func testFilteredSessionsEmptyQueryReturnsAll() {
+        viewModel.createSession()
+        viewModel.createSession()
+        XCTAssertEqual(viewModel.filteredSessions(searchText: "").count, 2)
+    }
+
+    func testFilteredSessionsCaseInsensitiveMatch() {
+        viewModel.createSession()
+        viewModel.renameSession(id: viewModel.sessions[0].id, title: "Swift Tips")
+        let results = viewModel.filteredSessions(searchText: "swift")
+        XCTAssertEqual(results.count, 1)
+        XCTAssertEqual(results.first?.title, "Swift Tips")
+    }
+
+    func testFilteredSessionsNoMatchReturnsEmpty() {
+        viewModel.createSession()
+        viewModel.renameSession(id: viewModel.sessions[0].id, title: "Swift Tips")
+        XCTAssertTrue(viewModel.filteredSessions(searchText: "zzz").isEmpty)
+    }
+
+    // MARK: - nextUpcomingEvent
+
+    func testNextUpcomingEventNilWhenCalendarDisabled() {
+        calendarService.isAuthorized = false
+        XCTAssertNil(viewModel.nextUpcomingEvent())
+    }
+
+    func testNextUpcomingEventReturnsFirstNonAllDayEvent() {
+        calendarService.isAuthorized = true
+        let soon = Date(timeIntervalSinceNow: 3600)
+        let event = CalendarEventInfo(
+            eventIdentifier: "1",
+            title: "Team Sync",
+            startDate: soon,
+            endDate: soon.addingTimeInterval(3600),
+            isAllDay: false,
+            calendarTitle: "Work"
+        )
+        calendarService.stubbedEvents = [event]
+        let result = viewModel.nextUpcomingEvent()
+        XCTAssertEqual(result?.title, "Team Sync")
+    }
+
+    // MARK: - todayEventCount
+
+    func testTodayEventCountZeroWhenCalendarDisabled() {
+        calendarService.isAuthorized = false
+        XCTAssertEqual(viewModel.todayEventCount(), 0)
+    }
+
+    func testTodayEventCountReturnsCorrectCount() {
+        calendarService.isAuthorized = true
+        let now = Date.now
+        // swiftlint:disable:next line_length
+        let e1 = CalendarEventInfo(eventIdentifier: "1", title: "A", startDate: now, endDate: now.addingTimeInterval(3600), isAllDay: false, calendarTitle: "Work")
+        // swiftlint:disable:next line_length
+        let e2 = CalendarEventInfo(eventIdentifier: "2", title: "B", startDate: now, endDate: now.addingTimeInterval(7200), isAllDay: false, calendarTitle: "Work")
+        calendarService.stubbedEvents = [e1, e2]
+        XCTAssertEqual(viewModel.todayEventCount(), 2)
+    }
+
     // MARK: - scheduleSiriQuery
 
     func testScheduleSiriQueryCreatesSession() {
@@ -243,12 +347,102 @@ final class SessionListViewModelTests: XCTestCase {
     func testScheduleSiriQuerySetsSiriNavigationMeta() throws {
         viewModel.scheduleSiriQuery("What's happening tomorrow?")
         let meta = try XCTUnwrap(viewModel.siriNavigationMeta)
-        XCTAssertFalse(meta.id == UUID(uuidString: "00000000-0000-0000-0000-000000000000")!)
+        let zeroID = UUID(uuidString: "00000000-0000-0000-0000-000000000000")
+        XCTAssertNotEqual(meta.id, zeroID)
     }
 
-    func testScheduleSiriQueryStoresPendingQuery() {
+    func testScheduleSiriQueryStoresPendingQuery() throws {
         viewModel.scheduleSiriQuery("Check my schedule")
-        let sessionID = viewModel.sessions.first!.id
+        let sessionID = try XCTUnwrap(viewModel.sessions.first).id
         XCTAssertEqual(viewModel.pendingQueryBySessionID[sessionID], "Check my schedule")
     }
+
+    func testScheduleSiriQueryEmptyStringSetsPendingQueryToEmpty() throws {
+        viewModel.scheduleSiriQuery("")
+        let sessionID = try XCTUnwrap(viewModel.sessions.first).id
+        XCTAssertEqual(viewModel.pendingQueryBySessionID[sessionID], "")
+    }
+
+    // MARK: - groupedSessions
+
+    func testGroupedSessionsEmptySessionsProducesNoGroups() {
+        let groups = viewModel.groupedSessions(searchText: "")
+        XCTAssertTrue(groups.allSatisfy { $0.sessions.isEmpty })
+    }
+
+    func testGroupedSessionsTodaySessionGoesToTodayBucket() {
+        let id = UUID()
+        mock.save(ChatSession(id: id, title: "Today Session", createdAt: .now, updatedAt: .now, messages: []))
+        viewModel = SessionListViewModel(
+            sessionManager: mock,
+            dependencies: SessionListViewModelDependencies(
+                llmService: llm, calendarService: calendarService,
+                calendarActionController: controller, settings: settings,
+                speechService: speech, hapticService: MockHapticService(), contextService: MockContextService()
+            )
+        )
+        let groups = viewModel.groupedSessions(searchText: "")
+        let todayGroup = groups.first { $0.title == "Today" }
+        XCTAssertEqual(todayGroup?.sessions.first?.id, id)
+    }
+
+    func testGroupedSessionsOldSessionGoesToEarlierBucket() {
+        let id = UUID()
+        let oldDate = Date(timeIntervalSinceNow: -30 * 24 * 3600)
+        mock.save(ChatSession(id: id, title: "Old Session", createdAt: oldDate, updatedAt: oldDate, messages: []))
+        viewModel = SessionListViewModel(
+            sessionManager: mock,
+            dependencies: SessionListViewModelDependencies(
+                llmService: llm, calendarService: calendarService,
+                calendarActionController: controller, settings: settings,
+                speechService: speech, hapticService: MockHapticService(), contextService: MockContextService()
+            )
+        )
+        let groups = viewModel.groupedSessions(searchText: "")
+        let earlierGroup = groups.first { $0.title == "Earlier" }
+        XCTAssertEqual(earlierGroup?.sessions.first?.id, id)
+    }
+
+    // MARK: - nextUpcomingEvent
+
+    func testNextUpcomingEventReturnsNilWhenCalendarUnauthorized() {
+        calendarService.isAuthorized = false
+        XCTAssertNil(viewModel.nextUpcomingEvent())
+    }
+
+    func testNextUpcomingEventReturnsNilWhenNoEvents() {
+        calendarService.isAuthorized = true
+        calendarService.stubbedEvents = []
+        XCTAssertNil(viewModel.nextUpcomingEvent())
+    }
+
+    // MARK: - todayEventCount
+
+    func testTodayEventCountReturnsZeroWhenCalendarUnauthorized() {
+        calendarService.isAuthorized = false
+        XCTAssertEqual(viewModel.todayEventCount(), 0)
+    }
+
+    func testTodayEventCountExcludesAllDayEvents() {
+        calendarService.isAuthorized = true
+        let allDay = CalendarEventInfo(
+            eventIdentifier: "1", title: "Holiday",
+            startDate: .now, endDate: .now,
+            isAllDay: true, calendarTitle: "Personal"
+        )
+        calendarService.stubbedEvents = [allDay]
+        XCTAssertEqual(viewModel.todayEventCount(), 0)
+    }
+
+    func testTodayEventCountIncludesTimedEvents() {
+        calendarService.isAuthorized = true
+        let event = CalendarEventInfo(
+            eventIdentifier: "1", title: "Meeting",
+            startDate: .now, endDate: Date(timeIntervalSinceNow: 3600),
+            isAllDay: false, calendarTitle: "Work"
+        )
+        calendarService.stubbedEvents = [event]
+        XCTAssertEqual(viewModel.todayEventCount(), 1)
+    }
 }
+// swiftlint:enable file_length type_body_length

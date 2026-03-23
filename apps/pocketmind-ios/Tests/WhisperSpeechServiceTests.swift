@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 /// WhisperSpeechService uses AVAudioRecorder + WhisperKit (on-device C FFI).
 /// Full recording/transcription tests require microphone permissions and a loaded

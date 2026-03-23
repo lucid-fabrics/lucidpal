@@ -57,21 +57,31 @@ final class SuggestedPromptsProvider: SuggestedPromptsProviderProtocol {
         let isMonday   = weekday == 2
 
         return [
-            overviewPrompt(isEvening: isEvening, isMorning: isMorning, isMonday: isMonday,
-                           remaining: remaining, tomorrow: tomorrow),
+            overviewPrompt(
+                isEvening: isEvening,
+                isMorning: isMorning,
+                isMonday: isMonday,
+                remaining: remaining,
+                tomorrow: tomorrow
+            ),
             nextEventPrompt(nextEvent: nextEvent, now: now, cal: cal, isMorning: isMorning),
             tomorrowPrompt(isEvening: isEvening, isMorning: isMorning, tomorrow: tomorrow),
-            utilityPrompt(isEvening: isEvening, isMorning: isMorning, isMonday: isMonday,
-                          isThursday: isThursday, isFriday: isFriday, isWeekend: isWeekend,
-                          remaining: remaining, weekendStart: weekendStart, cal: cal, service: service),
+            utilityPrompt(
+                isEvening: isEvening, isMorning: isMorning, isMonday: isMonday,
+                isThursday: isThursday, isFriday: isFriday, isWeekend: isWeekend,
+                remaining: remaining, weekendStart: weekendStart, cal: cal, service: service
+            ),
         ]
     }
 
     // ── Q1: Overview ────────────────────────────────────────────────────────
 
     private static func overviewPrompt(
-        isEvening: Bool, isMorning: Bool, isMonday: Bool,
-        remaining: [CalendarEventInfo], tomorrow: [CalendarEventInfo]
+        isEvening: Bool,
+        isMorning: Bool,
+        isMonday: Bool,
+        remaining: [CalendarEventInfo],
+        tomorrow: [CalendarEventInfo]
     ) -> String {
         if isEvening {
             return tomorrow.isEmpty ? "What does tomorrow look like?" : "What's on my agenda tomorrow?"
@@ -94,7 +104,7 @@ final class SuggestedPromptsProvider: SuggestedPromptsProviderProtocol {
         guard let event = nextEvent, let title = event.title, !title.isEmpty else {
             return isMorning ? "Am I free this afternoon?" : "Am I free tomorrow?"
         }
-        let short = clamp(title, to: 20)
+        let short = clamp(title, to: ChatConstants.eventTitlePreviewLength)
         let minsUntil = Int(event.startDate.timeIntervalSince(now) / 60)
         if minsUntil < ChatConstants.minutesPerHour {
             return "How long until \(short)?"
@@ -114,7 +124,7 @@ final class SuggestedPromptsProvider: SuggestedPromptsProviderProtocol {
     ) -> String {
         if isEvening {
             if tomorrow.count == 1, let title = tomorrow.first?.title, !title.isEmpty {
-                return "What time is \(clamp(title, to: 20)) tomorrow?"
+                return "What time is \(clamp(title, to: ChatConstants.eventTitlePreviewLength)) tomorrow?"
             } else if tomorrow.isEmpty {
                 return "Add a meeting tomorrow morning"
             } else {
@@ -129,10 +139,18 @@ final class SuggestedPromptsProvider: SuggestedPromptsProviderProtocol {
 
     // ── Q4: Utility / contextual ─────────────────────────────────────────────
 
+    // swiftlint:disable:next function_parameter_count
     private static func utilityPrompt(
-        isEvening: Bool, isMorning: Bool, isMonday: Bool, isThursday: Bool,
-        isFriday: Bool, isWeekend: Bool, remaining: [CalendarEventInfo],
-        weekendStart: Date?, cal: Calendar, service: any CalendarServiceProtocol
+        isEvening: Bool,
+        isMorning: Bool,
+        isMonday: Bool,
+        isThursday: Bool,
+        isFriday: Bool,
+        isWeekend: Bool,
+        remaining: [CalendarEventInfo],
+        weekendStart: Date?,
+        cal: Calendar,
+        service: any CalendarServiceProtocol
     ) -> String {
         if (isThursday || isFriday) && !isWeekend, let wsStart = weekendStart {
             let weekendEnd = cal.date(byAdding: .day, value: 2, to: wsStart) ?? wsStart

@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 /// Regression tests for context-window budget consistency in LLMConstants.
 ///
@@ -57,8 +57,10 @@ final class LLMConstantsTests: XCTestCase {
     /// time, so batchCapacity must be at least as large as the larger context size to
     /// ensure the prefill of a full prompt never exceeds it.
     func testBatchCapacityCoversLargeContextSize() {
+        // swiftlint:disable line_length
         XCTAssertGreaterThanOrEqual(Int(LLMConstants.batchCapacity), Int(LLMConstants.largeContextSize),
             "batchCapacity (\(LLMConstants.batchCapacity)) < largeContextSize (\(LLMConstants.largeContextSize)): prefill of a full prompt on a high-RAM device would exceed n_batch and abort")
+        // swiftlint:enable line_length
     }
 
     // MARK: - Minimum prompt headroom

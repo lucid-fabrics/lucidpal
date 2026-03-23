@@ -1,7 +1,7 @@
-import XCTest
-import SwiftUI
-import SnapshotTesting
 @testable import PocketMind
+import SnapshotTesting
+import SwiftUI
+import XCTest
 
 @MainActor
 final class SnapshotTests: XCTestCase {
@@ -54,6 +54,7 @@ final class SnapshotTests: XCTestCase {
     }
 
     func testAssistantBubble() {
+        // swiftlint:disable:next line_length
         let msg = ChatMessage(role: .assistant, content: "Machine learning is a subset of AI where models learn **patterns from data** rather than following explicit rules.")
         snapshot(
             MessageBubbleView(message: msg)
@@ -76,8 +77,10 @@ final class SnapshotTests: XCTestCase {
     // MARK: - MessageBubbleView — thinking states
 
     func testThinkingBubble() {
+        // swiftlint:disable line_length
         var msg = ChatMessage(role: .assistant, content: "The Eiffel Tower is **330 meters** tall including its antenna, making it the tallest structure in Paris.")
         msg.thinkingContent = "The user is asking about the Eiffel Tower height. I should include the full height with the antenna as that is the commonly cited figure."
+        // swiftlint:enable line_length
         snapshot(
             MessageBubbleView(message: msg)
                 .frame(width: 390)
@@ -142,11 +145,13 @@ final class SnapshotTests: XCTestCase {
     /// Grouped listed events card — shown when the user asks what's on their calendar.
     func testCalendarEventListCard() {
         let today = Calendar.current.startOfDay(for: Date())
+        // swiftlint:disable line_length
         let listed: [CalendarEventPreview] = [
             CalendarEventPreview(title: "Standup", start: today.addingTimeInterval(9 * 3600), end: today.addingTimeInterval(9.5 * 3600), calendarName: "Work", state: .listed),
             CalendarEventPreview(title: "Design Review", start: today.addingTimeInterval(14 * 3600), end: today.addingTimeInterval(15 * 3600), calendarName: "Work", state: .listed),
             CalendarEventPreview(title: "Gym", start: today.addingTimeInterval(17 * 3600), end: today.addingTimeInterval(18 * 3600), calendarName: "Personal", state: .listed),
         ]
+        // swiftlint:enable line_length
         var msg = ChatMessage(role: .assistant, content: "You have 3 events today.")
         msg.calendarEventPreviews = listed
         snapshot(
@@ -174,11 +179,13 @@ final class SnapshotTests: XCTestCase {
     /// User asks what's on today — assistant replies with a grouped calendar card.
     func testChatShortConversation() {
         let today = Calendar.current.startOfDay(for: Date())
+        // swiftlint:disable line_length
         let listed: [CalendarEventPreview] = [
             CalendarEventPreview(title: "Standup", start: today.addingTimeInterval(9 * 3600), end: today.addingTimeInterval(9.5 * 3600), calendarName: "Work", state: .listed),
             CalendarEventPreview(title: "Design Review", start: today.addingTimeInterval(14 * 3600), end: today.addingTimeInterval(15 * 3600), calendarName: "Work", state: .listed),
             CalendarEventPreview(title: "Gym", start: today.addingTimeInterval(17 * 3600), end: today.addingTimeInterval(18 * 3600), calendarName: "Personal", state: .listed),
         ]
+        // swiftlint:enable line_length
         var assistantMsg = ChatMessage(role: .assistant, content: "You have 3 events today.")
         assistantMsg.calendarEventPreviews = listed
         let vm = makeViewModel(loaded: true, messages: [

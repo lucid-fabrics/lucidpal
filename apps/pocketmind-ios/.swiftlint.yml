@@ -1,0 +1,155 @@
+# SwiftLint configuration for PocketMind iOS
+# Philosophy: errors for crash risks and layer violations, warnings for style.
+# Short test identifiers (vm, s1, sut) are allowed in test targets.
+
+excluded:
+  - Packages/          # llama.cpp Swift package — third-party
+  - .build/
+  - DerivedData/
+  - PocketMind.xcodeproj/
+
+# ── Opt-in rules ────────────────────────────────────────────────────────────
+
+opt_in_rules:
+  - force_unwrapping          # crash risk — error
+  - empty_xctest_method       # empty test methods are dead weight
+  - explicit_init             # prefer .init() over Type()
+  - fatal_error_message       # fatalError() must have a message
+  - first_where               # prefer .first(where:) over .filter().first
+  - flatmap_over_map_reduce   # simpler
+  - identical_operands        # catches x == x bugs
+  - joined_default_parameter  # prefer .joined() over .joined(separator: "")
+  - last_where                # prefer .last(where:)
+  - legacy_multiple           # prefer isMultiple(of:)
+  - multiline_parameters      # consistent multi-line function signatures
+  - overridden_super_call     # must call super in lifecycle methods
+  - prefer_self_type_over_type_of_self
+  - redundant_nil_coalescing  # x ?? nil → x
+  - sorted_imports            # keep imports tidy
+  - unneeded_parentheses_in_closure_argument
+  - unused_import
+
+# ── Disabled rules ───────────────────────────────────────────────────────────
+
+disabled_rules:
+  - trailing_comma            # stylistic — handled by SwiftFormat if added
+  - implicit_optional_initialization  # common mock pattern: var x: T? = nil
+  - large_tuple               # executeCalendarActions returns 3-tuple intentionally
+  - todo                      # TODOs tracked in issues, not lint errors
+
+# ── Rule configuration ───────────────────────────────────────────────────────
+
+force_unwrapping:
+  severity: error
+  # In XCTest, ! on known-non-nil values is idiomatic — use XCTUnwrap for truly optional values
+  excluded:
+    - ".*/Tests/.*\\.swift"
+
+force_cast:
+  severity: error
+
+empty_catch:
+  severity: error
+
+# Allow short names in tests (vm, sut, s1, s2, a, b are idiomatic)
+# Allow underscores in model IDs (qwen3_5_2B — version numbers contain underscores)
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  max_length:
+    warning: 50
+    error: 60
+  allowed_symbols: ["_"]
+  excluded:
+    - id
+    - i
+    - j
+    - k
+    - x
+    - y
+    - z
+    - vm
+    - db
+    # Single-letter pattern-match bindings in if-let / switch-case (idiomatic Swift)
+    - a
+    - b
+    - c
+    - d
+    - e
+    - f
+    - h
+    - l
+    - m
+    - n
+    - p
+    - r
+    - s
+    - t
+    - v
+    - w
+
+# 160 chars for code; 300 to allow long SwiftUI footer string literals without noise
+line_length:
+  warning: 160
+  error: 300
+  ignores_comments: true
+  ignores_urls: true
+
+# Combine subscriber lists are inherently verbose — warn at 60, error at 100
+function_body_length:
+  warning: 60
+  error: 100
+
+# Internal context-passing functions may have many parameters (e.g. SuggestedPromptsProvider)
+function_parameter_count:
+  warning: 8
+  error: 12
+
+# Files: audit threshold is 300 lines — warn at 250, error at 350
+file_length:
+  warning: 300
+  error: 400
+  ignore_comment_only_lines: true
+
+# Types: warn when a type is getting large
+type_body_length:
+  warning: 300
+  error: 400
+
+cyclomatic_complexity:
+  warning: 12
+  error: 20
+
+nesting:
+  type_level:
+    warning: 2
+  function_level:
+    warning: 4
+
+# ── Custom rules ─────────────────────────────────────────────────────────────
+
+custom_rules:
+  # Catch ViewModels that import SwiftUI (service layer must not touch UI)
+  service_no_swiftui:
+    name: "Service imports SwiftUI"
+    regex: '^import SwiftUI'
+    included: ".*/Services/.*\\.swift"
+    message: "Services must not import SwiftUI — move UI concerns to the View layer."
+    severity: error
+
+  # Catch hardcoded DispatchQueue.main.async (use @MainActor instead)
+  no_dispatch_main:
+    name: "DispatchQueue.main.async in production code"
+    regex: 'DispatchQueue\.main\.async'
+    excluded: ".*/Tests/.*\\.swift"
+    message: "Use @MainActor or MainActor.run {} instead of DispatchQueue.main.async."
+    severity: warning
+
+  # Warn on bare magic HTTP status codes (except in tests)
+  magic_http_status:
+    name: "Magic HTTP status code"
+    regex: '== (200|201|400|401|403|404|500|503)(?!\s*\/\/)'
+    excluded: ".*/Tests/.*\\.swift"
+    message: "Extract HTTP status code to a named constant (e.g. HTTPStatus.ok)."
+    severity: warning

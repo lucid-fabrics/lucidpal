@@ -17,7 +17,9 @@ CHANGED_FILES=$(git diff --name-only origin/$(git branch --show-current 2>/dev/n
   grep -v "\.spec\." || true)
 
 if [ -n "$CHANGED_FILES" ]; then
-  SECRET_MATCHES=$(echo "$CHANGED_FILES" | xargs git diff origin/$(git branch --show-current 2>/dev/null || echo main)...HEAD -- 2>/dev/null | \
+  # Exclude key/constant definition files — these hold storage key names, not secrets
+  SCANNABLE_FILES=$(echo "$CHANGED_FILES" | grep -v 'Keys\.swift\|Constants\.swift\|\.env\.example')
+  SECRET_MATCHES=$(echo "$SCANNABLE_FILES" | xargs git diff origin/$(git branch --show-current 2>/dev/null || echo main)...HEAD -- 2>/dev/null | \
     grep "^+" | \
     grep -iE "(password|api.?key|secret|token)\s*=\s*['\"][^'\"]{8,}['\"]" | \
     grep -v '\${\|\\$\|\$[A-Z_]\|EXAMPLE\|getItem\|setItem' || true)

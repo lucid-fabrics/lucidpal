@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class SettingsViewModelTests: XCTestCase {
@@ -91,5 +91,52 @@ final class SettingsViewModelTests: XCTestCase {
         viewModel.setVoiceAutoStart(false)
         XCTAssertFalse(settings.voiceAutoStartEnabled)
         XCTAssertTrue(settings.speechAutoSendEnabled)
+    }
+
+    // MARK: - requestLocationAccess
+
+    func testRequestLocationAccessGrantedStoresCityAndEnablesLocation() async throws {
+        let locationService = MockLocationService()
+        locationService.stubbedCity = "Montreal"
+        locationService.authorizationStatus = .authorizedWhenInUse
+        viewModel = SettingsViewModel(settings: settings, calendarService: mockCalendar, locationService: locationService)
+
+        await viewModel.requestLocationAccess()
+
+        XCTAssertEqual(settings.userCity, "Montreal")
+        XCTAssertTrue(settings.locationEnabled)
+        XCTAssertFalse(viewModel.isResolvingCity)
+    }
+
+    func testRequestLocationAccessDeniedDisablesLocation() async throws {
+        let locationService = MockLocationService()
+        locationService.stubbedCity = nil
+        locationService.authorizationStatus = .denied
+        settings.locationEnabled = true
+        viewModel = SettingsViewModel(settings: settings, calendarService: mockCalendar, locationService: locationService)
+
+        await viewModel.requestLocationAccess()
+
+        XCTAssertFalse(settings.locationEnabled)
+        XCTAssertFalse(viewModel.isResolvingCity)
+    }
+
+    func testRequestLocationAccessNilServiceIsNoOp() async throws {
+        viewModel = SettingsViewModel(settings: settings, calendarService: mockCalendar, locationService: nil)
+
+        await viewModel.requestLocationAccess()
+
+        XCTAssertFalse(settings.locationEnabled)
+    }
+
+    func testRequestLocationAccessSetsLocationStatusFromService() async throws {
+        let locationService = MockLocationService()
+        locationService.stubbedCity = "Toronto"
+        locationService.authorizationStatus = .authorizedWhenInUse
+        viewModel = SettingsViewModel(settings: settings, calendarService: mockCalendar, locationService: locationService)
+
+        await viewModel.requestLocationAccess()
+
+        XCTAssertEqual(viewModel.locationStatus, .authorizedWhenInUse)
     }
 }

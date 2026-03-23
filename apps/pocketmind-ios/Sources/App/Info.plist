@@ -32,6 +32,15 @@
 	<string>PocketMind reads your reminders to answer questions about your tasks and to-dos. All processing happens on-device.</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
 	<string>PocketMind needs full reminders access to help you manage your tasks. All processing happens on-device.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>PocketMind uses your location to include your city in AI responses (e.g. weather, local recommendations). Location is never stored or sent to any server.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>PocketMind needs local network access to connect to your self-hosted SearXNG search instance.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

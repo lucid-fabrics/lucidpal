@@ -1,7 +1,8 @@
 import Foundation
 @testable import PocketMind
 
-final class MockContextService: ContextServiceProtocol, @unchecked Sendable {
+@MainActor
+final class MockContextService: ContextServiceProtocol {
     var isNotesEnabled = false
     var isRemindersEnabled = false
     var isMailEnabled = false

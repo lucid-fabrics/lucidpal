@@ -45,6 +45,7 @@ struct CalendarQueryResultCard: View {
                     .padding(12)
             } else {
                 ForEach(Array(slots.enumerated()), id: \.element.id) { index, slot in
+                    // swiftlint:disable:next multiple_closures_with_trailing_closure
                     Button(action: { openInCalendar(slot) }) {
                         HStack(spacing: 12) {
                             // Date badge
@@ -64,6 +65,7 @@ struct CalendarQueryResultCard: View {
                             .frame(width: DesignConstants.Size.slotBadgeWidth)
                             .background(Color(.systemBackground))
                             .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.compactBadge, style: .continuous))
+                            // swiftlint:disable:next line_length
                             .overlay(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.compactBadge, style: .continuous).stroke(Color(.systemGray4), lineWidth: 0.5))
 
                             VStack(alignment: .leading, spacing: 2) {
@@ -91,6 +93,7 @@ struct CalendarQueryResultCard: View {
         }
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous))
+        // swiftlint:disable:next line_length
         .overlay(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous).stroke(Color.accentColor.opacity(DesignConstants.Opacity.slotBorder), lineWidth: 1))
     }
 

@@ -3,7 +3,7 @@ import EventKit
 import OSLog
 import SwiftUI
 
-private let intentLogger = Logger(subsystem: "com.pocketmind", category: "DeleteCalendarEventIntent")
+private let intentLogger = Logger(subsystem: "app.pocketmind", category: "DeleteCalendarEventIntent")
 
 // MARK: - DeleteCalendarEventIntent
 
@@ -23,6 +23,7 @@ struct DeleteCalendarEventIntent: AppIntent {
     var eventName: String
 
     func perform() async throws -> some IntentResult & ProvidesDialog & ShowsSnippetView {
+        // Direct EventKit access — CalendarService requires @MainActor but intents run off-main
         let store = EKEventStore()
         let granted: Bool
         if #available(iOS 17.0, *) {
@@ -134,28 +135,7 @@ struct UndoLastDeletionIntent: AppIntent {
 
         switch last.type {
         case .deleted:
-            try await requestConfirmation(
-                output: .result(
-                    dialog: IntentDialog(stringLiteral: "Restore \"\(last.eventTitle)\"?"),
-                    view: SiriEventCard(
-                        title: last.eventTitle, start: last.eventStart, end: last.eventEnd,
-                        calendarName: last.calendarName, isAllDay: last.isAllDay, deleted: false
-                    )
-                )
-            )
-            let restored = EKEvent(eventStore: store)
-            restored.title = last.eventTitle
-            restored.startDate = last.eventStart
-            restored.endDate = last.eventEnd
-            restored.isAllDay = last.isAllDay
-            restored.location = last.location
-            restored.notes = last.notes
-            if let calID = last.calendarIdentifier, let cal = store.calendar(withIdentifier: calID) {
-                restored.calendar = cal
-            } else {
-                restored.calendar = store.defaultCalendarForNewEvents
-            }
-            try store.save(restored, span: .thisEvent)
+            try await performRestoreEvent(last, store: store)
             SiriContextStore.clear()
             return .result(
                 dialog: IntentDialog(stringLiteral: "\"\(last.eventTitle)\" has been restored."),
@@ -170,16 +150,7 @@ struct UndoLastDeletionIntent: AppIntent {
                   let event = store.event(withIdentifier: identifier) else {
                 return .result(dialog: "That event no longer exists.", view: EmptyView())
             }
-            try await requestConfirmation(
-                output: .result(
-                    dialog: IntentDialog(stringLiteral: "Delete \"\(last.eventTitle)\"?"),
-                    view: SiriEventCard(
-                        title: last.eventTitle, start: last.eventStart, end: last.eventEnd,
-                        calendarName: last.calendarName, isAllDay: last.isAllDay, deleted: false
-                    )
-                )
-            )
-            try store.remove(event, span: .thisEvent)
+            try await performDeleteCreatedEvent(last, event: event, store: store)
             SiriContextStore.clear()
             return .result(
                 dialog: IntentDialog(stringLiteral: "\"\(last.eventTitle)\" has been removed."),
@@ -199,5 +170,44 @@ struct UndoLastDeletionIntent: AppIntent {
             )
         }
     }
-}
 
+    /// Confirms with the user, then reconstructs and saves the deleted event back to the store.
+    private func performRestoreEvent(_ last: SiriLastAction, store: EKEventStore) async throws {
+        try await requestConfirmation(
+            output: .result(
+                dialog: IntentDialog(stringLiteral: "Restore \"\(last.eventTitle)\"?"),
+                view: SiriEventCard(
+                    title: last.eventTitle, start: last.eventStart, end: last.eventEnd,
+                    calendarName: last.calendarName, isAllDay: last.isAllDay, deleted: false
+                )
+            )
+        )
+        let restored = EKEvent(eventStore: store)
+        restored.title = last.eventTitle
+        restored.startDate = last.eventStart
+        restored.endDate = last.eventEnd
+        restored.isAllDay = last.isAllDay
+        restored.location = last.location
+        restored.notes = last.notes
+        if let calID = last.calendarIdentifier, let cal = store.calendar(withIdentifier: calID) {
+            restored.calendar = cal
+        } else {
+            restored.calendar = store.defaultCalendarForNewEvents
+        }
+        try store.save(restored, span: .thisEvent)
+    }
+
+    /// Confirms with the user, then removes the previously created event from the store.
+    private func performDeleteCreatedEvent(_ last: SiriLastAction, event: EKEvent, store: EKEventStore) async throws {
+        try await requestConfirmation(
+            output: .result(
+                dialog: IntentDialog(stringLiteral: "Delete \"\(last.eventTitle)\"?"),
+                view: SiriEventCard(
+                    title: last.eventTitle, start: last.eventStart, end: last.eventEnd,
+                    calendarName: last.calendarName, isAllDay: last.isAllDay, deleted: false
+                )
+            )
+        )
+        try store.remove(event, span: .thisEvent)
+    }
+}

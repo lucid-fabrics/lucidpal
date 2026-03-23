@@ -11,10 +11,16 @@ final class MockAppSettings: AppSettingsProtocol {
     var speechAutoSendEnabled: Bool = true
     var voiceAutoStartEnabled: Bool = false
     var airpodsAutoVoiceEnabled: Bool = false
-    var contextSize: Int = 4096
+    var contextSize: Int = ChatConstants.defaultContextSizeTokens
     var notesAccessEnabled: Bool = false
     var remindersAccessEnabled: Bool = false
     var mailAccessEnabled: Bool = false
+    var webSearchEnabled: Bool = false
+    var webSearchProvider: WebSearchProvider = .brave
+    var webSearchEndpoint: String = ""
+    var braveApiKey: String = ""
+    var locationEnabled: Bool = false
+    var userCity: String = ""
 
     var selectedModel: ModelInfo {
         [ModelInfo.qwen3_5_0B8, ModelInfo.qwen3_5_2B, ModelInfo.qwen3_5_4B]
@@ -22,5 +28,7 @@ final class MockAppSettings: AppSettingsProtocol {
     }
 
     var deviceRAMGB: Int = 4
-    var maxContextSize: Int { deviceRAMGB >= 6 ? 8192 : 4096 }
+    var maxContextSize: Int {
+        deviceRAMGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeContextSizeTokens : ChatConstants.defaultContextSizeTokens
+    }
 }

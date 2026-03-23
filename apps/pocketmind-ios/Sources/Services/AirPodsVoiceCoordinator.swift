@@ -3,7 +3,7 @@ import Combine
 import Foundation
 import OSLog
 
-private let coordinatorLogger = Logger(subsystem: "com.pocketmind", category: "AirPodsVoiceCoordinator")
+private let coordinatorLogger = Logger(subsystem: "app.pocketmind", category: "AirPodsVoiceCoordinator")
 
 // MARK: - Protocol
 
@@ -26,12 +26,12 @@ final class AirPodsVoiceCoordinator: ObservableObject, AirPodsVoiceCoordinatorPr
 
     private let audioRouteMonitor: any AudioRouteMonitorProtocol
     private let speechService: any SpeechServiceProtocol
-    private let settings: any AppSettingsProtocol
+    private let settings: any VoiceSettingsProtocol
 
     private var cancellables = Set<AnyCancellable>()
     private var shouldAutoResume = false
 
-    init(audioRouteMonitor: any AudioRouteMonitorProtocol, speechService: any SpeechServiceProtocol, settings: any AppSettingsProtocol) {
+    init(audioRouteMonitor: any AudioRouteMonitorProtocol, speechService: any SpeechServiceProtocol, settings: any VoiceSettingsProtocol) {
         self.audioRouteMonitor = audioRouteMonitor
         self.speechService = speechService
         self.settings = settings
@@ -47,10 +47,11 @@ final class AirPodsVoiceCoordinator: ObservableObject, AirPodsVoiceCoordinatorPr
     }
 
     func stopMonitoring() {
-        isAutoListening = false
-        if speechService.isRecording {
+        // Only stop recording if auto-voice started it. Don't cancel user-initiated sessions.
+        if isAutoListening, speechService.isRecording {
             speechService.stopRecording()
         }
+        isAutoListening = false
     }
 
     // MARK: - Private Methods
@@ -94,7 +95,7 @@ final class AirPodsVoiceCoordinator: ObservableObject, AirPodsVoiceCoordinatorPr
             shouldAutoResume = false
             // Delay slightly to ensure audio session is ready
             Task { [weak self] in
-                try? await Task.sleep(for: .milliseconds(500))
+                try? await Task.sleep(for: .milliseconds(ChatConstants.airPodsAutoResumeDelayMilliseconds))
                 self?.startAutoVoice()
             }
         }
@@ -122,7 +123,8 @@ final class AirPodsVoiceCoordinator: ObservableObject, AirPodsVoiceCoordinatorPr
     }
 
     private func stopAutoVoice() {
-        if speechService.isRecording {
+        // Only stop recording if auto-voice started it. Don't cancel user-initiated sessions.
+        if isAutoListening, speechService.isRecording {
             speechService.stopRecording()
         }
         isAutoListening = false

@@ -19,14 +19,14 @@ extension CalendarActionController {
         }
 
         var pending = PendingCalendarUpdate()
-        if let t = p.title    { pending.title = t }
-        if let s = p.start    { pending.start = s }
-        if let e = p.end      { pending.end = e }
+        if let t = p.title { pending.title = t }
+        if let s = p.start { pending.start = s }
+        if let e = p.end { pending.end = e }
         if let l = p.location, !l.isEmpty { pending.location = l }
-        if let n = p.notes, !n.isEmpty    { pending.notes = n }
-        if let m = p.reminderMinutes      { pending.reminderMinutes = m }
-        if let a = p.isAllDay             { pending.isAllDay = a }
-        if let r = p.recurrence           { pending.recurrence = r }
+        if let n = p.notes, !n.isEmpty { pending.notes = n }
+        if let m = p.reminderMinutes { pending.reminderMinutes = m }
+        if let a = p.isAllDay { pending.isAllDay = a }
+        if let r = p.recurrence { pending.recurrence = r }
 
         let newStart = pending.start ?? event.startDate
         let newEnd = pending.end ?? event.endDate
@@ -195,7 +195,6 @@ extension CalendarActionController {
     }
 
     // MARK: - Helpers
-
 
     /// Maps an array of `CalendarEventInfo` values to `ConflictingEventSnapshot` values.
     func makeConflictSnapshots(from events: [CalendarEventInfo]) -> [ConflictingEventSnapshot] {

@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class ChatViewModelMessageHandlingTests: XCTestCase {
@@ -10,14 +10,18 @@ final class ChatViewModelMessageHandlingTests: XCTestCase {
         super.setUp()
         llm = MockLLMService()
         viewModel = ChatViewModel(
-            llmService: llm,
-            calendarService: MockCalendarService(),
-            settings: MockAppSettings(),
-            systemPromptBuilder: MockSystemPromptBuilder(),
-            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
-            speechService: MockSpeechService(),
-            hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
+            dependencies: ChatViewModelDependencies(
+                llmService: llm,
+                calendarService: MockCalendarService(),
+                settings: MockAppSettings(),
+                systemPromptBuilder: MockSystemPromptBuilder(),
+                suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+                speechService: MockSpeechService(),
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: nil
+            )
         )
     }
 
@@ -196,5 +200,89 @@ final class ChatViewModelMessageHandlingTests: XCTestCase {
         viewModel.applyStreamToken("!", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: false, idx: idx)
 
         XCTAssertEqual(viewModel.messages[idx].content, "Hello World!")
+    }
+
+    // MARK: - applyStreamToken: empty token
+
+    func testApplyStreamTokenEmptyTokenDoesNotCrash() {
+        let idx = appendAssistant()
+        var raw = ""
+        var thinkDone = false
+        // Should not crash or mutate state in a broken way
+        viewModel.applyStreamToken("", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: false, idx: idx)
+        XCTAssertFalse(thinkDone)
+        XCTAssertTrue(viewModel.messages[idx].content.isEmpty)
+    }
+
+    func testApplyStreamTokenEmptyTokenWhenThinkDoneDoesNotCrash() {
+        let idx = appendAssistant()
+        viewModel.messages[idx].content = "existing"
+        var raw = "existing"
+        var thinkDone = true
+        viewModel.applyStreamToken("", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: false, idx: idx)
+        // Content unchanged when appending empty string
+        XCTAssertEqual(viewModel.messages[idx].content, "existing")
+        XCTAssertTrue(thinkDone)
+    }
+
+    // MARK: - applyStreamToken: thinkingContent trimming
+
+    func testApplyStreamTokenThinkingContentIsTrimmed() {
+        let idx = appendAssistant()
+        var raw = ""
+        var thinkDone = false
+        viewModel.applyStreamToken("<think>  whitespace  </think>answer", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: true, idx: idx)
+        XCTAssertEqual(viewModel.messages[idx].thinkingContent, "whitespace")
+    }
+
+    func testApplyStreamTokenIncrementalThinkingContentUpdatesEachToken() {
+        let idx = appendAssistant()
+        var raw = ""
+        var thinkDone = false
+
+        viewModel.applyStreamToken("<think>first", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: true, idx: idx)
+        XCTAssertEqual(viewModel.messages[idx].thinkingContent, "first")
+
+        viewModel.applyStreamToken(" second", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: true, idx: idx)
+        XCTAssertEqual(viewModel.messages[idx].thinkingContent, "first second")
+        XCTAssertFalse(thinkDone)
+    }
+
+    // MARK: - applyStreamToken: leading whitespace after </think>
+
+    func testApplyStreamTokenLeadingWhitespaceAfterCloseTagIsTrimmed() {
+        let idx = appendAssistant()
+        var raw = ""
+        var thinkDone = false
+        viewModel.applyStreamToken("<think>r</think>\n\n  answer", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: false, idx: idx)
+        XCTAssertEqual(viewModel.messages[idx].content, "answer")
+    }
+
+    // MARK: - applyStreamToken: rawBuffer accumulation
+
+    func testApplyStreamTokenRawBufferAccumulatesAcrossIncrementalTokens() {
+        let idx = appendAssistant()
+        var raw = ""
+        var thinkDone = false
+
+        viewModel.applyStreamToken("<think>", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: true, idx: idx)
+        viewModel.applyStreamToken("thought", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: true, idx: idx)
+        viewModel.applyStreamToken("</think>", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: true, idx: idx)
+
+        XCTAssertEqual(raw, "<think>thought</think>")
+        XCTAssertTrue(thinkDone)
+        XCTAssertEqual(viewModel.messages[idx].thinkingContent, "thought")
+        XCTAssertTrue(viewModel.messages[idx].content.isEmpty)
+    }
+
+    func testApplyStreamTokenRawBufferAccumulatesWhenThinkDone() {
+        let idx = appendAssistant()
+        var raw = ""
+        var thinkDone = true
+
+        viewModel.applyStreamToken("A", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: false, idx: idx)
+        viewModel.applyStreamToken("B", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: false, idx: idx)
+
+        XCTAssertEqual(raw, "AB")
     }
 }

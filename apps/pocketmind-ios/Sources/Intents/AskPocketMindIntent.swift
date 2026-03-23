@@ -1,7 +1,7 @@
 import AppIntents
 import OSLog
 
-private let intentLogger = Logger(subsystem: "com.pocketmind", category: "AskPocketMindIntent")
+private let intentLogger = Logger(subsystem: "app.pocketmind", category: "AskPocketMindIntent")
 
 // MARK: - Siri Pending Event
 

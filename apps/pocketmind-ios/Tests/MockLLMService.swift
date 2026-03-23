@@ -30,13 +30,17 @@ final class MockLLMService: LLMServiceProtocol {
     }
 
     var stubbedTokens: [String] = []
+    /// Tokens returned on the second `generate` call (e.g. post-search re-generation).
+    var secondStubbedTokens: [String] = []
     var shouldThrowOnGenerate: Error? = nil
     var loadedURL: URL? = nil
     var unloadCalled = false
     var cancelCalled = false
+    private(set) var generateCallCount = 0
 
     func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool) -> AsyncThrowingStream<String, Error> {
-        let tokens = stubbedTokens
+        generateCallCount += 1
+        let tokens = generateCallCount > 1 && !secondStubbedTokens.isEmpty ? secondStubbedTokens : stubbedTokens
         let error = shouldThrowOnGenerate
         let loaded = isLoaded
         return AsyncThrowingStream { continuation in

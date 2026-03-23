@@ -10,11 +10,12 @@ final class MockSpeechService: SpeechServiceProtocol {
     var isTranscribing: Bool = false
     var isInterrupted: Bool = false
 
-    private let isRecordingSubject    = CurrentValueSubject<Bool, Never>(false)
-    private let isAuthorizedSubject   = CurrentValueSubject<Bool, Never>(true)
-    private let transcriptSubject     = CurrentValueSubject<String, Never>("")
-    private let isTranscribingSubject = CurrentValueSubject<Bool, Never>(false)
-    private let isInterruptedSubject  = CurrentValueSubject<Bool, Never>(false)
+    private let isRecordingSubject        = CurrentValueSubject<Bool, Never>(false)
+    private let isAuthorizedSubject       = CurrentValueSubject<Bool, Never>(true)
+    private let transcriptSubject         = CurrentValueSubject<String, Never>("")
+    private let isTranscribingSubject     = CurrentValueSubject<Bool, Never>(false)
+    private let isInterruptedSubject      = CurrentValueSubject<Bool, Never>(false)
+    private let transcriptionErrorSubject = CurrentValueSubject<String?, Never>(nil)
 
     var isRecordingPublisher: AnyPublisher<Bool, Never> {
         isRecordingSubject.eraseToAnyPublisher()
@@ -30,6 +31,9 @@ final class MockSpeechService: SpeechServiceProtocol {
     }
     var isInterruptedPublisher: AnyPublisher<Bool, Never> {
         isInterruptedSubject.eraseToAnyPublisher()
+    }
+    var transcriptionErrorPublisher: AnyPublisher<String?, Never> {
+        transcriptionErrorSubject.eraseToAnyPublisher()
     }
 
     var authorizationRequested = false
@@ -68,5 +72,16 @@ final class MockSpeechService: SpeechServiceProtocol {
     func simulateRecordingEnded() {
         isRecording = false
         isRecordingSubject.send(false)
+    }
+
+    /// Simulates the transcribing phase (WhisperKit processing).
+    func simulateTranscribing(_ transcribing: Bool) {
+        isTranscribing = transcribing
+        isTranscribingSubject.send(transcribing)
+    }
+
+    /// Simulates a transcription error being published.
+    func simulateTranscriptionError(_ message: String?) {
+        transcriptionErrorSubject.send(message)
     }
 }

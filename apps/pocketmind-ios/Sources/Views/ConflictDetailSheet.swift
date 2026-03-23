@@ -9,6 +9,10 @@ struct ConflictDetailSheet: View {
     let onFindFreeSlots: () async -> [CalendarFreeSlot]
     let onReschedule: (CalendarFreeSlot) async -> Void
 
+    private enum AnimationConstants {
+        static let sheetExpandDuration: Double = 0.4
+    }
+
     @State private var freeSlots: [CalendarFreeSlot] = []
     @State private var isLoadingSlots = false
     @State private var hasSearched = false
@@ -165,7 +169,7 @@ struct ConflictDetailSheet: View {
                 isLoadingSlots = false
                 hasSearched = true
                 if !freeSlots.isEmpty {
-                    withAnimation(.spring(duration: 0.4)) { sheetDetent = .large }
+                    withAnimation(.spring(duration: AnimationConstants.sheetExpandDuration)) { sheetDetent = .large }
                 }
             }
         } label: {

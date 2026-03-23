@@ -1,5 +1,6 @@
-import XCTest
 import SwiftUI
+import XCTest
+
 @testable import PocketMind
 
 /// Smoke tests that verify View structs can be instantiated with representative data

@@ -31,7 +31,7 @@ struct ChatSession: Identifiable, Codable {
 
     var meta: ChatSessionMeta {
         let lastContent = messages.last(where: { $0.role != .system })?.content
-        let preview = lastContent.map { String($0.prefix(120)) }
+        let preview = lastContent.map { String($0.prefix(ChatConstants.sessionPreviewLength)) }
         return ChatSessionMeta(id: id, title: title, createdAt: createdAt, updatedAt: updatedAt, lastMessagePreview: preview)
     }
 

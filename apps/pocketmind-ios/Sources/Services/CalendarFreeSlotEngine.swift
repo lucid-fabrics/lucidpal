@@ -34,7 +34,7 @@ enum CalendarFreeSlotEngine {
 
         func workDayEnd(_ from: Date) -> Date {
             var comps = cal.dateComponents([.year, .month, .day], from: from)
-            comps.hour = 20; comps.minute = 0; comps.second = 0
+            comps.hour = ChatConstants.defaultWorkdayEndHour; comps.minute = 0; comps.second = 0
             return cal.date(from: comps) ?? from
         }
 

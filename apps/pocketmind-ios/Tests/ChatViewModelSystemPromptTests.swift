@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import PocketMind
 
 @MainActor
@@ -43,44 +44,72 @@ final class SystemPromptBuilderTests: XCTestCase {
         XCTAssertEqual(matches.count, 0)
     }
 
-    // MARK: - formattedToday
+    // MARK: - buildSystemPrompt (identity section always present)
 
-    func testFormattedTodayIsNonEmpty() {
-        XCTAssertFalse(builder.formattedToday().isEmpty)
+    func testBuildSystemPromptIsNonEmpty() async {
+        let prompt = await builder.buildSystemPrompt()
+        XCTAssertFalse(prompt.isEmpty)
     }
 
-    func testFormattedTodayContainsCurrentYear() {
-        let year = Calendar.current.component(.year, from: Date())
-        XCTAssertTrue(builder.formattedToday().contains(String(year)))
+    func testBuildSystemPromptContainsTodaysDate() async {
+        let prompt = await builder.buildSystemPrompt()
+        let year = String(Calendar.current.component(.year, from: Date()))
+        XCTAssertTrue(prompt.contains(year))
     }
 
-    // MARK: - calendarToolInstructions
+    // MARK: - buildSystemPrompt (calendar section)
 
-    func testCalendarToolInstructionsContainsCreateAction() {
-        XCTAssertTrue(builder.calendarToolInstructions().contains("create"))
+    func testBuildSystemPromptWithCalendarEnabledContainsCreateAction() async {
+        let prompt = await promptWithCalendar()
+        XCTAssertTrue(prompt.contains("create"))
     }
 
-    func testCalendarToolInstructionsContainsDeleteAction() {
-        XCTAssertTrue(builder.calendarToolInstructions().contains("delete"))
+    func testBuildSystemPromptWithCalendarEnabledContainsDeleteAction() async {
+        let prompt = await promptWithCalendar()
+        XCTAssertTrue(prompt.contains("delete"))
     }
 
-    func testCalendarToolInstructionsContainsQueryAction() {
-        XCTAssertTrue(builder.calendarToolInstructions().contains("query"))
+    func testBuildSystemPromptWithCalendarEnabledContainsQueryAction() async {
+        let prompt = await promptWithCalendar()
+        XCTAssertTrue(prompt.contains("query"))
     }
 
-    // MARK: - calendarBlockFormats
-
-    func testCalendarBlockFormatsContainsISO8601Format() {
-        XCTAssertTrue(builder.calendarBlockFormats().contains("YYYY-MM-DDTHH:MM:SS"))
+    func testBuildSystemPromptWithCalendarEnabledContainsISO8601Format() async {
+        let prompt = await promptWithCalendar()
+        XCTAssertTrue(prompt.contains("YYYY-MM-DDTHH:MM:SS"))
     }
 
-    // MARK: - calendarActionRules
-
-    func testCalendarActionRulesContainsMandatoryRule() {
-        XCTAssertTrue(builder.calendarActionRules().contains("NEVER skip the block"))
+    func testBuildSystemPromptWithCalendarEnabledContainsMandatoryRule() async {
+        let prompt = await promptWithCalendar()
+        XCTAssertTrue(prompt.contains("NEVER skip the block"))
     }
 
-    // MARK: - executeCalendarActions (no-op when no blocks present)
+    func testBuildSystemPromptWithCalendarDisabledOmitsToolInstructions() async {
+        let prompt = await builder.buildSystemPrompt()  // calendarAccessEnabled = false by default
+        XCTAssertFalse(prompt.contains("CALENDAR TOOL"))
+    }
+
+    // MARK: - buildSynthesisPrompt
+
+    func testBuildSynthesisPromptOmitsWebSearchSection() async {
+        let settings = MockAppSettings()
+        settings.webSearchEnabled = true
+        settings.webSearchProvider = .searxng
+        settings.webSearchEndpoint = "http://localhost:8888"
+        let b = SystemPromptBuilder(
+            calendarService: calendar,
+            contextService: MockContextService(),
+            settings: settings,
+            calendarActionController: MockCalendarActionController()
+        )
+        // Full prompt includes WEB SEARCH TOOL; synthesis prompt must not.
+        let fullPrompt = await b.buildSystemPrompt()
+        let synthesisPrompt = await b.buildSynthesisPrompt()
+        XCTAssertTrue(fullPrompt.contains("WEB SEARCH TOOL"))
+        XCTAssertFalse(synthesisPrompt.contains("WEB SEARCH TOOL"))
+    }
+
+    // MARK: - executeCalendarActions
 
     func testExecuteCalendarActionsPassesThroughPlainText() async {
         let plain = "Hello, here are your events for today."
@@ -90,32 +119,47 @@ final class SystemPromptBuilderTests: XCTestCase {
         XCTAssertTrue(slots.isEmpty)
     }
 
-    // MARK: - buildSystemPrompt (calendar disabled)
+    // MARK: - extractWebSearchQuery
 
-    func testBuildSystemPromptContainsTodaysDate() async {
-        let settings = MockAppSettings()
-        settings.calendarAccessEnabled = false
-        let b = SystemPromptBuilder(
-            calendarService: calendar,
-            contextService: MockContextService(),
-            settings: settings,
-            calendarActionController: MockCalendarActionController()
-        )
-        let prompt = await b.buildSystemPrompt()
-        let year = String(Calendar.current.component(.year, from: Date()))
-        XCTAssertTrue(prompt.contains(year))
+    func testExtractWebSearchQueryReturnsNilForPlainText() {
+        XCTAssertNil(builder.extractWebSearchQuery(from: "Hello world"))
     }
 
-    func testBuildSystemPromptWithCalendarDisabledOmitsToolInstructions() async {
+    func testExtractWebSearchQueryParsesQueryAndMaxResults() {
+        let text = #"[WEB_SEARCH:{"query":"swift actors","maxResults":3}]"#
+        let result = builder.extractWebSearchQuery(from: text)
+        XCTAssertEqual(result?.query, "swift actors")
+        XCTAssertEqual(result?.maxResults, 3)
+    }
+
+    func testExtractWebSearchQueryDefaultsMaxResultsToFive() {
+        let text = #"[WEB_SEARCH:{"query":"swift actors"}]"#
+        let result = builder.extractWebSearchQuery(from: text)
+        XCTAssertEqual(result?.query, "swift actors")
+        XCTAssertEqual(result?.maxResults, 5)
+    }
+
+    func testExtractWebSearchQueryReturnsNilForMalformedJSON() {
+        let text = "[WEB_SEARCH:{bad json}]"
+        XCTAssertNil(builder.extractWebSearchQuery(from: text))
+    }
+
+    func testExtractWebSearchQueryReturnsNilWhenQueryFieldMissing() {
+        let text = #"[WEB_SEARCH:{"maxResults":5}]"#
+        XCTAssertNil(builder.extractWebSearchQuery(from: text))
+    }
+
+    // MARK: - Helpers
+
+    private func promptWithCalendar() async -> String {
         let settings = MockAppSettings()
-        settings.calendarAccessEnabled = false
+        settings.calendarAccessEnabled = true
         let b = SystemPromptBuilder(
             calendarService: calendar,
             contextService: MockContextService(),
             settings: settings,
             calendarActionController: MockCalendarActionController()
         )
-        let prompt = await b.buildSystemPrompt()
-        XCTAssertFalse(prompt.contains("CALENDAR TOOL"))
+        return await b.buildSystemPrompt()
     }
 }

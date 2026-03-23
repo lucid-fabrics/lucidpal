@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 /// Tests for all 4 Siri intent types. Verifies that perform() writes the
 /// correct query to UserDefaults and does not throw on valid input.

@@ -3,7 +3,7 @@ import Combine
 import Foundation
 import OSLog
 
-private let audioLogger = Logger(subsystem: "com.pocketmind", category: "AudioRouteMonitor")
+private let audioLogger = Logger(subsystem: "app.pocketmind", category: "AudioRouteMonitor")
 
 @MainActor
 protocol AudioRouteMonitorProtocol: AnyObject {
@@ -66,7 +66,7 @@ final class AudioRouteMonitor: ObservableObject, AudioRouteMonitorProtocol {
             routeNames.append(output.portName)
 
             // AirPods detection: port type is BluetoothA2DP or BluetoothHFP, name contains "AirPods"
-            if (output.portType == .bluetoothA2DP || output.portType == .bluetoothHFP),
+            if output.portType == .bluetoothA2DP || output.portType == .bluetoothHFP,
                output.portName.contains("AirPods") {
                 detectedAirPods = true
             }

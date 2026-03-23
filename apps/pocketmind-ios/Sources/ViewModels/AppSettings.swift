@@ -53,6 +53,30 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         didSet { UserDefaults.standard.set(mailAccessEnabled, forKey: UserDefaultsKeys.mailAccessEnabled) }
     }
 
+    @Published var webSearchEnabled: Bool {
+        didSet { UserDefaults.standard.set(webSearchEnabled, forKey: UserDefaultsKeys.webSearchEnabled) }
+    }
+
+    @Published var webSearchProvider: WebSearchProvider {
+        didSet { UserDefaults.standard.set(webSearchProvider.rawValue, forKey: UserDefaultsKeys.webSearchProvider) }
+    }
+
+    @Published var webSearchEndpoint: String {
+        didSet { UserDefaults.standard.set(webSearchEndpoint, forKey: UserDefaultsKeys.webSearchEndpoint) }
+    }
+
+    @Published var braveApiKey: String {
+        didSet { UserDefaults.standard.set(braveApiKey, forKey: UserDefaultsKeys.braveApiKey) }
+    }
+
+    @Published var locationEnabled: Bool {
+        didSet { UserDefaults.standard.set(locationEnabled, forKey: UserDefaultsKeys.locationEnabled) }
+    }
+
+    @Published var userCity: String {
+        didSet { UserDefaults.standard.set(userCity, forKey: UserDefaultsKeys.userCity) }
+    }
+
     // MARK: - Init
 
     init() {
@@ -65,10 +89,16 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         speechAutoSendEnabled = defaults.object(forKey: UserDefaultsKeys.speechAutoSendEnabled) as? Bool ?? true
         voiceAutoStartEnabled = defaults.object(forKey: UserDefaultsKeys.voiceAutoStartEnabled) as? Bool ?? false
         airpodsAutoVoiceEnabled = defaults.object(forKey: UserDefaultsKeys.airpodsAutoVoiceEnabled) as? Bool ?? false
-        contextSize = defaults.object(forKey: UserDefaultsKeys.contextSize) as? Int ?? 4096
+        contextSize = defaults.object(forKey: UserDefaultsKeys.contextSize) as? Int ?? ChatConstants.defaultContextSizeTokens
         notesAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.notesAccessEnabled)
         remindersAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.remindersAccessEnabled)
         mailAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.mailAccessEnabled)
+        webSearchEnabled = defaults.bool(forKey: UserDefaultsKeys.webSearchEnabled)
+        webSearchProvider = WebSearchProvider(rawValue: defaults.string(forKey: UserDefaultsKeys.webSearchProvider) ?? "") ?? .brave
+        webSearchEndpoint = defaults.string(forKey: UserDefaultsKeys.webSearchEndpoint) ?? ""
+        braveApiKey = defaults.string(forKey: UserDefaultsKeys.braveApiKey) ?? ""
+        locationEnabled = defaults.bool(forKey: UserDefaultsKeys.locationEnabled)
+        userCity = defaults.string(forKey: UserDefaultsKeys.userCity) ?? ""
     }
 
     // MARK: - Computed Properties
@@ -83,7 +113,7 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
     }
 
     var maxContextSize: Int {
-        deviceRAMGB >= 6 ? 8192 : 4096
+        deviceRAMGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeContextSizeTokens : ChatConstants.defaultContextSizeTokens
     }
 
     // MARK: - Private Constants

@@ -26,6 +26,7 @@ struct FindFreeTimeShortcutIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
+        // Direct EventKit access — CalendarService requires @MainActor but intents run off-main
         let store = EKEventStore()
 
         // Check authorization

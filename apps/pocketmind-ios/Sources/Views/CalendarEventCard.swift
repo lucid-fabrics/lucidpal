@@ -212,9 +212,9 @@ struct CalendarEventCard: View {
     }
 
     func reminderLabel(_ minutes: Int) -> String {
-        if minutes < 60 { return "\(minutes)m before" }
-        let h = minutes / 60
-        let m = minutes % 60
+        if minutes < ChatConstants.minutesPerHour { return "\(minutes)m before" }
+        let h = minutes / ChatConstants.minutesPerHour
+        let m = minutes % ChatConstants.minutesPerHour
         return m == 0 ? "\(h)h before" : "\(h)h \(m)m before"
     }
 

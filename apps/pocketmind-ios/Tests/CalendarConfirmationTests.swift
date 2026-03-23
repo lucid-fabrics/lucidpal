@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import PocketMind
 
 @MainActor
@@ -48,7 +49,7 @@ final class CalendarConfirmationTests: XCTestCase {
 
     // MARK: - confirmDeletion
 
-    func testConfirmDeletionSetsStateToDeleted() async {
+    func testConfirmDeletionSetsStateToDeleted() async throws {
         let p = preview(state: .pendingDeletion)
         let msgID = addMessageWithPreviews([p])
         await vm.confirmDeletion(messageID: msgID, previewID: p.id)
@@ -64,7 +65,7 @@ final class CalendarConfirmationTests: XCTestCase {
         XCTAssertFalse(errorMsg.isEmpty)
     }
 
-    func testConfirmDeletionTriggersHapticOnSuccess() async {
+    func testConfirmDeletionTriggersHapticOnSuccess() async throws {
         let p = preview(state: .pendingDeletion)
         let msgID = addMessageWithPreviews([p])
         await vm.confirmDeletion(messageID: msgID, previewID: p.id)
@@ -73,14 +74,14 @@ final class CalendarConfirmationTests: XCTestCase {
 
     // MARK: - undoDeletion
 
-    func testUndoDeletionSetsStateToRestored() async {
+    func testUndoDeletionSetsStateToRestored() async throws {
         let p = preview(state: .deleted)
         let msgID = addMessageWithPreviews([p])
         await vm.undoDeletion(messageID: msgID, previewID: p.id)
         XCTAssertEqual(vm.messages.last?.calendarEventPreviews.first?.state, .restored)
     }
 
-    func testUndoDeletionCallsCreateEvent() async {
+    func testUndoDeletionCallsCreateEvent() async throws {
         let p = preview(state: .deleted)
         let msgID = addMessageWithPreviews([p])
         await vm.undoDeletion(messageID: msgID, previewID: p.id)
@@ -88,14 +89,14 @@ final class CalendarConfirmationTests: XCTestCase {
         XCTAssertEqual(calendar.createdEvents.first?.title, "Dentist")
     }
 
-    func testUndoDeletionTriggersHapticOnSuccess() async {
+    func testUndoDeletionTriggersHapticOnSuccess() async throws {
         let p = preview(state: .deleted)
         let msgID = addMessageWithPreviews([p])
         await vm.undoDeletion(messageID: msgID, previewID: p.id)
         XCTAssertTrue(haptic.notifySuccessCalled)
     }
 
-    func testUndoDeletionNoOpForUnknownMessageID() async {
+    func testUndoDeletionNoOpForUnknownMessageID() async throws {
         let p = preview(state: .deleted)
         _ = addMessageWithPreviews([p])
         await vm.undoDeletion(messageID: UUID(), previewID: p.id)
@@ -111,7 +112,7 @@ final class CalendarConfirmationTests: XCTestCase {
         XCTAssertFalse(errorMsg.isEmpty)
     }
 
-    func testUndoDeletionPreservesStateWhenCreateFails() async {
+    func testUndoDeletionPreservesStateWhenCreateFails() async throws {
         calendar.shouldThrowOnCreate = true
         let p = preview(state: .deleted)
         let msgID = addMessageWithPreviews([p])
@@ -121,7 +122,7 @@ final class CalendarConfirmationTests: XCTestCase {
 
     // MARK: - confirmAllDeletions
 
-    func testConfirmAllDeletionsDeletesAllPendingPreviews() async {
+    func testConfirmAllDeletionsDeletesAllPendingPreviews() async throws {
         let p1 = CalendarEventPreview(title: "A", start: Date(timeIntervalSinceNow: 3600),
                                      end: Date(timeIntervalSinceNow: 7200), calendarName: "Work",
                                      state: .pendingDeletion, eventIdentifier: "id-A")
@@ -131,11 +132,11 @@ final class CalendarConfirmationTests: XCTestCase {
         let msgID = addMessageWithPreviews([p1, p2])
         await vm.confirmAllDeletions(messageID: msgID)
         let states = vm.messages.last?.calendarEventPreviews.map(\.state) ?? []
-        XCTAssertTrue(states.allSatisfy { $0 == .deleted })
+        XCTAssertEqual(states, [.deleted, .deleted])
         XCTAssertEqual(Set(calendar.deletedIdentifiers), ["id-A", "id-B"])
     }
 
-    func testConfirmAllDeletionsIgnoresNonPendingPreviews() async {
+    func testConfirmAllDeletionsIgnoresNonPendingPreviews() async throws {
         let p = CalendarEventPreview(title: "Done", start: Date(timeIntervalSinceNow: 3600),
                                     end: Date(timeIntervalSinceNow: 7200), calendarName: "Work",
                                     state: .deleted, eventIdentifier: "id-done")
@@ -154,21 +155,21 @@ final class CalendarConfirmationTests: XCTestCase {
         XCTAssertFalse(errorMsg.isEmpty)
     }
 
-    func testConfirmAllDeletionsOnEmptyMessageIsNoOp() async {
+    func testConfirmAllDeletionsOnEmptyMessageIsNoOp() async throws {
         var msg = ChatMessage(role: .assistant, content: "")
         vm.messages.append(msg)
         await vm.confirmAllDeletions(messageID: msg.id)
         XCTAssertTrue(calendar.deletedIdentifiers.isEmpty)
     }
 
-    func testConfirmAllDeletionsNoOpForUnknownMessageID() async {
+    func testConfirmAllDeletionsNoOpForUnknownMessageID() async throws {
         await vm.confirmAllDeletions(messageID: UUID())
         XCTAssertTrue(calendar.deletedIdentifiers.isEmpty)
     }
 
     // MARK: - confirmUpdate
 
-    func testConfirmUpdateCallsApplyUpdate() async {
+    func testConfirmUpdateCallsApplyUpdate() async throws {
         var p = preview(state: .pendingUpdate)
         var update = PendingCalendarUpdate()
         update.title = "Rescheduled"
@@ -179,7 +180,7 @@ final class CalendarConfirmationTests: XCTestCase {
         XCTAssertEqual(calendar.appliedUpdates.first?.1, "evt-001")
     }
 
-    func testConfirmUpdateMirrorsFieldsOntoPreview() async {
+    func testConfirmUpdateMirrorsFieldsOntoPreview() async throws {
         var p = preview(state: .pendingUpdate)
         var update = PendingCalendarUpdate()
         update.title = "Updated Title"
@@ -194,7 +195,7 @@ final class CalendarConfirmationTests: XCTestCase {
         XCTAssertNil(updated?.pendingUpdate)
     }
 
-    func testConfirmUpdateSetsTerminalState() async {
+    func testConfirmUpdateSetsTerminalState() async throws {
         var p = preview(state: .pendingUpdate)
         var update = PendingCalendarUpdate()
         update.title = "Renamed"
@@ -219,14 +220,14 @@ final class CalendarConfirmationTests: XCTestCase {
         XCTAssertFalse(errorMsg.isEmpty)
     }
 
-    func testConfirmUpdateNoPendingUpdateIsNoOp() async {
+    func testConfirmUpdateNoPendingUpdateIsNoOp() async throws {
         let p = preview(state: .pendingUpdate)
         let msgID = addMessageWithPreviews([p])
         await vm.confirmUpdate(messageID: msgID, previewID: p.id)
         XCTAssertTrue(calendar.appliedUpdates.isEmpty)
     }
 
-    func testConfirmUpdateTriggersHapticOnSuccess() async {
+    func testConfirmUpdateTriggersHapticOnSuccess() async throws {
         var p = preview(state: .pendingUpdate)
         var update = PendingCalendarUpdate()
         update.title = "New"
@@ -234,5 +235,78 @@ final class CalendarConfirmationTests: XCTestCase {
         let msgID = addMessageWithPreviews([p])
         await vm.confirmUpdate(messageID: msgID, previewID: p.id)
         XCTAssertTrue(haptic.notifySuccessCalled)
+    }
+
+    func testConfirmUpdateEventNotFoundClearsPendingUpdate() async throws {
+        calendar.shouldThrowOnApplyUpdate = true
+        var p = preview(state: .pendingUpdate)
+        var update = PendingCalendarUpdate()
+        update.title = "Oops"
+        p.pendingUpdate = update
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmUpdate(messageID: msgID, previewID: p.id)
+        XCTAssertNil(vm.messages.last?.calendarEventPreviews.first?.pendingUpdate)
+    }
+
+    func testConfirmUpdateErrorSetsNonEmptyMessage() async throws {
+        // Verifies that errorMessage is non-empty on any applyUpdate failure.
+        // MockCalendarService throws CalendarError.eventNotFound, which sets a
+        // hardcoded non-empty message in the .eventNotFound catch branch.
+        calendar.shouldThrowOnApplyUpdate = true
+        var p = preview(state: .pendingUpdate)
+        var update = PendingCalendarUpdate()
+        update.title = "Fail"
+        p.pendingUpdate = update
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmUpdate(messageID: msgID, previewID: p.id)
+        let errorMsg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
+    }
+
+    // MARK: - cancelConflict error path
+
+    func testCancelConflictThrowSetsErrorMessage() async throws {
+        calendar.shouldThrowOnDelete = true
+        let p = preview(state: .pendingDeletion)
+        let msgID = addMessageWithPreviews([p])
+        await vm.cancelConflict(messageID: msgID, previewID: p.id)
+        let errorMsg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
+    }
+
+    func testCancelConflictThrowDoesNotMarkDeleted() async throws {
+        calendar.shouldThrowOnDelete = true
+        let p = preview(state: .pendingDeletion)
+        let msgID = addMessageWithPreviews([p])
+        await vm.cancelConflict(messageID: msgID, previewID: p.id)
+        XCTAssertNotEqual(vm.messages.last?.calendarEventPreviews.first?.state, .deleted)
+    }
+
+    // MARK: - rescheduleConflict error path
+
+    func testRescheduleConflictThrowSetsErrorMessage() async throws {
+        calendar.shouldThrowOnApplyUpdate = true
+        let p = preview(state: .pendingUpdate)
+        let msgID = addMessageWithPreviews([p])
+        let slot = CalendarFreeSlot(
+            start: Date(timeIntervalSinceNow: 3600),
+            end: Date(timeIntervalSinceNow: 7200)
+        )
+        await vm.rescheduleConflict(messageID: msgID, previewID: p.id, to: slot)
+        let errorMsg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
+    }
+
+    func testRescheduleConflictThrowDoesNotUpdatePreviewDates() async throws {
+        calendar.shouldThrowOnApplyUpdate = true
+        let p = preview(state: .pendingUpdate)
+        let originalStart = p.start
+        let msgID = addMessageWithPreviews([p])
+        let slot = CalendarFreeSlot(
+            start: Date(timeIntervalSinceNow: 86400),
+            end: Date(timeIntervalSinceNow: 90000)
+        )
+        await vm.rescheduleConflict(messageID: msgID, previewID: p.id, to: slot)
+        XCTAssertEqual(vm.messages.last?.calendarEventPreviews.first?.start, originalStart)
     }
 }

@@ -8,10 +8,13 @@ final class MockSystemPromptBuilder: SystemPromptBuilderProtocol {
     var executeCalendarActionsCalled = false
 
     func buildSystemPrompt() async -> String { stubbedPrompt }
+    func buildSynthesisPrompt() async -> String { stubbedPrompt }
 
     func executeCalendarActions(in text: String) async -> (content: String, previews: [CalendarEventPreview], freeSlots: [CalendarFreeSlot]) {
         executeCalendarActionsCalled = true
         let result = executeCalendarActionsResult
         return (result.content.isEmpty ? text : result.content, result.previews, result.freeSlots)
     }
+
+    func extractWebSearchQuery(from text: String) -> (query: String, maxResults: Int)? { nil }
 }

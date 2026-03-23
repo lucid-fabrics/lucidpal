@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class CalendarServiceProtocolTests: XCTestCase {
@@ -58,7 +58,7 @@ final class CalendarServiceProtocolTests: XCTestCase {
         )
         service.stubbedConflicts = [conflict]
         let result = service.findConflicts(start: Date(), end: Date(timeIntervalSinceNow: 3600), excludingIdentifier: nil)
-        XCTAssertTrue(result.first?.isRecurring == true)
+        XCTAssertEqual(result.first?.isRecurring, true)
     }
 
     // MARK: - createEvent
@@ -83,7 +83,9 @@ final class CalendarServiceProtocolTests: XCTestCase {
     }
 
     func testCreateEventReturnsIncrementingMockId() throws {
+        // swiftlint:disable:next line_length
         _ = try service.createEvent(title: "A", start: Date(), end: Date(), location: nil, notes: nil, reminderMinutes: nil, calendarIdentifier: nil, isAllDay: false, recurrence: nil, recurrenceEnd: nil)
+        // swiftlint:disable:next line_length
         let id = try service.createEvent(title: "B", start: Date(), end: Date(), location: nil, notes: nil, reminderMinutes: nil, calendarIdentifier: nil, isAllDay: false, recurrence: nil, recurrenceEnd: nil)
         XCTAssertEqual(id, "mock-id-2")
     }
@@ -108,6 +110,7 @@ final class CalendarServiceProtocolTests: XCTestCase {
 
     func testCreateEventDoesNotRecordOnThrow() {
         service.shouldThrowOnCreate = true
+        // swiftlint:disable:next line_length
         _ = try? service.createEvent(title: "T", start: Date(), end: Date(), location: nil, notes: nil, reminderMinutes: nil, calendarIdentifier: nil, isAllDay: false, recurrence: nil, recurrenceEnd: nil)
         XCTAssertTrue(service.createdEvents.isEmpty)
     }
@@ -116,7 +119,7 @@ final class CalendarServiceProtocolTests: XCTestCase {
 
     func testDeleteEventRecordsDeletedIdentifier() throws {
         try service.deleteEvent(identifier: "evt-123")
-        XCTAssertTrue(service.deletedIdentifiers.contains("evt-123"))
+        XCTAssertEqual(service.deletedIdentifiers, ["evt-123"])
     }
 
     func testDeleteEventThrowsWhenConfigured() {
@@ -128,6 +131,16 @@ final class CalendarServiceProtocolTests: XCTestCase {
         service.shouldThrowOnDelete = true
         _ = try? service.deleteEvent(identifier: "evt-123")
         XCTAssertTrue(service.deletedIdentifiers.isEmpty)
+    }
+
+    func testDeleteEventThrowsEventNotFound() {
+        service.shouldThrowOnDelete = true
+        XCTAssertThrowsError(try service.deleteEvent(identifier: "missing-id")) { error in
+            guard case CalendarError.eventNotFound = error else {
+                XCTFail("Expected CalendarError.eventNotFound, got \(error)")
+                return
+            }
+        }
     }
 
     // MARK: - applyUpdate
@@ -162,6 +175,26 @@ final class CalendarServiceProtocolTests: XCTestCase {
         var update = PendingCalendarUpdate()
         update.title = "Test"
         XCTAssertThrowsError(try service.applyUpdate(update, to: "evt-123"))
+    }
+
+    func testApplyUpdateThrowsEventNotFound() {
+        service.shouldThrowOnApplyUpdate = true
+        var update = PendingCalendarUpdate()
+        update.title = "Test"
+        XCTAssertThrowsError(try service.applyUpdate(update, to: "missing-id")) { error in
+            guard case CalendarError.eventNotFound = error else {
+                XCTFail("Expected CalendarError.eventNotFound, got \(error)")
+                return
+            }
+        }
+    }
+
+    func testApplyUpdateDoesNotRecordOnThrow() {
+        service.shouldThrowOnApplyUpdate = true
+        var update = PendingCalendarUpdate()
+        update.title = "Test"
+        _ = try? service.applyUpdate(update, to: "evt-123")
+        XCTAssertTrue(service.appliedUpdates.isEmpty)
     }
 
     func testApplyUpdateRecordsAppliedUpdate() throws {

@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 /// SpeechService uses AVAudioEngine + SFSpeechRecognizer, both requiring microphone
 /// permissions and physical hardware. Full recording tests must run on a physical device.

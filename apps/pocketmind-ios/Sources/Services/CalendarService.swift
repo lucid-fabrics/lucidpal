@@ -28,6 +28,7 @@ struct CalendarEventInfo: Sendable {
     /// True when the event belongs to a recurring series.
     let isRecurring: Bool
 
+    // swiftlint:disable:next line_length
     init(eventIdentifier: String?, title: String?, startDate: Date, endDate: Date, isAllDay: Bool, calendarTitle: String?, location: String? = nil, isRecurring: Bool = false) {
         self.eventIdentifier = eventIdentifier
         self.title = title
@@ -158,7 +159,7 @@ final class CalendarService {
     func findEvents(matching title: String, windowDays: Int = CalendarService.defaultSearchWindowDays) -> [CalendarEventInfo] {
         guard isAuthorized else { return [] }
         let windowStart = Calendar.current.date(byAdding: .day, value: -windowDays, to: .now) ?? .now
-        let windowEnd   = Calendar.current.date(byAdding: .day, value:  windowDays, to: .now) ?? .now
+        let windowEnd   = Calendar.current.date(byAdding: .day, value: windowDays, to: .now) ?? .now
         let predicate = store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: nil)
         return store.events(matching: predicate).map(Self.mapEvent)
     }
@@ -204,6 +205,7 @@ final class CalendarService {
         try store.remove(event, span: .thisEvent)
     }
 
+    // swiftlint:disable cyclomatic_complexity
     /// Applies a PendingCalendarUpdate to an existing event. Returns the resulting preview state.
     func applyUpdate(_ update: PendingCalendarUpdate, to identifier: String) throws -> CalendarEventPreview.PreviewState {
         authorizationStatus = Self.mapStatus(EKEventStore.authorizationStatus(for: .event))
@@ -215,11 +217,11 @@ final class CalendarService {
         let titleChanged = update.title != nil
         let datesChanged = update.start != nil || update.end != nil
 
-        if let t = update.title    { event.title = t }
-        if let s = update.start    { event.startDate = s }
-        if let e = update.end      { event.endDate = e }
+        if let t = update.title { event.title = t }
+        if let s = update.start { event.startDate = s }
+        if let e = update.end { event.endDate = e }
         if let l = update.location, !l.isEmpty { event.location = l }
-        if let n = update.notes,   !n.isEmpty  { event.notes = n }
+        if let n = update.notes, !n.isEmpty { event.notes = n }
         if let m = update.reminderMinutes {
             event.alarms?.forEach { event.removeAlarm($0) }
             event.addAlarm(EKAlarm(relativeOffset: -TimeInterval(m * 60)))
@@ -239,6 +241,7 @@ final class CalendarService {
         try store.save(event, span: .thisEvent)
         return datesChanged && !titleChanged ? .rescheduled : .updated
     }
+    // swiftlint:enable cyclomatic_complexity
 
     /// Creates and saves a calendar event. Returns the event identifier on success.
     @discardableResult
@@ -293,4 +296,3 @@ final class CalendarService {
         return event.eventIdentifier ?? ""
     }
 }
-

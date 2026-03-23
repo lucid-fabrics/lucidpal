@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import PocketMind
 
 @MainActor
@@ -14,14 +15,18 @@ final class ChatViewModelSendMessageTests: XCTestCase {
         settings = MockAppSettings()
         llm = MockLLMService()
         viewModel = ChatViewModel(
-            llmService: llm,
-            calendarService: mock,
-            settings: settings,
-            systemPromptBuilder: MockSystemPromptBuilder(),
-            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
-            speechService: MockSpeechService(),
-            hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
+            dependencies: ChatViewModelDependencies(
+                llmService: llm,
+                calendarService: mock,
+                settings: settings,
+                systemPromptBuilder: MockSystemPromptBuilder(),
+                suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+                speechService: MockSpeechService(),
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: nil
+            )
         )
     }
 
@@ -31,26 +36,30 @@ final class ChatViewModelSendMessageTests: XCTestCase {
         mockLLM.stubbedTokens = tokens
         let speech = MockSpeechService()
         let vm = ChatViewModel(
-            llmService: mockLLM,
-            calendarService: mock,
-            settings: settings,
-            systemPromptBuilder: MockSystemPromptBuilder(),
-            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
-            speechService: speech,
-            hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
+            dependencies: ChatViewModelDependencies(
+                llmService: mockLLM,
+                calendarService: mock,
+                settings: settings,
+                systemPromptBuilder: MockSystemPromptBuilder(),
+                suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+                speechService: speech,
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: nil
+            )
         )
         return (vm, mockLLM, speech)
     }
 
     // MARK: - cancelGeneration / handleSiriQuery
 
-    func testCancelGenerationCallsLLMService() {
+    func testCancelGenerationCallsLLMService() async throws {
         viewModel.cancelGeneration()
         XCTAssertTrue(llm.cancelCalled)
     }
 
-    func testHandleSiriQuerySetsInputText() {
+    func testHandleSiriQuerySetsInputText() async throws {
         viewModel.handleSiriQuery("What's on my calendar?")
         XCTAssertEqual(viewModel.inputText, "What's on my calendar?")
     }
@@ -115,14 +124,14 @@ final class ChatViewModelSendMessageTests: XCTestCase {
 
     // MARK: - toggleSpeech
 
-    func testToggleSpeechStartsRecordingWhenNotRecording() {
+    func testToggleSpeechStartsRecordingWhenNotRecording() async throws {
         let (vm, _, speech) = makeLoadedViewModel()
         speech.isAuthorized = true
         vm.toggleSpeech()
         XCTAssertTrue(speech.startCalled)
     }
 
-    func testToggleSpeechStopsRecordingWhenAlreadyRecording() {
+    func testToggleSpeechStopsRecordingWhenAlreadyRecording() async throws {
         let (vm, _, speech) = makeLoadedViewModel()
         speech.isRecording = true
         vm.toggleSpeech()
@@ -149,7 +158,7 @@ final class ChatViewModelSendMessageTests: XCTestCase {
 
     // MARK: - clearHistory
 
-    func testClearHistoryDuringGenerationCancelsLLM() {
+    func testClearHistoryDuringGenerationCancelsLLM() async throws {
         let (vm, mockLLM, _) = makeLoadedViewModel(tokens: ["a", "b"])
         mockLLM.isGenerating = true
         vm.clearHistory()
@@ -159,14 +168,14 @@ final class ChatViewModelSendMessageTests: XCTestCase {
 
     // MARK: - deleteMessage
 
-    func testDeleteMessageRemovesItFromMessages() {
+    func testDeleteMessageRemovesItFromMessages() async throws {
         let msg = ChatMessage(role: .assistant, content: "to delete")
         viewModel.messages = [msg]
         viewModel.deleteMessage(id: msg.id)
         XCTAssertTrue(viewModel.messages.isEmpty)
     }
 
-    func testDeleteMessageWithWrongIDIsNoOp() {
+    func testDeleteMessageWithWrongIDIsNoOp() async throws {
         let msg = ChatMessage(role: .assistant, content: "keep")
         viewModel.messages = [msg]
         viewModel.deleteMessage(id: UUID())

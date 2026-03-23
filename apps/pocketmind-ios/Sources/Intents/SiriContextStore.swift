@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-private let contextStoreLogger = Logger(subsystem: "com.pocketmind", category: "SiriContextStore")
+private let contextStoreLogger = Logger(subsystem: "app.pocketmind", category: "SiriContextStore")
 
 /// Snapshot of the most recent calendar action taken in PocketMind — in-app or via Siri.
 /// Persisted to UserDefaults so Siri intents always have context without opening the app.

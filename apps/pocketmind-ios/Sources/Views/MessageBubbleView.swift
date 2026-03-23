@@ -4,6 +4,8 @@ import UIKit
 
 struct MessageBubbleView: View {
     let message: ChatMessage
+    var userPrompt: String? = nil
+    var onReply: ((ChatMessage) -> Void)? = nil
     var onConfirmDeletion: ((UUID) -> Void)? = nil
     var onCancelDeletion: ((UUID) -> Void)? = nil
     var onUndoDeletion: ((UUID) -> Void)? = nil
@@ -18,13 +20,36 @@ struct MessageBubbleView: View {
     var onRescheduleToSlot: ((UUID, CalendarFreeSlot) async -> Void)? = nil
     @State private var thinkingExpanded = false
     @State private var showTimestamp = false
+    @State private var swipeOffset: CGFloat = 0
+    @State private var replyTriggered = false
+
+    private enum AnimationConstants {
+        /// Minimum opacity for the pulsing dot in the generating status view.
+        static let dotInitialOpacity: Double = 0.2
+    }
+
+    private let replyThreshold: CGFloat = 60
+    /// Max swipe travel expressed as a multiple of replyThreshold (30% overshoot).
+    private let swipeExtentFactor: CGFloat = 1.3
+    /// Resistance damping applied to raw drag offset so the gesture feels spring-like.
+    private let swipeResistanceFactor: CGFloat = 0.55
+    /// Fraction of the damped threshold at which the reply action fires.
+    private let swipeTriggerRatio: CGFloat = 0.9
 
     private var pendingDeletionCount: Int {
         message.calendarEventPreviews.filter { $0.state == .pendingDeletion }.count
     }
 
     var body: some View {
-        HStack(alignment: .bottom, spacing: 8) {
+        ZStack(alignment: .leading) {
+            Image(systemName: "arrowshape.turn.up.left.fill")
+                .font(.body)
+                .foregroundStyle(Color.accentColor)
+                .opacity(Double(min(swipeOffset, replyThreshold)) / replyThreshold)
+                .scaleEffect(min(swipeOffset / replyThreshold, 1.0))
+                .padding(.leading, 20)
+
+            HStack(alignment: .bottom, spacing: 8) {
             if message.isUser { Spacer(minLength: DesignConstants.Size.messageSpacer) }
 
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: 6) {
@@ -71,12 +96,22 @@ struct MessageBubbleView: View {
                             }
                         }
                 } else if !message.isUser && !message.isStreamingAction && message.calendarEventPreviews.isEmpty {
-                    StreamingSkeletonView()
+                    GeneratingStatusView(userPrompt: userPrompt)
                 }
 
-                // Animated pill while action block is streaming
+                // Animated pill while calendar action block is streaming
                 if message.isStreamingAction {
                     CalendarActionPill()
+                }
+
+                // Animated pill while web search is executing
+                if message.isStreamingWebSearch {
+                    WebSearchingPill()
+                }
+
+                // Static pill after web search result is ready
+                if message.isWebSearchResult {
+                    WebSearchPill()
                 }
 
                 // Free slot query result
@@ -94,14 +129,14 @@ struct MessageBubbleView: View {
                 ForEach(message.calendarEventPreviews.filter { $0.state != .listed }, id: \.id) { preview in
                     CalendarEventCard(
                         preview: preview,
-                        onConfirm:        { onConfirmDeletion?(preview.id) },
-                        onCancel:         { onCancelDeletion?(preview.id) },
-                        onUndo:           { onUndoDeletion?(preview.id) },
-                        onConfirmUpdate:  { onConfirmUpdate?(preview.id) },
-                        onCancelUpdate:   { onCancelUpdate?(preview.id) },
-                        onKeepConflict:   { onKeepConflict?(preview.id) },
+                        onConfirm: { onConfirmDeletion?(preview.id) },
+                        onCancel: { onCancelDeletion?(preview.id) },
+                        onUndo: { onUndoDeletion?(preview.id) },
+                        onConfirmUpdate: { onConfirmUpdate?(preview.id) },
+                        onCancelUpdate: { onCancelUpdate?(preview.id) },
+                        onKeepConflict: { onKeepConflict?(preview.id) },
                         onCancelConflict: { await onCancelConflict?(preview.id) },
-                        onFindFreeSlots:  { await onFindFreeSlots?(preview.id) ?? [] },
+                        onFindFreeSlots: { await onFindFreeSlots?(preview.id) ?? [] },
                         onRescheduleToSlot: { slot in await onRescheduleToSlot?(preview.id, slot) }
                     )
                 }
@@ -111,7 +146,7 @@ struct MessageBubbleView: View {
                     BulkDeletionBar(
                         count: pendingDeletionCount,
                         onDeleteAll: { onConfirmAllDeletions?() },
-                        onKeepAll:   { onCancelAllDeletions?() }
+                        onKeepAll: { onCancelAllDeletions?() }
                     )
                 }
 
@@ -130,13 +165,32 @@ struct MessageBubbleView: View {
             }
 
             if !message.isUser { Spacer(minLength: DesignConstants.Size.messageSpacer) }
-        }
+            } // HStack
+            .offset(x: swipeOffset)
+        } // ZStack
         .padding(.horizontal, DesignConstants.Padding.messageHorizontal)
+        .gesture(
+            DragGesture(minimumDistance: 15, coordinateSpace: .local)
+                .onChanged { value in
+                    let dx = value.translation.width
+                    let dy = abs(value.translation.height)
+                    guard dx > 0, dx > dy else { swipeOffset = 0; return }
+                    swipeOffset = min(dx, replyThreshold * swipeExtentFactor) * swipeResistanceFactor
+                    if swipeOffset >= replyThreshold * swipeResistanceFactor * swipeTriggerRatio && !replyTriggered {
+                        replyTriggered = true
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    }
+                }
+                .onEnded { _ in
+                    if replyTriggered { onReply?(message) }
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { swipeOffset = 0 }
+                    replyTriggered = false
+                }
+        )
     }
 }
 
 // MARK: - Markdown bubble text
-
 
 /// Renders message text with inline markdown (bold, italic, code, links).
 /// Converts leading `- ` list markers to `•` before parsing.
@@ -145,7 +199,11 @@ struct MessageBubbleView: View {
 private func bubbleTextView(_ text: String, isUser: Bool) -> some View {
     let processed = text
         .components(separatedBy: "\n")
-        .map { $0.hasPrefix("- ") ? "• " + $0.dropFirst(2) : $0 }
+        .map { line -> String in
+            if line.hasPrefix("* ") { return "• " + line.dropFirst(2) }
+            if line.hasPrefix("- ") { return "• " + line.dropFirst(2) }
+            return line
+        }
         .joined(separator: "\n")
     let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
     if let attributed = try? AttributedString(markdown: processed, options: options) { // safe: returns nil, falls back to plain text
@@ -155,43 +213,99 @@ private func bubbleTextView(_ text: String, isUser: Bool) -> some View {
     }
 }
 
-// MARK: - Streaming skeleton
+// MARK: - Generating status view
 
-private struct StreamingSkeletonView: View {
+private struct GeneratingStatusView: View {
+    var userPrompt: String? = nil
+
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var phase: CGFloat = 0
+    @State private var dotOpacity: Double = 1
+    @State private var phaseIndex: Int = 0
+
+    // MARK: - Intent detection
+
+    private enum Intent {
+        case calendar, webSearch, generic
+    }
+
+    private var intent: Intent {
+        guard let prompt = userPrompt?.lowercased() else { return .generic }
+        let calendarKeywords = ["meet", "event", "schedule", "calendar", "appointment",
+                                "book", "reschedule", "cancel", "free time", "available",
+                                "remind", "tomorrow", "today", "next week", "this week",
+                                "morning", "afternoon", "evening", "slot"]
+        let searchKeywords  = ["weather", "news", "search", "latest", "current",
+                                "who is", "what is", "how to", "price", "score",
+                                "define", "translate", "find", "look up"]
+        if calendarKeywords.contains(where: { prompt.contains($0) }) { return .calendar }
+        if searchKeywords.contains(where: { prompt.contains($0) }) { return .webSearch }
+        return .generic
+    }
+
+    private var phrases: [String] {
+        switch intent {
+        case .calendar:
+            return [
+                "Checking your schedule",
+                "Looking at your calendar",
+                "Scanning your events",
+                "Finding available slots",
+                "Reviewing your day",
+                "Organizing your time",
+                "Almost there",
+            ]
+        case .webSearch:
+            return [
+                "Searching the web",
+                "Looking that up",
+                "Fetching results",
+                "Reading sources",
+                "Putting it together",
+                "Almost there",
+            ]
+        case .generic:
+            return [
+                "Thinking",
+                "Reading your message",
+                "Processing",
+                "Working on it",
+                "Reasoning through this",
+                "Putting it together",
+                "Drafting a response",
+                "One moment",
+                "Almost there",
+            ]
+        }
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            skeletonLine(width: nil)
-            skeletonLine(width: nil)
-            skeletonLine(width: 80)
+        HStack(spacing: 6) {
+            Circle()
+                .fill(Color.accentColor)
+                .frame(width: 7, height: 7)
+                .opacity(dotOpacity)
+                .animation(
+                    reduceMotion ? .default : .easeInOut(duration: 0.6).repeatForever(autoreverses: true),
+                    value: dotOpacity
+                )
+
+            Text(phrases[phaseIndex % phrases.count])
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .contentTransition(.numericText())
+                .animation(.easeInOut(duration: 0.4), value: phaseIndex)
         }
         .padding(.horizontal, DesignConstants.Padding.bubbleHorizontal)
         .padding(.vertical, DesignConstants.Padding.bubbleVertical)
-        .background(Color(.systemGray5))
-        .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.bubble, style: .continuous))
-        .onAppear {
+        .onAppear { if !reduceMotion { dotOpacity = AnimationConstants.dotInitialOpacity } }
+        .task {
             guard !reduceMotion else { return }
-            withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
-                phase = 1
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(4.5))
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    phaseIndex += 1
+                }
             }
         }
-    }
-
-    @ViewBuilder
-    private func skeletonLine(width: CGFloat?) -> some View {
-        RoundedRectangle(cornerRadius: 4)
-            .fill(shimmerGradient)
-            .frame(height: 11)
-            .frame(maxWidth: width ?? .infinity, alignment: .leading)
-    }
-
-    private var shimmerGradient: LinearGradient {
-        LinearGradient(
-            colors: [Color(.systemGray4), Color(.systemGray3), Color(.systemGray4)],
-            startPoint: UnitPoint(x: phase - 0.5, y: 0.5),
-            endPoint: UnitPoint(x: phase + 0.5, y: 0.5)
-        )
     }
 }

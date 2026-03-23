@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 /// Tests SessionManager's persistence behaviour and legacy chat_history.json migration path.
 @MainActor

@@ -28,6 +28,7 @@ struct BulkDeletionBar: View {
         .buttonStyle(.plain)
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous))
+        // swiftlint:disable:next line_length
         .overlay(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous).stroke(Color.red.opacity(DesignConstants.Opacity.conflictBorder), lineWidth: 1))
     }
 }

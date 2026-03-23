@@ -1,6 +1,6 @@
 import AppIntents
-import XCTest
 @testable import PocketMind
+import XCTest
 
 /// Tests for Shortcuts-compatible intents that return values directly.
 /// Tests parameter handling, validation, and error cases.

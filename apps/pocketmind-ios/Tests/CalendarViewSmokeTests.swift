@@ -1,6 +1,6 @@
-import XCTest
-import SwiftUI
 @testable import PocketMind
+import SwiftUI
+import XCTest
 
 /// Smoke tests for calendar-specific and secondary view structs.
 @MainActor
@@ -64,7 +64,7 @@ final class CalendarViewSmokeTests: XCTestCase {
 
     func testCalendarEventListCardEmptyEvents() {
         let view = CalendarEventListCard(events: [])
-        XCTAssertTrue(view.events.isEmpty)
+        XCTAssertTrue(view.events.isEmpty, "Expected events to be empty but got \(view.events.count) events")
     }
 
     func testCalendarEventListCardPreservesOrder() {
@@ -87,7 +87,7 @@ final class CalendarViewSmokeTests: XCTestCase {
 
     func testCalendarQueryResultCardEmptySlots() {
         let view = CalendarQueryResultCard(slots: [])
-        XCTAssertTrue(view.slots.isEmpty)
+        XCTAssertTrue(view.slots.isEmpty, "Expected slots to be empty but got \(view.slots.count) slots")
     }
 
     // MARK: - ConflictDetailSheet

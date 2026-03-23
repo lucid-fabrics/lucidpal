@@ -147,10 +147,12 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
     var isThinking: Bool
     var calendarEventPreviews: [CalendarEventPreview]
     let timestamp: Date
-
     var calendarFreeSlots: [CalendarFreeSlot]
+    /// True when this assistant message was produced via an agentic web search round-trip.
+    var isWebSearchResult: Bool
 
-    init(id: UUID = UUID(), role: MessageRole, content: String, thinkingContent: String? = nil, isThinking: Bool = false, calendarEventPreviews: [CalendarEventPreview] = [], calendarFreeSlots: [CalendarFreeSlot] = [], timestamp: Date = .now) {
+    // swiftlint:disable:next line_length
+    init(id: UUID = UUID(), role: MessageRole, content: String, thinkingContent: String? = nil, isThinking: Bool = false, calendarEventPreviews: [CalendarEventPreview] = [], calendarFreeSlots: [CalendarFreeSlot] = [], isWebSearchResult: Bool = false, timestamp: Date = .now) {
         self.id = id
         self.role = role
         self.content = content
@@ -158,7 +160,27 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
         self.isThinking = isThinking
         self.calendarEventPreviews = calendarEventPreviews
         self.calendarFreeSlots = calendarFreeSlots
+        self.isWebSearchResult = isWebSearchResult
         self.timestamp = timestamp
+    }
+
+    // MARK: - Codable (backward compat: isWebSearchResult defaults to false when key absent)
+
+    private enum CodingKeys: String, CodingKey {
+        case id, role, content, thinkingContent, isThinking, calendarEventPreviews, timestamp, calendarFreeSlots, isWebSearchResult
+    }
+
+    init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        role = try c.decode(MessageRole.self, forKey: .role)
+        content = try c.decode(String.self, forKey: .content)
+        thinkingContent = try c.decodeIfPresent(String.self, forKey: .thinkingContent)
+        isThinking = try c.decodeIfPresent(Bool.self, forKey: .isThinking) ?? false
+        calendarEventPreviews = try c.decodeIfPresent([CalendarEventPreview].self, forKey: .calendarEventPreviews) ?? []
+        timestamp = try c.decode(Date.self, forKey: .timestamp)
+        calendarFreeSlots = try c.decodeIfPresent([CalendarFreeSlot].self, forKey: .calendarFreeSlots) ?? []
+        isWebSearchResult = try c.decodeIfPresent(Bool.self, forKey: .isWebSearchResult) ?? false
     }
 
     var isUser: Bool { role == .user }
@@ -174,23 +196,41 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
         return !isReadAction && calendarEventPreviews.isEmpty
     }
 
+    /// True while the LLM is streaming a [WEB_SEARCH:...] block (before the search executes).
+    var isStreamingWebSearch: Bool {
+        content.contains("[WEB_SEARCH:") && !isWebSearchResult
+    }
+
     // Compiled once — NSRegularExpression is thread-safe for matching.
     private static let actionBlockRegex: NSRegularExpression = {
         let pattern = #"\[CALENDAR_ACTION:\{(?:[^}]|\}(?!\]))*\}\]"#
+        // swiftlint:disable:next line_length
         guard let regex = try? NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators) else { // safe: pattern is a compile-time constant; failure is caught by preconditionFailure below
             preconditionFailure("Invalid actionBlockRegex pattern")
         }
         return regex
     }()
 
-    /// Content with [CALENDAR_ACTION:...] blocks stripped for display.
-    /// Removes complete blocks via regex and partial blocks still mid-stream.
+    private static let webSearchBlockRegex: NSRegularExpression = {
+        let pattern = #"\[WEB_SEARCH:\{(?:[^}]|\}(?!\]))*\}\]"#
+        // safe: literal regex pattern — preconditionFailure guards nil; failure is a programming error
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators) else {
+            preconditionFailure("Invalid webSearchBlockRegex pattern")
+        }
+        return regex
+    }()
+
+    /// Content with tool blocks stripped for display.
+    /// Removes complete [CALENDAR_ACTION:...] and [WEB_SEARCH:...] blocks, plus partial mid-stream blocks.
     var displayContent: String {
         var text = content
         let ns = NSRange(text.startIndex..., in: text)
         text = Self.actionBlockRegex.stringByReplacingMatches(in: text, range: ns, withTemplate: "")
-        // Remove any partial block still streaming (no closing ])
+        text = Self.webSearchBlockRegex.stringByReplacingMatches(in: text, range: NSRange(text.startIndex..., in: text), withTemplate: "")
         if let start = text.range(of: "[CALENDAR_ACTION:") {
+            text = String(text[..<start.lowerBound])
+        }
+        if let start = text.range(of: "[WEB_SEARCH:") {
             text = String(text[..<start.lowerBound])
         }
         return text.trimmingCharacters(in: .whitespacesAndNewlines)

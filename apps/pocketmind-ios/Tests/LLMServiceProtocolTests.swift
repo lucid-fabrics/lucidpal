@@ -1,6 +1,6 @@
-import XCTest
 import Combine
 @testable import PocketMind
+import XCTest
 
 /// Tests the LLMServiceProtocol contract using MockLLMService.
 @MainActor

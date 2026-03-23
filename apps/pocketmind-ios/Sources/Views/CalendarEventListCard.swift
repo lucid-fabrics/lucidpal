@@ -29,7 +29,7 @@ struct CalendarEventListCard: View {
         }
 
         // Single day
-        if cal.isDateInToday(first.start)    { return "Today · \(count) \(noun)" }
+        if cal.isDateInToday(first.start) { return "Today · \(count) \(noun)" }
         if cal.isDateInTomorrow(first.start) { return "Tomorrow · \(count) \(noun)" }
         return "\(f.string(from: first.start)) · \(count) \(noun)"
     }
@@ -74,6 +74,7 @@ struct CalendarEventListCard: View {
     @ViewBuilder
     private var eventRows: some View {
         ForEach(Array(events.enumerated()), id: \.element.id) { index, event in
+            // swiftlint:disable:next multiple_closures_with_trailing_closure
             Button(action: { openInCalendar(event) }) {
                 eventRow(event)
             }

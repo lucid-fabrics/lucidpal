@@ -1,5 +1,5 @@
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class ChatViewModelStreamTests: XCTestCase {
@@ -8,14 +8,18 @@ final class ChatViewModelStreamTests: XCTestCase {
     override func setUp() {
         super.setUp()
         viewModel = ChatViewModel(
-            llmService: MockLLMService(),
-            calendarService: MockCalendarService(),
-            settings: MockAppSettings(),
-            systemPromptBuilder: MockSystemPromptBuilder(),
-            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
-            speechService: MockSpeechService(),
-            hapticService: MockHapticService(),
-            historyManager: MockChatHistoryManager()
+            dependencies: ChatViewModelDependencies(
+                llmService: MockLLMService(),
+                calendarService: MockCalendarService(),
+                settings: MockAppSettings(),
+                systemPromptBuilder: MockSystemPromptBuilder(),
+                suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+                speechService: MockSpeechService(),
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: nil
+            )
         )
     }
 
@@ -106,5 +110,35 @@ final class ChatViewModelStreamTests: XCTestCase {
         viewModel.applyStreamToken("<think>thinking</think>  ", rawBuffer: &raw, thinkDone: &thinkDone, showThinking: false, idx: idx)
         XCTAssertTrue(thinkDone)
         XCTAssertTrue(viewModel.messages[idx].content.isEmpty)
+    }
+
+    // MARK: - Stream interruption
+
+    func testCancellationLeavesPartialContentVisible() async throws {
+        let llm = MockLLMService()
+        llm.isLoaded = true
+        llm.stubbedTokens = ["Partial"]
+        llm.shouldThrowOnGenerate = CancellationError()
+        let vm = ChatViewModel(
+            dependencies: ChatViewModelDependencies(
+                llmService: llm,
+                calendarService: MockCalendarService(),
+                settings: MockAppSettings(),
+                systemPromptBuilder: MockSystemPromptBuilder(),
+                suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+                speechService: MockSpeechService(),
+                hapticService: MockHapticService(),
+                historyManager: MockChatHistoryManager(),
+                airPodsCoordinator: nil,
+                webSearchService: nil
+            )
+        )
+
+        vm.inputText = "Test cancellation"
+        await vm.sendMessage()
+
+        // Message slot must exist with partial content preserved, not cleared
+        let assistantMsg = vm.messages.last(where: { $0.role == .assistant })
+        XCTAssertEqual(assistantMsg?.content, "Partial")
     }
 }

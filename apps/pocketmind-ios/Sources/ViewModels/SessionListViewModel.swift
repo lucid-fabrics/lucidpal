@@ -15,36 +15,28 @@ final class SessionListViewModel: ObservableObject {
     /// Keyed by session ID — consumed by ChatSessionContainer on init to auto-send the first message.
     var pendingQueryBySessionID: [UUID: String] = [:]
 
-    let sessionManager: any SessionManagerProtocol
-    let llmService: any LLMServiceProtocol
-    let calendarService: any CalendarServiceProtocol
-    let calendarActionController: any CalendarActionControllerProtocol
-    let settings: any AppSettingsProtocol
-    let speechService: any SpeechServiceProtocol
-    let hapticService: any HapticServiceProtocol
-    let airPodsCoordinator: (any AirPodsVoiceCoordinatorProtocol)?
-    private let contextService: any ContextServiceProtocol
+    private let sessionManager: any SessionManagerProtocol
+    private let deps: SessionListViewModelDependencies
+    private let makeSystemPromptBuilder: () -> any SystemPromptBuilderProtocol
+    private let makeSuggestedPromptsProvider: () -> any SuggestedPromptsProviderProtocol
 
     init(
         sessionManager: any SessionManagerProtocol,
-        llmService: any LLMServiceProtocol,
-        calendarService: any CalendarServiceProtocol,
-        calendarActionController: any CalendarActionControllerProtocol,
-        settings: any AppSettingsProtocol,
-        speechService: any SpeechServiceProtocol,
-        hapticService: any HapticServiceProtocol,
-        airPodsCoordinator: (any AirPodsVoiceCoordinatorProtocol)? = nil,
-        contextService: (any ContextServiceProtocol)? = nil
+        dependencies: SessionListViewModelDependencies
     ) {
         self.sessionManager = sessionManager
-        self.llmService = llmService
-        self.calendarService = calendarService
-        self.calendarActionController = calendarActionController
-        self.settings = settings
-        self.speechService = speechService
-        self.hapticService = hapticService
-        self.airPodsCoordinator = airPodsCoordinator
-        self.contextService = contextService ?? ContextService(settings: settings)
+        self.deps = dependencies
+        self.makeSystemPromptBuilder = dependencies.makeSystemPromptBuilder ?? {
+            SystemPromptBuilder(
+                calendarService: dependencies.calendarService,
+                contextService: dependencies.contextService,
+                settings: dependencies.settings,
+                calendarActionController: dependencies.calendarActionController
+            )
+        }
+        self.makeSuggestedPromptsProvider = dependencies.makeSuggestedPromptsProvider ?? {
+            SuggestedPromptsProvider(calendarService: dependencies.calendarService)
+        }
         self.sessions = sessionManager.loadIndex().sorted { $0.updatedAt > $1.updatedAt }
     }
 
@@ -80,23 +72,20 @@ final class SessionListViewModel: ObservableObject {
     // MARK: - ChatViewModel Factory
 
     func makeChatViewModel(for session: ChatSession, initialQuery: String? = nil, startWithVoice: Bool = false) -> ChatViewModel {
-        let promptBuilder = SystemPromptBuilder(
-            calendarService: calendarService,
-            contextService: contextService,
-            settings: settings,
-            calendarActionController: calendarActionController
-        )
-        let promptsProvider = SuggestedPromptsProvider(calendarService: calendarService)
-        let vm = ChatViewModel(
-            llmService: llmService,
-            calendarService: calendarService,
-            settings: settings,
-            systemPromptBuilder: promptBuilder,
-            suggestedPromptsProvider: promptsProvider,
-            speechService: speechService,
-            hapticService: hapticService,
+        let chatDeps = ChatViewModelDependencies(
+            llmService: deps.llmService,
+            calendarService: deps.calendarService,
+            settings: deps.settings,
+            systemPromptBuilder: makeSystemPromptBuilder(),
+            suggestedPromptsProvider: makeSuggestedPromptsProvider(),
+            speechService: deps.speechService,
+            hapticService: deps.hapticService,
             historyManager: NoOpChatHistoryManager(),
-            airPodsCoordinator: airPodsCoordinator,
+            airPodsCoordinator: deps.airPodsCoordinator,
+            webSearchService: deps.webSearchService
+        )
+        let vm = ChatViewModel(
+            dependencies: chatDeps,
             session: session,
             sessionManager: sessionManager,
             onSessionUpdated: { [weak self] meta in
@@ -129,21 +118,21 @@ final class SessionListViewModel: ObservableObject {
     // MARK: - Calendar context for hero panel
 
     func nextUpcomingEvent() -> CalendarEventInfo? {
-        guard calendarService.isAuthorized else { return nil }
+        guard deps.calendarService.isAuthorized else { return nil }
         let now = Date.now
         let end = Calendar.current.date(byAdding: .hour, value: 24, to: now) ?? now.addingTimeInterval(24 * ChatConstants.secondsPerHour)
-        return calendarService.events(in: now, end: end)
+        return deps.calendarService.events(in: now, end: end)
             .filter { !$0.isAllDay }
             .sorted { $0.startDate < $1.startDate }
             .first
     }
 
     func todayEventCount() -> Int {
-        guard calendarService.isAuthorized else { return 0 }
+        guard deps.calendarService.isAuthorized else { return 0 }
         let cal = Calendar.current
         let start = cal.startOfDay(for: .now)
         let end = cal.date(byAdding: .day, value: 1, to: start) ?? start.addingTimeInterval(24 * ChatConstants.secondsPerHour)
-        return calendarService.events(in: start, end: end)
+        return deps.calendarService.events(in: start, end: end)
             .filter { !$0.isAllDay }
             .count
     }
@@ -195,10 +184,14 @@ final class SessionListViewModel: ObservableObject {
     }
 
     func createCalendarEvent(
-        title: String, start: Date, end: Date,
-        isAllDay: Bool, location: String?, notes: String?
+        title: String,
+        start: Date,
+        end: Date,
+        isAllDay: Bool,
+        location: String?,
+        notes: String?
     ) throws {
-        try calendarService.createEvent(
+        try deps.calendarService.createEvent(
             title: title,
             start: start,
             end: end,

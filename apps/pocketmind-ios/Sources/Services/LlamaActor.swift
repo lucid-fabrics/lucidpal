@@ -23,6 +23,9 @@ enum LLMConstants {
     static let samplerTemperature: Float = 0.35
     /// Bytes in one gigabyte — used for RAM-based context sizing.
     static let bytesPerGB: UInt64 = 1_073_741_824
+    /// GPU layers value that offloads the entire model to Metal on-device.
+    /// llama.cpp treats any value ≥ the model's actual layer count as "all layers".
+    static let allMetalGPULayers: Int32 = 99
 }
 
 // MARK: - LlamaActor
@@ -40,11 +43,11 @@ actor LlamaActor {
     // (which is nonisolated in Swift 6) can call the llama C free functions; by the time
     // deinit runs no other code holds a reference to this actor, so there is no concurrent
     // access.
-    nonisolated(unsafe) private var model:   OpaquePointer?   // freed in deinit
-    nonisolated(unsafe) private var ctx:     OpaquePointer?   // freed in deinit
-    nonisolated(unsafe) private var vocab:   OpaquePointer?   // freed in deinit (via model)
+    nonisolated(unsafe) private var model: OpaquePointer?   // freed in deinit
+    nonisolated(unsafe) private var ctx: OpaquePointer?   // freed in deinit
+    nonisolated(unsafe) private var vocab: OpaquePointer?   // freed in deinit (via model)
     nonisolated(unsafe) private var sampler: UnsafeMutablePointer<llama_sampler>? // freed in deinit
-    nonisolated(unsafe) private var batch:   llama_batch      // freed in deinit via llama_batch_free
+    nonisolated(unsafe) private var batch: llama_batch      // freed in deinit via llama_batch_free
 
     private var pendingCChars: [CChar] = []
     private var nCur: Int32 = 0
@@ -58,8 +61,8 @@ actor LlamaActor {
 
     deinit {
         if let s = sampler { llama_sampler_free(s) }
-        if let c = ctx     { llama_free(c) }
-        if let m = model   { llama_model_free(m) }
+        if let c = ctx { llama_free(c) }
+        if let m = model { llama_model_free(m) }
         llama_batch_free(batch)
         llama_backend_free()
     }
@@ -73,7 +76,7 @@ actor LlamaActor {
 #if targetEnvironment(simulator)
         mp.n_gpu_layers = 0
 #else
-        mp.n_gpu_layers = 99  // offload all layers to Metal on device
+        mp.n_gpu_layers = LLMConstants.allMetalGPULayers
 #endif
         guard let m = llama_model_load_from_file(path, mp) else {
             throw LLMError.loadFailed(underlying: NSError(
@@ -112,8 +115,8 @@ actor LlamaActor {
 
     func unload() {
         if let s = sampler { llama_sampler_free(s); sampler = nil }
-        if let c = ctx     { llama_free(c);         ctx     = nil }
-        if let m = model   { llama_model_free(m);   model   = nil }
+        if let c = ctx { llama_free(c); ctx = nil }
+        if let m = model { llama_model_free(m); model = nil }
         vocab = nil
         nCur  = 0
     }
@@ -163,7 +166,13 @@ actor LlamaActor {
         pendingCChars = []
         nCur = 0
 
-        // Prefill
+        guard prefill(tokens: tokens, ctx: ctx, continuation: continuation) else { return }
+        streamTokens(maxNew: maxNew, contextLength: contextLength, ctx: ctx, vocab: vocab, sampler: sampler, continuation: continuation)
+        continuation.finish()
+    }
+
+    /// Encodes all prompt tokens into the KV cache. Returns false (and finishes the continuation with an error) on failure.
+    private func prefill(tokens: [llama_token], ctx: OpaquePointer, continuation: AsyncThrowingStream<String, Error>.Continuation) -> Bool {
         batchClear()
         for (i, tok) in tokens.enumerated() {
             batchAdd(id: tok, pos: Int32(i), seqId: 0, logits: i == tokens.count - 1)
@@ -172,15 +181,27 @@ actor LlamaActor {
             continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
                 domain: "llama", code: 0,
                 userInfo: [NSLocalizedDescriptionKey: "Prefill decode failed"])))
-            return
+            return false
         }
         llama_synchronize(ctx)
         nCur = batch.n_tokens
+        return true
+    }
 
-        // Generation loop — also cap at context length so we never pass an out-of-range
-        // position to llama_decode (which asserts in debug builds).
+    /// Samples tokens one at a time and yields decoded strings until EOS, cancellation, or budget exhaustion.
+    private func streamTokens(
+        maxNew: Int32,
+        contextLength: Int,
+        ctx: OpaquePointer,
+        vocab: OpaquePointer,
+        sampler: UnsafeMutablePointer<llama_sampler>,
+        continuation: AsyncThrowingStream<String, Error>.Continuation
+    ) {
+        // Cap at context length so we never pass an out-of-range position to llama_decode
+        // (which asserts in debug builds).
         let ctxLimit = Int32(contextLength) - 1
-        while nCur - Int32(tokens.count) < maxNew && nCur < ctxLimit {
+        let startCur = nCur
+        while nCur - startCur < maxNew && nCur < ctxLimit {
             if Task.isCancelled { break }
 
             let newTok = llama_sampler_sample(sampler, ctx, -1)
@@ -203,8 +224,6 @@ actor LlamaActor {
             if !str.isEmpty { continuation.yield(str) }
             pendingCChars = []
         }
-
-        continuation.finish()
     }
 
     // MARK: - Batch helpers
@@ -257,12 +276,11 @@ actor LlamaActor {
             pendingCChars = []
             return str
         }
-        for len in stride(from: pendingCChars.count - 1, through: 1, by: -1) {
-            if String(validatingUTF8: Array(pendingCChars.suffix(len)) + [0]) != nil {
-                let str = String(cString: pendingCChars + [0])
-                pendingCChars = []
-                return str
-            }
+        for len in stride(from: pendingCChars.count - 1, through: 1, by: -1)
+            where String(validatingUTF8: Array(pendingCChars.suffix(len)) + [0]) != nil {
+            let str = String(cString: pendingCChars + [0])
+            pendingCChars = []
+            return str
         }
         return ""
     }

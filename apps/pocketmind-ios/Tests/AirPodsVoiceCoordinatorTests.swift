@@ -1,6 +1,6 @@
 import Combine
-import XCTest
 @testable import PocketMind
+import XCTest
 
 @MainActor
 final class AirPodsVoiceCoordinatorTests: XCTestCase {

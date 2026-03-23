@@ -1,7 +1,7 @@
 import OSLog
 import SwiftUI
 
-private let appLogger = Logger(subsystem: "com.pocketmind", category: "PocketMindApp")
+private let appLogger = Logger(subsystem: "app.pocketmind", category: "PocketMindApp")
 
 // Wrapper so the NotificationCenter token is removed in deinit.
 // PocketMindApp is a struct and cannot have deinit directly.
@@ -25,7 +25,6 @@ private final class MemoryPressureObserver {
 struct PocketMindApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
-
     // MARK: - Services
 
     private let settings = AppSettings()
@@ -36,7 +35,10 @@ struct PocketMindApp: App {
     private let modelDownloader = ModelDownloader()
     private let calendarActionController: any CalendarActionControllerProtocol
     private let audioRouteMonitor = AudioRouteMonitor()
-    private let airPodsCoordinator: AirPodsVoiceCoordinator
+    private let airPodsCoordinator: any AirPodsVoiceCoordinatorProtocol
+    private let webSearchService: any WebSearchServiceProtocol
+    private let contextService: any ContextServiceProtocol
+    private let locationService: any LocationServiceProtocol = LocationService()
 
     // MARK: - ViewModels
 
@@ -60,20 +62,27 @@ struct PocketMindApp: App {
             speechService: speechService,
             settings: settings
         )
+        webSearchService = WebSearchService(settings: settings)
+        contextService = ContextService(settings: settings)
         let sessionManager = SessionManager()
         sessionListViewModel = SessionListViewModel(
             sessionManager: sessionManager,
-            llmService: llmService,
-            calendarService: calendarService,
-            calendarActionController: actionController,
-            settings: settings,
-            speechService: speechService,
-            hapticService: hapticService,
-            airPodsCoordinator: airPodsCoordinator
+            dependencies: SessionListViewModelDependencies(
+                llmService: llmService,
+                calendarService: calendarService,
+                calendarActionController: actionController,
+                settings: settings,
+                speechService: speechService,
+                hapticService: hapticService,
+                contextService: contextService,
+                airPodsCoordinator: airPodsCoordinator,
+                webSearchService: webSearchService
+            )
         )
         settingsViewModel = SettingsViewModel(
             settings: settings,
-            calendarService: calendarService
+            calendarService: calendarService,
+            locationService: locationService
         )
         downloadViewModel = ModelDownloadViewModel(
             llmService: llmService,
