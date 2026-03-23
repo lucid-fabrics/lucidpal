@@ -100,8 +100,10 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
     // MARK: - Filters
 
     /// All models that support text inference and fit in RAM.
+    /// Excludes integrated models — those are vision-only selectable (selecting them as
+    /// "text" model is redundant since they handle both; users pick them in Vision section).
     static func textModels(physicalRAMGB: Int) -> [ModelInfo] {
-        [.qwen3_5_0B8, .qwen3_5_2B, .qwen3_5_4B, .qwen3_5_vision]
+        [.qwen3_5_0B8, .qwen3_5_2B, .qwen3_5_4B]
             .filter { $0.capabilities.contains(.text) && $0.minimumRAMGB <= physicalRAMGB }
     }
 
