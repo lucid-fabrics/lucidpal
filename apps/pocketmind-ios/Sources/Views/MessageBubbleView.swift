@@ -2,6 +2,11 @@ import SwiftUI
 // UIKit is used solely for UIPasteboard clipboard access — no UI components imported.
 import UIKit
 
+private enum AnimationConstants {
+    /// Minimum opacity for the pulsing dot in the generating status view.
+    static let dotInitialOpacity: Double = 0.2
+}
+
 struct MessageBubbleView: View {
     let message: ChatMessage
     var userPrompt: String? = nil
@@ -22,11 +27,6 @@ struct MessageBubbleView: View {
     @State private var showTimestamp = false
     @State private var swipeOffset: CGFloat = 0
     @State private var replyTriggered = false
-
-    private enum AnimationConstants {
-        /// Minimum opacity for the pulsing dot in the generating status view.
-        static let dotInitialOpacity: Double = 0.2
-    }
 
     private let replyThreshold: CGFloat = 60
     /// Max swipe travel expressed as a multiple of replyThreshold (30% overshoot).

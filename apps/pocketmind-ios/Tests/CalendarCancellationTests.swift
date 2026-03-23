@@ -14,7 +14,7 @@ final class CalendarCancellationTests: XCTestCase {
         llm.isLoaded = true
         calendar = MockCalendarService()
         haptic = MockHapticService()
-        vm = ChatViewModel(
+        vm = ChatViewModel(dependencies: ChatViewModelDependencies(
             llmService: llm,
             calendarService: calendar,
             settings: MockAppSettings(),
@@ -22,8 +22,10 @@ final class CalendarCancellationTests: XCTestCase {
             suggestedPromptsProvider: MockSuggestedPromptsProvider(),
             speechService: MockSpeechService(),
             hapticService: haptic,
-            historyManager: NoOpChatHistoryManager()
-        )
+            historyManager: NoOpChatHistoryManager(),
+            airPodsCoordinator: nil,
+            webSearchService: nil
+        ))
     }
 
     // MARK: - Helpers

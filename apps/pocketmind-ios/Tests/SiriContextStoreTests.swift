@@ -16,7 +16,7 @@ final class SiriContextStoreTests: XCTestCase {
 
     // MARK: - Write / Read
 
-    func testWriteThenRead() {
+    func testWriteThenRead() throws {
         let action = makeAction(type: .created, title: "Team Sync")
 
         SiriContextStore.write(action)

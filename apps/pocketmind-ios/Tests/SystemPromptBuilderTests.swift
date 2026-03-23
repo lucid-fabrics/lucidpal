@@ -2,7 +2,7 @@
 import XCTest
 
 @MainActor
-final class SystemPromptBuilderTests: XCTestCase {
+final class PromptSectionTests: XCTestCase {
 
     private var sut: SystemPromptBuilder!
 
@@ -117,7 +117,8 @@ final class SystemPromptBuilderTests: XCTestCase {
         settings.webSearchProvider = .searxng
         settings.webSearchEndpoint = "http://localhost:8888"
         let section = WebSearchPromptSection(settings: settings)
-        let result = try XCTUnwrap(await section.build(), "WebSearchPromptSection must return content when enabled with valid endpoint")
+        let built = await section.build()
+        let result = try XCTUnwrap(built, "WebSearchPromptSection must return content when enabled with valid endpoint")
         XCTAssertTrue(result.contains("WEB_SEARCH"))
     }
 }
