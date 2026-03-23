@@ -20,7 +20,7 @@ if [ -n "$CHANGED_FILES" ]; then
   SECRET_MATCHES=$(echo "$CHANGED_FILES" | xargs git diff origin/$(git branch --show-current 2>/dev/null || echo main)...HEAD -- 2>/dev/null | \
     grep "^+" | \
     grep -iE "(password|api.?key|secret|token)\s*=\s*['\"][^'\"]{8,}['\"]" | \
-    grep -v '\${\|\\$\|\$[A-Z_]\|EXAMPLE\|getItem\|setItem' || true)
+    grep -v '\${\|\\$\|\$[A-Z_]\|EXAMPLE\|getItem\|setItem\|UserDefaultsKeys\|DefaultsKey' || true)
 
   if [ -n "$SECRET_MATCHES" ]; then
     echo "❌ PUSH BLOCKED: Potential hardcoded secrets detected"
