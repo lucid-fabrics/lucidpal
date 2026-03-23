@@ -4,7 +4,7 @@ import Foundation
 @MainActor
 final class MockAppSettings: AppSettingsProtocol {
     var calendarAccessEnabled: Bool = false
-    var selectedModelID: String = ModelInfo.qwen3_5_2B.id
+    var selectedTextModelID: String = ModelInfo.qwen3_5_2B.id
     var hasCompletedOnboarding: Bool = false
     var thinkingEnabled: Bool = true
     var defaultCalendarIdentifier: String = ""
@@ -21,14 +21,29 @@ final class MockAppSettings: AppSettingsProtocol {
     var braveApiKey: String = ""
     var locationEnabled: Bool = false
     var userCity: String = ""
+    var visionEnabled: Bool = true
+    var selectedVisionModelID: String = ModelInfo.qwen3_5_vision.id
 
-    var selectedModel: ModelInfo {
-        [ModelInfo.qwen3_5_0B8, ModelInfo.qwen3_5_2B, ModelInfo.qwen3_5_4B]
-            .first { $0.id == selectedModelID } ?? .qwen3_5_2B
+    var selectedTextModel: ModelInfo {
+        [.qwen3_5_0B8, .qwen3_5_2B, .qwen3_5_4B, .qwen3_5_vision]
+            .first { $0.id == selectedTextModelID } ?? .qwen3_5_2B
+    }
+
+    var selectedVisionModel: ModelInfo {
+        [.qwen3_5_vision]
+            .first { $0.id == selectedVisionModelID } ?? .qwen3_5_vision
     }
 
     var deviceRAMGB: Int = 4
     var maxContextSize: Int {
         deviceRAMGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeContextSizeTokens : ChatConstants.defaultContextSizeTokens
     }
+
+    // Backwards-compat
+    var selectedModelID: String {
+        get { selectedTextModelID }
+        set { selectedTextModelID = newValue }
+    }
+
+    var selectedModel: ModelInfo { selectedTextModel }
 }

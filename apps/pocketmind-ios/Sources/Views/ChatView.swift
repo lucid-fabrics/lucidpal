@@ -1,11 +1,14 @@
 import SwiftUI
 import UIKit
+import PhotosUI
 
 struct ChatView: View {
     @ObservedObject var viewModel: ChatViewModel
 
     @FocusState var inputFocused: Bool
     @State private var showClearConfirm = false
+    @State var showingPhotoPicker = false
+    @State var selectedPhotos: [PhotosPickerItem] = []
 
     var body: some View {
         VStack(spacing: 0) {

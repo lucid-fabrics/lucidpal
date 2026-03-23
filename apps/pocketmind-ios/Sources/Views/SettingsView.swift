@@ -13,7 +13,9 @@ struct SettingsView: View {
                 calendarSection
                 locationSection
                 webSearchSection
-                modelSection
+                visionSection
+                textModelSection
+                visionModelSection
                 inferenceSection
                 shortcutsSection
                 aboutSection
@@ -27,6 +29,8 @@ struct SettingsView: View {
             }
         }
     }
+
+    // MARK: - Sections
 
     private var calendarSection: some View {
         Section {
@@ -115,7 +119,6 @@ struct SettingsView: View {
         } header: {
             Text("Location")
         } footer: {
-            // swiftlint:disable:next line_length
             Text("When enabled, your city is included in the AI prompt so responses like weather and local recommendations are relevant to you. Location is never stored on servers.")
         }
     }
@@ -149,52 +152,160 @@ struct SettingsView: View {
         }
     }
 
-    private var modelSection: some View {
+    private var visionSection: some View {
         Section {
-            ForEach(downloadViewModel.availableModels, id: \.id) { model in
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(model.displayName)
-                            .font(.subheadline)
-                        Text(model.isDownloaded ? "On device" : "Not downloaded")
-                            .font(.caption)
-                            .foregroundStyle(model.isDownloaded ? .green : .secondary)
-                    }
-                    Spacer()
-                    if viewModel.selectedModelID == model.id && downloadViewModel.isModelLoaded {
-                        Image(systemName: "checkmark")
-                            .foregroundStyle(Color.accentColor)
-                    }
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    if model.isDownloaded {
-                        viewModel.selectModel(model)
-                        downloadViewModel.selectModel(model)
-                        Task { await downloadViewModel.loadModel() }
-                    } else {
-                        downloadViewModel.selectModel(model)
-                    }
-                }
-                .swipeActions(edge: .trailing) {
-                    if model.isDownloaded {
-                        Button("Delete", role: .destructive) {
-                            downloadViewModel.deleteModel(model)
+            Toggle(isOn: $viewModel.visionEnabled) {
+                Label("Vision", systemImage: "camera.viewfinder")
+            }
+        } footer: {
+            Text("When enabled, photo attachments are processed by the vision model. Disable to only use text inference.")
+        }
+    }
+
+    // MARK: - Model Sections
+
+    private var textModelSection: some View {
+        Section {
+            ForEach(viewModel.availableTextModels, id: \.id) { model in
+                modelRow(
+                    model: model,
+                    isSelected: viewModel.selectedTextModelID == model.id,
+                    isLoaded: viewModel.selectedTextModelID == model.id && downloadViewModel.isModelLoaded,
+                    onSelect: {
+                        if model.isDownloaded {
+                            viewModel.selectTextModel(model)
+                            downloadViewModel.selectModel(model)
+                            Task { await downloadViewModel.loadModel() }
+                        } else {
+                            downloadViewModel.selectModel(model)
                         }
                     }
-                }
+                )
             }
 
-            NavigationLink("Download Models") {
-                ModelDownloadView(viewModel: downloadViewModel)
+            NavigationLink("Download More Models") {
+                ModelDownloadView(viewModel: downloadViewModel, capabilityFilter: .text)
             }
         } header: {
-            Text("Model")
+            Text("Text Model")
         } footer: {
-            // swiftlint:disable:next line_length
             Text("Device RAM: \(viewModel.deviceRAMGB) GB · Free storage: \(viewModel.availableStorageGB.map { String(format: "%.1f GB free", $0) } ?? "Unknown")")
         }
     }
+
+    private var visionModelSection: some View {
+        Section {
+            if viewModel.availableVisionModels.isEmpty {
+                Text("No vision models available for your device.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(viewModel.availableVisionModels, id: \.id) { model in
+                    modelRow(
+                        model: model,
+                        isSelected: viewModel.selectedVisionModelID == model.id || model.isIntegrated && viewModel.selectedTextModelID == model.id,
+                        isLoaded: false,   // vision model loaded on-demand; don't show as "loaded" here
+                        onSelect: {
+                            if model.isDownloaded {
+                                viewModel.selectVisionModel(model)
+                                if model.isIntegrated {
+                                    viewModel.selectTextModel(model)
+                                }
+                                downloadViewModel.selectModel(model)
+                                Task { await downloadViewModel.loadModel() }
+                            } else {
+                                downloadViewModel.selectModel(model)
+                            }
+                        }
+                    )
+                }
+            }
+
+            NavigationLink("Download Vision Models") {
+                ModelDownloadView(viewModel: downloadViewModel, capabilityFilter: .vision)
+            }
+        } header: {
+            Text("Vision Model")
+        } footer: {
+            if !viewModel.availableVisionModels.isEmpty {
+                Text("Vision models process photo attachments. Integrated models handle both text and vision — no separate selection needed.")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func modelRow(
+        model: ModelInfo,
+        isSelected: Bool,
+        isLoaded: Bool,
+        onSelect: @escaping () -> Void
+    ) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Text(model.displayName)
+                        .font(.subheadline)
+                    capabilityBadges(for: model)
+                }
+                HStack(spacing: 8) {
+                    Text(model.isDownloaded ? "On device" : "Not downloaded")
+                        .font(.caption)
+                        .foregroundStyle(model.isDownloaded ? .green : .secondary)
+                    Text("·")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(model.fileSizeGB < 1
+                        ? String(format: "%.0f MB", model.fileSizeGB * 1024)
+                        : String(format: "%.1f GB", model.fileSizeGB))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+            if isSelected {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(Color.accentColor)
+            } else if isLoaded {
+                Image(systemName: "checkmark.circle")
+                    .foregroundStyle(.green)
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { onSelect() }
+        .swipeActions(edge: .trailing) {
+            if model.isDownloaded {
+                Button("Delete", role: .destructive) {
+                    downloadViewModel.deleteModel(model)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func capabilityBadges(for model: ModelInfo) -> some View {
+        if model.isIntegrated {
+            badge("Integrated", icon: "sparkles", color: .purple)
+        } else if model.supportsVision {
+            badge("Vision", icon: "camera.viewfinder", color: .orange)
+        }
+    }
+
+    @ViewBuilder
+    private func badge(_ text: String, icon: String, color: Color) -> some View {
+        HStack(spacing: 3) {
+            Image(systemName: icon)
+                .font(.caption2)
+            Text(text)
+                .font(.caption2)
+        }
+        .foregroundStyle(color)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(color.opacity(0.15))
+        .clipShape(Capsule())
+    }
+
+    // MARK: - Inference
 
     private var inferenceSection: some View {
         Section {
@@ -216,7 +327,6 @@ struct SettingsView: View {
         } header: {
             Text("Inference")
         } footer: {
-            // swiftlint:disable:next line_length
             Text("\"Start voice on open\" automatically starts listening when you open a new chat. \"AirPods auto-voice\" starts listening automatically when AirPods are connected. Auto-send submits voice input when speech recognition finishes. Thinking mode can be toggled per chat via the brain icon in the chat toolbar.")
         }
     }
@@ -237,7 +347,6 @@ struct SettingsView: View {
             }
             .pickerStyle(.menu)
 
-            // swiftlint:disable:next line_length
             Text("How many tokens the model keeps in memory. Larger = longer conversations but slower load and more RAM. Takes effect next time the model loads. Your device supports up to \(maxCtx) tokens.")
                 .font(.caption)
                 .foregroundStyle(.secondary)

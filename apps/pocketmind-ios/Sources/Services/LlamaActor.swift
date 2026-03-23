@@ -26,6 +26,17 @@ enum LLMConstants {
     /// GPU layers value that offloads the entire model to Metal on-device.
     /// llama.cpp treats any value ≥ the model's actual layer count as "all layers".
     static let allMetalGPULayers: Int32 = 99
+    /// RAM threshold for vision model loading — if device has less than this and a text
+    /// model is already loaded, unload the text model first.
+    static let visionModelMinRAMGB: Int = 6
+}
+
+// MARK: - ModelType
+
+/// Role of the model in the dual-model architecture.
+enum ModelType: Sendable {
+    case text
+    case vision
 }
 
 // MARK: - LlamaActor
@@ -43,16 +54,35 @@ actor LlamaActor {
     // (which is nonisolated in Swift 6) can call the llama C free functions; by the time
     // deinit runs no other code holds a reference to this actor, so there is no concurrent
     // access.
-    nonisolated(unsafe) private var model: OpaquePointer?   // freed in deinit
-    nonisolated(unsafe) private var ctx: OpaquePointer?   // freed in deinit
-    nonisolated(unsafe) private var vocab: OpaquePointer?   // freed in deinit (via model)
-    nonisolated(unsafe) private var sampler: UnsafeMutablePointer<llama_sampler>? // freed in deinit
-    nonisolated(unsafe) private var batch: llama_batch      // freed in deinit via llama_batch_free
+
+    // Text model pointers
+    nonisolated(unsafe) private var textModel: OpaquePointer?
+    nonisolated(unsafe) private var textCtx: OpaquePointer?
+    nonisolated(unsafe) private var textVocab: OpaquePointer?
+    nonisolated(unsafe) private var textSampler: UnsafeMutablePointer<llama_sampler>?
+
+    // Vision model pointers
+    nonisolated(unsafe) private var visionModel: OpaquePointer?
+    nonisolated(unsafe) private var visionCtx: OpaquePointer?
+    nonisolated(unsafe) private var visionVocab: OpaquePointer?
+    nonisolated(unsafe) private var visionSampler: UnsafeMutablePointer<llama_sampler>?
+
+    // Shared batch (used by both models)
+    nonisolated(unsafe) private var batch: llama_batch
 
     private var pendingCChars: [CChar] = []
     private var nCur: Int32 = 0
 
-    var isLoaded: Bool { model != nil }
+    // Current active role
+    private var activeRole: ModelType?
+
+    /// True when the text model is an integrated vision model (handles both text and vision).
+    private var textModelSupportsVision: Bool = false
+
+    var isTextModelLoaded: Bool { textModel != nil }
+    var isVisionModelLoaded: Bool { visionModel != nil }
+
+    var isLoaded: Bool { textModel != nil || visionModel != nil }
 
     init() {
         llama_backend_init()
@@ -60,17 +90,56 @@ actor LlamaActor {
     }
 
     deinit {
-        if let s = sampler { llama_sampler_free(s) }
-        if let c = ctx { llama_free(c) }
-        if let m = model { llama_model_free(m) }
+        if let s = textSampler { llama_sampler_free(s) }
+        if let c = textCtx { llama_free(c) }
+        if let m = textModel { llama_model_free(m) }
+        if let s = visionSampler { llama_sampler_free(s) }
+        if let c = visionCtx { llama_free(c) }
+        if let m = visionModel { llama_model_free(m) }
         llama_batch_free(batch)
         llama_backend_free()
     }
 
-    // MARK: Load / Unload
+    // MARK: - Device RAM
 
-    func load(path: String, contextSize: UInt32) throws {
-        unload()
+    private var deviceRAMGB: Int {
+        Int(ProcessInfo.processInfo.physicalMemory / LLMConstants.bytesPerGB)
+    }
+
+    // MARK: - Load / Unload
+
+    /// Loads a model for the given role. If loading a vision model on a low-RAM device
+    /// with the text model already loaded, unloads the text model first.
+    func loadModel(at path: String, contextSize: UInt32, role: ModelType) throws {
+        // RAM guard: vision model needs enough RAM. If loading vision on < 6GB device
+        // with text model already loaded, unload text model first.
+        if role == .vision && deviceRAMGB < LLMConstants.visionModelMinRAMGB && textModel != nil {
+            unloadModel(role: .text)
+        }
+
+        switch role {
+        case .text:
+            try loadSingleModel(at: path, contextSize: contextSize, into: &textModel, &textCtx, &textVocab, &textSampler)
+            // Detect integrated vision models by filename convention
+            textModelSupportsVision = path.localizedCaseInsensitiveContains("vision")
+        case .vision:
+            try loadSingleModel(at: path, contextSize: contextSize, into: &visionModel, &visionCtx, &visionVocab, &visionSampler)
+        }
+        activeRole = role
+    }
+
+    private func loadSingleModel(
+        at path: String,
+        contextSize: UInt32,
+        into modelPtr: inout OpaquePointer?,
+        _ ctxPtr: inout OpaquePointer?,
+        _ vocabPtr: inout OpaquePointer?,
+        _ samplerPtr: inout UnsafeMutablePointer<llama_sampler>?
+    ) throws {
+        // Free existing model of same role if any
+        if let s = samplerPtr { llama_sampler_free(s); samplerPtr = nil }
+        if let c = ctxPtr { llama_free(c); ctxPtr = nil }
+        if let m = modelPtr { llama_model_free(m); modelPtr = nil }
 
         var mp = llama_model_default_params()
 #if targetEnvironment(simulator)
@@ -87,11 +156,11 @@ actor LlamaActor {
         let nThreads = max(1, min(LLMConstants.maxThreadCount, Int32(ProcessInfo.processInfo.processorCount - 2)))
         var cp = llama_context_default_params()
         cp.n_ctx           = contextSize
-        cp.n_batch         = contextSize  // must match n_ctx so full-prompt prefill fits in one decode call
+        cp.n_batch         = contextSize
         cp.n_threads       = nThreads
         cp.n_threads_batch = nThreads
-        cp.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_ENABLED  // halves KV cache memory, speeds up prefill
-        cp.offload_kqv     = true                           // keep KV cache in GPU memory
+        cp.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_ENABLED
+        cp.offload_kqv     = true
 
         guard let c = llama_init_from_model(m, cp) else {
             llama_model_free(m)
@@ -100,31 +169,48 @@ actor LlamaActor {
                 userInfo: [NSLocalizedDescriptionKey: "llama_init_from_model returned nil — not enough memory?"]))
         }
 
-        model = m
-        ctx   = c
-        vocab = llama_model_get_vocab(m)
+        modelPtr = m
+        ctxPtr   = c
+        vocabPtr = llama_model_get_vocab(m)
 
         let sparams = llama_sampler_chain_default_params()
         let s = llama_sampler_chain_init(sparams)
-        // Lower temperature for a calendar assistant: reduces hallucinated JSON fields
-        // and date/time errors. 0.35 keeps variety in prose while keeping actions precise.
         llama_sampler_chain_add(s, llama_sampler_init_temp(LLMConstants.samplerTemperature))
         llama_sampler_chain_add(s, llama_sampler_init_dist(UInt32.random(in: 0...UInt32.max)))
-        sampler = s
+        samplerPtr = s
     }
 
+    /// Unloads the model for the given role.
+    func unloadModel(role: ModelType) {
+        switch role {
+        case .text:
+            if let s = textSampler { llama_sampler_free(s); textSampler = nil }
+            if let c = textCtx { llama_free(c); textCtx = nil }
+            if let m = textModel { llama_model_free(m); textModel = nil }
+            textVocab = nil
+            textModelSupportsVision = false
+        case .vision:
+            if let s = visionSampler { llama_sampler_free(s); visionSampler = nil }
+            if let c = visionCtx { llama_free(c); visionCtx = nil }
+            if let m = visionModel { llama_model_free(m); visionModel = nil }
+            visionVocab = nil
+        }
+        if activeRole == role { activeRole = nil }
+        nCur = 0
+    }
+
+    /// Unloads all models.
     func unload() {
-        if let s = sampler { llama_sampler_free(s); sampler = nil }
-        if let c = ctx { llama_free(c); ctx = nil }
-        if let m = model { llama_model_free(m); model = nil }
-        vocab = nil
-        nCur  = 0
+        unloadModel(role: .text)
+        unloadModel(role: .vision)
+        pendingCChars = []
+        nCur = 0
     }
 
     /// Decodes a single BOS token to warm up the Metal pipeline.
-    /// Eliminates the ~300 ms shader-compilation stutter on the first real user message.
-    /// KV cache is cleared afterwards so the warmup has no effect on responses.
-    func warmup() {
+    func warmup(role: ModelType) {
+        let ctx = role == .text ? textCtx : visionCtx
+        let vocab = role == .text ? textVocab : visionVocab
         guard let ctx, let vocab else { return }
         let bos = llama_vocab_bos(vocab)
         guard bos >= 0 else { return }
@@ -136,25 +222,39 @@ actor LlamaActor {
         nCur = 0
     }
 
-    // MARK: Generate
+    // MARK: - Generate
 
-    func generate(prompt: String, continuation: AsyncThrowingStream<String, Error>.Continuation) async {
+    func generate(prompt: String, role: ModelType, continuation: AsyncThrowingStream<String, Error>.Continuation) async {
+        // Determine which model slot to use.
+        // Fallback: if vision requested but vision slot empty, use text slot if it supports vision.
+        let useTextSlotForVision = role == .vision && visionCtx == nil && textModelSupportsVision && textCtx != nil
+        let actualCtx: OpaquePointer?
+        let actualVocab: OpaquePointer?
+        let actualSampler: UnsafeMutablePointer<llama_sampler>?
+        if useTextSlotForVision {
+            actualCtx = textCtx
+            actualVocab = textVocab
+            actualSampler = textSampler
+        } else {
+            actualCtx = role == .text ? textCtx : visionCtx
+            actualVocab = role == .text ? textVocab : visionVocab
+            actualSampler = role == .text ? textSampler : visionSampler
+        }
+        let ctx = actualCtx
+        let vocab = actualVocab
+        let sampler = actualSampler
+
         guard let ctx, let vocab, let sampler else {
             continuation.finish(throwing: LLMError.modelNotLoaded)
             return
         }
 
-        var tokens = tokenize(text: prompt, addBOS: true, parseSpecial: true)
+        var tokens = tokenize(text: prompt, addBOS: true, parseSpecial: true, vocab: vocab)
         guard !tokens.isEmpty else {
             continuation.finish()
             return
         }
 
-        // Guard against context overflow — truncate from the front, keeping the most recent tokens.
-        // Use the actual initialised context length so the budget is correct on both the 4 K and 8 K
-        // context configurations.  Previously this hard-coded smallContextSize (4096) regardless of
-        // device RAM, leaving only 512 slots for generation on a 4 K device while maxNewTokens is 768,
-        // causing llama_decode to assert-crash once generation went past token 4096.
         let maxNew: Int32 = LLMConstants.maxNewTokens
         let contextLength = Int(llama_n_ctx(ctx))
         let maxPromptTokens = contextLength - Int(maxNew)
@@ -171,7 +271,7 @@ actor LlamaActor {
         continuation.finish()
     }
 
-    /// Encodes all prompt tokens into the KV cache. Returns false (and finishes the continuation with an error) on failure.
+    /// Encodes all prompt tokens into the KV cache.
     private func prefill(tokens: [llama_token], ctx: OpaquePointer, continuation: AsyncThrowingStream<String, Error>.Continuation) -> Bool {
         batchClear()
         for (i, tok) in tokens.enumerated() {
@@ -188,7 +288,7 @@ actor LlamaActor {
         return true
     }
 
-    /// Samples tokens one at a time and yields decoded strings until EOS, cancellation, or budget exhaustion.
+    /// Samples tokens one at a time and yields decoded strings.
     private func streamTokens(
         maxNew: Int32,
         contextLength: Int,
@@ -197,8 +297,6 @@ actor LlamaActor {
         sampler: UnsafeMutablePointer<llama_sampler>,
         continuation: AsyncThrowingStream<String, Error>.Continuation
     ) {
-        // Cap at context length so we never pass an out-of-range position to llama_decode
-        // (which asserts in debug builds).
         let ctxLimit = Int32(contextLength) - 1
         let startCur = nCur
         while nCur - startCur < maxNew && nCur < ctxLimit {
@@ -207,7 +305,7 @@ actor LlamaActor {
             let newTok = llama_sampler_sample(sampler, ctx, -1)
             if llama_vocab_is_eog(vocab, newTok) { break }
 
-            let piece = tokenToPiece(token: newTok)
+            let piece = tokenToPiece(token: newTok, vocab: vocab)
             let str   = decodeUTF8(piece)
             if !str.isEmpty { continuation.yield(str) }
 
@@ -235,15 +333,14 @@ actor LlamaActor {
         batch.token   [i] = id
         batch.pos     [i] = pos
         batch.n_seq_id[i] = 1
-        if let ptr = batch.seq_id[i] { ptr[0] = seqId }  // Guard: seq_id[i] should always be non-nil after llama_batch_init
+        if let ptr = batch.seq_id[i] { ptr[0] = seqId }
         batch.logits  [i] = logits ? 1 : 0
         batch.n_tokens += 1
     }
 
     // MARK: - Tokenize
 
-    private func tokenize(text: String, addBOS: Bool, parseSpecial: Bool) -> [llama_token] {
-        guard let vocab else { return [] }
+    private func tokenize(text: String, addBOS: Bool, parseSpecial: Bool, vocab: OpaquePointer) -> [llama_token] {
         let utf8Count = text.utf8.count
         let maxTokens = utf8Count + (addBOS ? 1 : 0) + 1
         let buf = UnsafeMutablePointer<llama_token>.allocate(capacity: maxTokens)
@@ -255,14 +352,12 @@ actor LlamaActor {
 
     // MARK: - Token → String
 
-    private func tokenToPiece(token: llama_token) -> [CChar] {
-        guard let vocab else { return [] }
+    private func tokenToPiece(token: llama_token, vocab: OpaquePointer) -> [CChar] {
         var buf = [CChar](repeating: 0, count: 8)
         let n = llama_token_to_piece(vocab, token, &buf, 8, 0, false)
         if n < 0 {
-            // Cast to Int before negating to avoid Int32 overflow when n == Int32.min
             let bufSize = Int(-Int(n))
-            guard bufSize <= 65_536 else { return [] }  // Sanity: no token piece > 64 KB
+            guard bufSize <= 65_536 else { return [] }
             var big = [CChar](repeating: 0, count: bufSize)
             let n2 = llama_token_to_piece(vocab, token, &big, Int32(bufSize), 0, false)
             return Array(big.prefix(Int(n2)))

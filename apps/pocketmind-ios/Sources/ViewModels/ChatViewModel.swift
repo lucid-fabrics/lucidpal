@@ -1,6 +1,8 @@
 import Combine
 import Foundation
 import OSLog
+import PhotosUI
+import SwiftUI
 
 private let llmLogger = Logger(subsystem: "app.pocketmind", category: "LLM")
 
@@ -13,6 +15,10 @@ final class ChatViewModel: ObservableObject {
     @Published var isModelLoaded = false
     @Published var errorMessage: String?
     @Published var toast: ToastItem?
+
+    func showToast(_ message: String, systemImage: String) {
+        toast = ToastItem(message: message, systemImage: systemImage)
+    }
 
     @Published var isSpeechRecording = false
     @Published var isSpeechAvailable = false
@@ -30,6 +36,9 @@ final class ChatViewModel: ObservableObject {
 
     /// Navigation title — equals session title in session mode, "PocketMind" otherwise.
     @Published var sessionTitle: String
+
+    /// Image attachments pending to be sent with the next message.
+    @Published var imageAttachments: [AttachedImage] = []
 
     let llmService: any LLMServiceProtocol
     let calendarService: any CalendarServiceProtocol
@@ -105,6 +114,26 @@ final class ChatViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Image Attachments
+
+    /// Adds a processed image attachment.
+    func addImageAttachment(_ attachment: AttachedImage) {
+        guard imageAttachments.count < 5 else { return }
+        imageAttachments.append(attachment)
+    }
+
+    /// Removes an image attachment by ID.
+    func removeImageAttachment(id: UUID) {
+        imageAttachments.removeAll { $0.id == id }
+    }
+
+    /// Clears all pending image attachments.
+    func clearImageAttachments() {
+        imageAttachments.removeAll()
+    }
+
+    // MARK: - Generation
+
     func cancelGeneration() {
         llmService.cancelGeneration()
     }
@@ -151,4 +180,6 @@ final class ChatViewModel: ObservableObject {
         guard index > 0 else { return true }
         return !Calendar.current.isDate(messages[index].timestamp, inSameDayAs: messages[index - 1].timestamp)
     }
+
+
 }

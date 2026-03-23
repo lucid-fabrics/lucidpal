@@ -12,10 +12,10 @@ protocol CalendarSettingsProtocol: AnyObject {
 /// LLM inference and model-selection settings.
 @MainActor
 protocol InferenceSettingsProtocol: AnyObject {
-    var selectedModelID: String { get set }
+    var selectedTextModelID: String { get set }
     var contextSize: Int { get set }
     var thinkingEnabled: Bool { get set }
-    var selectedModel: ModelInfo { get }
+    var selectedTextModel: ModelInfo { get }
     var maxContextSize: Int { get }
     var deviceRAMGB: Int { get }
 }
@@ -44,6 +44,14 @@ protocol LocationSettingsProtocol: AnyObject {
     var userCity: String { get set }
 }
 
+/// Vision model settings.
+@MainActor
+protocol VisionSettingsProtocol: AnyObject {
+    var visionEnabled: Bool { get set }
+    var selectedVisionModelID: String { get set }
+    var selectedVisionModel: ModelInfo { get }
+}
+
 // MARK: - Composite protocol
 
 /// Full settings contract used at the composition root and by components that
@@ -54,7 +62,8 @@ protocol AppSettingsProtocol: CalendarSettingsProtocol,
                                InferenceSettingsProtocol,
                                VoiceSettingsProtocol,
                                WebSearchSettingsProtocol,
-                               LocationSettingsProtocol {
+                               LocationSettingsProtocol,
+                               VisionSettingsProtocol {
     var hasCompletedOnboarding: Bool { get set }
     var notesAccessEnabled: Bool { get set }
     var remindersAccessEnabled: Bool { get set }

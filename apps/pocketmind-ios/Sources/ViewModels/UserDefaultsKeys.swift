@@ -3,7 +3,9 @@ import Foundation
 /// Centralised UserDefaults key constants — prevents typos and duplicated literals.
 enum UserDefaultsKeys {
     static let calendarAccessEnabled    = "calendarAccessEnabled"
-    static let selectedModelID          = "selectedModelID"
+    static let selectedModelID          = "selectedModelID"       // Deprecated — kept for migration
+    static let selectedTextModelID      = "selectedTextModelID"
+    static let selectedVisionModelID    = "selectedVisionModelID"
     static let hasCompletedOnboarding   = "hasCompletedOnboarding"
     static let thinkingEnabled          = "thinkingEnabled"
     static let defaultCalendarIdentifier = "defaultCalendarIdentifier"
@@ -20,6 +22,7 @@ enum UserDefaultsKeys {
     static let braveApiKey              = "braveApiKey"
     static let locationEnabled          = "locationEnabled"
     static let userCity                 = "userCity"
+    static let visionEnabled            = "visionEnabled"
 
     static let siriPendingQuery         = "pm_siri_pending_query"
     static let siriPendingEvent         = "pm_siri_pending_event"

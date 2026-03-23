@@ -1,137 +1,91 @@
-import Foundation
 import UIKit
 
-/// Error type for VisionImageProcessor operations.
-enum VisionProcessorError: LocalizedError {
-    case invalidImageData
+/// Error types for image preprocessing failures.
+enum VisionImageProcessorError: LocalizedError {
+    case imageDataConversionFailed
     case resizeFailed
-    case jpegEncodingFailed
-    case base64EncodingFailed
     case thumbnailGenerationFailed
 
     var errorDescription: String? {
         switch self {
-        case .invalidImageData:    return "Could not read image data."
-        case .resizeFailed:        return "Failed to resize image."
-        case .jpegEncodingFailed:  return "Failed to encode image as JPEG."
-        case .base64EncodingFailed: return "Failed to encode image as base64."
-        case .thumbnailGenerationFailed: return "Failed to generate thumbnail."
+        case .imageDataConversionFailed:
+            return "Failed to convert image to JPEG data."
+        case .resizeFailed:
+            return "Failed to resize image."
+        case .thumbnailGenerationFailed:
+            return "Failed to generate thumbnail."
         }
     }
 }
 
-/// Pre-processing pipeline for images before sending to the vision model.
-/// Resizes to 896×896, JPEG 0.8 compresses, base64-encodes, and generates UI thumbnails.
+/// Preprocesses UIImage attachments for the vision language model.
+/// Handles resizing, JPEG compression, base64 encoding, and thumbnail generation.
 struct VisionImageProcessor: Sendable {
 
-    // MARK: - Constants
+    /// Maximum dimension for the full-resolution image sent to the LLM (Qwen3.5-Vision preferred: 896 px).
+    private static let maxDimension: CGFloat = 896
+    /// JPEG compression quality for the full-resolution image.
+    private static let jpegQuality: CGFloat = 0.8
+    /// Maximum dimension for the thumbnail preview.
+    private static let thumbnailDimension: CGFloat = 224
+    /// JPEG compression quality for the thumbnail.
+    private static let thumbnailQuality: CGFloat = 0.5
 
-    /// Target edge length — Qwen3-VL expects 896×896 input.
-    static let targetSize: CGFloat = 896
-    /// JPEG compression quality (0.8 as per spec).
-    static let jpegQuality: CGFloat = 0.8
-    /// Thumbnail edge length for the chat UI strip.
-    static let thumbnailSize: CGFloat = 80
-
-    // MARK: - Public API
-
-    /// Fully processes a UIImage: resizes, compresses, base64-encodes, and generates a thumbnail.
+    /// Fully preprocesses a UIImage for the vision model.
     /// Returns an AttachedImage ready to embed in a ChatMessage.
-    func process(_ image: UIImage) async throws -> AttachedImage {
-        guard let resized = resize(image, to: Self.targetSize) else {
-            throw VisionProcessorError.resizeFailed
+    func process(_ image: UIImage) throws -> AttachedImage {
+        // Resize to max 896×896 preserving aspect ratio
+        guard let resized = resizePreservingAspect(image: image, maxDimension: Self.maxDimension) else {
+            throw VisionImageProcessorError.resizeFailed
         }
-        guard let jpeg = resized.jpegData(compressionQuality: Self.jpegQuality) else {
-            throw VisionProcessorError.jpegEncodingFailed
+
+        // Full-resolution JPEG base64
+        guard let jpegData = resized.jpegData(compressionQuality: Self.jpegQuality) else {
+            throw VisionImageProcessorError.imageDataConversionFailed
         }
-        guard let base64 = jpeg.base64EncodedString() as String? else {
-            throw VisionProcessorError.base64EncodingFailed
+        let base64Data = jpegData.base64EncodedString()
+
+        // Thumbnail
+        let thumbnailData: Data?
+        if let thumbnail = resizePreservingAspect(image: image, maxDimension: Self.thumbnailDimension),
+           let thumbJpeg = thumbnail.jpegData(compressionQuality: Self.thumbnailQuality) {
+            thumbnailData = thumbJpeg
+        } else {
+            thumbnailData = nil
         }
-        let thumbnail = await generateThumbnail(from: resized)
+
         return AttachedImage(
-            localURL: temporaryFileURL(),
-            base64Data: base64,
-            thumbnailData: thumbnail,
+            id: UUID(),
+            localURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".jpg"),
+            thumbnailData: thumbnailData,
+            base64Data: base64Data,
             width: Int(resized.size.width),
             height: Int(resized.size.height)
         )
     }
 
-    /// Synchronous version for use in contexts where async is inconvenient.
-    func processSync(_ image: UIImage) throws -> AttachedImage {
-        guard let resized = resize(image, to: Self.targetSize) else {
-            throw VisionProcessorError.resizeFailed
-        }
-        guard let jpeg = resized.jpegData(compressionQuality: Self.jpegQuality) else {
-            throw VisionProcessorError.jpegEncodingFailed
-        }
-        guard let base64 = jpeg.base64EncodedString() as String? else {
-            throw VisionProcessorError.base64EncodingFailed
-        }
-        let thumbnail = generateThumbnailSync(from: resized)
-        return AttachedImage(
-            localURL: temporaryFileURL(),
-            base64Data: base64,
-            thumbnailData: thumbnail,
-            width: Int(resized.size.width),
-            height: Int(resized.size.height)
-        )
-    }
-
-    // MARK: - Resize
-
-    /// Resizes image to fit within a square of `targetSize` edge length, preserving aspect ratio.
-    /// The output is always exactly `targetSize × targetSize` by scaling the shorter edge
-    /// to `targetSize` and centering the result on a transparent/solid-filled canvas.
-    private func resize(_ image: UIImage, to targetSize: CGFloat) -> UIImage? {
-        let size = image.size
-        let scale: CGFloat = min(targetSize / size.width, targetSize / size.height)
-        let scaledSize = CGSize(width: size.width * scale, height: size.height * scale)
-
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1  // Do not scale for device resolution — we want exact pixel dimensions
-        format.opaque = true
-
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: targetSize, height: targetSize), format: format)
-
-        return renderer.image { context in
-            // Fill with white (or transparent if we were doing alpha — spec implies solid fill)
-            UIColor.white.setFill()
-            context.fill(CGRect(origin: .zero, size: CGSize(width: targetSize, height: targetSize)))
-            // Center the scaled image
-            let x = (targetSize - scaledSize.width) / 2
-            let y = (targetSize - scaledSize.height) / 2
-            image.draw(in: CGRect(origin: CGPoint(x: x, y: y), size: scaledSize))
-        }
-    }
-
-    // MARK: - Thumbnail
-
-    /// Async thumbnail generation — runs on a background thread automatically.
-    private func generateThumbnail(from image: UIImage) async -> Data? {
-        await Task.detached(priority: .userInitiated) {
-            self.generateThumbnailSync(from: image)
+    /// Async version of process for use in async contexts.
+    func processAsync(_ image: UIImage) async throws -> AttachedImage {
+        try await Task.detached(priority: .userInitiated) {
+            try self.process(image)
         }.value
     }
 
-    /// Generates a low-resolution JPEG thumbnail for the chat UI strip.
-    private func generateThumbnailSync(from image: UIImage) -> Data? {
-        let thumbSize = CGSize(width: Self.thumbnailSize, height: Self.thumbnailSize)
+    /// Resizes an image preserving its aspect ratio so neither width nor height exceeds maxDimension.
+    func resizePreservingAspect(image: UIImage, maxDimension: CGFloat) -> UIImage? {
+        let size = image.size
+        let maxSide = max(size.width, size.height)
+
+        guard maxSide > maxDimension else { return image }
+
+        let scale = maxDimension / maxSide
+        let newSize = CGSize(width: size.width * scale, height: size.height * scale)
+
         let format = UIGraphicsImageRendererFormat()
-        format.scale = UIScreen.main.scale
-        let renderer = UIGraphicsImageRenderer(size: thumbSize, format: format)
-        let thumb = renderer.image { _ in
-            image.draw(in: CGRect(origin: .zero, size: thumbSize))
+        format.scale = 1
+        let renderer = UIGraphicsImageRenderer(size: newSize, format: format)
+        return renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: newSize))
         }
-        return thumb.jpegData(compressionQuality: 0.6)
-    }
-
-    // MARK: - Helpers
-
-    /// Returns a URL under the temporary directory for persisting the full image.
-    private func temporaryFileURL() -> URL {
-        FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-            .appendingPathExtension("jpg")
     }
 }

@@ -1,5 +1,5 @@
-import UIKit
 import XCTest
+import UIKit
 @testable import PocketMind
 
 @MainActor
@@ -9,65 +9,117 @@ final class VisionImageProcessorTests: XCTestCase {
 
     // MARK: - Constants
 
-    func testTargetSizeIs896() {
-        XCTAssertEqual(VisionImageProcessor.targetSize, 896)
+    func testMaxDimensionIs896() {
+        // Access via reflection or test behavior — verify resize caps at 896
+        let large = makeTestImage(size: CGSize(width: 2000, height: 1500))
+        let resized = processor.resizePreservingAspect(image: large, maxDimension: 896)
+        XCTAssertNotNil(resized)
+        XCTAssertLessThanOrEqual(resized!.size.width, 896)
+        XCTAssertLessThanOrEqual(resized!.size.height, 896)
     }
 
-    func testJpegQualityIs08() {
-        XCTAssertEqual(VisionImageProcessor.jpegQuality, 0.8, accuracy: 0.001)
+    // MARK: - resizePreservingAspect
+
+    func testResizePreservingAspectLandscape() {
+        let largeLandscape = makeTestImage(size: CGSize(width: 2000, height: 1000))
+        let resized = processor.resizePreservingAspect(image: largeLandscape, maxDimension: 896)
+        XCTAssertNotNil(resized)
+        XCTAssertLessThanOrEqual(resized!.size.width, 896)
+        XCTAssertLessThanOrEqual(resized!.size.height, 896)
+        XCTAssertEqual(resized!.size.width / resized!.size.height, 2.0, accuracy: 0.01)
     }
 
-    func testThumbnailSizeIs80() {
-        XCTAssertEqual(VisionImageProcessor.thumbnailSize, 80)
+    func testResizePreservingAspectPortrait() {
+        let largePortrait = makeTestImage(size: CGSize(width: 1000, height: 2000))
+        let resized = processor.resizePreservingAspect(image: largePortrait, maxDimension: 896)
+        XCTAssertNotNil(resized)
+        XCTAssertLessThanOrEqual(resized!.size.width, 896)
+        XCTAssertLessThanOrEqual(resized!.size.height, 896)
+        XCTAssertEqual(resized!.size.height / resized!.size.width, 2.0, accuracy: 0.01)
     }
 
-    // MARK: - processSync
+    func testResizePreservingAspectSmallImage() {
+        let small = makeTestImage(size: CGSize(width: 500, height: 300))
+        let resized = processor.resizePreservingAspect(image: small, maxDimension: 896)
+        XCTAssertEqual(resized!.size.width, 500)
+        XCTAssertEqual(resized!.size.height, 300)
+    }
 
-    func testProcessSyncReturnsNonNilAttachedImage() {
+    func testResizePreservingAspectSquare() {
+        let square = makeTestImage(size: CGSize(width: 1000, height: 1000))
+        let resized = processor.resizePreservingAspect(image: square, maxDimension: 896)
+        XCTAssertNotNil(resized)
+        XCTAssertEqual(resized!.size.width, 896)
+        XCTAssertEqual(resized!.size.height, 896)
+    }
+
+    // MARK: - process
+
+    func testProcessReturnsNonNilAttachedImage() throws {
         let image = makeTestImage(size: CGSize(width: 2000, height: 1500))
-        let result = try? processor.processSync(image)
+        let result = try processor.process(image)
         XCTAssertNotNil(result)
+        XCTAssertNotNil(result.id)
+        XCTAssertNotNil(result.localURL)
+        XCTAssertFalse(result.base64Data.isEmpty)
     }
 
-    func testProcessSyncSetsCorrectDimensions() {
+    func testProcessSetsCorrectDimensions() throws {
         let image = makeTestImage(size: CGSize(width: 2000, height: 1500))
-        let result = try? processor.processSync(image)
-        XCTAssertEqual(result?.width, 896)
-        XCTAssertEqual(result?.height, 896)
+        let result = try processor.process(image)
+        XCTAssertEqual(result.width, 896)
+        XCTAssertEqual(result.height, 672)
     }
 
-    func testProcessSyncProducesNonEmptyBase64() {
+    func testProcessProducesNonEmptyBase64() throws {
         let image = makeTestImage(size: CGSize(width: 1000, height: 1000))
-        let result = try? processor.processSync(image)
-        XCTAssertFalse(result?.base64Data.isEmpty ?? true)
+        let result = try processor.process(image)
+        XCTAssertFalse(result.base64Data.isEmpty)
     }
 
-    func testProcessSyncProducesValidBase64() {
+    func testProcessProducesValidBase64() throws {
         let image = makeTestImage(size: CGSize(width: 800, height: 600))
-        let result = try? processor.processSync(image)
-        guard let base64 = result?.base64Data else {
-            XCTFail("base64Data was nil"); return
-        }
-        // Valid base64 should decode without error
-        let data = Data(base64Encoded: base64)
+        let result = try processor.process(image)
+        let data = Data(base64Encoded: result.base64Data)
         XCTAssertNotNil(data)
         XCTAssertFalse(data?.isEmpty ?? true)
     }
 
-    func testProcessSyncGeneratesThumbnail() {
+    func testProcessBase64IsJPEG() throws {
         let image = makeTestImage(size: CGSize(width: 1200, height: 900))
-        let result = try? processor.processSync(image)
-        XCTAssertNotNil(result?.thumbnailData)
-        XCTAssertFalse(result?.thumbnailData?.isEmpty ?? true)
+        let result = try processor.process(image)
+        let data = Data(base64Encoded: result.base64Data)
+        // JPEG starts with FFD8FF
+        XCTAssertNotNil(data)
+        XCTAssertTrue(data!.count >= 3)
+        XCTAssertEqual(data![0], 0xFF)
+        XCTAssertEqual(data![1], 0xD8)
+        XCTAssertEqual(data![2], 0xFF)
     }
 
-    func testProcessSyncThumbnailIsJPEG() {
+    func testProcessGeneratesThumbnail() throws {
+        let image = makeTestImage(size: CGSize(width: 1200, height: 900))
+        let result = try processor.process(image)
+        XCTAssertNotNil(result.thumbnailData)
+        XCTAssertFalse(result.thumbnailData?.isEmpty ?? true)
+    }
+
+    func testProcessThumbnailIsSmallerThanFullImage() throws {
+        let image = makeTestImage(size: CGSize(width: 2000, height: 2000))
+        let result = try processor.process(image)
+        guard let thumbData = result.thumbnailData,
+              let fullData = Data(base64Encoded: result.base64Data) else {
+            XCTFail("Missing data"); return
+        }
+        XCTAssertLessThan(thumbData.count, fullData.count)
+    }
+
+    func testProcessThumbnailIsJPEG() throws {
         let image = makeTestImage(size: CGSize(width: 1000, height: 1000))
-        let result = try? processor.processSync(image)
-        guard let thumbData = result?.thumbnailData else {
+        let result = try processor.process(image)
+        guard let thumbData = result.thumbnailData else {
             XCTFail("thumbnailData was nil"); return
         }
-        // JPEG starts with FFD8FF
         let isJPEG = thumbData.count >= 3 &&
             thumbData[0] == 0xFF &&
             thumbData[1] == 0xD8 &&
@@ -75,42 +127,43 @@ final class VisionImageProcessorTests: XCTestCase {
         XCTAssertTrue(isJPEG, "Thumbnail should be JPEG data")
     }
 
-    func testProcessSyncThumbnailIsSmallerThanFullImage() {
+    func testProcessThumbnailDimensionCapped() throws {
         let image = makeTestImage(size: CGSize(width: 2000, height: 2000))
-        let result = try? processor.processSync(image)
-        guard let thumbData = result?.thumbnailData,
-              let fullData = Data(base64Encoded: result?.base64Data ?? "") else {
-            XCTFail("Missing data"); return
+        let result = try processor.process(image)
+        guard let thumbData = result.thumbnailData,
+              let thumbImage = UIImage(data: thumbData) else {
+            XCTFail("Missing thumbnail"); return
         }
-        XCTAssertLessThan(thumbData.count, fullData.count)
+        let maxThumbSide = max(thumbImage.size.width, thumbImage.size.height)
+        XCTAssertLessThanOrEqual(maxThumbSide, 224)
     }
 
-    func testProcessSyncAssignsUUID() {
+    func testProcessAssignsUUID() throws {
         let image = makeTestImage(size: CGSize(width: 500, height: 500))
-        let result = try? processor.processSync(image)
-        XCTAssertNotNil(result?.id)
+        let result = try processor.process(image)
+        XCTAssertNotNil(result.id)
     }
 
-    func testProcessSyncCreatesTemporaryLocalURL() {
+    func testProcessCreatesTemporaryLocalURL() throws {
         let image = makeTestImage(size: CGSize(width: 400, height: 400))
-        let result = try? processor.processSync(image)
-        XCTAssertNotNil(result?.localURL)
-        XCTAssertEqual(result?.localURL.pathExtension, "jpg")
+        let result = try processor.process(image)
+        XCTAssertNotNil(result.localURL)
+        XCTAssertEqual(result.localURL.pathExtension, "jpg")
     }
 
-    // MARK: - process (async)
+    // MARK: - processAsync
 
     func testProcessAsyncReturnsEquivalentResult() async throws {
         let image = makeTestImage(size: CGSize(width: 1600, height: 1200))
-        let asyncResult = try await processor.process(image)
-        let syncResult = try processor.processSync(image)
+        let asyncResult = try await processor.processAsync(image)
+        let syncResult = try processor.process(image)
 
         XCTAssertEqual(asyncResult.width, syncResult.width)
         XCTAssertEqual(asyncResult.height, syncResult.height)
         XCTAssertEqual(asyncResult.base64Data, syncResult.base64Data)
     }
 
-    // MARK: - Helpers
+    // MARK: - Helper
 
     private func makeTestImage(size: CGSize) -> UIImage {
         let format = UIGraphicsImageRendererFormat()
