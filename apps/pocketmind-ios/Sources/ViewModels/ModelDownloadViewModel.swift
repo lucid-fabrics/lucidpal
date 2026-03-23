@@ -37,7 +37,13 @@ final class ModelDownloadViewModel: ObservableObject {
         let allModels = ModelInfo.available(physicalRAMGB: ram)
         let filteredModels: [ModelInfo]
         if let filter = capabilityFilter {
-            filteredModels = allModels.filter { $0.capabilities.contains(filter) }
+            // For .text: show only text-only models (no vision capability at all)
+            // For .vision: show any model with vision (visionOnly or integrated)
+            if filter == .text {
+                filteredModels = allModels.filter { $0.capabilities == .text }
+            } else {
+                filteredModels = allModels.filter { $0.capabilities.contains(.vision) }
+            }
         } else {
             filteredModels = allModels
         }

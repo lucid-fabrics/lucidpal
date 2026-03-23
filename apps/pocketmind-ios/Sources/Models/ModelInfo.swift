@@ -104,7 +104,7 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
     /// "text" model is redundant since they handle both; users pick them in Vision section).
     static func textModels(physicalRAMGB: Int) -> [ModelInfo] {
         [.qwen3_5_0B8, .qwen3_5_2B, .qwen3_5_4B]
-            .filter { $0.capabilities.contains(.text) && $0.minimumRAMGB <= physicalRAMGB }
+            .filter { $0.capabilities == .text && $0.minimumRAMGB <= physicalRAMGB }
     }
 
     /// All models that support vision and fit in RAM.
