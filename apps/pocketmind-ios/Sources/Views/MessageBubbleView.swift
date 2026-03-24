@@ -317,29 +317,127 @@ private struct GeneratingStatusView: View {
 
 // MARK: - Image thumbnails
 
-@ViewBuilder
-private func imageThumbnails(_ attachments: [AttachedImage], isUserMessage: Bool) -> some View {
-    ScrollView(.horizontal, showsIndicators: false) {
-        HStack(spacing: 6) {
-            ForEach(attachments) { attachment in
-                if let thumbnailData = attachment.thumbnailData,
-                   let uiImage = UIImage(data: thumbnailData) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 56, height: 56)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                } else {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(.systemGray5))
-                        .frame(width: 56, height: 56)
-                        .overlay {
-                            Image(systemName: "photo")
-                                .foregroundStyle(Color(.systemGray3))
-                        }
+private struct ImageThumbnailsView: View {
+    let attachments: [AttachedImage]
+    let isUserMessage: Bool
+    @State private var fullscreenImage: UIImage?
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(attachments) { attachment in
+                    if let thumbnailData = attachment.thumbnailData,
+                       let uiImage = UIImage(data: thumbnailData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 56, height: 56)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .onTapGesture {
+                                fullscreenImage = loadFullImage(attachment)
+                            }
+                    } else {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color(.systemGray5))
+                            .frame(width: 56, height: 56)
+                            .overlay {
+                                Image(systemName: "photo")
+                                    .foregroundStyle(Color(.systemGray3))
+                            }
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: isUserMessage ? .trailing : .leading)
+        .fullScreenCover(isPresented: Binding(
+            get: { fullscreenImage != nil },
+            set: { if !$0 { fullscreenImage = nil } }
+        )) {
+            if let image = fullscreenImage {
+                FullscreenImageView(image: image) {
+                    fullscreenImage = nil
                 }
             }
         }
     }
-    .frame(maxWidth: .infinity, alignment: isUserMessage ? .trailing : .leading)
+
+    private func loadFullImage(_ attachment: AttachedImage) -> UIImage? {
+        // Try full-res JPEG from disk first
+        if FileManager.default.fileExists(atPath: attachment.localURL.path),
+           let data = try? Data(contentsOf: attachment.localURL),
+           let image = UIImage(data: data) {
+            return image
+        }
+        // Fallback: decode base64
+        if !attachment.base64Data.isEmpty,
+           let data = Data(base64Encoded: attachment.base64Data),
+           let image = UIImage(data: data) {
+            return image
+        }
+        // Last resort: thumbnail
+        if let data = attachment.thumbnailData {
+            return UIImage(data: data)
+        }
+        return nil
+    }
+}
+
+// MARK: - Fullscreen image viewer
+
+private struct FullscreenImageView: View {
+    let image: UIImage
+    let onDismiss: () -> Void
+    @State private var scale: CGFloat = 1.0
+    @State private var lastScale: CGFloat = 1.0
+    @State private var offset: CGSize = .zero
+    @State private var lastOffset: CGSize = .zero
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            Image(uiImage: image)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .scaleEffect(scale)
+                .offset(offset)
+                .gesture(
+                    MagnifyGesture()
+                        .onChanged { value in
+                            scale = lastScale * value.magnification
+                        }
+                        .onEnded { _ in
+                            lastScale = max(scale, 1.0)
+                            scale = lastScale
+                            if scale <= 1.0 {
+                                offset = .zero
+                                lastOffset = .zero
+                            }
+                        }
+                )
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            if scale > 1.0 {
+                                offset = CGSize(
+                                    width: lastOffset.width + value.translation.width,
+                                    height: lastOffset.height + value.translation.height
+                                )
+                            }
+                        }
+                        .onEnded { _ in
+                            lastOffset = offset
+                        }
+                )
+                .onTapGesture {
+                    onDismiss()
+                }
+        }
+        .statusBarHidden()
+    }
+}
+
+@ViewBuilder
+private func imageThumbnails(_ attachments: [AttachedImage], isUserMessage: Bool) -> some View {
+    ImageThumbnailsView(attachments: attachments, isUserMessage: isUserMessage)
 }
