@@ -16,9 +16,14 @@ struct SessionListView: View {
                     sessionSections
                 }
             }
+            .refreshable {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                viewModel.refreshSessions()
+            }
             .listStyle(.insetGrouped)
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search chats")
             .navigationDestination(for: ChatSessionMeta.self) { meta in
                 ChatSessionContainer(
@@ -175,6 +180,15 @@ struct SessionListView: View {
                     .buttonStyle(.plain)
                     .swipeActions(edge: .leading) {
                         Button {
+                            viewModel.togglePin(id: meta.id)
+                        } label: {
+                            Label(
+                                meta.isPinned ? "Unpin" : "Pin",
+                                systemImage: meta.isPinned ? "pin.slash" : "pin"
+                            )
+                        }
+                        .tint(.yellow)
+                        Button {
                             renameText = meta.title
                             renamingSession = meta
                         } label: {
@@ -183,6 +197,14 @@ struct SessionListView: View {
                         .tint(.accentColor)
                     }
                     .contextMenu {
+                        Button {
+                            viewModel.togglePin(id: meta.id)
+                        } label: {
+                            Label(
+                                meta.isPinned ? "Unpin" : "Pin",
+                                systemImage: meta.isPinned ? "pin.slash" : "pin"
+                            )
+                        }
                         Button {
                             renameText = meta.title
                             renamingSession = meta

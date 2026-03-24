@@ -41,6 +41,7 @@
 		2EC95E8574DAEECF027620DD /* ConflictDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC1A7BED055E8911E379967 /* ConflictDetailSheet.swift */; };
 		30C27172EEDDEFEDA9024C39 /* SuggestedPromptsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EAE2B8ED67E6015F975408 /* SuggestedPromptsView.swift */; };
 		33ED1D8F75C6C957BC38E619 /* WebSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 538ADBABF322C5E915F92BBB /* WebSearchService.swift */; };
+		36056FD98ACAB462DC44E34C /* View+PremiumShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12937EE5EBF3C3DD0E3301E /* View+PremiumShadow.swift */; };
 		37099D2943311ABE7AE50DCE /* AirPodsVoiceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19B883E55CD8A4368093466 /* AirPodsVoiceCoordinator.swift */; };
 		3729B6D0AF8163910802B64A /* HapticServiceProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A0D2C0FFE1AA189D2DF325 /* HapticServiceProtocolTests.swift */; };
 		38613A4E38E15A30F0E15449 /* LLMServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D4ADCAA29604B5AC274F060 /* LLMServiceProtocol.swift */; };
@@ -355,6 +356,7 @@
 		D84C1E4AC57BAD6C32B91758 /* ChatViewModelMessageHandlingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelMessageHandlingTests.swift; sourceTree = "<group>"; };
 		DD2D27465A04B24BCDC5E770 /* ChatViewModel+Speech.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatViewModel+Speech.swift"; sourceTree = "<group>"; };
 		DE63EA21194F4E4481C922CB /* PocketMindWidgetProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PocketMindWidgetProvider.swift; sourceTree = "<group>"; };
+		E12937EE5EBF3C3DD0E3301E /* View+PremiumShadow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+PremiumShadow.swift"; sourceTree = "<group>"; };
 		E1B1F1057063C9CB1B3EEBE2 /* CalendarActionModelsDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionModelsDecodingTests.swift; sourceTree = "<group>"; };
 		E48D63B17A7DB85CD907E6B5 /* SnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotTests.swift; sourceTree = "<group>"; };
 		E52E3FBE9B7F8FB587B81E07 /* AppSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsTests.swift; sourceTree = "<group>"; };
@@ -604,6 +606,7 @@
 				B0EAE2B8ED67E6015F975408 /* SuggestedPromptsView.swift */,
 				D4797A688FBD64A2C9FA9189 /* ThinkingDisclosure.swift */,
 				80EB1F543172F8F1C5871341 /* ToastView.swift */,
+				E12937EE5EBF3C3DD0E3301E /* View+PremiumShadow.swift */,
 				4D046A1713EC67CFD7A30AD9 /* VoiceRecordingOverlay.swift */,
 				12467D720BF0E733CF2B526C /* WebSearchSettingsView.swift */,
 			);
@@ -976,6 +979,7 @@
 				8E992579DACB482D55CB45E6 /* ThinkingDisclosure.swift in Sources */,
 				3A09F44096102E4C913E6902 /* ToastView.swift in Sources */,
 				9B72E07A18F728BDE94511A5 /* UserDefaultsKeys.swift in Sources */,
+				36056FD98ACAB462DC44E34C /* View+PremiumShadow.swift in Sources */,
 				53A4657BF15791022995BAF9 /* VisionImageProcessor.swift in Sources */,
 				598491A0E7DF75FD48573F04 /* VoiceRecordingOverlay.swift in Sources */,
 				33ED1D8F75C6C957BC38E619 /* WebSearchService.swift in Sources */,

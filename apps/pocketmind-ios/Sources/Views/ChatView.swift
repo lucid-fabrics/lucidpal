@@ -23,6 +23,29 @@ struct ChatView: View {
             }
             errorBanner
                 .animation(.easeInOut(duration: 0.2), value: viewModel.errorMessage)
+            if viewModel.isSearching {
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    TextField("Search messages…", text: $viewModel.searchText)
+                        .textFieldStyle(.plain)
+                        .font(.subheadline)
+                    if !viewModel.searchText.isEmpty {
+                        Button {
+                            viewModel.searchText = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color(.systemGray6))
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
             messageList
             if let reply = viewModel.replyingTo {
                 replyPreviewBar(reply)
@@ -30,6 +53,7 @@ struct ChatView: View {
             }
             inputBar
         }
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isSearching)
         .animation(.easeInOut(duration: 0.2), value: viewModel.isGenerating || viewModel.isPreparing)
         .animation(.easeInOut(duration: 0.2), value: viewModel.replyingTo?.id)
         .background(NavPopGestureDisabler())
@@ -54,6 +78,7 @@ struct ChatView: View {
         }
         .animation(.spring(duration: 0.3), value: viewModel.toast)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Button {
@@ -87,6 +112,15 @@ struct ChatView: View {
                     )
                 }
                 .buttonStyle(.plain)
+
+                Button {
+                    withAnimation { viewModel.isSearching.toggle() }
+                    if !viewModel.isSearching { viewModel.searchText = "" }
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                        .font(.caption.weight(.medium))
+                }
+                .foregroundStyle(.secondary)
 
                 if !viewModel.messages.isEmpty {
                     Button("Clear") { showClearConfirm = true }
@@ -199,6 +233,11 @@ struct ChatView: View {
                                 }
                             )
                             .id(message.id)
+                            .opacity(
+                                viewModel.searchText.isEmpty
+                                    || message.content.localizedCaseInsensitiveContains(viewModel.searchText)
+                                    ? 1 : 0.3
+                            )
                             .padding(.bottom, info.spacing)
                         }
                     }
@@ -231,11 +270,7 @@ struct ChatView: View {
                             .foregroundStyle(.secondary)
                             .frame(width: 36, height: 36)
                             .background(.regularMaterial, in: Circle())
-                            .shadow(
-                                color: DesignConstants.Shadow.floatingColor,
-                                radius: DesignConstants.Shadow.floatingRadius,
-                                y: DesignConstants.Shadow.floatingY
-                            )
+                            .premiumShadow(level: .floating)
                     }
                     .padding(.bottom, 8)
                     .transition(.scale.combined(with: .opacity))

@@ -45,11 +45,11 @@ final class SettingsViewModel: ObservableObject {
     @Published var availableTextModels: [ModelInfo] = []
     @Published var availableVisionModels: [ModelInfo] = []
 
-    // MARK: - Computed pass-throughs (read-only display; changed via selectModel / other VMs)
+    // MARK: - Model selection (published for SwiftUI reactivity)
     var maxContextSize: Int { settings.maxContextSize }
     var deviceRAMGB: Int { settings.deviceRAMGB }
-    var selectedTextModelID: String { settings.selectedTextModelID }
-    var selectedVisionModelID: String { settings.selectedVisionModelID }
+    @Published private(set) var selectedTextModelID: String = ""
+    @Published private(set) var selectedVisionModelID: String = ""
     var webSearchSummary: String {
         webSearchEnabled ? webSearchProvider.displayName : "Off"
     }
@@ -90,6 +90,8 @@ final class SettingsViewModel: ObservableObject {
         self.braveApiKey = settings.braveApiKey
         self.webSearchEndpoint = settings.webSearchEndpoint
         self.visionEnabled = settings.visionEnabled
+        self.selectedTextModelID = settings.selectedTextModelID
+        self.selectedVisionModelID = settings.selectedVisionModelID
 
         if availableTextModels.isEmpty { availableTextModels = [.qwen3_5_2B] }
         if availableVisionModels.isEmpty { availableVisionModels = [.qwen3_5_vision] }
@@ -164,10 +166,18 @@ final class SettingsViewModel: ObservableObject {
 
     func selectTextModel(_ model: ModelInfo) {
         settings.selectedTextModelID = model.id
+        selectedTextModelID = model.id
     }
 
     func selectVisionModel(_ model: ModelInfo) {
         settings.selectedVisionModelID = model.id
+        selectedVisionModelID = model.id
+    }
+
+    /// Refreshes published model IDs from settings (e.g. after another VM updates them).
+    func refreshModelSelection() {
+        selectedTextModelID = settings.selectedTextModelID
+        selectedVisionModelID = settings.selectedVisionModelID
     }
 
     // MARK: - Voice

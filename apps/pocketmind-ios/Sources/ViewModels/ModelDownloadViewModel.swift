@@ -134,7 +134,12 @@ final class ModelDownloadViewModel: ObservableObject {
 
     /// Loads the selected model into the LLM service.
     func loadModel() async {
-        guard selectedModel.isDownloaded else { return }
+        modelDownloadLogger.info("loadModel called: model=\(self.selectedModel.displayName) isDownloaded=\(self.selectedModel.isDownloaded) localURL=\(self.selectedModel.localURL.path)")
+        guard selectedModel.isDownloaded else {
+            modelDownloadLogger.warning("loadModel: model not downloaded, aborting")
+            loadError = "Model not downloaded. Please download it first."
+            return
+        }
         loadError = nil
 
         // Download mmproj if needed (vision models only)

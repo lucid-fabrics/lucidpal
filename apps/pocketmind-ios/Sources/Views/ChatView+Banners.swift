@@ -35,9 +35,25 @@ extension ChatView {
     }
 
     var modelNotLoadedBanner: some View {
+        ModelNotLoadedBannerContent()
+    }
+}
+
+// MARK: - Model not loaded banner (extracted for @State support)
+
+private struct ModelNotLoadedBannerContent: View {
+    @State private var pulse = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(.orange)
+                .opacity(pulse ? 0.4 : 1.0)
+                .animation(
+                    reduceMotion ? nil : .easeInOut(duration: 1.2).repeatForever(autoreverses: true),
+                    value: pulse
+                )
             Text("No model loaded — go to Settings to download one.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -51,7 +67,11 @@ extension ChatView {
                 .fill(Color.orange)
                 .frame(width: 3)
         }
+        .onAppear { if !reduceMotion { pulse = true } }
     }
+}
+
+extension ChatView {
 
     var autoListeningBanner: some View {
         HStack(spacing: 8) {

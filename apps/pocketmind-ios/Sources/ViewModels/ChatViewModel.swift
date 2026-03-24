@@ -34,6 +34,17 @@ final class ChatViewModel: ObservableObject {
     /// Message the user is replying to — shown as a quote strip above the input bar.
     @Published var replyingTo: ChatMessage? = nil
 
+    /// In-chat search text entered by the user.
+    @Published var searchText: String = ""
+    /// Whether the in-chat search bar is visible.
+    @Published var isSearching: Bool = false
+
+    /// Messages matching the current search query (all messages when query is empty).
+    var filteredMessages: [ChatMessage] {
+        guard !searchText.isEmpty else { return messages }
+        return messages.filter { $0.content.localizedCaseInsensitiveContains(searchText) }
+    }
+
     /// Navigation title — equals session title in session mode, "PocketMind" otherwise.
     @Published var sessionTitle: String
 

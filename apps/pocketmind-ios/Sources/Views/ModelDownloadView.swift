@@ -34,7 +34,21 @@ struct ModelDownloadView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
             }
+
+            if let error = viewModel.loadError {
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                    Text(error)
+                        .font(.caption)
+                }
+                .foregroundStyle(.red)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+                .transition(.opacity)
+            }
         }
+        .animation(.easeInOut(duration: 0.25), value: viewModel.isModelLoading)
         .padding(24)
         .onAppear {
             viewModel.capabilityFilter = capabilityFilter
@@ -106,21 +120,28 @@ struct ModelDownloadView: View {
                     .foregroundStyle(.green)
                     .font(.subheadline.weight(.medium))
             } else if viewModel.selectedModel.isDownloaded {
-                Button {
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    Task { await viewModel.loadModel() }
-                } label: {
-                    if viewModel.isModelLoading {
-                        HStack(spacing: 8) {
-                            ProgressView().tint(.white)
-                            Text("Loading…")
-                        }
-                    } else {
+                if viewModel.isModelLoading {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .controlSize(.large)
+                        Text("Loading \(viewModel.selectedModel.displayName)…")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.secondary)
+                        Text("This may take a moment")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .transition(.opacity)
+                } else {
+                    Button {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        Task { await viewModel.loadModel() }
+                    } label: {
                         Text("Load Model")
                     }
+                    .buttonStyle(.borderedProminent)
+                    .transition(.opacity)
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(viewModel.isModelLoading)
             } else {
                 VStack(spacing: 8) {
                     Button("Download") {
