@@ -67,6 +67,7 @@
 		5415840BF5E31CDF49808065 /* ChatSessionContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 154ECB289F1EEAFC5E11C343 /* ChatSessionContainer.swift */; };
 		554C40156A320AC04E291AEE /* CalendarDomainTypesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BCC2F0FDB961A8C83EF65C6 /* CalendarDomainTypesTests.swift */; };
 		573DE30FB5E1F48175825B86 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101B77275AB89E3FA4DE37C9 /* ChatMessage.swift */; };
+		57B595149CF226E80F7E3BCE /* ChatInputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115BB95E54F2D057476F917D /* ChatInputBar.swift */; };
 		57DDE7836359DA32F1BFF161 /* ModelDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 571F2AB04B35CA5F7570E1CD /* ModelDownloadView.swift */; };
 		583A36A96683856652DDBA3D /* CalendarServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EED2744C73A7597486B735D /* CalendarServiceTests.swift */; };
 		597E2E6176442FDE6FAF99CD /* OnboardingCarouselView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6FA46FBE6ABFD92E753D500 /* OnboardingCarouselView.swift */; };
@@ -208,6 +209,7 @@
 		0FC1A7BED055E8911E379967 /* ConflictDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictDetailSheet.swift; sourceTree = "<group>"; };
 		100196F990B4C26BC3C25D3F /* PocketMindShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PocketMindShortcuts.swift; sourceTree = "<group>"; };
 		101B77275AB89E3FA4DE37C9 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
+		115BB95E54F2D057476F917D /* ChatInputBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInputBar.swift; sourceTree = "<group>"; };
 		11B486B56E73969B42E61B04 /* CalendarCancellationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarCancellationTests.swift; sourceTree = "<group>"; };
 		121FFE394BE04B1950567322 /* CalendarDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarDataProvider.swift; sourceTree = "<group>"; };
 		12467D720BF0E733CF2B526C /* WebSearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSearchSettingsView.swift; sourceTree = "<group>"; };
@@ -565,6 +567,7 @@
 				6BD77AB35272C34A93243F4F /* CalendarEventCard+Subviews.swift */,
 				3CCFB720E7470B942D0E9FCF /* CalendarEventListCard.swift */,
 				FEC6F0AF069907CCCB456FE5 /* CalendarQueryResultCard.swift */,
+				115BB95E54F2D057476F917D /* ChatInputBar.swift */,
 				154ECB289F1EEAFC5E11C343 /* ChatSessionContainer.swift */,
 				23E71755F4423670B08C5890 /* ChatView.swift */,
 				C6484A474D1E05FDD1EB244E /* ChatView+Banners.swift */,
@@ -891,6 +894,7 @@
 				81424EB1A8D27DE59BDA6711 /* CalendarServiceProtocol.swift in Sources */,
 				2CF8FEFCFDA6BAFD7F44C21B /* ChatConstants.swift in Sources */,
 				DCD7844CFE3F3C559225633C /* ChatHistoryManager.swift in Sources */,
+				57B595149CF226E80F7E3BCE /* ChatInputBar.swift in Sources */,
 				573DE30FB5E1F48175825B86 /* ChatMessage.swift in Sources */,
 				B12902D6ADBD80A907F7F9C2 /* ChatSession.swift in Sources */,
 				5415840BF5E31CDF49808065 /* ChatSessionContainer.swift in Sources */,
