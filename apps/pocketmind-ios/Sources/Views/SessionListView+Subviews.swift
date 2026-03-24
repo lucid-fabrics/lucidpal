@@ -37,15 +37,25 @@ struct NextEventCard: View {
             .padding(.vertical, 11)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(CardPressStyle())
     }
 
     private var timeUntil: String {
         let mins = Int(event.startDate.timeIntervalSince(now) / 60)
         if mins < 1 { return "Starting now" }
-        if mins < 60 { return "in \(mins) min" }
-        let h = mins / 60, m = mins % 60
+        if mins < ChatConstants.minutesPerHour { return "in \(mins) min" }
+        let h = mins / ChatConstants.minutesPerHour, m = mins % ChatConstants.minutesPerHour
         return m == 0 ? "in \(h)h" : "in \(h)h \(m)m"
+    }
+}
+
+// MARK: - Card Press Style
+
+private struct CardPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
@@ -54,15 +64,28 @@ struct NextEventCard: View {
 struct PulsingMicButton: View {
     let action: () -> Void
     @State private var pulsing = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         Button(action: action) {
             ZStack {
+                // Outer accent ring
+                Circle()
+                    .strokeBorder(Color.accentColor.opacity(reduceMotion ? 0.2 : (pulsing ? 0.05 : 0.2)), lineWidth: 2)
+                    .frame(width: 120, height: 120)
+                    .animation(
+                        reduceMotion ? nil : .easeInOut(duration: 2.0).repeatForever(autoreverses: true),
+                        value: pulsing
+                    )
+
                 // Pulse ring
                 Circle()
                     .stroke(Color.accentColor.opacity(pulsing ? 0 : 0.3), lineWidth: 2)
                     .frame(width: pulsing ? 108 : 88, height: pulsing ? 108 : 88)
-                    .animation(.easeOut(duration: 1.6).repeatForever(autoreverses: false), value: pulsing)
+                    .animation(
+                        reduceMotion ? nil : .easeOut(duration: 1.6).repeatForever(autoreverses: false),
+                        value: pulsing
+                    )
 
                 // Main button
                 Circle()
@@ -75,8 +98,19 @@ struct PulsingMicButton: View {
                     .foregroundStyle(.white)
             }
         }
-        .buttonStyle(.plain)
-        .onAppear { pulsing = true }
+        .buttonStyle(MicPressStyle())
+        .onAppear {
+            guard !reduceMotion else { return }
+            pulsing = true
+        }
+    }
+}
+
+private struct MicPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
+            .animation(.spring(duration: 0.25, bounce: 0.4), value: configuration.isPressed)
     }
 }
 
@@ -85,6 +119,9 @@ struct PulsingMicButton: View {
 struct SessionRowView: View {
     let meta: ChatSessionMeta
     var searchText: String = ""
+
+    @State private var appeared = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var highlightedTitle: AttributedString {
         var attributed = AttributedString(meta.title)
@@ -107,7 +144,7 @@ struct SessionRowView: View {
                         .lineLimit(1)
                     Spacer()
                     Text(smartTimestamp)
-                        .font(.caption)
+                        .font(.caption.monospacedDigit())
                         .foregroundStyle(.secondary)
                 }
                 if let preview = meta.lastMessagePreview, !preview.isEmpty {
@@ -124,6 +161,16 @@ struct SessionRowView: View {
             }
         }
         .padding(.vertical, 4)
+        .opacity(appeared ? 1 : 0)
+        .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
+        .onAppear {
+            guard !appeared else { return }
+            if reduceMotion {
+                appeared = true
+            } else {
+                withAnimation(.easeOut(duration: 0.3)) { appeared = true }
+            }
+        }
     }
 
     private var avatar: some View {
@@ -135,6 +182,7 @@ struct SessionRowView: View {
                 .font(.system(size: 17, weight: .medium))
                 .foregroundStyle(Color.accentColor)
         }
+        .shadow(color: Color.accentColor.opacity(0.15), radius: 4, y: 2)
     }
 
     private var smartTimestamp: String {

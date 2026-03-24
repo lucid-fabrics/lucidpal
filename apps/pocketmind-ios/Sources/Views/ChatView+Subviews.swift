@@ -17,8 +17,21 @@ struct MicButtonLabel: View {
     @State private var ring1Scale: CGFloat = 1
     @State private var ring2Scale: CGFloat = 1
 
+    private var backgroundColor: Color {
+        if isTranscribing {
+            return Color.accentColor.opacity(0.12)
+        } else if isRecording {
+            return Color.red.opacity(0.12)
+        }
+        return Color(.systemGray5)
+    }
+
     var body: some View {
         ZStack {
+            Circle()
+                .fill(backgroundColor)
+                .frame(width: 40, height: 40)
+
             if isTranscribing {
                 // Spinning arc while WhisperKit processes
                 Circle()
@@ -79,6 +92,9 @@ struct MicButtonLabel: View {
 struct DateSeparatorView: View {
     let date: Date
 
+    @State private var appeared = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private static let formatter: DateFormatter = {
         let f = DateFormatter()
         f.doesRelativeDateFormatting = true
@@ -97,6 +113,16 @@ struct DateSeparatorView: View {
             .clipShape(Capsule())
             .frame(maxWidth: .infinity)
             .padding(.vertical, 4)
+            .scaleEffect(appeared ? 1.0 : 0.85)
+            .opacity(appeared ? 1 : 0)
+            .onAppear {
+                guard !appeared else { return }
+                if reduceMotion {
+                    appeared = true
+                } else {
+                    withAnimation(.spring(duration: 0.3)) { appeared = true }
+                }
+            }
     }
 }
 

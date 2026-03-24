@@ -110,6 +110,19 @@ final class ChatHistoryManagerTests: XCTestCase {
         manager.clear()
     }
 
+    func testLoadReturnsFallbackWhenFileBinaryGarbage() throws {
+        let garbage = Data((0..<256).map { _ in UInt8.random(in: 0...255) })
+        try garbage.write(to: ChatHistoryManager.historyURL)
+        let messages = manager.load()
+        XCTAssertTrue(messages.isEmpty, "Binary garbage should produce empty fallback")
+    }
+
+    func testLoadReturnsFallbackWhenFileIsEmptyJSON() throws {
+        try Data("{}".utf8).write(to: ChatHistoryManager.historyURL)
+        let messages = manager.load()
+        XCTAssertTrue(messages.isEmpty, "Empty JSON object should produce empty fallback")
+    }
+
     // MARK: - NoOpChatHistoryManager
 
     func testNoOpLoadAlwaysReturnsEmpty() {

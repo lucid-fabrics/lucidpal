@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Pending state card variants (deletion + update) — split from CalendarEventCard.swift
 
@@ -17,7 +18,10 @@ extension CalendarEventCard {
                         .padding(.vertical, DesignConstants.Padding.rowVertical)
                 }
                 Divider().frame(height: DesignConstants.Size.dividerHeight)
-                Button(action: onConfirm) {
+                Button {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    onConfirm()
+                } label: {
                     Text("Delete")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.red)
@@ -25,7 +29,7 @@ extension CalendarEventCard {
                         .padding(.vertical, DesignConstants.Padding.rowVertical)
                 }
             }
-            .buttonStyle(.plain)
+            .buttonStyle(CalendarCardPressStyle())
         }
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous))
@@ -57,7 +61,10 @@ extension CalendarEventCard {
                         .padding(.vertical, DesignConstants.Padding.rowVertical)
                 }
                 Divider().frame(height: DesignConstants.Size.dividerHeight)
-                Button(action: onConfirmUpdate) {
+                Button {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    onConfirmUpdate()
+                } label: {
                     Text("Apply")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color.accentColor)
@@ -65,7 +72,7 @@ extension CalendarEventCard {
                         .padding(.vertical, DesignConstants.Padding.rowVertical)
                 }
             }
-            .buttonStyle(.plain)
+            .buttonStyle(CalendarCardPressStyle())
         }
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous))

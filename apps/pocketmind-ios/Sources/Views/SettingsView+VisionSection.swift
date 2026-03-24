@@ -8,6 +8,8 @@ extension SettingsView {
             Toggle(isOn: $viewModel.visionEnabled) {
                 Label("Vision", systemImage: "camera.viewfinder")
             }
+        } header: {
+            sectionHeader("Vision", icon: "eye.fill", color: .orange)
         } footer: {
             Text("When enabled, photo attachments are processed by the vision model. Disable to only use text inference.")
         }
@@ -32,13 +34,31 @@ extension SettingsView {
                 )
             }
 
-            NavigationLink("Download More Models") {
+            NavigationLink {
                 ModelDownloadView(viewModel: downloadViewModel, capabilityFilter: .text)
+            } label: {
+                Label("Download More Models", systemImage: "arrow.down.circle")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.accentColor)
             }
         } header: {
-            Text("Text Model")
+            sectionHeader("Text Model", icon: "cpu", color: .purple)
         } footer: {
-            Text("Device RAM: \(viewModel.deviceRAMGB) GB · Free storage: \(viewModel.availableStorageGB.map { String(format: "%.1f GB free", $0) } ?? "Unknown")")
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    Image(systemName: "internaldrive")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text("RAM: \(viewModel.deviceRAMGB) GB")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("·")
+                        .foregroundStyle(.tertiary)
+                    Text(viewModel.availableStorageGB.map { String(format: "%.1f GB free", $0) } ?? "Unknown")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
     }
 
@@ -70,14 +90,20 @@ extension SettingsView {
                 }
             }
 
-            NavigationLink("Download Vision Models") {
+            NavigationLink {
                 ModelDownloadView(viewModel: downloadViewModel, capabilityFilter: .vision)
+            } label: {
+                Label("Download Vision Models", systemImage: "arrow.down.circle")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.accentColor)
             }
         } header: {
-            Text("Vision Model")
+            sectionHeader("Vision Model", icon: "camera.viewfinder", color: .pink)
         } footer: {
             if !viewModel.availableVisionModels.isEmpty {
-                Text("Vision models process photo attachments. Integrated models handle both text and vision — no separate selection needed.")
+                Text("Vision models process photo attachments. Integrated models handle both text and vision.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
     }
@@ -91,36 +117,56 @@ extension SettingsView {
         isLoaded: Bool,
         onSelect: @escaping () -> Void
     ) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
+        HStack(spacing: 12) {
+            // Model icon
+            Image(systemName: model.supportsVision ? "camera.viewfinder" : "cpu")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(isSelected ? .white : (model.supportsVision ? Color.orange : Color.purple))
+                .frame(width: 32, height: 32)
+                .background(
+                    isSelected
+                        ? AnyShapeStyle(Color.accentColor)
+                        : AnyShapeStyle(model.supportsVision ? Color.orange.opacity(0.12) : Color.purple.opacity(0.12)),
+                    in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                )
+
+            VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(model.displayName)
-                        .font(.subheadline)
+                        .font(.subheadline.weight(.medium))
                     capabilityBadges(for: model)
                 }
-                HStack(spacing: 8) {
-                    Text(model.isDownloaded ? "On device" : "Not downloaded")
-                        .font(.caption)
-                        .foregroundStyle(model.isDownloaded ? .green : .secondary)
+                HStack(spacing: 6) {
+                    // Download status
+                    HStack(spacing: 3) {
+                        Circle()
+                            .fill(model.isDownloaded ? Color.green : Color(.systemGray4))
+                            .frame(width: 6, height: 6)
+                        Text(model.isDownloaded ? "On device" : "Not downloaded")
+                            .font(.caption2)
+                            .foregroundStyle(model.isDownloaded ? .green : .secondary)
+                    }
                     Text("·")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
                     Text(model.fileSizeGB < 1
                         ? String(format: "%.0f MB", model.fileSizeGB * 1024)
                         : String(format: "%.1f GB", model.fileSizeGB))
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
             }
+
             Spacer()
+
             if isSelected {
                 Image(systemName: "checkmark.circle.fill")
+                    .font(.title3)
                     .foregroundStyle(Color.accentColor)
-            } else if isLoaded {
-                Image(systemName: "checkmark.circle")
-                    .foregroundStyle(.green)
+                    .symbolEffect(.bounce, value: isSelected)
             }
         }
+        .padding(.vertical, 2)
         .contentShape(Rectangle())
         .onTapGesture { onSelect() }
         .swipeActions(edge: .trailing) {
@@ -145,14 +191,13 @@ extension SettingsView {
     func badge(_ text: String, icon: String, color: Color) -> some View {
         HStack(spacing: 3) {
             Image(systemName: icon)
-                .font(.caption2)
+                .font(.system(size: 9, weight: .bold))
             Text(text)
-                .font(.caption2)
+                .font(.system(size: 10, weight: .semibold))
         }
         .foregroundStyle(color)
         .padding(.horizontal, 6)
         .padding(.vertical, 2)
-        .background(color.opacity(0.15))
-        .clipShape(Capsule())
+        .background(color.opacity(0.12), in: Capsule())
     }
 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct DebugLogView: View {
 
@@ -29,7 +30,9 @@ struct DebugLogView: View {
             } else {
                 ForEach(filtered.reversed()) { entry in
                     entryRow(entry)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                 }
+                .animation(.easeOut(duration: 0.25), value: filtered.count)
             }
         }
         .listStyle(.plain)
@@ -55,16 +58,18 @@ struct DebugLogView: View {
             }
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     let text = filtered.reversed().map { e in
                         "[\(e.date.formatted(.dateTime))] [\(e.category)] [\(e.level.rawValue)] \(e.message)"
                     }.joined(separator: "\n")
                     UIPasteboard.general.string = text
                     copiedToast = true
-                    Task { try? await Task.sleep(for: .seconds(1.5)); copiedToast = false }
+                    Task { try? await Task.sleep(for: .seconds(ChatConstants.toastDisplaySeconds)); copiedToast = false }
                 } label: {
                     Image(systemName: copiedToast ? "checkmark" : "doc.on.doc")
                 }
                 Button(role: .destructive) {
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                     store.clear()
                 } label: {
                     Image(systemName: "trash")

@@ -8,6 +8,9 @@ private let messageBubbleLogger = Logger(subsystem: "app.pocketmind", category: 
 struct MessageBubbleView: View {
     let message: ChatMessage
     var userPrompt: String? = nil
+    var isStreaming: Bool = false
+    var isFirstInGroup: Bool = true
+    var isLastInGroup: Bool = true
     var onReply: ((ChatMessage) -> Void)? = nil
     var onConfirmDeletion: ((UUID) -> Void)? = nil
     var onCancelDeletion: ((UUID) -> Void)? = nil
@@ -25,6 +28,8 @@ struct MessageBubbleView: View {
     @State private var showTimestamp = false
     @State private var swipeOffset: CGFloat = 0
     @State private var replyTriggered = false
+    @State private var appeared = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let replyThreshold: CGFloat = 60
     /// Max swipe travel expressed as a multiple of replyThreshold (30% overshoot).
@@ -33,6 +38,26 @@ struct MessageBubbleView: View {
     private let swipeResistanceFactor: CGFloat = 0.55
     /// Fraction of the damped threshold at which the reply action fires.
     private let swipeTriggerRatio: CGFloat = 0.9
+
+    private var bubbleShape: UnevenRoundedRectangle {
+        let full = DesignConstants.CornerRadius.bubble
+        let small = DesignConstants.CornerRadius.bubbleGrouped
+        if message.isUser {
+            return UnevenRoundedRectangle(
+                topLeadingRadius: full,
+                bottomLeadingRadius: full,
+                bottomTrailingRadius: isLastInGroup ? full : small,
+                topTrailingRadius: isFirstInGroup ? full : small
+            )
+        } else {
+            return UnevenRoundedRectangle(
+                topLeadingRadius: isFirstInGroup ? full : small,
+                bottomLeadingRadius: isLastInGroup ? full : small,
+                bottomTrailingRadius: full,
+                topTrailingRadius: full
+            )
+        }
+    }
 
     private var pendingDeletionCount: Int {
         message.calendarEventPreviews.filter { $0.state == .pendingDeletion }.count
@@ -51,6 +76,21 @@ struct MessageBubbleView: View {
             if message.isUser { Spacer(minLength: DesignConstants.Size.messageSpacer) }
 
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: 6) {
+                // Assistant avatar label
+                if !message.isUser && isFirstInGroup {
+                    HStack(spacing: 6) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(Color.accentColor)
+                            .frame(width: DesignConstants.BubbleStyle.avatarSize, height: DesignConstants.BubbleStyle.avatarSize)
+                            .background(Color.accentColor.opacity(0.1))
+                            .clipShape(Circle())
+                        Text("PocketMind")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 // Thinking disclosure (assistant only)
                 if !message.isUser, let thinking = message.thinkingContent {
                     ThinkingDisclosure(content: thinking, isThinking: message.isThinking, isExpanded: $thinkingExpanded)
@@ -61,20 +101,29 @@ struct MessageBubbleView: View {
 
                 // Main bubble — action block stripped; shown as pill below
                 let bubbleText = message.displayContent
+                let displayText = (isStreaming && !message.isUser) ? bubbleText + " ▍" : bubbleText
                 if !bubbleText.isEmpty {
-                    bubbleTextView(bubbleText, isUser: message.isUser)
+                    bubbleTextView(displayText, isUser: message.isUser)
                         .padding(.horizontal, DesignConstants.Padding.bubbleHorizontal)
                         .padding(.vertical, DesignConstants.Padding.bubbleVertical)
-                        .background(message.isUser ? Color.accentColor : Color(.systemBackground))
+                        .background(
+                            message.isUser
+                                ? AnyShapeStyle(LinearGradient(
+                                    colors: [DesignConstants.BubbleStyle.userGradientTop, DesignConstants.BubbleStyle.userGradientBottom],
+                                    startPoint: .top, endPoint: .bottom))
+                                : AnyShapeStyle(Color(.systemBackground))
+                        )
                         .foregroundStyle(message.isUser ? .white : .primary)
-                        .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.bubble, style: .continuous))
+                        .clipShape(bubbleShape)
                         .overlay {
                             if !message.isUser {
-                                RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.bubble, style: .continuous)
+                                bubbleShape
                                     .strokeBorder(Color(.systemGray4), lineWidth: 1)
                             }
                         }
-                        .shadow(color: .black.opacity(message.isUser ? 0 : 0.06), radius: 4, x: 0, y: 2)
+                        .shadow(color: message.isUser ? DesignConstants.BubbleStyle.userShadowColor : .black.opacity(0.06),
+                                radius: message.isUser ? DesignConstants.BubbleStyle.userShadowRadius : 4,
+                                x: 0, y: message.isUser ? DesignConstants.BubbleStyle.userShadowY : 2)
                         .contextMenu {
                             if !message.content.isEmpty {
                                 Button {
@@ -171,6 +220,19 @@ struct MessageBubbleView: View {
             } // HStack
             .offset(x: swipeOffset)
         } // ZStack
+        .opacity(appeared ? 1 : 0)
+        .offset(
+            x: reduceMotion ? 0 : (appeared ? 0 : (message.isUser ? 8 : -8)),
+            y: reduceMotion ? 0 : (appeared ? 0 : 12)
+        )
+        .onAppear {
+            guard !appeared else { return }
+            if reduceMotion {
+                appeared = true
+            } else {
+                withAnimation(DesignConstants.Anim.messageFadeIn) { appeared = true }
+            }
+        }
         .padding(.horizontal, DesignConstants.Padding.messageHorizontal)
         .gesture(
             DragGesture(minimumDistance: 15, coordinateSpace: .local)

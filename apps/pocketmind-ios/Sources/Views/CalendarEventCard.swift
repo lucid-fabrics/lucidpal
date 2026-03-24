@@ -1,4 +1,15 @@
 import SwiftUI
+import UIKit
+
+// MARK: - Card press style (calendar)
+
+struct CalendarCardPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
 
 // MARK: - Calendar event card
 
@@ -99,7 +110,7 @@ struct CalendarEventCard: View {
                     .padding(.trailing, DesignConstants.Padding.card)
                 }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(CalendarCardPressStyle())
     }
 
     // MARK: - Shared sub-views

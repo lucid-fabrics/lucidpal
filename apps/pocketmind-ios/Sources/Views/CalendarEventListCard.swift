@@ -78,7 +78,7 @@ struct CalendarEventListCard: View {
             Button(action: { openInCalendar(event) }) {
                 eventRow(event)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(CalendarCardPressStyle())
 
             if index < events.count - 1 {
                 Divider().padding(.leading, 34)

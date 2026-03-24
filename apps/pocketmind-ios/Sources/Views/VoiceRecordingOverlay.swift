@@ -50,6 +50,14 @@ struct VoiceRecordingOverlay: View {
                 .fill(.ultraThinMaterial)
                 .ignoresSafeArea()
 
+            RadialGradient(
+                colors: [Color.accentColor.opacity(0.08), .clear],
+                center: .center,
+                startRadius: 50,
+                endRadius: 300
+            )
+            .ignoresSafeArea()
+
             VStack(spacing: 36) {
                 Spacer()
 

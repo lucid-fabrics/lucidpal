@@ -43,6 +43,10 @@ struct ThinkingDisclosure: View {
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, DesignConstants.Padding.cardHorizontal)
                     .padding(.bottom, DesignConstants.Padding.slotRowVertical)
+                    .transition(.asymmetric(
+                        insertion: .push(from: .top).combined(with: .opacity),
+                        removal: .push(from: .bottom).combined(with: .opacity)
+                    ))
             }
         }
         .background(Color(.systemGray6))

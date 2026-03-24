@@ -49,4 +49,22 @@ enum ChatConstants {
     static let rawLogPreviewLength: Int = 200
     /// Hour (24h) marking the end of the work day — used as the upper bound for free-slot search.
     static let defaultWorkdayEndHour: Int = 20
+    /// Hour (24h) at which evening begins — used for time-of-day prompt selection.
+    static let eveningStartHour: Int = 17
+    /// Hour (24h) before which it is considered morning — used for time-of-day prompt selection.
+    static let morningEndHour: Int = 12
+    /// Minutes threshold below which an event is considered "starting now".
+    static let eventStartingNowMinutes: Int = 5
+    /// Maximum token buffer size for llama tokenization.
+    static let maxTokenBufferSize: Int = 65_536
+    /// Minimum audio recording file size (bytes) to consider valid (~0.5s at 16kHz 16-bit mono).
+    static let minimumRecordingFileSize: UInt64 = 16_000
+    /// HTTP status code range indicating a successful response.
+    static let httpSuccessRange: Range<Int> = 200..<300
+    /// Seconds the "copied" toast is shown before auto-dismissing.
+    static let toastDisplaySeconds: Double = 1.5
+    /// Seconds between generating-phrase rotations in the status indicator.
+    static let generatingPhraseIntervalSeconds: Double = 4.5
+    /// Nanoseconds to wait before resetting the photo picker selection.
+    static let photoPickerResetDelayNanoseconds: UInt64 = 100_000_000
 }

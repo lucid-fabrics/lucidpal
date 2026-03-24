@@ -82,7 +82,7 @@ final class WebSearchService: WebSearchServiceProtocol {
         request.setValue(apiKey, forHTTPHeaderField: "X-Subscription-Token")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         let (data, response) = try await session.data(for: request)
-        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+        guard let http = response as? HTTPURLResponse, ChatConstants.httpSuccessRange.contains(http.statusCode) else {
             throw WebSearchError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
         }
         let payload = try JSONDecoder().decode(BraveResponse.self, from: data)
@@ -108,7 +108,7 @@ final class WebSearchService: WebSearchServiceProtocol {
         guard let url = components?.url else { throw WebSearchError.invalidEndpoint }
         let request = URLRequest(url: url, timeoutInterval: 10)
         let (data, response) = try await session.data(for: request)
-        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+        guard let http = response as? HTTPURLResponse, ChatConstants.httpSuccessRange.contains(http.statusCode) else {
             let code = (response as? HTTPURLResponse)?.statusCode ?? 0
             throw code == HTTPStatus.forbidden ? WebSearchError.searxngJsonDisabled : WebSearchError.httpError(code)
         }

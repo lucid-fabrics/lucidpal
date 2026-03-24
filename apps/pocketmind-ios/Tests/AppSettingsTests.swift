@@ -86,4 +86,28 @@ final class AppSettingsTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: "voiceAutoStartEnabled")
         XCTAssertFalse(AppSettings().voiceAutoStartEnabled)
     }
+
+    // MARK: - Corrupted / unexpected values
+
+    func testSelectedModelIDHandlesEmptyString() {
+        settings.selectedModelID = ""
+        XCTAssertEqual(settings.selectedModel, .qwen3_5_2B, "Empty model ID should fall back to default")
+    }
+
+    func testContextSizeHandlesNegativeValue() {
+        UserDefaults.standard.set(-1, forKey: "contextSize")
+        let fresh = AppSettings()
+        // Should return the persisted value or a safe default — must not crash
+        let ctx = fresh.contextSize
+        XCTAssertTrue(ctx == -1 || ctx == ChatConstants.defaultContextSizeTokens,
+                      "Negative contextSize should either persist or reset to default")
+    }
+
+    func testContextSizeHandlesZeroValue() {
+        UserDefaults.standard.set(0, forKey: "contextSize")
+        let fresh = AppSettings()
+        let ctx = fresh.contextSize
+        XCTAssertTrue(ctx == 0 || ctx == ChatConstants.defaultContextSizeTokens,
+                      "Zero contextSize should either persist or reset to default")
+    }
 }

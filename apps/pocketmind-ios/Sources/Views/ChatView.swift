@@ -7,8 +7,11 @@ struct ChatView: View {
 
     @FocusState var inputFocused: Bool
     @State private var showClearConfirm = false
+    @State private var showRenameAlert = false
+    @State private var renameText = ""
     @State var showingPhotoPicker = false
     @State var selectedPhotos: [PhotosPickerItem] = []
+    @State private var isNearBottom = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -21,10 +24,6 @@ struct ChatView: View {
             errorBanner
                 .animation(.easeInOut(duration: 0.2), value: viewModel.errorMessage)
             messageList
-            if viewModel.isGenerating || viewModel.isPreparing {
-                stopBar
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
             if let reply = viewModel.replyingTo {
                 replyPreviewBar(reply)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -54,9 +53,19 @@ struct ChatView: View {
             }
         }
         .animation(.spring(duration: 0.3), value: viewModel.toast)
-        .navigationTitle(viewModel.sessionTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                Button {
+                    renameText = viewModel.sessionTitle
+                    showRenameAlert = true
+                } label: {
+                    Text(viewModel.sessionTitle)
+                        .font(.headline)
+                        .lineLimit(1)
+                }
+                .buttonStyle(.plain)
+            }
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
                     viewModel.thinkingEnabled.toggle()
@@ -85,11 +94,26 @@ struct ChatView: View {
                 }
             }
         }
+        .onChange(of: viewModel.isGenerating) { wasGenerating, isNowGenerating in
+            if wasGenerating && !isNowGenerating {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            }
+        }
         .confirmationDialog("Clear chat history?", isPresented: $showClearConfirm, titleVisibility: .visible) {
             Button("Clear History", role: .destructive) { viewModel.clearHistory() }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This will permanently delete all messages. This cannot be undone.")
+        }
+        .alert("Rename Chat", isPresented: $showRenameAlert) {
+            TextField("Chat name", text: $renameText)
+            Button("Save") {
+                let trimmed = renameText.trimmingCharacters(in: .whitespaces)
+                guard !trimmed.isEmpty, let id = viewModel.sessionID else { return }
+                viewModel.sessionTitle = trimmed
+                viewModel.sessionManager?.renameSession(id: id, title: trimmed)
+            }
+            Button("Cancel", role: .cancel) {}
         }
         .task {
             guard let query = viewModel.pendingInput else { return }
@@ -116,17 +140,23 @@ struct ChatView: View {
                 if viewModel.messages.isEmpty {
                     emptyState
                 } else {
-                    LazyVStack(spacing: 8) {
+                    LazyVStack(spacing: 0) {
+                        // Invisible anchor to track scroll offset
+                        Color.clear.frame(height: 0)
+                            .id("scroll-top")
                         ForEach(Array(viewModel.messages.enumerated()), id: \.element.id) { index, message in
+                            let info = groupInfo(at: index)
+
                             if viewModel.needsDateSeparator(at: index) {
                                 DateSeparatorView(date: message.timestamp)
                                     .padding(.top, index == 0 ? 0 : 4)
                             }
-                            let precedingUserPrompt = viewModel.messages[..<index]
-                                .last(where: { $0.role == .user })?.content
                             MessageBubbleView(
                                 message: message,
-                                userPrompt: precedingUserPrompt,
+                                userPrompt: info.precedingUserPrompt,
+                                isStreaming: viewModel.isGenerating && index == viewModel.messages.count - 1 && !message.isUser,
+                                isFirstInGroup: info.isFirst,
+                                isLastInGroup: info.isLast,
                                 onReply: { msg in
                                     withAnimation { viewModel.replyingTo = msg }
                                     inputFocused = true
@@ -169,18 +199,75 @@ struct ChatView: View {
                                 }
                             )
                             .id(message.id)
+                            .padding(.bottom, info.spacing)
                         }
                     }
                     .padding(.vertical, 12)
                 }
             }
-            .onChange(of: viewModel.messages.count, perform: { _ in
+            .onScrollGeometryChange(for: Bool.self) { geometry in
+                let distanceFromBottom = geometry.contentSize.height - geometry.contentOffset.y - geometry.containerSize.height
+                return distanceFromBottom < DesignConstants.Threshold.scrollNearBottom
+            } action: { _, newValue in
+                withAnimation(.easeInOut(duration: 0.2)) { isNearBottom = newValue }
+            }
+            .onChange(of: viewModel.messages.count) {
                 scrollToBottom(proxy: proxy)
-            })
-            .onChange(of: viewModel.messages.last?.content, perform: { _ in
-                scrollToBottom(proxy: proxy)
-            })
+            }
+            .onChange(of: viewModel.messages.last?.content) {
+                if isNearBottom { scrollToBottom(proxy: proxy) }
+            }
+            .overlay(alignment: .bottom) {
+                if !isNearBottom && !viewModel.messages.isEmpty {
+                    Button {
+                        withAnimation(.spring(duration: 0.4, bounce: 0.1)) {
+                            if let last = viewModel.messages.last {
+                                proxy.scrollTo(last.id, anchor: .bottom)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(.secondary)
+                            .frame(width: 36, height: 36)
+                            .background(.regularMaterial, in: Circle())
+                            .shadow(
+                                color: DesignConstants.Shadow.floatingColor,
+                                radius: DesignConstants.Shadow.floatingRadius,
+                                y: DesignConstants.Shadow.floatingY
+                            )
+                    }
+                    .padding(.bottom, 8)
+                    .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .animation(DesignConstants.Anim.pillEntrance, value: isNearBottom)
         }
+    }
+}
+
+// MARK: - Message grouping
+
+fileprivate struct MessageGroupInfo {
+    let isFirst: Bool
+    let isLast: Bool
+    let spacing: CGFloat
+    let precedingUserPrompt: String?
+}
+
+extension ChatView {
+    fileprivate func groupInfo(at index: Int) -> MessageGroupInfo {
+        let msgs = viewModel.messages
+        let message = msgs[index]
+        let prevRole = index > 0 ? msgs[index - 1].role : nil
+        let nextRole = index < msgs.count - 1 ? msgs[index + 1].role : nil
+        let hasSeparator = viewModel.needsDateSeparator(at: index)
+        let nextHasSeparator = index < msgs.count - 1 && viewModel.needsDateSeparator(at: index + 1)
+        let isFirst = prevRole != message.role || hasSeparator
+        let isLast = nextRole != message.role || nextHasSeparator
+        let spacing = isLast ? DesignConstants.Grouping.interGroupSpacing : DesignConstants.Grouping.intraGroupSpacing
+        let prompt = msgs[..<index].last(where: { $0.role == .user })?.content
+        return MessageGroupInfo(isFirst: isFirst, isLast: isLast, spacing: spacing, precedingUserPrompt: prompt)
     }
 }
 
