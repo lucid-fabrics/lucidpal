@@ -53,6 +53,53 @@ extension ChatViewModel {
         cancelSuggestionsGeneration()
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         let attachments = imageAttachments
+
+        // Auto-load vision model if needed but not loaded
+        let hasImages = !attachments.isEmpty
+        let needsVision = hasImages && settings.visionEnabled
+        if needsVision && !llmService.isVisionModelLoaded {
+            let visionModel = settings.selectedVisionModel
+            if visionModel.isDownloaded {
+                // Download mmproj if needed (CLIP vision encoder)
+                if let mmprojURL = visionModel.mmprojURL,
+                   !visionModel.isMmprojDownloaded,
+                   let destURL = visionModel.mmprojLocalURL {
+                    showToast("Downloading vision encoder…", systemImage: "arrow.down.circle")
+                    do {
+                        let (tempURL, _) = try await URLSession.shared.download(from: mmprojURL)
+                        if FileManager.default.fileExists(atPath: destURL.path) {
+                            try FileManager.default.removeItem(at: destURL)
+                        }
+                        try FileManager.default.moveItem(at: tempURL, to: destURL)
+                    } catch {
+                        showToast("Vision encoder download failed: \(error.localizedDescription)", systemImage: "exclamationmark.triangle")
+                        return
+                    }
+                }
+
+                do {
+                    showToast("Loading vision model…", systemImage: "eye")
+                    let loadRole: ModelType = visionModel.isIntegrated ? .text : .vision
+                    let mmprojPath = visionModel.isMmprojDownloaded ? visionModel.mmprojLocalURL : nil
+                    // Vision needs at least 8192 context — CLIP image embeddings use ~4000+ tokens
+                    let visionContextSize = max(UInt32(settings.contextSize), UInt32(LLMConstants.largeContextSize))
+                    try await llmService.loadModel(
+                        at: visionModel.localURL,
+                        contextSize: visionContextSize,
+                        role: loadRole,
+                        isIntegrated: visionModel.isIntegrated,
+                        mmprojURL: mmprojPath
+                    )
+                } catch {
+                    showToast("Vision model failed to load: \(error.localizedDescription)", systemImage: "exclamationmark.triangle")
+                    return
+                }
+            } else {
+                showToast("Vision model required. Go to Settings → Models to download one.", systemImage: "photo.badge.plus")
+                return
+            }
+        }
+
         guard !text.isEmpty || !attachments.isEmpty, !isGenerating, isModelLoaded else { return }
 
         hapticService.impact(.light)
@@ -93,8 +140,7 @@ extension ChatViewModel {
         let showThinking = thinkingEnabled
 
         // Determine model role: vision if images attached and vision is enabled
-        let hasImages = !attachments.isEmpty
-        let useVision = hasImages && settings.visionEnabled
+        let useVision = needsVision
         let modelRole: ModelType = useVision ? .vision : .text
 
         do {

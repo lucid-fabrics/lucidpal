@@ -22,9 +22,9 @@ enum VisionImageProcessorError: LocalizedError {
 /// Handles resizing, JPEG compression, base64 encoding, and thumbnail generation.
 struct VisionImageProcessor: Sendable {
 
-    /// Maximum dimension for the full-resolution image sent to the LLM (Qwen3.5-Vision preferred: 896 px).
+    /// Maximum dimension for the image sent to the LLM via CLIP encoder.
     private static let maxDimension: CGFloat = 896
-    /// JPEG compression quality for the full-resolution image.
+    /// JPEG compression quality for the image passed to CLIP.
     private static let jpegQuality: CGFloat = 0.8
     /// Maximum dimension for the thumbnail preview.
     private static let thumbnailDimension: CGFloat = 224
@@ -39,11 +39,16 @@ struct VisionImageProcessor: Sendable {
             throw VisionImageProcessorError.resizeFailed
         }
 
-        // Full-resolution JPEG base64
+        // Full-resolution JPEG for CLIP encoder
         guard let jpegData = resized.jpegData(compressionQuality: Self.jpegQuality) else {
             throw VisionImageProcessorError.imageDataConversionFailed
         }
         let base64Data = jpegData.base64EncodedString()
+
+        // Save JPEG to disk so mtmd can read it during generation
+        let imageID = UUID()
+        let localURL = FileManager.default.temporaryDirectory.appendingPathComponent(imageID.uuidString + ".jpg")
+        try jpegData.write(to: localURL)
 
         // Thumbnail
         let thumbnailData: Data?
@@ -55,8 +60,8 @@ struct VisionImageProcessor: Sendable {
         }
 
         return AttachedImage(
-            id: UUID(),
-            localURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".jpg"),
+            id: imageID,
+            localURL: localURL,
             thumbnailData: thumbnailData,
             base64Data: base64Data,
             width: Int(resized.size.width),

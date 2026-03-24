@@ -11,21 +11,30 @@ final class LLMService: LLMServiceProtocol {
     @Published private(set) var isLoaded    = false
     @Published private(set) var isLoading   = false
     @Published private(set) var isGenerating = false
+    @Published private(set) var visionLoaded = false
+
+    /// True when the loaded text model is an integrated vision model.
+    private var textModelSupportsVision = false
 
     private let llama = LlamaActor()
     private var currentTask: Task<Void, Never>?
 
-    func loadModel(at url: URL, contextSize: UInt32, role: ModelType) async throws {
+    var isVisionModelLoaded: Bool { visionLoaded || textModelSupportsVision }
+
+    func loadModel(at url: URL, contextSize: UInt32, role: ModelType, isIntegrated: Bool, mmprojURL: URL? = nil) async throws {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
-        try await llama.loadModel(at: url.path, contextSize: contextSize, role: role)
+        try await llama.loadModel(at: url.path, contextSize: contextSize, role: role, isIntegrated: isIntegrated, mmprojPath: mmprojURL?.path)
         await llama.warmup(role: role)
         isLoaded = true
+        if role == .vision { visionLoaded = true }
+        if role == .text && isIntegrated { textModelSupportsVision = true }
     }
 
     func unloadModel(role: ModelType) {
         cancelGeneration()
+        if role == .text { textModelSupportsVision = false }
         let actor = llama
         Task { [weak self] in
             await actor.unloadModel(role: role)
@@ -33,6 +42,7 @@ final class LLMService: LLMServiceProtocol {
             let visionLoaded = await actor.isVisionModelLoaded
             await MainActor.run {
                 self?.isLoaded = textLoaded || visionLoaded
+                self?.visionLoaded = visionLoaded
             }
         }
     }
@@ -42,6 +52,8 @@ final class LLMService: LLMServiceProtocol {
         let actor = llama
         Task { await actor.unload() }
         isLoaded = false
+        visionLoaded = false
+        textModelSupportsVision = false
     }
 
     func cancelGeneration() {
@@ -59,15 +71,32 @@ final class LLMService: LLMServiceProtocol {
         }
 
         isGenerating = true
-
-        let prompt: String
-        if modelRole == .vision {
-            // Build vision prompt with image tags
-            prompt = Self.buildVisionPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
-        } else {
-            prompt = Self.buildPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
-        }
         let llamaRef = llama
+
+        // Vision path: use mtmd for proper CLIP-based image understanding
+        if modelRole == .vision {
+            let body = messages.filter { $0.role != .system }
+            let lastUserMessage = body.last(where: { $0.role == .user })
+            let imageDataList = Self.extractImageData(from: lastUserMessage)
+            let prompt = Self.buildVisionPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled, imageCount: imageDataList.count)
+
+            return AsyncThrowingStream { continuation in
+                let task = Task {
+                    defer {
+                        Task { @MainActor [weak self] in
+                            self?.isGenerating = false
+                            self?.currentTask  = nil
+                        }
+                    }
+                    await llamaRef.generateWithImages(prompt: prompt, imageDataList: imageDataList, role: modelRole, continuation: continuation)
+                }
+                MainActor.assumeIsolated { [weak self] in self?.currentTask = task }
+                continuation.onTermination = { _ in task.cancel() }
+            }
+        }
+
+        // Text path: standard prompt
+        let prompt = Self.buildPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
 
         return AsyncThrowingStream { continuation in
             let task = Task {
@@ -84,6 +113,25 @@ final class LLMService: LLMServiceProtocol {
         }
     }
 
+    // MARK: - Image Data Extraction
+
+    /// Reads JPEG data from attached image files on disk.
+    private static func extractImageData(from message: ChatMessage?) -> [Data] {
+        guard let message else { return [] }
+        return message.imageAttachments.compactMap { attachment in
+            // Read JPEG from the localURL on disk
+            if FileManager.default.fileExists(atPath: attachment.localURL.path),
+               let data = try? Data(contentsOf: attachment.localURL) {
+                return data
+            }
+            // Fallback: decode base64 data
+            if !attachment.base64Data.isEmpty {
+                return Data(base64Encoded: attachment.base64Data)
+            }
+            return nil
+        }
+    }
+
     // MARK: - Prompt builder (Qwen3 ChatML)
 
     private static func sanitize(_ text: String) -> String {
@@ -92,7 +140,7 @@ final class LLMService: LLMServiceProtocol {
             .replacingOccurrences(of: "<|im_end|>", with: "")
     }
 
-    private static func buildPrompt(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true) -> String {
+    static func buildPrompt(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true) -> String {
         var parts: [String] = []
 
         if !systemPrompt.isEmpty {
@@ -120,34 +168,22 @@ final class LLMService: LLMServiceProtocol {
         return parts.joined(separator: "\n")
     }
 
-    /// Builds a vision prompt for Qwen3.5-Vision using <|vision_start|><|image_pad|><|vision_end|> tags.
-    /// Format:
-    /// <|im_start|>user
-    /// <|vision_start|><|image_pad|><|vision_end|>
-    /// Picture 1: <|vision_start|><|image_pad|><|vision_end|>
-    /// {user text}<|im_end|>
-    /// <|im_start|>assistant
-    private static func buildVisionPrompt(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true) -> String {
+    /// Builds a vision prompt using <__media__> markers for mtmd.
+    /// Each image attachment gets one marker that mtmd replaces with CLIP embeddings.
+    private static func buildVisionPrompt(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true, imageCount: Int) -> String {
         var parts: [String] = []
 
-        if !systemPrompt.isEmpty {
-            parts.append("<|im_start|>system\n\(sanitize(systemPrompt))<|im_end|>")
-        }
+        // Qwen VL requires "You are a helpful assistant." to stay in conversation mode.
+        // Without it, the model defaults to object detection (bbox JSON output).
+        let visionSystemPrompt = systemPrompt.isEmpty ? "You are a helpful assistant." : sanitize(systemPrompt)
+        parts.append("<|im_start|>system\n\(visionSystemPrompt)<|im_end|>")
 
-        // Find the last user message with image attachments
         let body = messages.filter { $0.role != .system }
         guard let lastUserMessage = body.last(where: { $0.role == .user }) else {
             return buildPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
         }
 
-        // Build image tags for vision model
-        let imageCount = lastUserMessage.imageAttachments.count
-        var imageSection = "<|vision_start|><|image_pad|><|vision_end|>\n"
-        for idx in 1...imageCount {
-            imageSection += "Picture \(idx): <|vision_start|><|image_pad|><|vision_end|>\n"
-        }
-
-        // System context for prior messages (without images)
+        // Prior conversation context (without images)
         let priorMessages = body.filter { $0.id != lastUserMessage.id }
         var i = 0
         while i + 1 < priorMessages.count {
@@ -160,11 +196,13 @@ final class LLMService: LLMServiceProtocol {
             }
         }
 
-        // Last user message with vision images
-        let suffix = thinkingEnabled ? "" : " /no_think"
+        // Last user message with image markers — no /no_think for vision (confuses the model)
+        let markers = (0..<imageCount).map { _ in "<__media__>" }.joined(separator: "\n")
         parts.append("<|im_start|>user")
-        parts.append(imageSection)
-        parts.append("\(sanitize(lastUserMessage.content))\(suffix)<|im_end|>")
+        if !markers.isEmpty {
+            parts.append(markers)
+        }
+        parts.append("\(sanitize(lastUserMessage.content))<|im_end|>")
 
         parts.append("<|im_start|>assistant\n")
         return parts.joined(separator: "\n")
