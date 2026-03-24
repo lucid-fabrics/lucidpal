@@ -23,6 +23,7 @@ func bubbleTextView(_ text: String, isUser: Bool) -> some View {
                 Text(segment.content)
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(isUser ? .white.opacity(0.9) : .primary)
+                    .textSelection(.enabled)
                     .padding(10)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(
@@ -79,11 +80,15 @@ private func renderMarkdown(_ text: String, isUser: Bool) -> some View {
             return line
         }
         .joined(separator: "\n")
-    let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+    let options = AttributedString.MarkdownParsingOptions(
+        interpretedSyntax: .inlineOnlyPreservingWhitespace
+    )
     if let attributed = try? AttributedString(markdown: processed, options: options) {
         Text(attributed)
+            .textSelection(.enabled)
     } else {
         Text(processed)
+            .textSelection(.enabled)
     }
 }
 

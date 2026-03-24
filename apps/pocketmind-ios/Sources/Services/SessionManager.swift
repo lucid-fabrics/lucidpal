@@ -1,5 +1,7 @@
+import CoreSpotlight
 import Foundation
 import OSLog
+import UniformTypeIdentifiers
 
 private let sessionLogger = Logger(subsystem: "app.pocketmind", category: "SessionManager")
 
@@ -10,6 +12,7 @@ protocol SessionManagerProtocol {
     @discardableResult func save(_ session: ChatSession) -> Task<Void, Never>
     func delete(id: UUID)
     @discardableResult func renameSession(id: UUID, title: String) -> Task<Void, Never>
+    @discardableResult func togglePin(id: UUID) -> Task<Void, Never>
 }
 
 /// Manages multiple chat sessions on disk.
@@ -97,6 +100,7 @@ final class SessionManager: SessionManagerProtocol {
             }
         }
         updateIndex(with: session.meta)
+        indexForSpotlight(session.meta)
         return task
     }
 
@@ -109,6 +113,7 @@ final class SessionManager: SessionManagerProtocol {
         var index = loadIndex()
         index.removeAll { $0.id == id }
         saveIndex(index)
+        CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [id.uuidString])
     }
 
     @discardableResult
@@ -116,6 +121,15 @@ final class SessionManager: SessionManagerProtocol {
         guard var session = loadSession(id: id) else { return Task {} }
         session.title = title
         return save(session)
+    }
+
+    @discardableResult
+    func togglePin(id: UUID) -> Task<Void, Never> {
+        var index = loadIndex()
+        guard let i = index.firstIndex(where: { $0.id == id }) else { return Task {} }
+        index[i].isPinned.toggle()
+        saveIndex(index)
+        return Task {}
     }
 
     // MARK: - Private
@@ -127,7 +141,9 @@ final class SessionManager: SessionManagerProtocol {
     private func updateIndex(with meta: ChatSessionMeta) {
         var index = loadIndex()
         if let i = index.firstIndex(where: { $0.id == meta.id }) {
+            let pinned = index[i].isPinned
             index[i] = meta
+            index[i].isPinned = pinned
         } else {
             index.insert(meta, at: 0)
         }
@@ -141,6 +157,24 @@ final class SessionManager: SessionManagerProtocol {
         } catch {
             sessionLogger.error("Failed to save index: \(error)")
         }
+    }
+
+    // MARK: - Spotlight
+
+    private func indexForSpotlight(_ meta: ChatSessionMeta) {
+        let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
+        attributeSet.title = meta.title
+        attributeSet.contentDescription = meta.lastMessagePreview
+        attributeSet.lastUsedDate = meta.updatedAt
+
+        let item = CSSearchableItem(
+            uniqueIdentifier: meta.id.uuidString,
+            domainIdentifier: "app.pocketmind.sessions",
+            attributeSet: attributeSet
+        )
+        item.expirationDate = Date.distantFuture
+
+        CSSearchableIndex.default().indexSearchableItems([item])
     }
 
     // MARK: - Migration

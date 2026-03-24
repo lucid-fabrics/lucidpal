@@ -7,13 +7,15 @@ struct ChatSessionMeta: Identifiable, Codable, Equatable, Hashable {
     let createdAt: Date
     var updatedAt: Date
     var lastMessagePreview: String?
+    var isPinned: Bool = false
 
-    init(id: UUID, title: String, createdAt: Date, updatedAt: Date, lastMessagePreview: String? = nil) {
+    init(id: UUID, title: String, createdAt: Date, updatedAt: Date, lastMessagePreview: String? = nil, isPinned: Bool = false) {
         self.id = id
         self.title = title
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.lastMessagePreview = lastMessagePreview
+        self.isPinned = isPinned
     }
 
     func hash(into hasher: inout Hasher) {

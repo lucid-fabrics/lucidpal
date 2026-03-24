@@ -34,4 +34,9 @@ final class MockSessionManager: SessionManagerProtocol {
         store[id] = session
         return Task {}
     }
+
+    @discardableResult
+    func togglePin(id: UUID) -> Task<Void, Never> {
+        Task {}
+    }
 }

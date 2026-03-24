@@ -139,6 +139,11 @@ struct SessionRowView: View {
             avatar
             VStack(alignment: .leading, spacing: 3) {
                 HStack(alignment: .firstTextBaseline) {
+                    if meta.isPinned {
+                        Image(systemName: "pin.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                    }
                     Text(highlightedTitle)
                         .font(.body.weight(.semibold))
                         .lineLimit(1)

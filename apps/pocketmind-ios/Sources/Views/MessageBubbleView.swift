@@ -136,6 +136,7 @@ struct MessageBubbleView: View {
                                 }
                                 Divider()
                                 Button(role: .destructive) {
+                                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                                     onDeleteMessage?(message.id)
                                 } label: {
                                     Label("Delete", systemImage: "trash")

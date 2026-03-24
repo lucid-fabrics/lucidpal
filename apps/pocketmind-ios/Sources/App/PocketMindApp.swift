@@ -147,6 +147,20 @@ private struct RootView: View {
     @ObservedObject var settingsViewModel: SettingsViewModel
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
 
+    /// Auto-loads the last used text model on app launch if one was previously selected and downloaded.
+    private func autoLoadLastModel() async {
+        guard !downloadViewModel.isModelLoaded,
+              !downloadViewModel.isModelLoading else { return }
+        let savedID = settings.selectedTextModelID
+        guard !savedID.isEmpty else { return }
+        let allModels = ModelInfo.available(physicalRAMGB: settings.deviceRAMGB)
+        guard let model = allModels.first(where: { $0.id == savedID }),
+              model.isDownloaded else { return }
+        downloadViewModel.selectModel(model)
+        await downloadViewModel.loadModel()
+        settingsViewModel.refreshModelSelection()
+    }
+
     var body: some View {
         // Gate only on hasCompletedOnboarding — not isModelLoaded.
         // If the model unloads post-onboarding (memory pressure, delete), the user
@@ -158,6 +172,7 @@ private struct RootView: View {
                 settingsViewModel: settingsViewModel,
                 downloadViewModel: downloadViewModel
             )
+            .task { await autoLoadLastModel() }
         } else {
             OnboardingView(
                 downloadViewModel: downloadViewModel,

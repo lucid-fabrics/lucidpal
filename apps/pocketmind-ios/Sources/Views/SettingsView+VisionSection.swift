@@ -159,7 +159,10 @@ extension SettingsView {
 
             Spacer()
 
-            if isSelected {
+            if isSelected && downloadViewModel.isModelLoading {
+                ProgressView()
+                    .controlSize(.small)
+            } else if isSelected {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.title3)
                     .foregroundStyle(Color.accentColor)

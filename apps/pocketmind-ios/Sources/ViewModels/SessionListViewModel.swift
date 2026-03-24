@@ -61,6 +61,16 @@ final class SessionListViewModel: ObservableObject {
         sessionManager.renameSession(id: id, title: title)
     }
 
+    func togglePin(id: UUID) {
+        guard let i = sessions.firstIndex(where: { $0.id == id }) else { return }
+        sessions[i].isPinned.toggle()
+        sessionManager.togglePin(id: id)
+    }
+
+    func refreshSessions() {
+        sessions = sessionManager.loadIndex().sorted { $0.updatedAt > $1.updatedAt }
+    }
+
     func sessionUpdated(_ meta: ChatSessionMeta) {
         guard let i = sessions.firstIndex(where: { $0.id == meta.id }) else { return }
         sessions[i] = meta
@@ -152,13 +162,17 @@ final class SessionListViewModel: ObservableObject {
     func groupedSessions(searchText: String) -> [SessionGroup] {
         let cal = Calendar.current
         let now = Date.now
+        let filtered = filteredSessions(searchText: searchText)
+
+        let pinned = filtered.filter(\.isPinned)
+        let unpinned = filtered.filter { !$0.isPinned }
 
         var today: [ChatSessionMeta] = []
         var yesterday: [ChatSessionMeta] = []
         var thisWeek: [ChatSessionMeta] = []
         var earlier: [ChatSessionMeta] = []
 
-        for meta in filteredSessions(searchText: searchText) {
+        for meta in unpinned {
             if cal.isDateInToday(meta.updatedAt) {
                 today.append(meta)
             } else if cal.isDateInYesterday(meta.updatedAt) {
@@ -171,12 +185,17 @@ final class SessionListViewModel: ObservableObject {
             }
         }
 
-        return [
+        var groups: [SessionGroup] = []
+        if !pinned.isEmpty {
+            groups.append(SessionGroup(title: "Pinned", sessions: pinned))
+        }
+        groups.append(contentsOf: [
             SessionGroup(title: "Today", sessions: today),
             SessionGroup(title: "Yesterday", sessions: yesterday),
             SessionGroup(title: "This Week", sessions: thisWeek),
             SessionGroup(title: "Earlier", sessions: earlier),
-        ].filter { !$0.sessions.isEmpty }
+        ].filter { !$0.sessions.isEmpty })
+        return groups
     }
 
     func scheduleCreateEvent(_ event: SiriPendingEvent) {
