@@ -22,8 +22,6 @@ apps/pocketmind-ios/**/*.gguf
 **/fastlane/report.xml
 docs/node_modules
 docs/build
-docs/node_modules
-docs/build
 docs/.docusaurus
 
 # Build/tool artifacts
