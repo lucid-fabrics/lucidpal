@@ -25,3 +25,10 @@ docs/build
 docs/node_modules
 docs/build
 docs/.docusaurus
+
+# Build/tool artifacts
+node_modules/
+.nx/
+.claude/
+PLAN.md
+package-lock.json
