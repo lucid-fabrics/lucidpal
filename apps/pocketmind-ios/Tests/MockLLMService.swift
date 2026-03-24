@@ -14,6 +14,7 @@ final class MockLLMService: LLMServiceProtocol {
     var isGenerating: Bool = false {
         didSet { isGeneratingSubject.send(isGenerating) }
     }
+    var isVisionModelLoaded: Bool = false
 
     private let isLoadedSubject     = CurrentValueSubject<Bool, Never>(false)
     private let isLoadingSubject    = CurrentValueSubject<Bool, Never>(false)
@@ -57,7 +58,7 @@ final class MockLLMService: LLMServiceProtocol {
         }
     }
 
-    func loadModel(at url: URL, contextSize: UInt32, role: ModelType) async throws {
+    func loadModel(at url: URL, contextSize: UInt32, role: ModelType, isIntegrated: Bool, mmprojURL: URL? = nil) async throws {
         loadedURL = url
         isLoaded = true  // didSet fires isLoadedSubject
     }

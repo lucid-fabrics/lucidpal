@@ -38,6 +38,11 @@ struct ModelDownloadView: View {
         .onAppear {
             viewModel.capabilityFilter = capabilityFilter
             viewModel.refreshAvailableModels(filter: capabilityFilter)
+            // Auto-select first available if current selection was filtered out.
+            if !viewModel.availableModels.contains(where: { $0.id == viewModel.selectedModel.id }),
+               let first = viewModel.availableModels.first {
+                viewModel.selectModel(first)
+            }
         }
     }
 
