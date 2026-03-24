@@ -49,8 +49,8 @@ final class SuggestedPromptsProvider: SuggestedPromptsProviderProtocol {
             .filter { !$0.isAllDay }.sorted { $0.startDate < $1.startDate }
         let nextEvent = remaining.first ?? thisWeek.first
 
-        let isEvening  = hour >= 17
-        let isMorning  = hour < 12
+        let isEvening  = hour >= ChatConstants.eveningStartHour
+        let isMorning  = hour < ChatConstants.morningEndHour
         let isWeekend  = weekday == 1 || weekday == 7
         let isFriday   = weekday == 6
         let isThursday = weekday == 5

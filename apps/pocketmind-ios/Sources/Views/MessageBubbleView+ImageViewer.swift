@@ -10,11 +10,67 @@ private enum AnimationConstants {
 
 // MARK: - Markdown bubble text
 
-/// Renders message text with inline markdown (bold, italic, code, links).
+/// Renders message text with inline markdown and code block detection.
+/// Triple-backtick fenced blocks get monospace font + dark background.
 /// Converts leading `- ` list markers to `•` before parsing.
 /// Falls back to plain text if AttributedString parsing fails.
 @ViewBuilder
 func bubbleTextView(_ text: String, isUser: Bool) -> some View {
+    let segments = parseCodeBlocks(text)
+    VStack(alignment: .leading, spacing: 8) {
+        ForEach(Array(segments.enumerated()), id: \.offset) { _, segment in
+            if segment.isCode {
+                Text(segment.content)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(isUser ? .white.opacity(0.9) : .primary)
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(
+                        isUser
+                            ? Color.white.opacity(0.12)
+                            : Color(.systemGray6)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.codeBlock, style: .continuous))
+            } else {
+                renderMarkdown(segment.content, isUser: isUser)
+            }
+        }
+    }
+}
+
+private struct TextSegment {
+    let content: String
+    let isCode: Bool
+}
+
+private func parseCodeBlocks(_ text: String) -> [TextSegment] {
+    let pattern = "```(?:\\w*\\n)?([\\s\\S]*?)```"
+    guard let regex = try? NSRegularExpression(pattern: pattern) else {
+        return [TextSegment(content: text, isCode: false)]
+    }
+    var segments: [TextSegment] = []
+    var lastEnd = text.startIndex
+    let nsRange = NSRange(text.startIndex..., in: text)
+    for match in regex.matches(in: text, range: nsRange) {
+        let matchRange = Range(match.range, in: text)!
+        let codeRange = Range(match.range(at: 1), in: text)!
+        if lastEnd < matchRange.lowerBound {
+            let pre = String(text[lastEnd..<matchRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+            if !pre.isEmpty { segments.append(TextSegment(content: pre, isCode: false)) }
+        }
+        segments.append(TextSegment(content: String(text[codeRange]).trimmingCharacters(in: .whitespacesAndNewlines), isCode: true))
+        lastEnd = matchRange.upperBound
+    }
+    if lastEnd < text.endIndex {
+        let remaining = String(text[lastEnd...]).trimmingCharacters(in: .whitespacesAndNewlines)
+        if !remaining.isEmpty { segments.append(TextSegment(content: remaining, isCode: false)) }
+    }
+    if segments.isEmpty { segments.append(TextSegment(content: text, isCode: false)) }
+    return segments
+}
+
+@ViewBuilder
+private func renderMarkdown(_ text: String, isUser: Bool) -> some View {
     let processed = text
         .components(separatedBy: "\n")
         .map { line -> String in
@@ -96,14 +152,20 @@ struct GeneratingStatusView: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Circle()
-                .fill(Color.accentColor)
-                .frame(width: 7, height: 7)
-                .opacity(dotOpacity)
-                .animation(
-                    reduceMotion ? .default : .easeInOut(duration: 0.6).repeatForever(autoreverses: true),
-                    value: dotOpacity
-                )
+            HStack(spacing: 4) {
+                ForEach(0..<3, id: \.self) { index in
+                    Circle()
+                        .fill(Color.accentColor)
+                        .frame(width: 7, height: 7)
+                        .opacity(dotOpacity)
+                        .animation(
+                            reduceMotion ? .default : .easeInOut(duration: 0.5)
+                                .repeatForever(autoreverses: true)
+                                .delay(Double(index) * 0.15),
+                            value: dotOpacity
+                        )
+                }
+            }
 
             Text(phrases[phaseIndex % phrases.count])
                 .font(.subheadline)
@@ -117,7 +179,7 @@ struct GeneratingStatusView: View {
         .task {
             guard !reduceMotion else { return }
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(4.5))
+                try? await Task.sleep(for: .seconds(ChatConstants.generatingPhraseIntervalSeconds))
                 withAnimation(.easeInOut(duration: 0.4)) {
                     phaseIndex += 1
                 }
@@ -211,16 +273,40 @@ struct FullscreenImageView: View {
     @State private var lastScale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
+    @State private var dragOffset: CGSize = .zero
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.black
+                .opacity(scale <= 1.0 ? 1.0 - Double(abs(dragOffset.height)) / 400.0 : 1.0)
+                .ignoresSafeArea()
 
             Image(uiImage: image)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .scaleEffect(scale)
-                .offset(offset)
+                .offset(CGSize(
+                    width: offset.width + (scale <= 1.0 ? dragOffset.width : 0),
+                    height: offset.height + (scale <= 1.0 ? dragOffset.height : 0)
+                ))
+                .gesture(
+                    TapGesture(count: 2)
+                        .onEnded {
+                            let anim: Animation = reduceMotion ? .default : .spring(response: 0.3)
+                            withAnimation(anim) {
+                                if scale > 1.0 {
+                                    scale = 1.0
+                                    lastScale = 1.0
+                                    offset = .zero
+                                    lastOffset = .zero
+                                } else {
+                                    scale = 2.5
+                                    lastScale = 2.5
+                                }
+                            }
+                        }
+                )
                 .gesture(
                     MagnifyGesture()
                         .onChanged { value in
@@ -243,10 +329,23 @@ struct FullscreenImageView: View {
                                     width: lastOffset.width + value.translation.width,
                                     height: lastOffset.height + value.translation.height
                                 )
+                            } else {
+                                dragOffset = value.translation
                             }
                         }
-                        .onEnded { _ in
-                            lastOffset = offset
+                        .onEnded { value in
+                            if scale > 1.0 {
+                                lastOffset = offset
+                            } else {
+                                if abs(dragOffset.height) > 100 {
+                                    onDismiss()
+                                } else {
+                                    let anim: Animation = reduceMotion ? .default : .spring(response: 0.3, dampingFraction: 0.75)
+                                    withAnimation(anim) {
+                                        dragOffset = .zero
+                                    }
+                                }
+                            }
                         }
                 )
                 .onTapGesture {

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct WebSearchSettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
@@ -12,6 +13,7 @@ struct WebSearchSettingsView: View {
                 configSection
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: viewModel.webSearchEnabled)
         .navigationTitle("Web Search")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -77,7 +79,7 @@ struct WebSearchSettingsView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SubtlePressStyle())
             .sheet(isPresented: $showJsonInfo) {
                 jsonInfoSheet
             }
@@ -143,6 +145,7 @@ struct WebSearchSettingsView: View {
 
     private var testButton: some View {
         Button {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
             Task { await viewModel.runConnectionTest() }
         } label: {
             HStack {
@@ -171,5 +174,16 @@ struct WebSearchSettingsView: View {
         case .success:        return .green
         case .failure:        return .red
         }
+    }
+}
+
+// MARK: - Button Styles
+
+private struct SubtlePressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .opacity(configuration.isPressed ? 0.85 : 1.0)
+            .animation(.easeInOut(duration: 0.12), value: configuration.isPressed)
     }
 }

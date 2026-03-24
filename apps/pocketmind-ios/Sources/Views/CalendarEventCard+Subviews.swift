@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Card variant subviews
 
@@ -18,7 +19,10 @@ extension CalendarEventCard {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Button(action: onUndo) {
+            Button {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                onUndo()
+            } label: {
                 Text("Undo")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(Color.accentColor)
@@ -75,7 +79,7 @@ extension CalendarEventCard {
             .background(Color.orange.opacity(0.1))
             .clipShape(RoundedRectangle(cornerRadius: DesignConstants.CornerRadius.card, style: .continuous))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(CalendarCardPressStyle())
     }
 
     func statusCard(icon: String, label: String, color: Color) -> some View {

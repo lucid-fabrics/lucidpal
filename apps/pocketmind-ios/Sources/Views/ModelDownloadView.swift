@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ModelDownloadView: View {
     @ObservedObject var viewModel: ModelDownloadViewModel
@@ -84,12 +85,13 @@ struct ModelDownloadView: View {
                                   : Color(.systemGray6))
                     )
                 }
+                .buttonStyle(PickerItemPressStyle())
             }
         }
     }
 
     private var modelDetails: some View {
-        Text("Recommended for your device: \(ModelInfo.recommended(physicalRAMGB: viewModel.settings.deviceRAMGB).displayName)")
+        Text("Recommended for your device: \(ModelInfo.recommended(physicalRAMGB: viewModel.deviceRAMGB).displayName)")
             .font(.caption)
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
@@ -99,12 +101,13 @@ struct ModelDownloadView: View {
     private var actionButton: some View {
         switch viewModel.downloadState {
         case .idle:
-            if viewModel.isModelLoaded && (viewModel.settings.selectedTextModelID == viewModel.selectedModel.id || viewModel.settings.selectedVisionModelID == viewModel.selectedModel.id) {
+            if viewModel.isModelLoaded && (viewModel.selectedTextModelID == viewModel.selectedModel.id || viewModel.selectedVisionModelID == viewModel.selectedModel.id) {
                 Label("Loaded", systemImage: "checkmark.circle.fill")
                     .foregroundStyle(.green)
                     .font(.subheadline.weight(.medium))
             } else if viewModel.selectedModel.isDownloaded {
                 Button {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     Task { await viewModel.loadModel() }
                 } label: {
                     if viewModel.isModelLoading {
@@ -121,6 +124,7 @@ struct ModelDownloadView: View {
             } else {
                 VStack(spacing: 8) {
                     Button("Download") {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         viewModel.startDownload()
                     }
                     .buttonStyle(.borderedProminent)
@@ -157,9 +161,21 @@ struct ModelDownloadView: View {
 
         case .failed:
             Button("Retry") {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 viewModel.startDownload()
             }
             .buttonStyle(.borderedProminent)
         }
+    }
+}
+
+// MARK: - Button Styles
+
+private struct PickerItemPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .opacity(configuration.isPressed ? 0.85 : 1.0)
+            .animation(.easeInOut(duration: 0.12), value: configuration.isPressed)
     }
 }

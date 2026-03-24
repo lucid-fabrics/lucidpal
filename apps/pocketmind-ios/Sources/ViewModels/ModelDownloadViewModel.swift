@@ -14,10 +14,16 @@ final class ModelDownloadViewModel: ObservableObject {
     @Published var loadError: String?
     @Published var deleteError: String?
 
-    let downloader: any ModelDownloaderProtocol
+    private let downloader: any ModelDownloaderProtocol
     private let llmService: any LLMServiceProtocol
-    let settings: any AppSettingsProtocol
+    private let settings: any AppSettingsProtocol
     private var cancellables = Set<AnyCancellable>()
+
+    // MARK: - Pass-throughs (keep settings private, publish for SwiftUI)
+
+    var deviceRAMGB: Int { settings.deviceRAMGB }
+    @Published private(set) var selectedTextModelID: String = ""
+    @Published private(set) var selectedVisionModelID: String = ""
 
     /// Controls which models appear: .text for text-only, .vision for any vision-capable.
     /// Set by ModelDownloadView on appear to filter the shared viewModel instance.
@@ -42,6 +48,8 @@ final class ModelDownloadViewModel: ObservableObject {
             ? savedTextModel
             : ModelInfo.recommended(physicalRAMGB: ram)
         self.isModelLoaded = llmService.isLoaded
+        self.selectedTextModelID = settings.selectedTextModelID
+        self.selectedVisionModelID = settings.selectedVisionModelID
 
         // assign(to: &$property) uses weak self internally — no retain cycle.
         downloader.statePublisher.assign(to: &$downloadState)
@@ -159,11 +167,13 @@ final class ModelDownloadViewModel: ObservableObject {
                 : UInt32(settings.contextSize)
             modelDownloadLogger.info("loadModel: model=\(self.selectedModel.displayName) role=\(String(describing: role)) isIntegrated=\(self.selectedModel.isIntegrated) ctx=\(ctxSize) mmproj=\(mmprojPath?.path ?? "none")")
             try await llmService.loadModel(at: selectedModel.localURL, contextSize: ctxSize, role: role, isIntegrated: selectedModel.isIntegrated, mmprojURL: mmprojPath)
-            // Update the appropriate saved model ID.
+            // Update the appropriate saved model ID (settings + published).
             if role == .text {
                 settings.selectedTextModelID = selectedModel.id
+                selectedTextModelID = selectedModel.id
             } else {
                 settings.selectedVisionModelID = selectedModel.id
+                selectedVisionModelID = selectedModel.id
             }
             downloader.resetState()
         } catch {

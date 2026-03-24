@@ -58,16 +58,19 @@ final class SettingsViewModel: ObservableObject {
     private let settings: any AppSettingsProtocol
     let calendarService: any CalendarServiceProtocol
     let locationService: (any LocationServiceProtocol)?
+    private let webSearchServiceFactory: (any AppSettingsProtocol) -> any WebSearchServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
     init(
         settings: any AppSettingsProtocol,
         calendarService: any CalendarServiceProtocol,
-        locationService: (any LocationServiceProtocol)? = nil
+        locationService: (any LocationServiceProtocol)? = nil,
+        webSearchServiceFactory: @escaping (any AppSettingsProtocol) -> any WebSearchServiceProtocol = { WebSearchService(settings: $0) }
     ) {
         self.settings = settings
         self.calendarService = calendarService
         self.locationService = locationService
+        self.webSearchServiceFactory = webSearchServiceFactory
 
         // Seed published state from settings
         self.calendarAuthStatus = calendarService.authorizationStatus
@@ -216,7 +219,7 @@ final class SettingsViewModel: ObservableObject {
 
     /// Creates a WebSearchService scoped to the current web search settings.
     private func makeWebSearchService() -> any WebSearchServiceProtocol {
-        WebSearchService(settings: settings)
+        webSearchServiceFactory(settings)
     }
 
     // MARK: - Storage

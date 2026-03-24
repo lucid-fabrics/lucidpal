@@ -78,6 +78,13 @@ struct SessionListView: View {
             heroActions(event: event, now: now)
         }
         .frame(maxWidth: .infinity)
+        .background(
+            LinearGradient(
+                colors: [Color.accentColor.opacity(0.06), Color.clear],
+                startPoint: .top, endPoint: .bottom
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private func heroHeader(now: Date, count: Int) -> some View {
@@ -147,8 +154,8 @@ struct SessionListView: View {
         }
         let mins = Int(event.startDate.timeIntervalSince(now) / 60)
         let short = title.count > ChatConstants.eventTitlePreviewLength + 2 ? String(title.prefix(ChatConstants.eventTitlePreviewLength)) + "…" : title
-        if mins < 5 { return "\"\(short)\" is starting now" }
-        if mins < 60 { return "Ask about \"\(short)\"" }
+        if mins < ChatConstants.eventStartingNowMinutes { return "\"\(short)\" is starting now" }
+        if mins < ChatConstants.minutesPerHour { return "Ask about \"\(short)\"" }
         return "Tap the mic to ask about your day"
     }
 
@@ -166,6 +173,15 @@ struct SessionListView: View {
                         SessionRowView(meta: meta, searchText: searchText)
                     }
                     .buttonStyle(.plain)
+                    .swipeActions(edge: .leading) {
+                        Button {
+                            renameText = meta.title
+                            renamingSession = meta
+                        } label: {
+                            Label("Rename", systemImage: "pencil")
+                        }
+                        .tint(.accentColor)
+                    }
                     .contextMenu {
                         Button {
                             renameText = meta.title

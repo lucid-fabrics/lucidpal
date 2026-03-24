@@ -112,7 +112,11 @@ final class WhisperSpeechService {
             let started = rec.record()
             DebugLogStore.shared.log("AVAudioRecorder.record() returned \(started)", category: "Whisper")
             guard started else {
-                try? session.setActive(false, options: .notifyOthersOnDeactivation)
+                do {
+                    try session.setActive(false, options: .notifyOthersOnDeactivation)
+                } catch {
+                    whisperLogger.warning("Failed to deactivate audio session after recording failed to start: \(error.localizedDescription)")
+                }
                 throw RecordingError.failedToStart
             }
             recorder = rec
@@ -206,7 +210,7 @@ final class WhisperSpeechService {
         DebugLogStore.shared.log("Recording file size: \(fileSize) bytes at \(url.lastPathComponent)", category: "Whisper")
 
         // WAV at 16 kHz 16-bit mono = 32 KB/s. Require at least 0.5 s (~16 KB).
-        guard FileManager.default.fileExists(atPath: url.path), fileSize > 16_000 else {
+        guard FileManager.default.fileExists(atPath: url.path), fileSize > ChatConstants.minimumRecordingFileSize else {
             let msg = fileSize == 0
                 ? "Recording file missing — microphone may not have started."
                 : "Recording too short — nothing was captured."

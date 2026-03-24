@@ -65,7 +65,8 @@ final class VisionImageProcessorTests: XCTestCase {
         XCTAssertLessThanOrEqual(result.width, 896)
         XCTAssertLessThanOrEqual(result.height, 896)
         XCTAssertFalse(result.base64Data.isEmpty)
-        XCTAssertNotNil(Data(base64Encoded: result.base64Data))
+        let decoded = try XCTUnwrap(Data(base64Encoded: result.base64Data))
+        XCTAssertGreaterThan(decoded.count, 0, "Decoded base64 data should not be empty")
         XCTAssertEqual(result.localURL.pathExtension, "jpg")
     }
 
@@ -166,6 +167,23 @@ final class VisionImageProcessorTests: XCTestCase {
         XCTAssertEqual(asyncResult.width, syncResult.width)
         XCTAssertEqual(asyncResult.height, syncResult.height)
         XCTAssertEqual(asyncResult.base64Data, syncResult.base64Data)
+    }
+
+    // MARK: - Edge cases
+
+    func testProcessMinimalPixelImage() throws {
+        let tiny = makeTestImage(size: CGSize(width: 1, height: 1))
+        let result = try processor.process(tiny)
+        XCTAssertEqual(result.width, 1)
+        XCTAssertEqual(result.height, 1)
+        XCTAssertFalse(result.base64Data.isEmpty)
+    }
+
+    func testResizePreservingAspectExactMaxDimension() throws {
+        let exact = makeTestImage(size: CGSize(width: 896, height: 896))
+        let resized = try XCTUnwrap(processor.resizePreservingAspect(image: exact, maxDimension: 896))
+        XCTAssertEqual(resized.size.width, 896)
+        XCTAssertEqual(resized.size.height, 896)
     }
 
     // MARK: - Helper

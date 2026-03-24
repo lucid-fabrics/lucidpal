@@ -9,21 +9,28 @@ struct ContentView: View {
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
 
+    @State private var selectedTab: Tab = .chat
+
     // MARK: - Body
 
     var body: some View {
         Group {
             if hasSeenOnboarding {
-                TabView {
+                TabView(selection: $selectedTab) {
                     SessionListView(viewModel: sessionListViewModel)
                         .tabItem {
                             Label(Tab.chat.title, systemImage: Tab.chat.icon)
                         }
+                        .tag(Tab.chat)
 
                     SettingsView(viewModel: settingsViewModel, downloadViewModel: downloadViewModel)
                         .tabItem {
                             Label(Tab.settings.title, systemImage: Tab.settings.icon)
                         }
+                        .tag(Tab.settings)
+                }
+                .onChange(of: selectedTab) { _, _ in
+                    UISelectionFeedbackGenerator().selectionChanged()
                 }
             } else {
                 OnboardingCarouselView()

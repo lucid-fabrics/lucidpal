@@ -83,7 +83,7 @@ struct CalendarQueryResultCard: View {
                         .padding(.horizontal, DesignConstants.Padding.cardHorizontal)
                         .padding(.vertical, DesignConstants.Padding.slotRowVertical)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(CalendarCardPressStyle())
 
                     if index < slots.count - 1 {
                         Divider().padding(.horizontal, DesignConstants.Padding.card)

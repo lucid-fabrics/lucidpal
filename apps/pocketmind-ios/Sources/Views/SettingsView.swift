@@ -5,20 +5,30 @@ struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
 
-    private static let sourceURL = URL(string: "https://github.com/wassimmehanna/pocketmind")
-
     var body: some View {
         NavigationStack {
             Form {
+                // Data Sources
                 calendarSection
                 locationSection
                 webSearchSection
+
+                // AI Models
                 visionSection
                 textModelSection
                 visionModelSection
+
+                // Interaction
                 inferenceSection
+
+                // Integration
                 shortcutsSection
+
+                // App
                 aboutSection
+                #if DEBUG
+                debugSection
+                #endif
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
@@ -27,6 +37,24 @@ struct SettingsView: View {
             } message: {
                 Text(downloadViewModel.deleteError ?? "")
             }
+        }
+    }
+
+    // MARK: - Section Header Helper
+
+    @ViewBuilder
+    func sectionHeader(_ title: String, icon: String, color: Color) -> some View {
+        Label {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .textCase(nil)
+        } icon: {
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 24, height: 24)
+                .background(color, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
         }
     }
 
@@ -66,7 +94,7 @@ struct SettingsView: View {
                 }
             }
         } header: {
-            Text("Calendar")
+            sectionHeader("Calendar", icon: "calendar", color: .red)
         } footer: {
             Text("When enabled, upcoming events are included in the AI prompt. All processing is on-device.")
         }
@@ -74,15 +102,13 @@ struct SettingsView: View {
 
     @ViewBuilder
     private var statusBadge: some View {
-        if viewModel.isCalendarAuthorized {
-            Text("Granted")
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.green)
-        } else {
-            Text("Not granted")
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.orange)
-        }
+        let granted = viewModel.isCalendarAuthorized
+        Text(granted ? "Granted" : "Not granted")
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(granted ? .green : .orange)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background((granted ? Color.green : Color.orange).opacity(0.12), in: Capsule())
     }
 
     private var locationSection: some View {
@@ -117,7 +143,7 @@ struct SettingsView: View {
                 }
             }
         } header: {
-            Text("Location")
+            sectionHeader("Location", icon: "location.fill", color: .blue)
         } footer: {
             Text("When enabled, your city is included in the AI prompt so responses like weather and local recommendations are relevant to you. Location is never stored on servers.")
         }
@@ -126,18 +152,24 @@ struct SettingsView: View {
     @ViewBuilder
     private var locationStatusBadge: some View {
         if viewModel.locationEnabled && !viewModel.userCity.isEmpty {
-            Text("On · \(viewModel.userCity)")
-                .font(.caption.weight(.medium))
+            Text(viewModel.userCity)
+                .font(.caption2.weight(.semibold))
                 .foregroundStyle(.green)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Color.green.opacity(0.12), in: Capsule())
         } else {
             Text("Off")
-                .font(.caption.weight(.medium))
+                .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Color(.systemGray5), in: Capsule())
         }
     }
 
     private var webSearchSection: some View {
-        Section("Web Search") {
+        Section {
             NavigationLink {
                 WebSearchSettingsView(viewModel: viewModel)
             } label: {
@@ -145,10 +177,19 @@ struct SettingsView: View {
                     Label("Web Search", systemImage: "globe")
                     Spacer()
                     Text(viewModel.webSearchSummary)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(viewModel.webSearchEnabled ? .cyan : .secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(
+                            (viewModel.webSearchEnabled ? Color.cyan : Color(.systemGray5))
+                                .opacity(viewModel.webSearchEnabled ? 0.12 : 1),
+                            in: Capsule()
+                        )
                 }
             }
+        } header: {
+            sectionHeader("Web Search", icon: "globe", color: .cyan)
         }
     }
 
@@ -172,7 +213,7 @@ struct SettingsView: View {
             }
             contextSizePicker
         } header: {
-            Text("Inference")
+            sectionHeader("Inference", icon: "waveform", color: .indigo)
         } footer: {
             Text("\"Start voice on open\" automatically starts listening when you open a new chat. \"AirPods auto-voice\" starts listening automatically when AirPods are connected. Auto-send submits voice input when speech recognition finishes. Thinking mode can be toggled per chat via the brain icon in the chat toolbar.")
         }
@@ -202,19 +243,66 @@ struct SettingsView: View {
     }
 
     private var aboutSection: some View {
-        Section("About") {
-            LabeledContent("Version", value: Self.appVersion)
-            LabeledContent("Inference", value: "On-device (llama.cpp)")
-            if let url = Self.sourceURL {
-                Link("Source Code", destination: url)
+        Section {
+            // App identity hero
+            HStack(spacing: 14) {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(LinearGradient(
+                        colors: [Color.accentColor, Color.accentColor.opacity(0.7)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    ))
+                    .frame(width: 56, height: 56)
+                    .overlay {
+                        Image(systemName: "brain.head.profile")
+                            .font(.system(size: 24, weight: .medium))
+                            .foregroundStyle(.white)
+                    }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("PocketMind")
+                        .font(.headline)
+                    Text("Version \(Self.appVersion)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("On-device AI · llama.cpp")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
             }
+            .padding(.vertical, 4)
+
             NavigationLink {
                 DebugLogView()
             } label: {
                 Label("Debug Logs", systemImage: "terminal")
             }
+        } header: {
+            sectionHeader("About", icon: "info.circle.fill", color: .gray)
         }
     }
+
+    #if DEBUG
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = true
+
+    private var debugSection: some View {
+        Section {
+            Button {
+                hasSeenOnboarding = false
+            } label: {
+                Label("Replay Onboarding", systemImage: "arrow.counterclockwise")
+            }
+            Button(role: .destructive) {
+                if let domain = Bundle.main.bundleIdentifier {
+                    UserDefaults.standard.removePersistentDomain(forName: domain)
+                }
+            } label: {
+                Label("Reset All Settings", systemImage: "trash")
+                    .foregroundStyle(.red)
+            }
+        } header: {
+            sectionHeader("Developer", icon: "wrench.and.screwdriver", color: .yellow)
+        }
+    }
+    #endif
 
     private static var appVersion: String {
         let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"

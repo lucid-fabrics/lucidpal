@@ -21,7 +21,7 @@ extension LlamaActor {
         let n = llama_token_to_piece(vocab, token, &buf, 8, 0, false)
         if n < 0 {
             let bufSize = Int(-Int(n))
-            guard bufSize <= 65_536 else { return [] }
+            guard bufSize <= ChatConstants.maxTokenBufferSize else { return [] }
             var big = [CChar](repeating: 0, count: bufSize)
             let n2 = llama_token_to_piece(vocab, token, &big, Int32(bufSize), 0, false)
             return Array(big.prefix(Int(n2)))

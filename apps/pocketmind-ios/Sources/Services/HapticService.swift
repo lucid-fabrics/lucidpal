@@ -13,6 +13,8 @@ enum HapticStyle {
 protocol HapticServiceProtocol {
     func impact(_ style: HapticStyle)
     func notifySuccess()
+    func notifyError()
+    func selectionTick()
 }
 
 // MARK: - Implementation
@@ -33,5 +35,13 @@ final class HapticService: HapticServiceProtocol {
 
     func notifySuccess() {
         UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
+    func notifyError() {
+        UINotificationFeedbackGenerator().notificationOccurred(.error)
+    }
+
+    func selectionTick() {
+        UISelectionFeedbackGenerator().selectionChanged()
     }
 }

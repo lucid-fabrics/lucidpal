@@ -41,8 +41,12 @@ private struct PromptChip: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color(.systemGray6))
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .strokeBorder(Color.accentColor.opacity(0.15), lineWidth: 1)
+                )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PromptChipPressStyle())
         .scaleEffect(appeared ? 1 : 0.88)
         .opacity(appeared ? 1 : 0)
         .onAppear {
@@ -50,6 +54,17 @@ private struct PromptChip: View {
                 appeared = true
             }
         }
+    }
+}
+
+// MARK: - Prompt Chip Press Style
+
+private struct PromptChipPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .opacity(configuration.isPressed ? 0.8 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
