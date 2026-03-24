@@ -57,12 +57,36 @@ final class WhisperSpeechService {
     func startRecording() throws {
         guard isAuthorized, !isRecording, !isTranscribing else { return }
 
+        let session = try activateAudioSession()
+        try startAudioRecorder(session: session)
+
+        transcript = ""
+        transcriptionError = nil
+        isRecording = true
+        DebugLogStore.shared.log("Recording started — isRecording=true", category: "Whisper")
+
+        silenceTimer = Timer.scheduledTimer(
+            withTimeInterval: Self.silenceTimeoutSeconds,
+            repeats: false
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.stopRecording() }
+        }
+    }
+
+    // MARK: - Recording Setup Helpers
+
+    /// Configures and activates the audio session for recording.
+    private func activateAudioSession() throws -> AVAudioSession {
         let session = AVAudioSession.sharedInstance()
         // .default mode keeps AGC active — critical for WhisperKit to hear quiet voice.
         // .measurement disabled AGC which caused near-silence recordings → [BLANK_AUDIO].
         try session.setCategory(.record, mode: .default, options: .duckOthers)
         try session.setActive(true, options: .notifyOthersOnDeactivation)
+        return session
+    }
 
+    /// Creates and starts an AVAudioRecorder writing 16 kHz mono WAV to `recordingURL`.
+    private func startAudioRecorder(session: AVAudioSession) throws {
         // Record as 16 kHz mono LinearPCM WAV — the native format WhisperKit
         // feeds to the model. AAC at 16 kHz caused the OS to resample from
         // 44.1 kHz producing silent segments that WhisperKit returned as "".
@@ -80,7 +104,6 @@ final class WhisperSpeechService {
         do {
             try FileManager.default.removeItem(at: Self.recordingURL)
         } catch {
-            // Stale recording file may not exist; log and continue
             whisperLogger.debug("WhisperSpeech: could not remove stale recording: \(error)")
         }
 
@@ -89,7 +112,7 @@ final class WhisperSpeechService {
             let started = rec.record()
             DebugLogStore.shared.log("AVAudioRecorder.record() returned \(started)", category: "Whisper")
             guard started else {
-                try? session.setActive(false, options: .notifyOthersOnDeactivation)  // best-effort
+                try? session.setActive(false, options: .notifyOthersOnDeactivation)
                 throw RecordingError.failedToStart
             }
             recorder = rec
@@ -101,18 +124,6 @@ final class WhisperSpeechService {
             }
             DebugLogStore.shared.log("startRecording failed: \(error.localizedDescription)", category: "Whisper", level: .error)
             throw error
-        }
-
-        transcript = ""
-        transcriptionError = nil
-        isRecording = true
-        DebugLogStore.shared.log("Recording started — isRecording=true", category: "Whisper")
-
-        silenceTimer = Timer.scheduledTimer(
-            withTimeInterval: Self.silenceTimeoutSeconds,
-            repeats: false
-        ) { [weak self] _ in
-            Task { @MainActor [weak self] in self?.stopRecording() }
         }
     }
 
@@ -179,10 +190,16 @@ final class WhisperSpeechService {
             return
         }
 
-        // safe: failure is handled by the guard's else branch — error is logged, transcription is skipped
-        guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
-              let fileSize = attrs[.size] as? Int else {
-            whisperLogger.error("WhisperSpeech: could not read recording file attributes")
+        let attrs: [FileAttributeKey: Any]
+        do {
+            attrs = try FileManager.default.attributesOfItem(atPath: url.path)
+        } catch {
+            whisperLogger.error("WhisperSpeech: could not read recording file attributes: \(error.localizedDescription, privacy: .public)")
+            transcriptionError = "Recording file missing — microphone may not have started."
+            return
+        }
+        guard let fileSize = attrs[.size] as? Int else {
+            whisperLogger.error("WhisperSpeech: file size attribute missing")
             transcriptionError = "Recording file missing — microphone may not have started."
             return
         }

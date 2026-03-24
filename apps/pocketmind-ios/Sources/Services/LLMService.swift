@@ -1,5 +1,8 @@
 import Foundation
+import OSLog
 import llama
+
+private let llmServiceLogger = Logger(subsystem: "app.pocketmind", category: "LLMService")
 
 // MARK: - LLMService (see LlamaActor.swift for the underlying C FFI actor)
 
@@ -11,24 +14,49 @@ final class LLMService: LLMServiceProtocol {
     @Published private(set) var isLoaded    = false
     @Published private(set) var isLoading   = false
     @Published private(set) var isGenerating = false
+    @Published private(set) var visionLoaded = false
+
+    /// True when the loaded text model is an integrated vision model.
+    private var textModelSupportsVision = false
 
     private let llama = LlamaActor()
     private var currentTask: Task<Void, Never>?
 
-    func loadModel(at url: URL, contextSize: UInt32) async throws {
+    var isVisionModelLoaded: Bool { visionLoaded || textModelSupportsVision }
+
+    func loadModel(at url: URL, contextSize: UInt32, role: ModelType, isIntegrated: Bool, mmprojURL: URL? = nil) async throws {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
-        try await llama.load(path: url.path, contextSize: contextSize)
-        await llama.warmup()  // pre-compiles Metal shaders — eliminates first-message stutter
+        try await llama.loadModel(at: url.path, contextSize: contextSize, role: role, isIntegrated: isIntegrated, mmprojPath: mmprojURL?.path)
+        await llama.warmup(role: role)
         isLoaded = true
+        if role == .vision { visionLoaded = true }
+        if role == .text && isIntegrated { textModelSupportsVision = true }
     }
 
-    func unloadModel() {
+    func unloadModel(role: ModelType) {
         cancelGeneration()
-        let actor = llama  // capture actor reference directly — avoids extending LLMService lifetime
+        if role == .text { textModelSupportsVision = false }
+        let actor = llama
+        Task { [weak self] in
+            await actor.unloadModel(role: role)
+            let textLoaded = await actor.isTextModelLoaded
+            let visionLoaded = await actor.isVisionModelLoaded
+            await MainActor.run {
+                self?.isLoaded = textLoaded || visionLoaded
+                self?.visionLoaded = visionLoaded
+            }
+        }
+    }
+
+    func unload() {
+        cancelGeneration()
+        let actor = llama
         Task { await actor.unload() }
         isLoaded = false
+        visionLoaded = false
+        textModelSupportsVision = false
     }
 
     func cancelGeneration() {
@@ -37,7 +65,7 @@ final class LLMService: LLMServiceProtocol {
         isGenerating = false
     }
 
-    func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true) -> AsyncThrowingStream<String, Error> {
+    func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true, modelRole: ModelType) -> AsyncThrowingStream<String, Error> {
         guard !isGenerating else {
             return AsyncThrowingStream { $0.finish(throwing: LLMError.generationInProgress) }
         }
@@ -46,12 +74,33 @@ final class LLMService: LLMServiceProtocol {
         }
 
         isGenerating = true
-
-        let prompt = Self.buildPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
         let llamaRef = llama
 
-        // AsyncThrowingStream closure runs synchronously on @MainActor (generate() is @MainActor-isolated),
-        // so MainActor.assumeIsolated is safe for assigning currentTask.
+        // Vision path: use mtmd for proper CLIP-based image understanding
+        if modelRole == .vision {
+            let body = messages.filter { $0.role != .system }
+            let lastUserMessage = body.last(where: { $0.role == .user })
+            let imageDataList = Self.extractImageData(from: lastUserMessage)
+            let prompt = Self.buildVisionPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled, imageCount: imageDataList.count)
+
+            return AsyncThrowingStream { continuation in
+                let task = Task {
+                    defer {
+                        Task { @MainActor [weak self] in
+                            self?.isGenerating = false
+                            self?.currentTask  = nil
+                        }
+                    }
+                    await llamaRef.generateWithImages(prompt: prompt, imageDataList: imageDataList, role: modelRole, continuation: continuation)
+                }
+                MainActor.assumeIsolated { [weak self] in self?.currentTask = task }
+                continuation.onTermination = { _ in task.cancel() }
+            }
+        }
+
+        // Text path: standard prompt
+        let prompt = Self.buildPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
+
         return AsyncThrowingStream { continuation in
             let task = Task {
                 defer {
@@ -60,11 +109,33 @@ final class LLMService: LLMServiceProtocol {
                         self?.currentTask  = nil
                     }
                 }
-                await llamaRef.generate(prompt: prompt, continuation: continuation)
+                await llamaRef.generate(prompt: prompt, role: modelRole, continuation: continuation)
             }
             MainActor.assumeIsolated { [weak self] in self?.currentTask = task }
-            // Cancel inflight generation when caller drops the stream.
             continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    // MARK: - Image Data Extraction
+
+    /// Reads JPEG data from attached image files on disk.
+    private static func extractImageData(from message: ChatMessage?) -> [Data] {
+        guard let message else { return [] }
+        return message.imageAttachments.compactMap { attachment in
+            // Read JPEG from the localURL on disk
+            if FileManager.default.fileExists(atPath: attachment.localURL.path) {
+                do {
+                    let data = try Data(contentsOf: attachment.localURL)
+                    return data
+                } catch {
+                    llmServiceLogger.error("Failed to read image data from disk: \(error.localizedDescription, privacy: .public)")
+                }
+            }
+            // Fallback: decode base64 data
+            if !attachment.base64Data.isEmpty {
+                return Data(base64Encoded: attachment.base64Data)
+            }
+            return nil
         }
     }
 
@@ -76,7 +147,7 @@ final class LLMService: LLMServiceProtocol {
             .replacingOccurrences(of: "<|im_end|>", with: "")
     }
 
-    private static func buildPrompt(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true) -> String {
+    static func buildPrompt(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true) -> String {
         var parts: [String] = []
 
         if !systemPrompt.isEmpty {
@@ -99,6 +170,46 @@ final class LLMService: LLMServiceProtocol {
             let suffix = thinkingEnabled ? "" : " /no_think"
             parts.append("<|im_start|>user\n\(sanitize(last.content))\(suffix)<|im_end|>")
         }
+
+        parts.append("<|im_start|>assistant\n")
+        return parts.joined(separator: "\n")
+    }
+
+    /// Builds a vision prompt using <__media__> markers for mtmd.
+    /// Each image attachment gets one marker that mtmd replaces with CLIP embeddings.
+    private static func buildVisionPrompt(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true, imageCount: Int) -> String {
+        var parts: [String] = []
+
+        // Qwen VL requires "You are a helpful assistant." to stay in conversation mode.
+        // Without it, the model defaults to object detection (bbox JSON output).
+        let visionSystemPrompt = systemPrompt.isEmpty ? "You are a helpful assistant." : sanitize(systemPrompt)
+        parts.append("<|im_start|>system\n\(visionSystemPrompt)<|im_end|>")
+
+        let body = messages.filter { $0.role != .system }
+        guard let lastUserMessage = body.last(where: { $0.role == .user }) else {
+            return buildPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
+        }
+
+        // Prior conversation context (without images)
+        let priorMessages = body.filter { $0.id != lastUserMessage.id }
+        var i = 0
+        while i + 1 < priorMessages.count {
+            if priorMessages[i].role == .user && priorMessages[i + 1].role == .assistant {
+                parts.append("<|im_start|>user\n\(sanitize(priorMessages[i].content))<|im_end|>")
+                parts.append("<|im_start|>assistant\n\(sanitize(priorMessages[i + 1].content))<|im_end|>")
+                i += 2
+            } else {
+                i += 1
+            }
+        }
+
+        // Last user message with image markers — no /no_think for vision (confuses the model)
+        let markers = (0..<imageCount).map { _ in "<__media__>" }.joined(separator: "\n")
+        parts.append("<|im_start|>user")
+        if !markers.isEmpty {
+            parts.append(markers)
+        }
+        parts.append("\(sanitize(lastUserMessage.content))<|im_end|>")
 
         parts.append("<|im_start|>assistant\n")
         return parts.joined(separator: "\n")

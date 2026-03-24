@@ -64,12 +64,12 @@ final class SettingsViewModelTests: XCTestCase {
     }
 
     func testSelectModelUpdatesSettingsID() {
-        viewModel.selectModel(.qwen3_5_2B)
-        XCTAssertEqual(settings.selectedModelID, ModelInfo.qwen3_5_2B.id)
+        viewModel.selectTextModel(.qwen3_5_2B)
+        XCTAssertEqual(settings.selectedTextModelID, ModelInfo.qwen3_5_2B.id)
     }
 
     func testAvailableModelsNotEmpty() {
-        XCTAssertFalse(viewModel.availableModels.isEmpty)
+        XCTAssertFalse(viewModel.availableTextModels.isEmpty)
     }
 
     func testSetVoiceAutoStartTrueEnablesSpeechAutoSend() {

@@ -133,11 +133,39 @@ struct CalendarEventPreview: Codable, Equatable, Sendable {
     }
 }
 
+// MARK: - AttachedImage
+
+/// An image attached to a user message, preprocessed for vision model input.
+struct AttachedImage: Identifiable, Codable, Equatable, Sendable {
+    let id: UUID
+    /// Temporary local file URL for the full-resolution image.
+    let localURL: URL
+    /// JPEG thumbnail data for UI display.
+    let thumbnailData: Data?
+    /// Base64-encoded JPEG (quality 0.8, max 896x896) for LLM input.
+    let base64Data: String
+    let width: Int
+    let height: Int
+
+    init(id: UUID = UUID(), localURL: URL, thumbnailData: Data?, base64Data: String, width: Int, height: Int) {
+        self.id = id
+        self.localURL = localURL
+        self.thumbnailData = thumbnailData
+        self.base64Data = base64Data
+        self.width = width
+        self.height = height
+    }
+}
+
+// MARK: - MessageRole
+
 enum MessageRole: String, Codable, Sendable {
     case user
     case assistant
     case system
 }
+
+// MARK: - ChatMessage
 
 struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
     let id: UUID
@@ -150,9 +178,13 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
     var calendarFreeSlots: [CalendarFreeSlot]
     /// True when this assistant message was produced via an agentic web search round-trip.
     var isWebSearchResult: Bool
+    /// Image attachments for vision model processing.
+    var imageAttachments: [AttachedImage]
+    /// True when this message was processed by the vision model.
+    var processedWithVision: Bool
 
     // swiftlint:disable:next line_length
-    init(id: UUID = UUID(), role: MessageRole, content: String, thinkingContent: String? = nil, isThinking: Bool = false, calendarEventPreviews: [CalendarEventPreview] = [], calendarFreeSlots: [CalendarFreeSlot] = [], isWebSearchResult: Bool = false, timestamp: Date = .now) {
+    init(id: UUID = UUID(), role: MessageRole, content: String, thinkingContent: String? = nil, isThinking: Bool = false, calendarEventPreviews: [CalendarEventPreview] = [], calendarFreeSlots: [CalendarFreeSlot] = [], isWebSearchResult: Bool = false, imageAttachments: [AttachedImage] = [], processedWithVision: Bool = false, timestamp: Date = .now) {
         self.id = id
         self.role = role
         self.content = content
@@ -161,13 +193,16 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
         self.calendarEventPreviews = calendarEventPreviews
         self.calendarFreeSlots = calendarFreeSlots
         self.isWebSearchResult = isWebSearchResult
+        self.imageAttachments = imageAttachments
+        self.processedWithVision = processedWithVision
         self.timestamp = timestamp
     }
 
-    // MARK: - Codable (backward compat: isWebSearchResult defaults to false when key absent)
+    // MARK: - Codable (backward compat: new fields default to empty/false when key absent)
 
     private enum CodingKeys: String, CodingKey {
-        case id, role, content, thinkingContent, isThinking, calendarEventPreviews, timestamp, calendarFreeSlots, isWebSearchResult
+        case id, role, content, thinkingContent, isThinking, calendarEventPreviews, timestamp
+        case calendarFreeSlots, isWebSearchResult, imageAttachments, processedWithVision
     }
 
     init(from decoder: any Decoder) throws {
@@ -181,6 +216,8 @@ struct ChatMessage: Identifiable, Codable, Equatable, Sendable {
         timestamp = try c.decode(Date.self, forKey: .timestamp)
         calendarFreeSlots = try c.decodeIfPresent([CalendarFreeSlot].self, forKey: .calendarFreeSlots) ?? []
         isWebSearchResult = try c.decodeIfPresent(Bool.self, forKey: .isWebSearchResult) ?? false
+        imageAttachments = try c.decodeIfPresent([AttachedImage].self, forKey: .imageAttachments) ?? []
+        processedWithVision = try c.decodeIfPresent(Bool.self, forKey: .processedWithVision) ?? false
     }
 
     var isUser: Bool { role == .user }

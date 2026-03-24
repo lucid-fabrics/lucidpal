@@ -24,6 +24,7 @@ final class SessionListViewModelTests: XCTestCase {
             sessionManager: mock,
             dependencies: SessionListViewModelDependencies(
                 llmService: llm,
+
                 calendarService: calendarService,
                 calendarActionController: controller,
                 settings: settings,
@@ -47,6 +48,7 @@ final class SessionListViewModelTests: XCTestCase {
             sessionManager: mock,
             dependencies: SessionListViewModelDependencies(
                 llmService: llm,
+
                 calendarService: calendarService,
                 calendarActionController: controller,
                 settings: settings,
@@ -376,7 +378,8 @@ final class SessionListViewModelTests: XCTestCase {
         viewModel = SessionListViewModel(
             sessionManager: mock,
             dependencies: SessionListViewModelDependencies(
-                llmService: llm, calendarService: calendarService,
+                llmService: llm,
+                calendarService: calendarService,
                 calendarActionController: controller, settings: settings,
                 speechService: speech, hapticService: MockHapticService(), contextService: MockContextService()
             )
@@ -393,7 +396,8 @@ final class SessionListViewModelTests: XCTestCase {
         viewModel = SessionListViewModel(
             sessionManager: mock,
             dependencies: SessionListViewModelDependencies(
-                llmService: llm, calendarService: calendarService,
+                llmService: llm,
+                calendarService: calendarService,
                 calendarActionController: controller, settings: settings,
                 speechService: speech, hapticService: MockHapticService(), contextService: MockContextService()
             )

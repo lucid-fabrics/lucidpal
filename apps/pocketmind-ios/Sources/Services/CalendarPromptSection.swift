@@ -65,8 +65,11 @@ struct CalendarPromptSection: PromptSection {
         [createExamples(), updateDeleteExamples(), queryExamples()].joined(separator: "\n\n")
     }
 
-    // swiftlint:disable:next function_body_length
     private func createExamples() -> String {
+        [negativeExamples(), missingInfoExamples(), positiveCreateExamples()].joined(separator: "\n\n")
+    }
+
+    private func negativeExamples() -> String {
         """
             Example — NOT a calendar request (desire/intention, no scheduling language):
             User: I would like to eat pizza tonight.
@@ -95,7 +98,11 @@ struct CalendarPromptSection: PromptSection {
             Example — NOT a calendar request ("clear" in non-scheduling context):
             User: Can you clear up the confusion about async/await?
             You: Sure — async/await is syntactic sugar over Promises that lets you write asynchronous code that reads like synchronous code.
+            """
+    }
 
+    private func missingInfoExamples() -> String {
+        """
             Example — missing time (date is known, time is not):
             User: add a meeting tomorrow
             You: What time?
@@ -107,7 +114,11 @@ struct CalendarPromptSection: PromptSection {
             Example — missing everything:
             User: schedule something
             You: What's the event, date, and time?
+            """
+    }
 
+    private func positiveCreateExamples() -> String {
+        """
             Example — create request (no conflict):
             User: add a meeting tomorrow at 3pm
             You: [CALENDAR_ACTION:{"action":"create","title":"Meeting","start":"2026-03-18T15:00:00","end":"2026-03-18T16:00:00","location":"","notes":""}]

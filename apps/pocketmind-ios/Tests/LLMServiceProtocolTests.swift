@@ -45,7 +45,7 @@ final class LLMServiceProtocolTests: XCTestCase {
 
     func testGenerateWhenNotLoadedThrows() async throws {
         mock.isLoaded = false
-        let stream = mock.generate(systemPrompt: "sys", messages: [], thinkingEnabled: true)
+        let stream = mock.generate(systemPrompt: "sys", messages: [], thinkingEnabled: true, modelRole: .text)
         var threwError = false
         do {
             for try await _ in stream { }
@@ -58,7 +58,7 @@ final class LLMServiceProtocolTests: XCTestCase {
     func testGenerateWhenLoadedYieldsTokens() async throws {
         mock.isLoaded = true
         mock.stubbedTokens = ["Hello", " world"]
-        let stream = mock.generate(systemPrompt: "sys", messages: [], thinkingEnabled: true)
+        let stream = mock.generate(systemPrompt: "sys", messages: [], thinkingEnabled: true, modelRole: .text)
         var tokens: [String] = []
         for try await token in stream {
             tokens.append(token)

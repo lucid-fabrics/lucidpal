@@ -13,7 +13,9 @@ struct SettingsView: View {
                 calendarSection
                 locationSection
                 webSearchSection
-                modelSection
+                visionSection
+                textModelSection
+                visionModelSection
                 inferenceSection
                 shortcutsSection
                 aboutSection
@@ -27,6 +29,8 @@ struct SettingsView: View {
             }
         }
     }
+
+    // MARK: - Sections
 
     private var calendarSection: some View {
         Section {
@@ -115,7 +119,6 @@ struct SettingsView: View {
         } header: {
             Text("Location")
         } footer: {
-            // swiftlint:disable:next line_length
             Text("When enabled, your city is included in the AI prompt so responses like weather and local recommendations are relevant to you. Location is never stored on servers.")
         }
     }
@@ -149,54 +152,9 @@ struct SettingsView: View {
         }
     }
 
-    private var modelSection: some View {
-        Section {
-            ForEach(downloadViewModel.availableModels, id: \.id) { model in
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(model.displayName)
-                            .font(.subheadline)
-                        Text(model.isDownloaded ? "On device" : "Not downloaded")
-                            .font(.caption)
-                            .foregroundStyle(model.isDownloaded ? .green : .secondary)
-                    }
-                    Spacer()
-                    if viewModel.selectedModelID == model.id && downloadViewModel.isModelLoaded {
-                        Image(systemName: "checkmark")
-                            .foregroundStyle(Color.accentColor)
-                    }
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    if model.isDownloaded {
-                        viewModel.selectModel(model)
-                        downloadViewModel.selectModel(model)
-                        Task { await downloadViewModel.loadModel() }
-                    } else {
-                        downloadViewModel.selectModel(model)
-                    }
-                }
-                .swipeActions(edge: .trailing) {
-                    if model.isDownloaded {
-                        Button("Delete", role: .destructive) {
-                            downloadViewModel.deleteModel(model)
-                        }
-                    }
-                }
-            }
+    // MARK: - Inference
 
-            NavigationLink("Download Models") {
-                ModelDownloadView(viewModel: downloadViewModel)
-            }
-        } header: {
-            Text("Model")
-        } footer: {
-            // swiftlint:disable:next line_length
-            Text("Device RAM: \(viewModel.deviceRAMGB) GB · Free storage: \(viewModel.availableStorageGB.map { String(format: "%.1f GB free", $0) } ?? "Unknown")")
-        }
-    }
-
-    private var inferenceSection: some View {
+    var inferenceSection: some View {
         Section {
             Toggle(isOn: Binding(
                 get: { viewModel.voiceAutoStartEnabled },
@@ -216,7 +174,6 @@ struct SettingsView: View {
         } header: {
             Text("Inference")
         } footer: {
-            // swiftlint:disable:next line_length
             Text("\"Start voice on open\" automatically starts listening when you open a new chat. \"AirPods auto-voice\" starts listening automatically when AirPods are connected. Auto-send submits voice input when speech recognition finishes. Thinking mode can be toggled per chat via the brain icon in the chat toolbar.")
         }
     }
@@ -237,7 +194,6 @@ struct SettingsView: View {
             }
             .pickerStyle(.menu)
 
-            // swiftlint:disable:next line_length
             Text("How many tokens the model keeps in memory. Larger = longer conversations but slower load and more RAM. Takes effect next time the model loads. Your device supports up to \(maxCtx) tokens.")
                 .font(.caption)
                 .foregroundStyle(.secondary)

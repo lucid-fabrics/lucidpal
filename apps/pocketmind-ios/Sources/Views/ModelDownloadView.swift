@@ -3,6 +3,14 @@ import SwiftUI
 struct ModelDownloadView: View {
     @ObservedObject var viewModel: ModelDownloadViewModel
 
+    /// Controls which models appear in the list: text-only, vision-only, or all.
+    private let capabilityFilter: ModelCapability?
+
+    init(viewModel: ModelDownloadViewModel, capabilityFilter: ModelCapability? = nil) {
+        self.viewModel = viewModel
+        self.capabilityFilter = capabilityFilter
+    }
+
     var body: some View {
         VStack(spacing: 24) {
             Image(systemName: "brain.head.profile")
@@ -27,6 +35,15 @@ struct ModelDownloadView: View {
             }
         }
         .padding(24)
+        .onAppear {
+            viewModel.capabilityFilter = capabilityFilter
+            viewModel.refreshAvailableModels(filter: capabilityFilter)
+            // Auto-select first available if current selection was filtered out.
+            if !viewModel.availableModels.contains(where: { $0.id == viewModel.selectedModel.id }),
+               let first = viewModel.availableModels.first {
+                viewModel.selectModel(first)
+            }
+        }
     }
 
     private var modelPicker: some View {
@@ -82,7 +99,7 @@ struct ModelDownloadView: View {
     private var actionButton: some View {
         switch viewModel.downloadState {
         case .idle:
-            if viewModel.isModelLoaded && viewModel.settings.selectedModelID == viewModel.selectedModel.id {
+            if viewModel.isModelLoaded && (viewModel.settings.selectedTextModelID == viewModel.selectedModel.id || viewModel.settings.selectedVisionModelID == viewModel.selectedModel.id) {
                 Label("Loaded", systemImage: "checkmark.circle.fill")
                     .foregroundStyle(.green)
                     .font(.subheadline.weight(.medium))

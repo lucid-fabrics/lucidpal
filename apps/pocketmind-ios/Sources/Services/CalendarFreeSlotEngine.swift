@@ -16,40 +16,18 @@ enum CalendarFreeSlotEngine {
         rangeEnd: Date,
         duration: TimeInterval
     ) -> [CalendarFreeSlot] {
-        let cal = Calendar.current
-
-        func nextWeekdayStart(_ from: Date) -> Date {
-            var comps = cal.dateComponents([.year, .month, .day], from: from)
-            comps.hour = 8; comps.minute = 0; comps.second = 0
-            var candidate = cal.date(from: comps) ?? from
-            if candidate < from {
-                candidate = cal.date(byAdding: .day, value: 1, to: candidate) ?? candidate
-            }
-            // Skip Saturday (7) and Sunday (1)
-            while [1, 7].contains(cal.component(.weekday, from: candidate)) {
-                candidate = cal.date(byAdding: .day, value: 1, to: candidate) ?? candidate
-            }
-            return candidate
-        }
-
-        func workDayEnd(_ from: Date) -> Date {
-            var comps = cal.dateComponents([.year, .month, .day], from: from)
-            comps.hour = ChatConstants.defaultWorkdayEndHour; comps.minute = 0; comps.second = 0
-            return cal.date(from: comps) ?? from
-        }
-
         var freeSlots: [CalendarFreeSlot] = []
-        var cursor = nextWeekdayStart(rangeStart)
+        var cursor = nextWeekdayStart(from: rangeStart)
         var busyIdx = 0
 
         while cursor < rangeEnd && freeSlots.count < 5 {
             // Skip weekends (nextWeekdayStart handles them, but guard against drift)
-            if [1, 7].contains(cal.component(.weekday, from: cursor)) {
-                cursor = nextWeekdayStart(cursor)
+            if isWeekend(cursor) {
+                cursor = nextWeekdayStart(from: cursor)
                 continue
             }
 
-            let workEnd = workDayEnd(cursor)
+            let workEnd = workDayEnd(from: cursor)
 
             // Advance past busy windows that have already ended
             while busyIdx < busyWindows.count && busyWindows[busyIdx].end <= cursor {
@@ -60,19 +38,47 @@ enum CalendarFreeSlotEngine {
             let freeUntil = min(nextBusyStart, workEnd)
 
             if freeUntil > cursor && freeUntil.timeIntervalSince(cursor) >= duration {
-                // Slot fits — emit exactly `duration` long and advance cursor within the same gap
                 let slotEnd = cursor.addingTimeInterval(duration)
                 freeSlots.append(CalendarFreeSlot(start: cursor, end: slotEnd))
                 cursor = slotEnd
             } else if busyIdx < busyWindows.count && busyWindows[busyIdx].start < workEnd {
-                // Blocked by a busy window before end of work day — skip past it
-                cursor = nextWeekdayStart(busyWindows[busyIdx].end)
+                cursor = nextWeekdayStart(from: busyWindows[busyIdx].end)
                 busyIdx += 1
             } else {
-                // Reached end of work day — advance to next weekday morning
-                cursor = nextWeekdayStart(cal.date(byAdding: .day, value: 1, to: workEnd) ?? workEnd)
+                let cal = Calendar.current
+                cursor = nextWeekdayStart(from: cal.date(byAdding: .day, value: 1, to: workEnd) ?? workEnd)
             }
         }
         return freeSlots
+    }
+
+    // MARK: - Helpers
+
+    /// Returns the start of the next weekday working window (8 AM) at or after `from`.
+    private static func nextWeekdayStart(from date: Date) -> Date {
+        let cal = Calendar.current
+        var comps = cal.dateComponents([.year, .month, .day], from: date)
+        comps.hour = 8; comps.minute = 0; comps.second = 0
+        var candidate = cal.date(from: comps) ?? date
+        if candidate < date {
+            candidate = cal.date(byAdding: .day, value: 1, to: candidate) ?? candidate
+        }
+        while isWeekend(candidate) {
+            candidate = cal.date(byAdding: .day, value: 1, to: candidate) ?? candidate
+        }
+        return candidate
+    }
+
+    /// Returns the end-of-workday time for the day containing `date`.
+    private static func workDayEnd(from date: Date) -> Date {
+        let cal = Calendar.current
+        var comps = cal.dateComponents([.year, .month, .day], from: date)
+        comps.hour = ChatConstants.defaultWorkdayEndHour; comps.minute = 0; comps.second = 0
+        return cal.date(from: comps) ?? date
+    }
+
+    /// Saturday (7) or Sunday (1) in the Gregorian calendar.
+    private static func isWeekend(_ date: Date) -> Bool {
+        [1, 7].contains(Calendar.current.component(.weekday, from: date))
     }
 }

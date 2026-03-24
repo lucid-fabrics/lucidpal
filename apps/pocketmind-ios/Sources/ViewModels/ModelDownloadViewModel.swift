@@ -19,6 +19,10 @@ final class ModelDownloadViewModel: ObservableObject {
     let settings: any AppSettingsProtocol
     private var cancellables = Set<AnyCancellable>()
 
+    /// Controls which models appear: .text for text-only, .vision for any vision-capable.
+    /// Set by ModelDownloadView on appear to filter the shared viewModel instance.
+    @Published var capabilityFilter: ModelCapability?
+
     init(
         llmService: any LLMServiceProtocol,
         settings: any AppSettingsProtocol,
@@ -28,15 +32,14 @@ final class ModelDownloadViewModel: ObservableObject {
         self.settings = settings
         self.downloader = downloader
 
+        // Pre-populate availableModels with no filter — will be re-filtered when capabilityFilter is set.
         let ram = settings.deviceRAMGB
-        let models = ModelInfo.available(physicalRAMGB: ram)
-        self.availableModels = models.isEmpty ? [.qwen3_5_2B] : models
+        self.availableModels = ModelInfo.available(physicalRAMGB: ram)
 
-        // Pre-select the device-recommended model when nothing has been downloaded yet.
-        // If the user's saved model is already on disk, keep their choice.
-        let savedModel = settings.selectedModel
-        self.selectedModel = savedModel.isDownloaded
-            ? savedModel
+        // Pre-select the user's saved text model, or fall back to recommended.
+        let savedTextModel = settings.selectedTextModel
+        self.selectedModel = savedTextModel.isDownloaded
+            ? savedTextModel
             : ModelInfo.recommended(physicalRAMGB: ram)
         self.isModelLoaded = llmService.isLoaded
 
@@ -49,7 +52,7 @@ final class ModelDownloadViewModel: ObservableObject {
             .sink { [weak self] in self?.isModelLoading = $0 }
             .store(in: &cancellables)
 
-        // Auto-load immediately when download finishes — removes the need for a "Load Model" tap.
+        // Auto-load immediately when download finishes.
         downloader.statePublisher
             .compactMap { state -> URL? in
                 if case .completed(let url) = state { return url }
@@ -60,17 +63,56 @@ final class ModelDownloadViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        // Auto-load the previously selected model on launch if already on disk.
-        // Task is enqueued after init completes — self is fully initialized when body runs.
-        if settings.selectedModel.isDownloaded && !llmService.isLoaded {
+        // Auto-load the previously selected text model on launch if already on disk.
+        if settings.selectedTextModel.isDownloaded && !llmService.isLoaded {
             Task { [weak self] in await self?.loadModel() }
         }
+
+        // Auto-load the vision model on launch if downloaded.
+        if settings.selectedVisionModel.isDownloaded {
+            modelDownloadLogger.info("AUTO-LOAD VISION: model=\(settings.selectedVisionModel.displayName) isIntegrated=\(settings.selectedVisionModel.isIntegrated)")
+            Task { [weak self] in
+                guard let self else { return }
+                self.selectedModel = self.settings.selectedVisionModel
+                await self.loadModel()
+            }
+        } else {
+            modelDownloadLogger.info("AUTO-LOAD VISION: skipped, not downloaded — selectedVisionModel=\(self.settings.selectedVisionModel.displayName)")
+        }
+
+        // Re-filter availableModels whenever capabilityFilter changes.
+        $capabilityFilter
+            .removeDuplicates()
+            .sink { [weak self] filter in
+                guard let filter else { return }
+                self?.refreshAvailableModels(filter: filter)
+            }
+            .store(in: &cancellables)
     }
 
-    /// Select a model. Cancels any in-flight download for the previous selection.
+    /// Refreshes availableModels based on the current capabilityFilter.
+    func refreshAvailableModels(filter: ModelCapability?) {
+        let ram = settings.deviceRAMGB
+        let allModels = ModelInfo.available(physicalRAMGB: ram)
+        let filteredModels: [ModelInfo]
+        if let filter = filter {
+            if filter == .text {
+                filteredModels = allModels.filter { $0.capabilities == .text }
+            } else {
+                filteredModels = allModels.filter { $0.capabilities.contains(.vision) }
+            }
+        } else {
+            filteredModels = allModels
+        }
+        availableModels = filteredModels.isEmpty
+            ? [filter == .vision ? .qwen3_5_vision : .qwen3_5_2B]
+            : filteredModels
+    }
+
+    /// Select a model for download. Cancels any in-flight download for the previous selection.
     func selectModel(_ model: ModelInfo) {
         guard model.id != selectedModel.id else { return }
-        cancelDownload()  // Clear stale progress from the previous model
+        cancelDownload()
         selectedModel = model
     }
 
@@ -82,24 +124,63 @@ final class ModelDownloadViewModel: ObservableObject {
         downloader.cancel()
     }
 
+    /// Loads the selected model into the LLM service.
     func loadModel() async {
         guard selectedModel.isDownloaded else { return }
         loadError = nil
+
+        // Download mmproj if needed (vision models only)
+        if let mmprojURL = selectedModel.mmprojURL,
+           !selectedModel.isMmprojDownloaded,
+           let destURL = selectedModel.mmprojLocalURL {
+            modelDownloadLogger.info("loadModel: downloading mmproj for \(self.selectedModel.displayName)")
+            do {
+                let (tempURL, _) = try await URLSession.shared.download(from: mmprojURL)
+                if FileManager.default.fileExists(atPath: destURL.path) {
+                    try FileManager.default.removeItem(at: destURL)
+                }
+                try FileManager.default.moveItem(at: tempURL, to: destURL)
+                modelDownloadLogger.info("loadModel: mmproj downloaded to \(destURL.path)")
+            } catch {
+                modelDownloadLogger.error("loadModel: mmproj download failed: \(error)")
+                loadError = "Vision projector download failed: \(error.localizedDescription)"
+                downloader.resetState()
+                return
+            }
+        }
+
         do {
-            try await llmService.loadModel(at: selectedModel.localURL, contextSize: UInt32(settings.contextSize))
-            settings.selectedModelID = selectedModel.id
-            downloader.resetState()  // Reset download state — clears stale "Load Model" button
+            // Integrated models and text models both load as .text; purely vision models load as .vision.
+            let role: ModelType = selectedModel.supportsVision && !selectedModel.isIntegrated ? .vision : .text
+            let mmprojPath = selectedModel.mmprojLocalURL
+            // Vision models need at least 8192 context for CLIP image embeddings
+            let ctxSize = selectedModel.supportsVision
+                ? max(UInt32(settings.contextSize), UInt32(LLMConstants.largeContextSize))
+                : UInt32(settings.contextSize)
+            modelDownloadLogger.info("loadModel: model=\(self.selectedModel.displayName) role=\(String(describing: role)) isIntegrated=\(self.selectedModel.isIntegrated) ctx=\(ctxSize) mmproj=\(mmprojPath?.path ?? "none")")
+            try await llmService.loadModel(at: selectedModel.localURL, contextSize: ctxSize, role: role, isIntegrated: selectedModel.isIntegrated, mmprojURL: mmprojPath)
+            // Update the appropriate saved model ID.
+            if role == .text {
+                settings.selectedTextModelID = selectedModel.id
+            } else {
+                settings.selectedVisionModelID = selectedModel.id
+            }
+            downloader.resetState()
         } catch {
-            modelDownloadLogger.error("loadModel failed: \(error)")
+            modelDownloadLogger.error("loadmodel failed: \(error)")
             loadError = error.localizedDescription
-            downloader.resetState()  // Reset download UI — don't leave it stuck in "Load Model" state
+            downloader.resetState()
         }
     }
 
+    /// Deletes a model from disk. Unloads it first if currently loaded.
     func deleteModel(_ model: ModelInfo) {
         deleteError = nil
-        if llmService.isLoaded && settings.selectedModelID == model.id {
-            llmService.unloadModel()
+        let isTextLoaded = settings.selectedTextModelID == model.id && llmService.isLoaded
+        let isVisionLoaded = settings.selectedVisionModelID == model.id && llmService.isLoaded
+        if isTextLoaded || isVisionLoaded {
+            let role: ModelType = isVisionLoaded ? .vision : .text
+            llmService.unloadModel(role: role)
         }
         do {
             try downloader.deleteModel(model)

@@ -1,11 +1,9 @@
+import OSLog
 import SwiftUI
 // UIKit is used solely for UIPasteboard clipboard access — no UI components imported.
 import UIKit
 
-private enum AnimationConstants {
-    /// Minimum opacity for the pulsing dot in the generating status view.
-    static let dotInitialOpacity: Double = 0.2
-}
+private let messageBubbleLogger = Logger(subsystem: "app.pocketmind", category: "MessageBubble")
 
 struct MessageBubbleView: View {
     let message: ChatMessage
@@ -95,6 +93,11 @@ struct MessageBubbleView: View {
                                 }
                             }
                         }
+
+                    // Image thumbnails for user messages with image attachments
+                    if message.isUser && !message.imageAttachments.isEmpty {
+                        imageThumbnails(message.imageAttachments, isUserMessage: message.isUser)
+                    }
                 } else if !message.isUser && !message.isStreamingAction && message.calendarEventPreviews.isEmpty {
                     GeneratingStatusView(userPrompt: userPrompt)
                 }
@@ -187,125 +190,5 @@ struct MessageBubbleView: View {
                     replyTriggered = false
                 }
         )
-    }
-}
-
-// MARK: - Markdown bubble text
-
-/// Renders message text with inline markdown (bold, italic, code, links).
-/// Converts leading `- ` list markers to `•` before parsing.
-/// Falls back to plain text if AttributedString parsing fails.
-@ViewBuilder
-private func bubbleTextView(_ text: String, isUser: Bool) -> some View {
-    let processed = text
-        .components(separatedBy: "\n")
-        .map { line -> String in
-            if line.hasPrefix("* ") { return "• " + line.dropFirst(2) }
-            if line.hasPrefix("- ") { return "• " + line.dropFirst(2) }
-            return line
-        }
-        .joined(separator: "\n")
-    let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-    if let attributed = try? AttributedString(markdown: processed, options: options) { // safe: returns nil, falls back to plain text
-        Text(attributed)
-    } else {
-        Text(processed)
-    }
-}
-
-// MARK: - Generating status view
-
-private struct GeneratingStatusView: View {
-    var userPrompt: String? = nil
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var dotOpacity: Double = 1
-    @State private var phaseIndex: Int = 0
-
-    // MARK: - Intent detection
-
-    private enum Intent {
-        case calendar, webSearch, generic
-    }
-
-    private var intent: Intent {
-        guard let prompt = userPrompt?.lowercased() else { return .generic }
-        let calendarKeywords = ["meet", "event", "schedule", "calendar", "appointment",
-                                "book", "reschedule", "cancel", "free time", "available",
-                                "remind", "tomorrow", "today", "next week", "this week",
-                                "morning", "afternoon", "evening", "slot"]
-        let searchKeywords  = ["weather", "news", "search", "latest", "current",
-                                "who is", "what is", "how to", "price", "score",
-                                "define", "translate", "find", "look up"]
-        if calendarKeywords.contains(where: { prompt.contains($0) }) { return .calendar }
-        if searchKeywords.contains(where: { prompt.contains($0) }) { return .webSearch }
-        return .generic
-    }
-
-    private var phrases: [String] {
-        switch intent {
-        case .calendar:
-            return [
-                "Checking your schedule",
-                "Looking at your calendar",
-                "Scanning your events",
-                "Finding available slots",
-                "Reviewing your day",
-                "Organizing your time",
-                "Almost there",
-            ]
-        case .webSearch:
-            return [
-                "Searching the web",
-                "Looking that up",
-                "Fetching results",
-                "Reading sources",
-                "Putting it together",
-                "Almost there",
-            ]
-        case .generic:
-            return [
-                "Thinking",
-                "Reading your message",
-                "Processing",
-                "Working on it",
-                "Reasoning through this",
-                "Putting it together",
-                "Drafting a response",
-                "One moment",
-                "Almost there",
-            ]
-        }
-    }
-
-    var body: some View {
-        HStack(spacing: 6) {
-            Circle()
-                .fill(Color.accentColor)
-                .frame(width: 7, height: 7)
-                .opacity(dotOpacity)
-                .animation(
-                    reduceMotion ? .default : .easeInOut(duration: 0.6).repeatForever(autoreverses: true),
-                    value: dotOpacity
-                )
-
-            Text(phrases[phaseIndex % phrases.count])
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .contentTransition(.numericText())
-                .animation(.easeInOut(duration: 0.4), value: phaseIndex)
-        }
-        .padding(.horizontal, DesignConstants.Padding.bubbleHorizontal)
-        .padding(.vertical, DesignConstants.Padding.bubbleVertical)
-        .onAppear { if !reduceMotion { dotOpacity = AnimationConstants.dotInitialOpacity } }
-        .task {
-            guard !reduceMotion else { return }
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(4.5))
-                withAnimation(.easeInOut(duration: 0.4)) {
-                    phaseIndex += 1
-                }
-            }
-        }
     }
 }

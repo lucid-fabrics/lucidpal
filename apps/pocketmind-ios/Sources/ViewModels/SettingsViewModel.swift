@@ -38,13 +38,18 @@ final class SettingsViewModel: ObservableObject {
     @Published var braveApiKey: String = ""
     @Published var webSearchEndpoint: String = ""
 
+    // MARK: - Vision
+    @Published var visionEnabled: Bool = true
+
     // MARK: - Model list
-    @Published var availableModels: [ModelInfo] = []
+    @Published var availableTextModels: [ModelInfo] = []
+    @Published var availableVisionModels: [ModelInfo] = []
 
     // MARK: - Computed pass-throughs (read-only display; changed via selectModel / other VMs)
     var maxContextSize: Int { settings.maxContextSize }
     var deviceRAMGB: Int { settings.deviceRAMGB }
-    var selectedModelID: String { settings.selectedModelID }
+    var selectedTextModelID: String { settings.selectedTextModelID }
+    var selectedVisionModelID: String { settings.selectedVisionModelID }
     var webSearchSummary: String {
         webSearchEnabled ? webSearchProvider.displayName : "Off"
     }
@@ -67,7 +72,8 @@ final class SettingsViewModel: ObservableObject {
         // Seed published state from settings
         self.calendarAuthStatus = calendarService.authorizationStatus
         self.locationStatus = locationService?.authorizationStatus ?? .notDetermined
-        self.availableModels = ModelInfo.available(physicalRAMGB: settings.deviceRAMGB)
+        self.availableTextModels = ModelInfo.textModels(physicalRAMGB: settings.deviceRAMGB)
+        self.availableVisionModels = ModelInfo.visionModels(physicalRAMGB: settings.deviceRAMGB)
         self.calendarAccessEnabled = settings.calendarAccessEnabled
         self.defaultCalendarIdentifier = settings.defaultCalendarIdentifier
         self.locationEnabled = settings.locationEnabled
@@ -80,8 +86,10 @@ final class SettingsViewModel: ObservableObject {
         self.webSearchProvider = settings.webSearchProvider
         self.braveApiKey = settings.braveApiKey
         self.webSearchEndpoint = settings.webSearchEndpoint
+        self.visionEnabled = settings.visionEnabled
 
-        if availableModels.isEmpty { availableModels = [.qwen3_5_2B] }
+        if availableTextModels.isEmpty { availableTextModels = [.qwen3_5_2B] }
+        if availableVisionModels.isEmpty { availableVisionModels = [.qwen3_5_vision] }
 
         setupPublishers()
     }
@@ -126,6 +134,11 @@ final class SettingsViewModel: ObservableObject {
         $contextSize.dropFirst()
             .sink { [weak self] in self?.settings.contextSize = $0 }
             .store(in: &cancellables)
+
+        // Vision mirror → settings
+        $visionEnabled.dropFirst()
+            .sink { [weak self] in self?.settings.visionEnabled = $0 }
+            .store(in: &cancellables)
     }
 
     // MARK: - Calendar
@@ -146,8 +159,12 @@ final class SettingsViewModel: ObservableObject {
 
     // MARK: - Model
 
-    func selectModel(_ model: ModelInfo) {
-        settings.selectedModelID = model.id
+    func selectTextModel(_ model: ModelInfo) {
+        settings.selectedTextModelID = model.id
+    }
+
+    func selectVisionModel(_ model: ModelInfo) {
+        settings.selectedVisionModelID = model.id
     }
 
     // MARK: - Voice
@@ -180,8 +197,6 @@ final class SettingsViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Web Search
-
     // MARK: - Web Search Connection Test
 
     @Published private(set) var connectionTestResult: ConnectionTestResult = .idle
@@ -199,8 +214,6 @@ final class SettingsViewModel: ObservableObject {
 
     var isLocationServiceUnavailable: Bool { locationService == nil }
 
-    // DIP-exempt: WebSearchService has no protocol-injected path here; factory is app-internal
-    // and only used for live connection tests triggered by the user from Settings UI.
     /// Creates a WebSearchService scoped to the current web search settings.
     private func makeWebSearchService() -> any WebSearchServiceProtocol {
         WebSearchService(settings: settings)
