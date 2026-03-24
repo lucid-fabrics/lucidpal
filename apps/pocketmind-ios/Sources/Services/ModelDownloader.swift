@@ -113,67 +113,71 @@ extension ModelDownloader: URLSessionDownloadDelegate {
     ) {
         guard let destination = destinationURL else { return }
 
-        // Validate HTTP status — HuggingFace can return 401/302→HTML on auth-gated models.
-        // URLSessionDownloadTask fires this delegate even on non-200, saving the error HTML as
-        // a file. Reject anything that isn't 200.
-        if let httpResponse = downloadTask.response as? HTTPURLResponse,
-           httpResponse.statusCode != 200 {
+        if let failure = validateDownloadedFile(at: location, response: downloadTask.response) {
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
-                self?.state = .failed(message: "Download failed: server returned HTTP \(httpResponse.statusCode). The model may require authentication.")
-            }
-            return
-        }
-
-        // Sanity-check file size: reject files under 10 MB (an HTML error page is a few KB).
-        let minExpectedBytes: Int64 = minimumExpectedModelBytes
-        let rawSize = try? FileManager.default.attributesOfItem(atPath: location.path)[.size] as? Int64 // safe: returns nil on failure
-        if rawSize == nil { logger.warning("Could not read temp file attributes at \(location.path)") }
-        let downloadedSize = rawSize ?? 0
-        guard downloadedSize >= minExpectedBytes else {
-            Task { @MainActor [weak self] in
-                self?.downloadTask = nil
-                self?.state = .failed(message: "Download appears corrupt (file too small: \(downloadedSize / 1024) KB). Check your connection and retry.")
+                self?.state = .failed(message: failure)
             }
             return
         }
 
         do {
-            // Remove any pre-existing file (e.g. prior failed/partial download)
-            if FileManager.default.fileExists(atPath: destination.path) {
-                try FileManager.default.removeItem(at: destination)
-            }
-            try FileManager.default.moveItem(at: location, to: destination)
+            try moveDownloadedFile(from: location, to: destination)
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
                 self?.session?.finishTasksAndInvalidate()
                 self?.session = nil
                 self?.state = .completed(url: destination)
             }
-        } catch CocoaError.fileWriteOutOfSpace {
-            do {
-                try FileManager.default.removeItem(at: destination)
-            } catch {
-                logger.error("Cleanup failed after disk-full error: \(error)")
-            }
-            Task { @MainActor [weak self] in
-                self?.downloadTask = nil
-                self?.session?.finishTasksAndInvalidate()
-                self?.session = nil
-                self?.state = .failed(message: "Not enough storage space. Free up space and try again.")
-            }
         } catch {
-            do {
-                try FileManager.default.removeItem(at: destination)
-            } catch {
-                logger.error("Cleanup failed: \(error)")
-            }
+            cleanupPartialFile(at: destination, context: error)
+            let message = (error as? CocoaError)?.code == .fileWriteOutOfSpace
+                ? "Not enough storage space. Free up space and try again."
+                : error.localizedDescription
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
                 self?.session?.finishTasksAndInvalidate()
                 self?.session = nil
-                self?.state = .failed(message: error.localizedDescription)
+                self?.state = .failed(message: message)
             }
+        }
+    }
+
+    // MARK: - Download Validation Helpers
+
+    /// Returns a failure message if the downloaded file is invalid, `nil` if valid.
+    private nonisolated func validateDownloadedFile(at location: URL, response: URLResponse?) -> String? {
+        // Validate HTTP status — HuggingFace can return 401/302→HTML on auth-gated models.
+        if let httpResponse = response as? HTTPURLResponse,
+           httpResponse.statusCode != 200 {
+            return "Download failed: server returned HTTP \(httpResponse.statusCode). The model may require authentication."
+        }
+
+        // Sanity-check file size: reject files under 10 MB (an HTML error page is a few KB).
+        let rawSize = try? FileManager.default.attributesOfItem(atPath: location.path)[.size] as? Int64
+        if rawSize == nil { logger.warning("Could not read temp file attributes at \(location.path)") }
+        let downloadedSize = rawSize ?? 0
+        guard downloadedSize >= minimumExpectedModelBytes else {
+            return "Download appears corrupt (file too small: \(downloadedSize / 1024) KB). Check your connection and retry."
+        }
+
+        return nil
+    }
+
+    /// Moves the temporary download to the final destination, replacing any existing file.
+    private nonisolated func moveDownloadedFile(from source: URL, to destination: URL) throws {
+        if FileManager.default.fileExists(atPath: destination.path) {
+            try FileManager.default.removeItem(at: destination)
+        }
+        try FileManager.default.moveItem(at: source, to: destination)
+    }
+
+    /// Best-effort cleanup of a partial file after a move failure.
+    private nonisolated func cleanupPartialFile(at url: URL, context: Error) {
+        do {
+            try FileManager.default.removeItem(at: url)
+        } catch {
+            logger.error("Cleanup failed after \(context.localizedDescription): \(error)")
         }
     }
 

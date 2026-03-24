@@ -10,7 +10,7 @@ enum LLMConstants {
     static let batchCapacity: Int32 = 8192
     /// Context size for devices with < 6 GB RAM.
     static let smallContextSize: UInt32 = 4096
-    /// Context size for devices with ≥ 6 GB RAM (4B model tier).
+    /// Context size for devices with >= 6 GB RAM (4B model tier).
     static let largeContextSize: UInt32 = 8192
     /// RAM threshold (GB) for selecting the larger context window.
     static let largeContextRAMThresholdGB = 6
@@ -25,7 +25,7 @@ enum LLMConstants {
     /// Bytes in one gigabyte — used for RAM-based context sizing.
     static let bytesPerGB: UInt64 = 1_073_741_824
     /// GPU layers value that offloads the entire model to Metal on-device.
-    /// llama.cpp treats any value ≥ the model's actual layer count as "all layers".
+    /// llama.cpp treats any value >= the model's actual layer count as "all layers".
     static let allMetalGPULayers: Int32 = 99
     /// RAM threshold for vision model loading — if device has less than this and a text
     /// model is already loaded, unload the text model first.
@@ -74,12 +74,54 @@ actor LlamaActor {
     private var activeRole: ModelType?
 
     /// True when the text model is an integrated vision model (handles both text and vision).
-    private var textModelSupportsVision: Bool = false
+    private(set) var textModelSupportsVision: Bool = false
 
     var isTextModelLoaded: Bool { textModel != nil }
     var isVisionModelLoaded: Bool { visionModel != nil }
 
     var isLoaded: Bool { textModel != nil || visionModel != nil }
+
+    // MARK: - Internal accessors for extensions
+
+    var textCtxPointer: OpaquePointer? { textCtx }
+    var textVocabPointer: OpaquePointer? { textVocab }
+    var textSamplerPointer: UnsafeMutablePointer<llama_sampler>? { textSampler }
+    var visionCtxPointer: OpaquePointer? { visionCtx }
+    var visionVocabPointer: OpaquePointer? { visionVocab }
+    var visionSamplerPointer: UnsafeMutablePointer<llama_sampler>? { visionSampler }
+    var mtmdCtxPointer: OpaquePointer? { mtmdCtx }
+    var currentBatch: llama_batch { batch }
+    var currentCursor: Int32 { nCur }
+
+    func setCursor(_ value: Int32) { nCur = value }
+    func advanceCursor() { nCur += 1 }
+    func resetCursor() { nCur = 0 }
+
+    func clearPending() { pendingCChars = [] }
+    func appendPendingChars(_ chars: [CChar]) { pendingCChars.append(contentsOf: chars) }
+    func getPendingChars() -> [CChar] { pendingCChars }
+
+    func flushPending(continuation: AsyncThrowingStream<String, Error>.Continuation) {
+        if !pendingCChars.isEmpty {
+            let str = String(cString: pendingCChars + [0])
+            if !str.isEmpty { continuation.yield(str) }
+            pendingCChars = []
+        }
+    }
+
+    func clearBatch() { batch.n_tokens = 0 }
+
+    func addToBatch(id: llama_token, pos: Int32, seqId: llama_seq_id, logits: Bool) {
+        let i = Int(batch.n_tokens)
+        batch.token   [i] = id
+        batch.pos     [i] = pos
+        batch.n_seq_id[i] = 1
+        if let ptr = batch.seq_id[i] { ptr[0] = seqId }
+        batch.logits  [i] = logits ? 1 : 0
+        batch.n_tokens += 1
+    }
+
+    // MARK: - Init / Deinit
 
     init() {
         llama_backend_init()
@@ -111,8 +153,6 @@ actor LlamaActor {
     func loadModel(at path: String, contextSize: UInt32, role: ModelType, isIntegrated: Bool = false, mmprojPath: String? = nil) throws {
         let logger = Logger(subsystem: "app.pocketmind", category: "LlamaActor")
         logger.info("loadModel: path=\(path) role=\(String(describing: role)) isIntegrated=\(isIntegrated) mmproj=\(mmprojPath ?? "none")")
-        // RAM guard: vision model needs enough RAM. If loading vision on < 6GB device
-        // with text model already loaded, unload text model first.
         if role == .vision && deviceRAMGB < LLMConstants.visionModelMinRAMGB && textModel != nil {
             unloadModel(role: .text)
         }
@@ -120,10 +160,8 @@ actor LlamaActor {
         switch role {
         case .text:
             try loadSingleModel(at: path, contextSize: contextSize, role: role, into: &textModel, &textCtx, &textVocab, &textSampler)
-            // Integrated models handle both text and vision with a single load.
             textModelSupportsVision = isIntegrated
 
-            // Initialize mtmd context if mmproj is provided (integrated vision model)
             if let mmprojPath, let model = textModel {
                 if let existingMtmd = mtmdCtx {
                     mtmd_free(existingMtmd)
@@ -159,7 +197,6 @@ actor LlamaActor {
         _ vocabPtr: inout OpaquePointer?,
         _ samplerPtr: inout UnsafeMutablePointer<llama_sampler>?
     ) throws {
-        // Free existing model of same role if any
         if let s = samplerPtr { llama_sampler_free(s); samplerPtr = nil }
         if let c = ctxPtr { llama_free(c); ctxPtr = nil }
         if let m = modelPtr { llama_model_free(m); modelPtr = nil }
@@ -238,287 +275,11 @@ actor LlamaActor {
         guard let ctx, let vocab else { return }
         let bos = llama_vocab_bos(vocab)
         guard bos >= 0 else { return }
-        batchClear()
-        batchAdd(id: bos, pos: 0, seqId: 0, logits: false)
+        clearBatch()
+        addToBatch(id: bos, pos: 0, seqId: 0, logits: false)
         _ = llama_decode(ctx, batch)
         llama_synchronize(ctx)
         llama_memory_clear(llama_get_memory(ctx), false)
         nCur = 0
-    }
-
-    // MARK: - Generate (text only)
-
-    func generate(prompt: String, role: ModelType, continuation: AsyncThrowingStream<String, Error>.Continuation) async {
-        // Determine which model slot to use.
-        let useTextSlotForVision = role == .vision && visionCtx == nil && textModelSupportsVision && textCtx != nil
-        let actualCtx: OpaquePointer?
-        let actualVocab: OpaquePointer?
-        let actualSampler: UnsafeMutablePointer<llama_sampler>?
-        if useTextSlotForVision {
-            actualCtx = textCtx
-            actualVocab = textVocab
-            actualSampler = textSampler
-        } else {
-            actualCtx = role == .text ? textCtx : visionCtx
-            actualVocab = role == .text ? textVocab : visionVocab
-            actualSampler = role == .text ? textSampler : visionSampler
-        }
-        let ctx = actualCtx
-        let vocab = actualVocab
-        let sampler = actualSampler
-
-        guard let ctx, let vocab, let sampler else {
-            continuation.finish(throwing: LLMError.modelNotLoaded)
-            return
-        }
-
-        let maxNew: Int32 = LLMConstants.maxNewTokens
-        let contextLength = Int(llama_n_ctx(ctx))
-        let maxPromptTokens = contextLength - Int(maxNew)
-
-        var tokens = tokenize(text: prompt, addBOS: true, parseSpecial: true, vocab: vocab)
-        guard !tokens.isEmpty else {
-            continuation.finish()
-            return
-        }
-
-        if tokens.count > Int(LLMConstants.batchCapacity) {
-            continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
-                domain: "llama", code: 0,
-                userInfo: [NSLocalizedDescriptionKey: "Prompt too large for batch (\(tokens.count) tokens, max \(LLMConstants.batchCapacity))"])))
-            return
-        }
-
-        if tokens.count > maxPromptTokens {
-            tokens = Array(tokens.suffix(maxPromptTokens))
-        }
-
-        llama_memory_clear(llama_get_memory(ctx), false)
-        pendingCChars = []
-        nCur = 0
-
-        guard prefill(tokens: tokens, ctx: ctx, continuation: continuation) else { return }
-        streamTokens(maxNew: maxNew, contextLength: contextLength, ctx: ctx, vocab: vocab, sampler: sampler, continuation: continuation)
-        continuation.finish()
-    }
-
-    // MARK: - Generate with Images (mtmd)
-
-    /// Generates a response using mtmd for proper CLIP-based image understanding.
-    func generateWithImages(prompt: String, imageDataList: [Data], role: ModelType, continuation: AsyncThrowingStream<String, Error>.Continuation) async {
-        let logger = Logger(subsystem: "app.pocketmind", category: "LlamaActor")
-
-        // Use text slot for integrated vision models
-        let ctx = textCtx
-        let vocab = textVocab
-        let sampler = textSampler
-
-        guard let ctx, let vocab, let sampler else {
-            logger.error("generateWithImages: missing ctx/vocab/sampler")
-            continuation.finish(throwing: LLMError.modelNotLoaded)
-            return
-        }
-
-        // If mtmd not available (no mmproj), fall back to text-only generation
-        guard let mtmdCtx else {
-            logger.warning("generateWithImages: mtmd not available, falling back to text-only")
-            await generate(prompt: prompt, role: .text, continuation: continuation)
-            return
-        }
-
-        llama_memory_clear(llama_get_memory(ctx), false)
-        pendingCChars = []
-        nCur = 0
-
-        // Create bitmaps from JPEG data
-        var bitmaps: [OpaquePointer] = []
-        defer { bitmaps.forEach { mtmd_bitmap_free($0) } }
-
-        for imageData in imageDataList {
-            let bitmap: OpaquePointer? = imageData.withUnsafeBytes { rawBuf in
-                guard let baseAddr = rawBuf.baseAddress?.assumingMemoryBound(to: UInt8.self) else { return nil }
-                return mtmd_helper_bitmap_init_from_buf(mtmdCtx, baseAddr, rawBuf.count)
-            }
-            guard let bitmap else {
-                logger.error("generateWithImages: failed to create bitmap from image data")
-                continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
-                    domain: "mtmd", code: 0,
-                    userInfo: [NSLocalizedDescriptionKey: "Failed to decode image for vision model"])))
-                return
-            }
-            bitmaps.append(bitmap)
-        }
-
-        // Tokenize prompt with image markers
-        guard let chunks = mtmd_input_chunks_init() else {
-            continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
-                domain: "mtmd", code: 0,
-                userInfo: [NSLocalizedDescriptionKey: "Failed to init input chunks"])))
-            return
-        }
-        defer { mtmd_input_chunks_free(chunks) }
-
-        var textInput = prompt.withCString { cStr -> mtmd_input_text in
-            mtmd_input_text(text: cStr, add_special: true, parse_special: true)
-        }
-
-        // Build C array of bitmap pointers (OpaquePointer for opaque C structs)
-        let bitmapPtrs: [OpaquePointer?] = bitmaps.map { Optional($0) }
-        let nBitmaps = bitmapPtrs.count
-        let tokenizeResult: Int32
-        if bitmapPtrs.isEmpty {
-            tokenizeResult = mtmd_tokenize(mtmdCtx, chunks, &textInput, nil, 0)
-        } else {
-            var ptrs = bitmapPtrs
-            tokenizeResult = ptrs.withUnsafeMutableBufferPointer { buf in
-                return mtmd_tokenize(mtmdCtx, chunks, &textInput, buf.baseAddress, nBitmaps)
-            }
-        }
-
-        guard tokenizeResult == 0 else {
-            logger.error("generateWithImages: mtmd_tokenize failed with \(tokenizeResult)")
-            continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
-                domain: "mtmd", code: Int(tokenizeResult),
-                userInfo: [NSLocalizedDescriptionKey: "mtmd_tokenize failed: \(tokenizeResult == 1 ? "bitmap count mismatch" : "image preprocessing error")"])))
-            return
-        }
-
-        // Log chunk details for debugging
-        let nChunks = mtmd_input_chunks_size(chunks)
-        let totalTokens = mtmd_helper_get_n_tokens(chunks)
-        let ctxSize = llama_n_ctx(ctx)
-        logger.info("generateWithImages: chunks=\(nChunks) totalTokens=\(totalTokens) ctxSize=\(ctxSize) useMRoPE=\(mtmd_decode_use_mrope(mtmdCtx))")
-
-        // Evaluate all chunks (text tokens + image embeddings) into KV cache
-        // Use a conservative batch size — image embeddings can be large
-        var newNPast: Int32 = 0
-        let nBatch: Int32 = 2048
-        let evalResult = mtmd_helper_eval_chunks(mtmdCtx, ctx, chunks, 0, 0, nBatch, true, &newNPast)
-
-        guard evalResult == 0 else {
-            logger.error("generateWithImages: mtmd_helper_eval_chunks failed with \(evalResult), chunks=\(nChunks) totalTokens=\(totalTokens) ctxSize=\(ctxSize)")
-            continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
-                domain: "mtmd", code: Int(evalResult),
-                userInfo: [NSLocalizedDescriptionKey: "Vision encoding failed (chunks=\(nChunks), tokens=\(totalTokens), ctx=\(ctxSize), err=\(evalResult))"])))
-            return
-        }
-
-        nCur = newNPast
-        logger.info("generateWithImages: eval done, n_past=\(newNPast)")
-
-        // Stream generated tokens
-        let maxNew: Int32 = LLMConstants.maxNewTokens
-        let contextLength = Int(llama_n_ctx(ctx))
-        streamTokens(maxNew: maxNew, contextLength: contextLength, ctx: ctx, vocab: vocab, sampler: sampler, continuation: continuation)
-        continuation.finish()
-    }
-
-    /// Encodes all prompt tokens into the KV cache.
-    private func prefill(tokens: [llama_token], ctx: OpaquePointer, continuation: AsyncThrowingStream<String, Error>.Continuation) -> Bool {
-        batchClear()
-        for (i, tok) in tokens.enumerated() {
-            batchAdd(id: tok, pos: Int32(i), seqId: 0, logits: i == tokens.count - 1)
-        }
-        guard llama_decode(ctx, batch) == 0 else {
-            continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
-                domain: "llama", code: 0,
-                userInfo: [NSLocalizedDescriptionKey: "Prefill decode failed"])))
-            return false
-        }
-        llama_synchronize(ctx)
-        nCur = batch.n_tokens
-        return true
-    }
-
-    /// Samples tokens one at a time and yields decoded strings.
-    private func streamTokens(
-        maxNew: Int32,
-        contextLength: Int,
-        ctx: OpaquePointer,
-        vocab: OpaquePointer,
-        sampler: UnsafeMutablePointer<llama_sampler>,
-        continuation: AsyncThrowingStream<String, Error>.Continuation
-    ) {
-        let ctxLimit = Int32(contextLength) - 1
-        let startCur = nCur
-        while nCur - startCur < maxNew && nCur < ctxLimit {
-            if Task.isCancelled { break }
-
-            let newTok = llama_sampler_sample(sampler, ctx, -1)
-            if llama_vocab_is_eog(vocab, newTok) { break }
-
-            let piece = tokenToPiece(token: newTok, vocab: vocab)
-            let str   = decodeUTF8(piece)
-            if !str.isEmpty { continuation.yield(str) }
-
-            batchClear()
-            batchAdd(id: newTok, pos: nCur, seqId: 0, logits: true)
-            nCur += 1
-
-            guard llama_decode(ctx, batch) == 0 else { break }
-            llama_synchronize(ctx)
-        }
-
-        if !pendingCChars.isEmpty {
-            let str = String(cString: pendingCChars + [0])
-            if !str.isEmpty { continuation.yield(str) }
-            pendingCChars = []
-        }
-    }
-
-    // MARK: - Batch helpers
-
-    private func batchClear() { batch.n_tokens = 0 }
-
-    private func batchAdd(id: llama_token, pos: Int32, seqId: llama_seq_id, logits: Bool) {
-        let i = Int(batch.n_tokens)
-        batch.token   [i] = id
-        batch.pos     [i] = pos
-        batch.n_seq_id[i] = 1
-        if let ptr = batch.seq_id[i] { ptr[0] = seqId }
-        batch.logits  [i] = logits ? 1 : 0
-        batch.n_tokens += 1
-    }
-
-    // MARK: - Tokenize
-
-    private func tokenize(text: String, addBOS: Bool, parseSpecial: Bool, vocab: OpaquePointer) -> [llama_token] {
-        let utf8Count = text.utf8.count
-        let maxTokens = utf8Count + (addBOS ? 1 : 0) + 1
-        let buf = UnsafeMutablePointer<llama_token>.allocate(capacity: maxTokens)
-        defer { buf.deallocate() }
-        let n = llama_tokenize(vocab, text, Int32(utf8Count), buf, Int32(maxTokens), addBOS, parseSpecial)
-        guard n > 0 else { return [] }
-        return Array(UnsafeBufferPointer(start: buf, count: Int(n)))
-    }
-
-    // MARK: - Token → String
-
-    private func tokenToPiece(token: llama_token, vocab: OpaquePointer) -> [CChar] {
-        var buf = [CChar](repeating: 0, count: 8)
-        let n = llama_token_to_piece(vocab, token, &buf, 8, 0, false)
-        if n < 0 {
-            let bufSize = Int(-Int(n))
-            guard bufSize <= 65_536 else { return [] }
-            var big = [CChar](repeating: 0, count: bufSize)
-            let n2 = llama_token_to_piece(vocab, token, &big, Int32(bufSize), 0, false)
-            return Array(big.prefix(Int(n2)))
-        }
-        return Array(buf.prefix(Int(n)))
-    }
-
-    private func decodeUTF8(_ chars: [CChar]) -> String {
-        pendingCChars.append(contentsOf: chars)
-        if let str = String(validatingUTF8: pendingCChars + [0]) {
-            pendingCChars = []
-            return str
-        }
-        for len in stride(from: pendingCChars.count - 1, through: 1, by: -1)
-            where String(validatingUTF8: Array(pendingCChars.suffix(len)) + [0]) != nil {
-            let str = String(cString: pendingCChars + [0])
-            pendingCChars = []
-            return str
-        }
-        return ""
     }
 }
