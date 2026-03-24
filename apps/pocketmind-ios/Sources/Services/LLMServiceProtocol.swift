@@ -8,6 +8,7 @@ protocol LLMServiceProtocol: AnyObject {
     var isLoaded: Bool { get }
     var isLoading: Bool { get }
     var isGenerating: Bool { get }
+    var isVisionModelLoaded: Bool { get }
 
     /// Combine publishers — use these instead of `$property` when the
     /// consumer holds `any LLMServiceProtocol` (existentials can't project `@Published`).
@@ -19,7 +20,7 @@ protocol LLMServiceProtocol: AnyObject {
     func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool, modelRole: ModelType) -> AsyncThrowingStream<String, Error>
 
     /// Loads the model at the given URL for the specified role.
-    func loadModel(at url: URL, contextSize: UInt32, role: ModelType) async throws
+    func loadModel(at url: URL, contextSize: UInt32, role: ModelType, isIntegrated: Bool, mmprojURL: URL?) async throws
 
     /// Unloads the model for the specified role.
     func unloadModel(role: ModelType)
