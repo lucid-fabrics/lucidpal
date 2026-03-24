@@ -1,5 +1,8 @@
+import OSLog
 import PhotosUI
 import SwiftUI
+
+private let inputBarLogger = Logger(subsystem: "app.pocketmind", category: "ChatInputBar")
 
 extension ChatView {
 
@@ -143,9 +146,13 @@ extension ChatView {
 
     private func handleSelectedPhotos(_ items: [PhotosPickerItem]) async {
         for item in items {
-            if let data = try? await item.loadTransferable(type: Data.self),
-               let uiImage = UIImage(data: data) {
-                await processImage(uiImage)
+            do {
+                if let data = try await item.loadTransferable(type: Data.self),
+                   let uiImage = UIImage(data: data) {
+                    await processImage(uiImage)
+                }
+            } catch {
+                inputBarLogger.error("Failed to load photo transferable: \(error.localizedDescription, privacy: .public)")
             }
         }
         try? await Task.sleep(nanoseconds: 100_000_000)
@@ -155,8 +162,11 @@ extension ChatView {
     private func processImage(_ uiImage: UIImage) async {
         await MainActor.run {
             let processor = VisionImageProcessor()
-            if let result = try? processor.process(uiImage) {
+            do {
+                let result = try processor.process(uiImage)
                 viewModel.addImageAttachment(result)
+            } catch {
+                inputBarLogger.error("Failed to process image for attachment: \(error.localizedDescription, privacy: .public)")
             }
         }
     }

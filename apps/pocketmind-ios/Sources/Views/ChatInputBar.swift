@@ -1,5 +1,8 @@
+import OSLog
 import PhotosUI
 import SwiftUI
+
+private let chatInputBarLogger = Logger(subsystem: "app.pocketmind", category: "ChatInputBar")
 
 /// Standalone chat input bar with optional photo attachment button and image thumbnail strip.
 struct ChatInputBar: View {
@@ -73,9 +76,13 @@ struct ChatInputBar: View {
         .onChange(of: selectedPhotoItem) { _, newItem in
             guard let newItem else { return }
             Task {
-                if let data = try? await newItem.loadTransferable(type: Data.self),
-                   let image = UIImage(data: data) {
-                    onAddImage(image)
+                do {
+                    if let data = try await newItem.loadTransferable(type: Data.self),
+                       let image = UIImage(data: data) {
+                        onAddImage(image)
+                    }
+                } catch {
+                    chatInputBarLogger.error("Failed to load photo transferable: \(error.localizedDescription, privacy: .public)")
                 }
                 selectedPhotoItem = nil
             }

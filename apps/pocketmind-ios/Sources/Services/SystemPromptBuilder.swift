@@ -50,27 +50,30 @@ final class SystemPromptBuilder: SystemPromptBuilderProtocol {
     static let actionPattern = #"\[CALENDAR_ACTION:(\{(?:[^}]|\}(?!\]))*\})\]"#
 
     private static let calendarActionRegex: NSRegularExpression = {
-        // safe: literal regex pattern — preconditionFailure guards nil; failure is a programming error
-        guard let regex = try? NSRegularExpression(
-            pattern: actionPattern,
-            options: [.dotMatchesLineSeparators]
-        ) else {
+        do {
+            return try NSRegularExpression(
+                pattern: actionPattern,
+                options: [.dotMatchesLineSeparators]
+            )
+        } catch {
+            systemPromptLogger.error("Failed to compile calendarActionRegex: \(error.localizedDescription, privacy: .public)")
             preconditionFailure("Invalid calendarActionRegex pattern: \(actionPattern)")
         }
-        return regex
     }()
 
     // Matches [WEB_SEARCH:{...}] — same lookahead pattern as calendarActionRegex.
     static let webSearchPattern = #"\[WEB_SEARCH:(\{(?:[^}]|\}(?!\]))*\})\]"#
 
     private static let webSearchRegex: NSRegularExpression = {
-        guard let regex = try? NSRegularExpression(
-            pattern: webSearchPattern,
-            options: [.dotMatchesLineSeparators]
-        ) else {
+        do {
+            return try NSRegularExpression(
+                pattern: webSearchPattern,
+                options: [.dotMatchesLineSeparators]
+            )
+        } catch {
+            systemPromptLogger.error("Failed to compile webSearchRegex: \(error.localizedDescription, privacy: .public)")
             preconditionFailure("Invalid webSearchRegex pattern: \(webSearchPattern)")
         }
-        return regex
     }()
 
     // MARK: - Init

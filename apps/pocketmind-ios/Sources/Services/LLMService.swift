@@ -1,5 +1,8 @@
 import Foundation
+import OSLog
 import llama
+
+private let llmServiceLogger = Logger(subsystem: "app.pocketmind", category: "LLMService")
 
 // MARK: - LLMService (see LlamaActor.swift for the underlying C FFI actor)
 
@@ -120,9 +123,13 @@ final class LLMService: LLMServiceProtocol {
         guard let message else { return [] }
         return message.imageAttachments.compactMap { attachment in
             // Read JPEG from the localURL on disk
-            if FileManager.default.fileExists(atPath: attachment.localURL.path),
-               let data = try? Data(contentsOf: attachment.localURL) {
-                return data
+            if FileManager.default.fileExists(atPath: attachment.localURL.path) {
+                do {
+                    let data = try Data(contentsOf: attachment.localURL)
+                    return data
+                } catch {
+                    llmServiceLogger.error("Failed to read image data from disk: \(error.localizedDescription, privacy: .public)")
+                }
             }
             // Fallback: decode base64 data
             if !attachment.base64Data.isEmpty {
