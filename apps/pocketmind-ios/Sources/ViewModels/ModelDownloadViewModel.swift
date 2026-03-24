@@ -68,9 +68,23 @@ final class ModelDownloadViewModel: ObservableObject {
             Task { [weak self] in await self?.loadModel() }
         }
 
+        // Auto-load the vision model on launch if downloaded.
+        if settings.selectedVisionModel.isDownloaded {
+            modelDownloadLogger.info("AUTO-LOAD VISION: model=\(settings.selectedVisionModel.displayName) isIntegrated=\(settings.selectedVisionModel.isIntegrated)")
+            Task { [weak self] in
+                guard let self else { return }
+                self.selectedModel = self.settings.selectedVisionModel
+                await self.loadModel()
+            }
+        } else {
+            modelDownloadLogger.info("AUTO-LOAD VISION: skipped, not downloaded — selectedVisionModel=\(self.settings.selectedVisionModel.displayName)")
+        }
+
         // Re-filter availableModels whenever capabilityFilter changes.
         $capabilityFilter
+            .removeDuplicates()
             .sink { [weak self] filter in
+                guard let filter else { return }
                 self?.refreshAvailableModels(filter: filter)
             }
             .store(in: &cancellables)
@@ -90,7 +104,9 @@ final class ModelDownloadViewModel: ObservableObject {
         } else {
             filteredModels = allModels
         }
-        availableModels = filteredModels.isEmpty ? [.qwen3_5_2B] : filteredModels
+        availableModels = filteredModels.isEmpty
+            ? [filter == .vision ? .qwen3_5_vision : .qwen3_5_2B]
+            : filteredModels
     }
 
     /// Select a model for download. Cancels any in-flight download for the previous selection.
@@ -112,10 +128,37 @@ final class ModelDownloadViewModel: ObservableObject {
     func loadModel() async {
         guard selectedModel.isDownloaded else { return }
         loadError = nil
+
+        // Download mmproj if needed (vision models only)
+        if let mmprojURL = selectedModel.mmprojURL,
+           !selectedModel.isMmprojDownloaded,
+           let destURL = selectedModel.mmprojLocalURL {
+            modelDownloadLogger.info("loadModel: downloading mmproj for \(self.selectedModel.displayName)")
+            do {
+                let (tempURL, _) = try await URLSession.shared.download(from: mmprojURL)
+                if FileManager.default.fileExists(atPath: destURL.path) {
+                    try FileManager.default.removeItem(at: destURL)
+                }
+                try FileManager.default.moveItem(at: tempURL, to: destURL)
+                modelDownloadLogger.info("loadModel: mmproj downloaded to \(destURL.path)")
+            } catch {
+                modelDownloadLogger.error("loadModel: mmproj download failed: \(error)")
+                loadError = "Vision projector download failed: \(error.localizedDescription)"
+                downloader.resetState()
+                return
+            }
+        }
+
         do {
             // Integrated models and text models both load as .text; purely vision models load as .vision.
             let role: ModelType = selectedModel.supportsVision && !selectedModel.isIntegrated ? .vision : .text
-            try await llmService.loadModel(at: selectedModel.localURL, contextSize: UInt32(settings.contextSize), role: role)
+            let mmprojPath = selectedModel.mmprojLocalURL
+            // Vision models need at least 8192 context for CLIP image embeddings
+            let ctxSize = selectedModel.supportsVision
+                ? max(UInt32(settings.contextSize), UInt32(LLMConstants.largeContextSize))
+                : UInt32(settings.contextSize)
+            modelDownloadLogger.info("loadModel: model=\(self.selectedModel.displayName) role=\(String(describing: role)) isIntegrated=\(self.selectedModel.isIntegrated) ctx=\(ctxSize) mmproj=\(mmprojPath?.path ?? "none")")
+            try await llmService.loadModel(at: selectedModel.localURL, contextSize: ctxSize, role: role, isIntegrated: selectedModel.isIntegrated, mmprojURL: mmprojPath)
             // Update the appropriate saved model ID.
             if role == .text {
                 settings.selectedTextModelID = selectedModel.id

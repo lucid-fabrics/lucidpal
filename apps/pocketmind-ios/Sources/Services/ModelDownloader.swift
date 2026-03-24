@@ -91,6 +91,11 @@ final class ModelDownloader: NSObject {
         if FileManager.default.fileExists(atPath: model.localURL.path) {
             try FileManager.default.removeItem(at: model.localURL)
         }
+        // Also delete the mmproj file if present
+        if let mmprojURL = model.mmprojLocalURL,
+           FileManager.default.fileExists(atPath: mmprojURL.path) {
+            try FileManager.default.removeItem(at: mmprojURL)
+        }
     }
 }
 

@@ -31,11 +31,29 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
     let minimumRAMGB: Int
     /// What this model can do.
     let capabilities: ModelCapability
+    /// URL for the multimodal projector (mmproj) file — only for vision models.
+    let mmprojURL: URL?
+    /// Filename for the mmproj file on disk.
+    let mmprojFilename: String?
 
     var localURL: URL {
         let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         return dir.appendingPathComponent(filename)
+    }
+
+    /// Local URL for the mmproj file.
+    var mmprojLocalURL: URL? {
+        guard let mmprojFilename else { return nil }
+        let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+        return dir.appendingPathComponent(mmprojFilename)
+    }
+
+    /// Whether the mmproj file is downloaded (true if no mmproj needed).
+    var isMmprojDownloaded: Bool {
+        guard let mmprojLocalURL else { return true }
+        return FileManager.default.fileExists(atPath: mmprojLocalURL.path)
     }
 
     var isDownloaded: Bool {
@@ -61,7 +79,9 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
         filename: "Qwen3.5-0.8B-Q4_K_M.gguf",
         fileSizeGB: 0.51,
         minimumRAMGB: 2,
-        capabilities: .textOnly
+        capabilities: .textOnly,
+        mmprojURL: nil,
+        mmprojFilename: nil
     )
 
     static let qwen3_5_2B = ModelInfo(
@@ -71,7 +91,9 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
         filename: "Qwen3.5-2B-Q4_K_M.gguf",
         fileSizeGB: 1.2,
         minimumRAMGB: 3,
-        capabilities: .textOnly
+        capabilities: .textOnly,
+        mmprojURL: nil,
+        mmprojFilename: nil
     )
 
     static let qwen3_5_4B = ModelInfo(
@@ -81,12 +103,13 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
         filename: "Qwen3.5-4B-Q4_K_M.gguf",
         fileSizeGB: 2.5,
         minimumRAMGB: 5,
-        capabilities: .textOnly
+        capabilities: .textOnly,
+        mmprojURL: nil,
+        mmprojFilename: nil
     )
 
     /// Qwen3.5 Vision 4B — integrated model: handles both text AND vision.
-    /// Requires Qwen3.5-4B.BF16-mmproj.gguf to be downloaded alongside this file.
-    /// https://huggingface.co/bjivanovich/Qwen3.5-4B-Vision-GGUF/resolve/main/Qwen3.5-4B.BF16-mmproj.gguf
+    /// Requires the mmproj (vision projector) file for CLIP image encoding.
     static let qwen3_5_vision = ModelInfo(
         id: "qwen3.5-4b-vision-q4km",
         displayName: "Qwen3.5 Vision 4B",
@@ -94,7 +117,9 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
         filename: "Qwen3.5-4B.Q4_K_M.gguf",
         fileSizeGB: 2.5,
         minimumRAMGB: 5,
-        capabilities: .integrated
+        capabilities: .integrated,
+        mmprojURL: knownURL("https://huggingface.co/bjivanovich/Qwen3.5-4B-Vision-GGUF/resolve/main/Qwen3.5-4B.BF16-mmproj.gguf"),
+        mmprojFilename: "Qwen3.5-4B.BF16-mmproj.gguf"
     )
 
     // MARK: - Filters
