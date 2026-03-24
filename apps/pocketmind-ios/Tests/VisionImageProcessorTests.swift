@@ -9,48 +9,50 @@ final class VisionImageProcessorTests: XCTestCase {
 
     // MARK: - Constants
 
-    func testMaxDimensionIs896() {
+    func testMaxDimensionIs896() throws {
         // Access via reflection or test behavior — verify resize caps at 896
         let large = makeTestImage(size: CGSize(width: 2000, height: 1500))
-        let resized = processor.resizePreservingAspect(image: large, maxDimension: 896)
-        XCTAssertNotNil(resized)
-        XCTAssertLessThanOrEqual(resized!.size.width, 896)
-        XCTAssertLessThanOrEqual(resized!.size.height, 896)
+        let resized = try XCTUnwrap(processor.resizePreservingAspect(image: large, maxDimension: 896))
+        XCTAssertGreaterThan(resized.size.width, 0)
+        XCTAssertGreaterThan(resized.size.height, 0)
+        XCTAssertLessThanOrEqual(resized.size.width, 896)
+        XCTAssertLessThanOrEqual(resized.size.height, 896)
     }
 
     // MARK: - resizePreservingAspect
 
-    func testResizePreservingAspectLandscape() {
+    func testResizePreservingAspectLandscape() throws {
         let largeLandscape = makeTestImage(size: CGSize(width: 2000, height: 1000))
-        let resized = processor.resizePreservingAspect(image: largeLandscape, maxDimension: 896)
-        XCTAssertNotNil(resized)
-        XCTAssertLessThanOrEqual(resized!.size.width, 896)
-        XCTAssertLessThanOrEqual(resized!.size.height, 896)
-        XCTAssertEqual(resized!.size.width / resized!.size.height, 2.0, accuracy: 0.01)
+        let resized = try XCTUnwrap(processor.resizePreservingAspect(image: largeLandscape, maxDimension: 896))
+        XCTAssertGreaterThan(resized.size.width, 0)
+        XCTAssertGreaterThan(resized.size.height, 0)
+        XCTAssertLessThanOrEqual(resized.size.width, 896)
+        XCTAssertLessThanOrEqual(resized.size.height, 896)
+        XCTAssertEqual(resized.size.width / resized.size.height, 2.0, accuracy: 0.01)
     }
 
-    func testResizePreservingAspectPortrait() {
+    func testResizePreservingAspectPortrait() throws {
         let largePortrait = makeTestImage(size: CGSize(width: 1000, height: 2000))
-        let resized = processor.resizePreservingAspect(image: largePortrait, maxDimension: 896)
-        XCTAssertNotNil(resized)
-        XCTAssertLessThanOrEqual(resized!.size.width, 896)
-        XCTAssertLessThanOrEqual(resized!.size.height, 896)
-        XCTAssertEqual(resized!.size.height / resized!.size.width, 2.0, accuracy: 0.01)
+        let resized = try XCTUnwrap(processor.resizePreservingAspect(image: largePortrait, maxDimension: 896))
+        XCTAssertGreaterThan(resized.size.width, 0)
+        XCTAssertGreaterThan(resized.size.height, 0)
+        XCTAssertLessThanOrEqual(resized.size.width, 896)
+        XCTAssertLessThanOrEqual(resized.size.height, 896)
+        XCTAssertEqual(resized.size.height / resized.size.width, 2.0, accuracy: 0.01)
     }
 
-    func testResizePreservingAspectSmallImage() {
+    func testResizePreservingAspectSmallImage() throws {
         let small = makeTestImage(size: CGSize(width: 500, height: 300))
-        let resized = processor.resizePreservingAspect(image: small, maxDimension: 896)
-        XCTAssertEqual(resized!.size.width, 500)
-        XCTAssertEqual(resized!.size.height, 300)
+        let resized = try XCTUnwrap(processor.resizePreservingAspect(image: small, maxDimension: 896))
+        XCTAssertEqual(resized.size.width, 500)
+        XCTAssertEqual(resized.size.height, 300)
     }
 
-    func testResizePreservingAspectSquare() {
+    func testResizePreservingAspectSquare() throws {
         let square = makeTestImage(size: CGSize(width: 1000, height: 1000))
-        let resized = processor.resizePreservingAspect(image: square, maxDimension: 896)
-        XCTAssertNotNil(resized)
-        XCTAssertEqual(resized!.size.width, 896)
-        XCTAssertEqual(resized!.size.height, 896)
+        let resized = try XCTUnwrap(processor.resizePreservingAspect(image: square, maxDimension: 896))
+        XCTAssertEqual(resized.size.width, 896)
+        XCTAssertEqual(resized.size.height, 896)
     }
 
     // MARK: - process
@@ -58,10 +60,13 @@ final class VisionImageProcessorTests: XCTestCase {
     func testProcessReturnsNonNilAttachedImage() throws {
         let image = makeTestImage(size: CGSize(width: 2000, height: 1500))
         let result = try processor.process(image)
-        XCTAssertNotNil(result)
-        XCTAssertNotNil(result.id)
-        XCTAssertNotNil(result.localURL)
+        XCTAssertGreaterThan(result.width, 0)
+        XCTAssertGreaterThan(result.height, 0)
+        XCTAssertLessThanOrEqual(result.width, 896)
+        XCTAssertLessThanOrEqual(result.height, 896)
         XCTAssertFalse(result.base64Data.isEmpty)
+        XCTAssertNotNil(Data(base64Encoded: result.base64Data))
+        XCTAssertEqual(result.localURL.pathExtension, "jpg")
     }
 
     func testProcessSetsCorrectDimensions() throws {
@@ -80,28 +85,26 @@ final class VisionImageProcessorTests: XCTestCase {
     func testProcessProducesValidBase64() throws {
         let image = makeTestImage(size: CGSize(width: 800, height: 600))
         let result = try processor.process(image)
-        let data = Data(base64Encoded: result.base64Data)
-        XCTAssertNotNil(data)
-        XCTAssertFalse(data?.isEmpty ?? true)
+        let data = try XCTUnwrap(Data(base64Encoded: result.base64Data))
+        XCTAssertGreaterThan(data.count, 0)
     }
 
     func testProcessBase64IsJPEG() throws {
         let image = makeTestImage(size: CGSize(width: 1200, height: 900))
         let result = try processor.process(image)
-        let data = Data(base64Encoded: result.base64Data)
+        let data = try XCTUnwrap(Data(base64Encoded: result.base64Data))
         // JPEG starts with FFD8FF
-        XCTAssertNotNil(data)
-        XCTAssertTrue(data!.count >= 3)
-        XCTAssertEqual(data![0], 0xFF)
-        XCTAssertEqual(data![1], 0xD8)
-        XCTAssertEqual(data![2], 0xFF)
+        XCTAssertGreaterThanOrEqual(data.count, 3)
+        XCTAssertEqual(data[0], 0xFF)
+        XCTAssertEqual(data[1], 0xD8)
+        XCTAssertEqual(data[2], 0xFF)
     }
 
     func testProcessGeneratesThumbnail() throws {
         let image = makeTestImage(size: CGSize(width: 1200, height: 900))
         let result = try processor.process(image)
-        XCTAssertNotNil(result.thumbnailData)
-        XCTAssertFalse(result.thumbnailData?.isEmpty ?? true)
+        let thumbData = try XCTUnwrap(result.thumbnailData)
+        XCTAssertGreaterThan(thumbData.count, 0)
     }
 
     func testProcessThumbnailIsSmallerThanFullImage() throws {
@@ -138,17 +141,19 @@ final class VisionImageProcessorTests: XCTestCase {
         XCTAssertLessThanOrEqual(maxThumbSide, 224)
     }
 
-    func testProcessAssignsUUID() throws {
+    func testProcessAssignsUniqueUUIDs() throws {
         let image = makeTestImage(size: CGSize(width: 500, height: 500))
-        let result = try processor.process(image)
-        XCTAssertNotNil(result.id)
+        let result1 = try processor.process(image)
+        let result2 = try processor.process(image)
+        XCTAssertNotEqual(result1.id, result2.id)
     }
 
     func testProcessCreatesTemporaryLocalURL() throws {
         let image = makeTestImage(size: CGSize(width: 400, height: 400))
         let result = try processor.process(image)
-        XCTAssertNotNil(result.localURL)
         XCTAssertEqual(result.localURL.pathExtension, "jpg")
+        XCTAssertTrue(result.localURL.path.contains("tmp") || result.localURL.path.contains("Temp"),
+                      "localURL should be in a temporary directory")
     }
 
     // MARK: - processAsync

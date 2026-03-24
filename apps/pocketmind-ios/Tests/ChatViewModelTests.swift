@@ -161,6 +161,39 @@ final class ChatViewModelTests: XCTestCase {
         XCTAssertTrue(mock.appliedUpdates.isEmpty)
     }
 
+    // MARK: - Image Attachments
+
+    func testAddImageAttachmentAppendsToList() {
+        let attachment = AttachedImage(id: UUID(), localURL: URL(fileURLWithPath: "/tmp/test.jpg"), thumbnailData: nil, base64Data: "dGVzdA==", width: 100, height: 100)
+        viewModel.addImageAttachment(attachment)
+        XCTAssertEqual(viewModel.imageAttachments.count, 1)
+        XCTAssertEqual(viewModel.imageAttachments.first?.id, attachment.id)
+    }
+
+    func testAddImageAttachmentCapsAt5() {
+        for i in 0..<6 {
+            let a = AttachedImage(id: UUID(), localURL: URL(fileURLWithPath: "/tmp/\(i).jpg"), thumbnailData: nil, base64Data: "dGVzdA==", width: 100, height: 100)
+            viewModel.addImageAttachment(a)
+        }
+        XCTAssertEqual(viewModel.imageAttachments.count, 5)
+    }
+
+    func testRemoveImageAttachment() {
+        let attachment = AttachedImage(id: UUID(), localURL: URL(fileURLWithPath: "/tmp/test.jpg"), thumbnailData: nil, base64Data: "dGVzdA==", width: 100, height: 100)
+        viewModel.addImageAttachment(attachment)
+        viewModel.removeImageAttachment(id: attachment.id)
+        XCTAssertTrue(viewModel.imageAttachments.isEmpty)
+    }
+
+    func testClearImageAttachments() {
+        let a1 = AttachedImage(id: UUID(), localURL: URL(fileURLWithPath: "/tmp/1.jpg"), thumbnailData: nil, base64Data: "dGVzdA==", width: 100, height: 100)
+        let a2 = AttachedImage(id: UUID(), localURL: URL(fileURLWithPath: "/tmp/2.jpg"), thumbnailData: nil, base64Data: "dGVzdA==", width: 100, height: 100)
+        viewModel.addImageAttachment(a1)
+        viewModel.addImageAttachment(a2)
+        viewModel.clearImageAttachments()
+        XCTAssertTrue(viewModel.imageAttachments.isEmpty)
+    }
+
     // MARK: - Edge cases
 
     func testConfirmDeletionWithWrongMessageIDIsNoOp() async throws {

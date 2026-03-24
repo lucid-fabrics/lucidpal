@@ -125,4 +125,25 @@ final class ModelDownloadViewModelTests: XCTestCase {
         viewModel.deleteModel(model)
         XCTAssertTrue(mockLLM.unloadCalled)
     }
+
+    // MARK: - refreshAvailableModels
+
+    func testRefreshAvailableModelsFiltersVision() {
+        viewModel.refreshAvailableModels(filter: .vision)
+        XCTAssertFalse(viewModel.availableModels.isEmpty)
+        XCTAssertTrue(viewModel.availableModels.allSatisfy { $0.capabilities.contains(.vision) })
+    }
+
+    func testRefreshAvailableModelsFiltersText() {
+        viewModel.refreshAvailableModels(filter: .text)
+        XCTAssertFalse(viewModel.availableModels.isEmpty)
+        XCTAssertTrue(viewModel.availableModels.allSatisfy { $0.capabilities == .text })
+    }
+
+    func testRefreshAvailableModelsNilFilterReturnsAll() {
+        let allCount = viewModel.availableModels.count
+        viewModel.refreshAvailableModels(filter: .vision)
+        viewModel.refreshAvailableModels(filter: nil)
+        XCTAssertEqual(viewModel.availableModels.count, allCount)
+    }
 }
