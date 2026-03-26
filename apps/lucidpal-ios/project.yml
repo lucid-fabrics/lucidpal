@@ -1,0 +1,105 @@
+name: LucidPal
+options:
+  bundleIdPrefix: app.lucidpal
+  deploymentTarget:
+    iOS: "18.0"
+  xcodeVersion: "16.0"
+  swift: "6.0"
+
+packages:
+  llama:
+    path: ./Packages/llama
+  SnapshotTesting:
+    url: https://github.com/pointfreeco/swift-snapshot-testing
+    from: "1.16.0"
+    maxVersion: "1.16.99"
+  WhisperKit:
+    url: https://github.com/argmaxinc/WhisperKit
+    from: "0.1.0"
+
+targets:
+  LucidPal:
+    type: application
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.lucidpal
+        SWIFT_VERSION: "6.0"
+        INFOPLIST_FILE: Sources/App/Info.plist
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: "KRPUAN3FFA"
+        ENABLE_HARDENED_RUNTIME: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    dependencies:
+      - package: llama
+        product: llama
+      - package: WhisperKit
+        product: WhisperKit
+    entitlements:
+      path: Sources/App/LucidPal.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.app.lucidpal
+
+  LucidPalTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: Tests
+    settings:
+      base:
+        SWIFT_VERSION: "6.0"
+        PRODUCT_BUNDLE_IDENTIFIER: app.lucidpal.tests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: "KRPUAN3FFA"
+    dependencies:
+      - target: LucidPal
+      - package: SnapshotTesting
+        product: SnapshotTesting
+
+  LucidPalWidget:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: WidgetExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.lucidpal.widget
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: "KRPUAN3FFA"
+    dependencies:
+      - target: LucidPal
+    entitlements:
+      path: WidgetExtension/LucidPalWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.app.lucidpal
+
+schemes:
+  LucidPal:
+    build:
+      targets:
+        LucidPal: all
+        LucidPalWidget: all
+        LucidPalTests: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - LucidPalTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
