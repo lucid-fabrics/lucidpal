@@ -53,8 +53,8 @@ private func parseCodeBlocks(_ text: String) -> [TextSegment] {
     var lastEnd = text.startIndex
     let nsRange = NSRange(text.startIndex..., in: text)
     for match in regex.matches(in: text, range: nsRange) {
-        let matchRange = Range(match.range, in: text)!
-        let codeRange = Range(match.range(at: 1), in: text)!
+        guard let matchRange = Range(match.range, in: text),
+              let codeRange = Range(match.range(at: 1), in: text) else { continue }
         if lastEnd < matchRange.lowerBound {
             let pre = String(text[lastEnd..<matchRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
             if !pre.isEmpty { segments.append(TextSegment(content: pre, isCode: false)) }

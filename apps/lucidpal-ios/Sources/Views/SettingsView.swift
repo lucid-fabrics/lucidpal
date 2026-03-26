@@ -219,7 +219,12 @@ struct SettingsView: View {
         } header: {
             sectionHeader("Inference", icon: "waveform", color: .indigo)
         } footer: {
-            Text("\"Start voice on open\" automatically starts listening when you open a new chat. \"AirPods auto-voice\" starts listening automatically when AirPods are connected. Auto-send submits voice input when speech recognition finishes. Thinking mode can be toggled per chat via the brain icon in the chat toolbar.")
+            Text(
+                "\"Start voice on open\" automatically starts listening when you open a new chat. " +
+                "\"AirPods auto-voice\" starts listening automatically when AirPods are connected. " +
+                "Auto-send submits voice input when speech recognition finishes. " +
+                "Thinking mode can be toggled per chat via the brain icon in the chat toolbar."
+            )
         }
     }
 

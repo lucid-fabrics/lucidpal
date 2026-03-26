@@ -5,7 +5,7 @@ import XCTest
 final class ModelDownloadViewModelTests: XCTestCase {
     var mockLLM: MockLLMService!
     var mockDownloader: MockModelDownloader!
-    var settings: AppSettingsProtocol!
+    var settings: MockAppSettings!
     var viewModel: ModelDownloadViewModel!
 
     override func setUp() async throws {
@@ -13,7 +13,7 @@ final class ModelDownloadViewModelTests: XCTestCase {
         mockLLM = MockLLMService()
         mockDownloader = MockModelDownloader()
         settings = MockAppSettings()
-        viewModel = ModelDownloadViewModel(llmService: mockLLM, settings: settings, downloader: mockDownloader)
+        viewModel = ModelDownloadViewModel(llmService: mockLLM, settings: settings as AppSettingsProtocol, downloader: mockDownloader)
     }
 
     func testInitDownloadStateIsIdle() {
@@ -68,7 +68,7 @@ final class ModelDownloadViewModelTests: XCTestCase {
         let model = viewModel.selectedModel
         // Simulate the model being loaded in the service directly
         mockLLM.isLoaded = true
-        (settings as! MockAppSettings).selectedModelID = model.id
+        settings.selectedModelID = model.id
         viewModel.deleteModel(model)
         XCTAssertTrue(mockLLM.unloadCalled)
     }
@@ -121,7 +121,7 @@ final class ModelDownloadViewModelTests: XCTestCase {
     func testDeleteLoadedModelUnloadsLLM() {
         let model = viewModel.selectedModel
         mockLLM.isLoaded = true
-        (settings as! MockAppSettings).selectedModelID = model.id
+        settings.selectedModelID = model.id
         viewModel.deleteModel(model)
         XCTAssertTrue(mockLLM.unloadCalled)
     }
