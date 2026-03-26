@@ -3,15 +3,15 @@ const { themes } = require('prism-react-renderer');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'PocketMind',
+  title: 'LucidPal',
   tagline: 'On-device AI calendar assistant for iOS',
   favicon: 'img/favicon.ico',
 
   url: 'https://lucid-fabrics.github.io',
-  baseUrl: '/pocketmind/',
+  baseUrl: '/lucidpal/',
 
   organizationName: 'lucid-fabrics',
-  projectName: 'pocketmind',
+  projectName: 'lucidpal',
   trailingSlash: false,
 
   onBrokenLinks: 'throw',
@@ -30,7 +30,7 @@ const config = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           routeBasePath: '/',
-          editUrl: 'https://github.com/lucid-fabrics/pocketmind/tree/main/docs/',
+          editUrl: 'https://github.com/lucid-fabrics/lucidpal/tree/main/docs/',
         },
         blog: false,
         theme: {
@@ -44,12 +44,17 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'PocketMind',
+        title: 'LucidPal',
         items: [
           { type: 'docSidebar', sidebarId: 'guides', position: 'left', label: 'Guides' },
-          { type: 'docSidebar', sidebarId: 'architecture', position: 'left', label: 'Architecture' },
           {
-            href: 'https://github.com/lucid-fabrics/pocketmind',
+            type: 'docSidebar',
+            sidebarId: 'architecture',
+            position: 'left',
+            label: 'Architecture',
+          },
+          {
+            href: 'https://github.com/lucid-fabrics/lucidpal',
             label: 'GitHub',
             position: 'right',
           },
@@ -57,7 +62,7 @@ const config = {
       },
       footer: {
         style: 'dark',
-        copyright: `© ${new Date().getFullYear()} PocketMind. Built with Docusaurus.`,
+        copyright: `© ${new Date().getFullYear()} LucidPal. Built with Docusaurus.`,
       },
       prism: {
         theme: themes.github,

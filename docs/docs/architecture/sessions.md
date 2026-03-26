@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # Session Management
 
-How PocketMind persists and navigates multiple chat sessions.
+How LucidPal persists and navigates multiple chat sessions.
 
 ## Data Model
 

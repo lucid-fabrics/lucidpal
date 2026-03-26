@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Calendar Integration
 
-How PocketMind translates natural language into EventKit operations.
+How LucidPal translates natural language into EventKit operations.
 
 ## End-to-End Flow
 
@@ -141,18 +141,18 @@ CalendarService executes → preview.state = .deleted / .updated / .rescheduled
 
 ### Preview States
 
-| State | Meaning |
-|-------|---------|
-| `.created` | Event successfully created — tap to open in Calendar |
-| `.pendingDeletion` | Awaiting user confirmation to delete |
-| `.deleted` | Deleted — shows strikethrough + Undo button |
-| `.deletionCancelled` | User kept the event |
-| `.pendingUpdate` | Awaiting user confirmation to apply changes |
-| `.updated` | Updated in place |
-| `.rescheduled` | Start/end times changed |
-| `.updateCancelled` | User dismissed the update |
-| `.restored` | Event recreated after undo |
-| `.listed` | Read-only list result — shown in `CalendarEventListCard`, no confirm buttons |
+| State                | Meaning                                                                      |
+| -------------------- | ---------------------------------------------------------------------------- |
+| `.created`           | Event successfully created — tap to open in Calendar                         |
+| `.pendingDeletion`   | Awaiting user confirmation to delete                                         |
+| `.deleted`           | Deleted — shows strikethrough + Undo button                                  |
+| `.deletionCancelled` | User kept the event                                                          |
+| `.pendingUpdate`     | Awaiting user confirmation to apply changes                                  |
+| `.updated`           | Updated in place                                                             |
+| `.rescheduled`       | Start/end times changed                                                      |
+| `.updateCancelled`   | User dismissed the update                                                    |
+| `.restored`          | Event recreated after undo                                                   |
+| `.listed`            | Read-only list result — shown in `CalendarEventListCard`, no confirm buttons |
 
 ## Anti-Corruption Layer
 
