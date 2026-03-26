@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Architecture Overview
 
-MVVM layers, dependency injection, and actor isolation in PocketMind.
+MVVM layers, dependency injection, and actor isolation in LucidPal.
 
 ## Layer Diagram
 
@@ -29,7 +29,7 @@ MVVM layers, dependency injection, and actor isolation in PocketMind.
 
 ## Dependency Injection
 
-PocketMind uses **constructor injection** throughout. All service dependencies are declared as protocol existentials (`any XProtocol`), never concrete types.
+LucidPal uses **constructor injection** throughout. All service dependencies are declared as protocol existentials (`any XProtocol`), never concrete types.
 
 ```swift
 // ✅ Correct — protocol existential
@@ -43,10 +43,10 @@ final class ChatViewModel: ObservableObject {
 let llmService: LLMService
 ```
 
-**`PocketMindApp`** is the sole composition root — the only place concrete services are instantiated:
+**`LucidPalApp`** is the sole composition root — the only place concrete services are instantiated:
 
 ```swift
-@main struct PocketMindApp: App {
+@main struct LucidPalApp: App {
     private let llmService = LLMService()
     private let calendarService = CalendarService()
     private let hapticService = HapticService()
@@ -56,9 +56,9 @@ let llmService: LLMService
 
 ## Actor Isolation
 
-| Actor | Purpose |
-|-------|---------|
-| `@MainActor` | All ViewModels and ObservableObjects — guarantees UI updates on main thread |
+| Actor        | Purpose                                                                      |
+| ------------ | ---------------------------------------------------------------------------- |
+| `@MainActor` | All ViewModels and ObservableObjects — guarantees UI updates on main thread  |
 | `LlamaActor` | Serial actor wrapping llama.cpp C FFI — serializes inference, safe for async |
 
 ```swift
@@ -70,24 +70,24 @@ actor LlamaActor {
 
 ## Protocol Inventory
 
-| Protocol | Conforming Type | Mock |
-|----------|----------------|------|
-| `LLMServiceProtocol` | `LLMService` | `MockLLMService` |
-| `CalendarServiceProtocol` | `CalendarService` | `MockCalendarService` |
-| `CalendarActionControllerProtocol` | `CalendarActionController` | `MockCalendarActionController` |
-| `SessionManagerProtocol` | `SessionManager` | `MockSessionManager` |
-| `SpeechServiceProtocol` | `SpeechService` | `MockSpeechService` |
-| `HapticServiceProtocol` | `HapticService` | `MockHapticService` |
-| `ChatHistoryManagerProtocol` | `ChatHistoryManager` / `NoOpChatHistoryManager` | — |
-| `ModelDownloaderProtocol` | `ModelDownloader` | `MockModelDownloader` |
-| `AppSettingsProtocol` | `AppSettings` | `MockAppSettings` |
+| Protocol                           | Conforming Type                                 | Mock                           |
+| ---------------------------------- | ----------------------------------------------- | ------------------------------ |
+| `LLMServiceProtocol`               | `LLMService`                                    | `MockLLMService`               |
+| `CalendarServiceProtocol`          | `CalendarService`                               | `MockCalendarService`          |
+| `CalendarActionControllerProtocol` | `CalendarActionController`                      | `MockCalendarActionController` |
+| `SessionManagerProtocol`           | `SessionManager`                                | `MockSessionManager`           |
+| `SpeechServiceProtocol`            | `SpeechService`                                 | `MockSpeechService`            |
+| `HapticServiceProtocol`            | `HapticService`                                 | `MockHapticService`            |
+| `ChatHistoryManagerProtocol`       | `ChatHistoryManager` / `NoOpChatHistoryManager` | —                              |
+| `ModelDownloaderProtocol`          | `ModelDownloader`                               | `MockModelDownloader`          |
+| `AppSettingsProtocol`              | `AppSettings`                                   | `MockAppSettings`              |
 
 ## File Structure
 
 ```
 Sources/
 ├── App/
-│   ├── PocketMindApp.swift       ← @main, composition root
+│   ├── LucidPalApp.swift       ← @main, composition root
 │   ├── ContentView.swift         ← Root navigation (onboarding → sessions)
 │   └── AppDelegate.swift         ← UIApplicationDelegate (background tasks)
 ├── Models/

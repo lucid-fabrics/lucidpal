@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # LLM Inference
 
-How PocketMind streams tokens from llama.cpp to the SwiftUI UI.
+How LucidPal streams tokens from llama.cpp to the SwiftUI UI.
 
 ## Flow
 
@@ -45,7 +45,7 @@ for try await token in llmService.generate(
 
 ## Thinking Mode (Qwen3.5 `<think>` Tags)
 
-Qwen3.5 models emit a `<think>...</think>` block before answering. PocketMind handles this live:
+Qwen3.5 models emit a `<think>...</think>` block before answering. LucidPal handles this live:
 
 ```
 <think>
@@ -56,11 +56,11 @@ Here's your event — tap confirm.
 
 `applyStreamToken()` buffers the prefix and splits at `</think>`:
 
-| Buffer state | Action |
-|--------------|--------|
+| Buffer state                         | Action                                              |
+| ------------------------------------ | --------------------------------------------------- |
 | Starts with `<think>` (no close yet) | Set `isThinking = true`, show in ThinkingDisclosure |
-| `</think>` detected | Extract thinking text, reset to response mode |
-| No `<think>` prefix | Treat entire output as response |
+| `</think>` detected                  | Extract thinking text, reset to response mode       |
+| No `<think>` prefix                  | Treat entire output as response                     |
 
 ## Context Window
 
@@ -73,18 +73,18 @@ let historyLimit = ramGB >= 6
     : ChatConstants.smallHistoryLimit   // 20 messages ≈ 2 000 tokens
 ```
 
-| RAM | Context | History Limit |
-|-----|---------|---------------|
-| < 4 GB | 4K tokens | 20 messages |
-| ≥ 4 GB | 8K tokens | 50 messages |
+| RAM    | Context   | History Limit |
+| ------ | --------- | ------------- |
+| < 4 GB | 4K tokens | 20 messages   |
+| ≥ 4 GB | 8K tokens | 50 messages   |
 
 ## Sampler Configuration
 
-| Parameter | Value | Reason |
-|-----------|-------|--------|
-| Temperature | 0.35 | Low — reduces hallucinated JSON fields |
-| Top-P | 0.9 | Nucleus sampling |
-| Max new tokens | 768 | Prevents runaway generation |
+| Parameter      | Value | Reason                                 |
+| -------------- | ----- | -------------------------------------- |
+| Temperature    | 0.35  | Low — reduces hallucinated JSON fields |
+| Top-P          | 0.9   | Nucleus sampling                       |
+| Max new tokens | 768   | Prevents runaway generation            |
 
 ## LlamaActor
 
@@ -107,8 +107,8 @@ actor LlamaActor {
 
 ## Error Handling
 
-| Error | Source | Handling |
-|-------|--------|---------|
-| `LLMError.modelNotLoaded` | `LLMService.generate` when model not ready | ChatViewModel shows error banner |
-| `CancellationError` | User taps stop button | Partial content left visible, no error shown |
-| Any other `Error` | llama.cpp runtime | Displayed in `messages[idx].content` |
+| Error                     | Source                                     | Handling                                     |
+| ------------------------- | ------------------------------------------ | -------------------------------------------- |
+| `LLMError.modelNotLoaded` | `LLMService.generate` when model not ready | ChatViewModel shows error banner             |
+| `CancellationError`       | User taps stop button                      | Partial content left visible, no error shown |
+| Any other `Error`         | llama.cpp runtime                          | Displayed in `messages[idx].content`         |

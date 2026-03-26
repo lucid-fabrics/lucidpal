@@ -1,5 +1,5 @@
 {
-  "name": "pocketmind",
+  "name": "lucidpal",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -17,9 +17,13 @@
     "prettier": "^3.6.2"
   },
   "lint-staged": {
-    "*.{ts,js,json,md}": ["prettier --write"]
+    "*.{ts,js,json,md}": [
+      "prettier --write"
+    ]
   },
   "commitlint": {
-    "extends": ["@commitlint/config-conventional"]
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   }
 }

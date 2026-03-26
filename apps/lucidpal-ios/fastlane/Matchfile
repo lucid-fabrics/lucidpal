@@ -1,0 +1,5 @@
+git_url("https://github.com/lucid-fabrics/lucidpal-certificates")
+storage_mode("git")
+type("development")
+app_identifier(["app.lucidpal", "app.lucidpal.widget"])
+team_id("KRPUAN3FFA")

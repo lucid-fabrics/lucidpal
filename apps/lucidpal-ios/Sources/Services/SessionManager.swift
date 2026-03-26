@@ -1,0 +1,220 @@
+import CoreSpotlight
+import Foundation
+import OSLog
+import UniformTypeIdentifiers
+
+private let sessionLogger = Logger(subsystem: "app.lucidpal", category: "SessionManager")
+
+@MainActor
+protocol SessionManagerProtocol {
+    func loadIndex() -> [ChatSessionMeta]
+    func loadSession(id: UUID) -> ChatSession?
+    @discardableResult func save(_ session: ChatSession) -> Task<Void, Never>
+    func delete(id: UUID)
+    @discardableResult func renameSession(id: UUID, title: String) -> Task<Void, Never>
+    @discardableResult func togglePin(id: UUID) -> Task<Void, Never>
+}
+
+/// Manages multiple chat sessions on disk.
+/// Each session is stored as `Documents/sessions/<uuid>.json`.
+/// A lightweight index at `Documents/sessions/index.json` stores metadata without messages.
+@MainActor
+final class SessionManager: SessionManagerProtocol {
+
+    private let sessionsDirectory: URL
+    private let indexURL: URL
+
+    /// Creates a `SessionManager` rooted at `directory`.
+    /// Pass a custom temp path in tests to avoid polluting the real Documents directory.
+    init(directory: URL? = nil) {
+        let root = directory ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        sessionsDirectory = root.appendingPathComponent("sessions", isDirectory: true)
+        indexURL = sessionsDirectory.appendingPathComponent("index.json")
+        do {
+            try FileManager.default.createDirectory(
+                at: sessionsDirectory,
+                withIntermediateDirectories: true
+            )
+        } catch {
+            sessionLogger.error("Failed to create sessions directory: \(error)")
+        }
+        migrate()
+    }
+
+    // MARK: - Protocol
+
+    func loadIndex() -> [ChatSessionMeta] {
+        let data: Data
+        do {
+            data = try Data(contentsOf: indexURL)
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile {
+            return []  // expected on first launch — index has not been written yet
+        } catch {
+            sessionLogger.error("Failed to read index file: \(error)")
+            return []
+        }
+        do {
+            return try JSONDecoder().decode([ChatSessionMeta].self, from: data)
+        } catch {
+            sessionLogger.error("Failed to decode index: \(error)")
+            return []
+        }
+    }
+
+    func loadSession(id: UUID) -> ChatSession? {
+        let url = sessionURL(for: id)
+        let data: Data
+        do {
+            data = try Data(contentsOf: url)
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile {
+            return nil  // session file absent — normal if session was deleted externally
+        } catch {
+            sessionLogger.error("Failed to read session \(id): \(error)")
+            return nil
+        }
+        do {
+            return try JSONDecoder().decode(ChatSession.self, from: data)
+        } catch {
+            sessionLogger.error("Failed to decode session \(id): \(error)")
+            return nil
+        }
+    }
+
+    @discardableResult
+    func save(_ session: ChatSession) -> Task<Void, Never> {
+        let url = sessionURL(for: session.id)
+        // Exclude system messages from persistence
+        let filtered = ChatSession(
+            id: session.id,
+            title: session.title,
+            createdAt: session.createdAt,
+            updatedAt: session.updatedAt,
+            messages: session.messages.filter { $0.role != .system }
+        )
+        let task = Task.detached(priority: .utility) {
+            do {
+                let data = try JSONEncoder().encode(filtered)
+                try data.write(to: url, options: .atomic)
+            } catch {
+                sessionLogger.error("Failed to save session \(filtered.id): \(error)")
+            }
+        }
+        updateIndex(with: session.meta)
+        indexForSpotlight(session.meta)
+        return task
+    }
+
+    func delete(id: UUID) {
+        do {
+            try FileManager.default.removeItem(at: sessionURL(for: id))
+        } catch {
+            sessionLogger.error("Failed to delete session \(id): \(error)")
+        }
+        var index = loadIndex()
+        index.removeAll { $0.id == id }
+        saveIndex(index)
+        CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [id.uuidString])
+    }
+
+    @discardableResult
+    func renameSession(id: UUID, title: String) -> Task<Void, Never> {
+        guard var session = loadSession(id: id) else { return Task {} }
+        session.title = title
+        return save(session)
+    }
+
+    @discardableResult
+    func togglePin(id: UUID) -> Task<Void, Never> {
+        var index = loadIndex()
+        guard let i = index.firstIndex(where: { $0.id == id }) else { return Task {} }
+        index[i].isPinned.toggle()
+        saveIndex(index)
+        return Task {}
+    }
+
+    // MARK: - Private
+
+    private func sessionURL(for id: UUID) -> URL {
+        sessionsDirectory.appendingPathComponent("\(id.uuidString).json")
+    }
+
+    private func updateIndex(with meta: ChatSessionMeta) {
+        var index = loadIndex()
+        if let i = index.firstIndex(where: { $0.id == meta.id }) {
+            let pinned = index[i].isPinned
+            index[i] = meta
+            index[i].isPinned = pinned
+        } else {
+            index.insert(meta, at: 0)
+        }
+        saveIndex(index)
+    }
+
+    private func saveIndex(_ index: [ChatSessionMeta]) {
+        do {
+            let data = try JSONEncoder().encode(index)
+            try data.write(to: indexURL, options: .atomic)
+        } catch {
+            sessionLogger.error("Failed to save index: \(error)")
+        }
+    }
+
+    // MARK: - Spotlight
+
+    private func indexForSpotlight(_ meta: ChatSessionMeta) {
+        let attributeSet = CSSearchableItemAttributeSet(contentType: .text)
+        attributeSet.title = meta.title
+        attributeSet.contentDescription = meta.lastMessagePreview
+        attributeSet.lastUsedDate = meta.updatedAt
+
+        let item = CSSearchableItem(
+            uniqueIdentifier: meta.id.uuidString,
+            domainIdentifier: "app.lucidpal.sessions",
+            attributeSet: attributeSet
+        )
+        item.expirationDate = Date.distantFuture
+
+        CSSearchableIndex.default().indexSearchableItems([item])
+    }
+
+    // MARK: - Migration
+
+    /// Migrates legacy single-file `chat_history.json` to the multi-session format.
+    private func migrate() {
+        let legacyURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("chat_history.json")
+        guard FileManager.default.fileExists(atPath: legacyURL.path) else { return }
+        let data: Data
+        let messages: [ChatMessage]
+        do {
+            data = try Data(contentsOf: legacyURL)
+            messages = try JSONDecoder().decode([ChatMessage].self, from: data)
+        } catch {
+            sessionLogger.error("Failed to read legacy history: \(error)")
+            do { try FileManager.default.removeItem(at: legacyURL) } catch {
+                sessionLogger.error("Failed to remove corrupt legacy file: \(error)")
+            }
+            return
+        }
+        guard !messages.isEmpty else {
+            do { try FileManager.default.removeItem(at: legacyURL) } catch {
+                sessionLogger.error("Failed to remove empty legacy file: \(error)")
+            }
+            return
+        }
+        let firstUserContent = messages.first(where: { $0.role == .user })?.content ?? "Chat"
+        let session = ChatSession(
+            id: UUID(),
+            title: String(firstUserContent.prefix(ChatConstants.maxSessionTitleLength)),
+            createdAt: messages.first?.timestamp ?? .now,
+            updatedAt: messages.last?.timestamp ?? .now,
+            messages: messages
+        )
+        save(session)
+        do {
+            try FileManager.default.removeItem(at: legacyURL)
+        } catch {
+            sessionLogger.error("Failed to remove legacy chat_history.json: \(error)")
+        }
+    }
+}

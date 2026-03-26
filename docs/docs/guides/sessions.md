@@ -4,9 +4,9 @@ sidebar_position: 3
 
 # Conversations
 
-How to create, manage, and switch between chat sessions in PocketMind.
+How to create, manage, and switch between chat sessions in LucidPal.
 
-PocketMind saves each conversation as a separate session. You can pick up any previous chat or start fresh at any time.
+LucidPal saves each conversation as a separate session. You can pick up any previous chat or start fresh at any time.
 
 ## Starting a New Conversation
 
@@ -51,17 +51,17 @@ Deleted sessions cannot be recovered. Events that were created from a session re
 Each session remembers its own message history. The AI uses recent messages as context when answering follow-up questions:
 
 > "Add a dentist appointment Friday at 10am"
-> *(PocketMind creates the event)*
+> _(LucidPal creates the event)_
 > "Actually, make it 11am instead"
 
-The follow-up works because PocketMind remembers the previous message in the same session.
+The follow-up works because LucidPal remembers the previous message in the same session.
 
 Context is limited based on your device's RAM:
 
-| Device RAM | Messages kept in context |
-|-----------|-------------------------|
-| Under 6 GB | Last 20 messages |
-| 6 GB or more | Last 50 messages |
+| Device RAM   | Messages kept in context |
+| ------------ | ------------------------ |
+| Under 6 GB   | Last 20 messages         |
+| 6 GB or more | Last 50 messages         |
 
 For very long conversations, start a new session to give the AI a clean slate.
 
@@ -69,4 +69,4 @@ For very long conversations, start a new session to give the AI a clean slate.
 
 ## Siri Opens a New Session
 
-When you use a Siri shortcut, PocketMind always opens a **new session** for that request. Your existing conversations are not affected.
+When you use a Siri shortcut, LucidPal always opens a **new session** for that request. Your existing conversations are not affected.

@@ -1,10 +1,10 @@
-# PocketMind
+# LucidPal
 
 An on-device AI assistant for iOS with native calendar access. All inference runs locally — no internet connection, no API keys, no data leaves your phone.
 
 Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [llama.cpp](https://github.com/ggml-org/llama.cpp).
 
-**[Documentation](https://lucid-fabrics.github.io/pocketmind)**
+**[Documentation](https://lucid-fabrics.github.io/lucidpal)**
 
 ---
 
@@ -26,17 +26,17 @@ Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [lla
 
 ## Requirements
 
-| | Minimum |
-|---|---|
-| iPhone | Any model with 2 GB RAM (iPhone 12 or newer recommended) |
-| iOS | 16.0 |
-| Free storage | 1 GB (0.8B model), 2 GB (2B model), or 3 GB (4B model) |
+|              | Minimum                                                  |
+| ------------ | -------------------------------------------------------- |
+| iPhone       | Any model with 2 GB RAM (iPhone 12 or newer recommended) |
+| iOS          | 16.0                                                     |
+| Free storage | 1 GB (0.8B model), 2 GB (2B model), or 3 GB (4B model)   |
 
 ---
 
 ## Getting started
 
-1. **Download the app** from the App Store *(coming soon)*
+1. **Download the app** from the App Store _(coming soon)_
 2. **Choose a model** — the app recommends one based on your device RAM
 3. **Download** — the model fetches directly from Hugging Face (~0.5–2.5 GB, Wi-Fi recommended)
 4. **Grant calendar access** — optional; required for reading/writing events
@@ -46,15 +46,18 @@ Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [lla
 
 ## Using the calendar
 
-PocketMind can read your upcoming events and create or rename them on your behalf.
+LucidPal can read your upcoming events and create or rename them on your behalf.
 
 **Read:**
+
 > "What do I have tomorrow?"
 
 **Create:**
+
 > "Schedule a dentist appointment Friday at 10am"
 
 **Rename/update:**
+
 > "Move my dentist appointment to 2pm"
 
 A calendar card appears in the chat after every successful write. Tap it to open the Calendar app.
@@ -67,11 +70,11 @@ When a new or rescheduled event overlaps an existing one, an orange banner appea
 
 Tapping the banner opens a sheet showing the conflicting event(s) — including title, time, calendar, and a "Recurring" badge when applicable — with three options:
 
-| Action | What it does |
-|--------|-------------|
-| Keep Anyway | Saves the event as-is and clears the warning |
+| Action         | What it does                                                            |
+| -------------- | ----------------------------------------------------------------------- |
+| Keep Anyway    | Saves the event as-is and clears the warning                            |
 | Find Free Slot | Searches the next 3 days for open windows matching the event's duration |
-| Cancel Event | Deletes the newly created event |
+| Cancel Event   | Deletes the newly created event                                         |
 
 Tapping a free slot reschedules the event to that time instantly.
 
@@ -79,28 +82,28 @@ Tapping a free slot reschedules the event to that time instantly.
 
 ## Siri
 
-PocketMind registers shortcuts automatically. Use them from Siri, the Shortcuts app, or the Lock Screen:
+LucidPal registers shortcuts automatically. Use them from Siri, the Shortcuts app, or the Lock Screen:
 
-| Phrase | What it does |
-|--------|--------------|
-| *"Ask PocketMind [question]"* | Opens the app with your question pre-filled |
-| *"Check my PocketMind schedule"* | Shows your upcoming calendar events |
-| *"Add a PocketMind event"* | Creates a calendar event via voice |
-| *"Find free time in PocketMind"* | Finds an open slot in your calendar |
-| *"Delete event in PocketMind"* | Deletes a named event with confirmation — no app required |
-| *"Undo my last PocketMind action"* | Reverses the last calendar change (in-app or via Siri) |
+| Phrase                           | What it does                                              |
+| -------------------------------- | --------------------------------------------------------- |
+| _"Ask LucidPal [question]"_      | Opens the app with your question pre-filled               |
+| _"Check my LucidPal schedule"_   | Shows your upcoming calendar events                       |
+| _"Add a LucidPal event"_         | Creates a calendar event via voice                        |
+| _"Find free time in LucidPal"_   | Finds an open slot in your calendar                       |
+| _"Delete event in LucidPal"_     | Deletes a named event with confirmation — no app required |
+| _"Undo my last LucidPal action"_ | Reverses the last calendar change (in-app or via Siri)    |
 
-The undo shortcut is context-aware: it knows whether your last action was a create, delete, or update — whether you did it inside PocketMind or through Siri — and reverses it with a confirmation card.
+The undo shortcut is context-aware: it knows whether your last action was a create, delete, or update — whether you did it inside LucidPal or through Siri — and reverses it with a confirmation card.
 
 ---
 
 ## Models
 
-| Model | Size | Best for |
-|-------|------|----------|
+| Model               | Size    | Best for                |
+| ------------------- | ------- | ----------------------- |
 | Qwen3.5 0.8B Q4_K_M | 0.51 GB | Devices with 2–3 GB RAM |
-| Qwen3.5 2B Q4_K_M | 1.2 GB | Devices with 3–5 GB RAM |
-| Qwen3.5 4B Q4_K_M | 2.5 GB | Devices with 5 GB+ RAM |
+| Qwen3.5 2B Q4_K_M   | 1.2 GB  | Devices with 3–5 GB RAM |
+| Qwen3.5 4B Q4_K_M   | 2.5 GB  | Devices with 5 GB+ RAM  |
 
 All models support Qwen3.5's built-in reasoning (thinking mode). Disable it in Settings for faster, more concise answers.
 
@@ -108,14 +111,14 @@ All models support Qwen3.5's built-in reasoning (thinking mode). Disable it in S
 
 ## Settings
 
-| Setting | What it does |
-|---------|-------------|
-| Calendar access | Enable/disable calendar read & write in chat |
-| Default calendar | Which calendar new events are added to |
-| Thinking mode | Show the model's reasoning before its answer (slower, more accurate) |
-| Start voice on open | Auto-start the microphone when opening a new chat |
-| Auto-send after speech | Submit automatically when speech recognition finishes |
-| Context window | KV cache size in tokens (2048 / 4096 / 8192) — larger = longer conversations, more RAM |
+| Setting                | What it does                                                                           |
+| ---------------------- | -------------------------------------------------------------------------------------- |
+| Calendar access        | Enable/disable calendar read & write in chat                                           |
+| Default calendar       | Which calendar new events are added to                                                 |
+| Thinking mode          | Show the model's reasoning before its answer (slower, more accurate)                   |
+| Start voice on open    | Auto-start the microphone when opening a new chat                                      |
+| Auto-send after speech | Submit automatically when speech recognition finishes                                  |
+| Context window         | KV cache size in tokens (2048 / 4096 / 8192) — larger = longer conversations, more RAM |
 
 Context window changes take effect the next time the model loads. Your device's RAM determines the maximum available size.
 

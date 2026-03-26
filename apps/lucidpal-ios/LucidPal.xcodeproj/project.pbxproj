@@ -1,0 +1,1339 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		00245E136D540B04342F99DC /* ChatViewModelEdgeCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF8BE00C9420E41E22E8E88 /* ChatViewModelEdgeCaseTests.swift */; };
+		015EC7B28597B03FDB36100F /* AskLucidPalShortcutIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3508CB29280F94629928558F /* AskLucidPalShortcutIntent.swift */; };
+		0369110B740DD7187CCCAC9B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCDE734760A7EA126395E573 /* OnboardingView.swift */; };
+		0518CB7542106BEF580784A3 /* BulkDeletionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 714032A2113DC95F20A8D94A /* BulkDeletionBar.swift */; };
+		056ADB8FFE5EBF08514F6619 /* CalendarActionControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D1324E68CF71D1A6D69E263 /* CalendarActionControllerTests.swift */; };
+		093039DFA169F1827527355A /* CalendarFreeSlotIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6C99119BC4DF91E79DDD08E /* CalendarFreeSlotIntegrationTests.swift */; };
+		0A4830821BE3363080E4BC60 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E2062ED268B2D75C8AF44CD7 /* Assets.xcassets */; };
+		0B0DB82A045413F5701EB714 /* MockAppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D6B45D84D5B60FD2D8B124 /* MockAppSettings.swift */; };
+		0C7DBF0043B20456289944FB /* LlamaActor+Tokenize.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE40F8823C0E67716D529201 /* LlamaActor+Tokenize.swift */; };
+		0D2F303188ACAF4A06607DA3 /* MockContextService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 602A89E6A501BAC655F88D72 /* MockContextService.swift */; };
+		105F257A88A7A29FA2ADF784 /* CalendarQueryResultCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EC78106C18D011E2DE8D5FA /* CalendarQueryResultCard.swift */; };
+		10D5F03FBCDE15F91EB5578D /* VoiceRecordingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AAC7D20A5943993F923510 /* VoiceRecordingOverlay.swift */; };
+		128B60E308D9AB3131D5D78A /* MockCalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C673E05C2BB426CCCF805CC5 /* MockCalendarService.swift */; };
+		14045A5106A180F24C850521 /* SessionManagerMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4E3664D0A05C417F2F6ACB /* SessionManagerMigrationTests.swift */; };
+		14E586B01CB67F547DC76C92 /* SettingsView+Shortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77655AE2BBF02BFB8E807998 /* SettingsView+Shortcuts.swift */; };
+		15FC9FF2A5088AAD67940AD8 /* DebugLogStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65DCF84AC19150A85E7D2D8 /* DebugLogStoreTests.swift */; };
+		16271E0880116FA896592B59 /* HapticServiceProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 658734752CBBCD72F510B467 /* HapticServiceProtocolTests.swift */; };
+		16772475987CBA5B2DA7FFCA /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 2DED8AEAC2DC7A408B680177 /* llama */; };
+		18DD4E00F69F1206CB590A3E /* MessageBubbleView+ImageViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D63931F91E36AEF6C63F8DEC /* MessageBubbleView+ImageViewer.swift */; };
+		18E1232F0348253BF9A7922A /* CalendarEventCard+Subviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48ABFA993438729C7ED637DA /* CalendarEventCard+Subviews.swift */; };
+		19AAEC3054EAC2FE7DBA9CBB /* LLMServiceProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B27E6EC0B2B73663510E7F /* LLMServiceProtocolTests.swift */; };
+		1B5C57919A0EAD3C955B9484 /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 547CC94B219A54508ED8BDED /* LLMService.swift */; };
+		1B822B7D6C796119BC306489 /* SessionListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADAD418E4BB1751ED32C1FB5 /* SessionListViewModel.swift */; };
+		1BCA2F07DE3D10CA06C4D40D /* MockSystemPromptBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 327F93D310D7A283F58227C6 /* MockSystemPromptBuilder.swift */; };
+		1FBB83DDAD565E037AF49362 /* WhisperSpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D222F9207B5C4D8F6205640 /* WhisperSpeechService.swift */; };
+		211506CD2E9CDB4D72250076 /* LlamaActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31B5620D40D122F48BE91D2 /* LlamaActor.swift */; };
+		22F70616D0632693651CEDB9 /* ContextServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19364312E74F2D861837012 /* ContextServiceTests.swift */; };
+		24F92B647C8FF42714CD50F9 /* ModelDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FDBA2AD6F55E5B6DFE6248D /* ModelDownloader.swift */; };
+		27014658C63259B761062E49 /* ModelDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9429C60CA1BA085993603526 /* ModelDownloadView.swift */; };
+		29A002E8EED7F8F4AB1FAE94 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA30E111CB8A029546600849 /* HapticService.swift */; };
+		29D889181C50202FFB7FE428 /* CalendarActionControllerHelpersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AFEBF4752BAB2D8D02298F /* CalendarActionControllerHelpersTests.swift */; };
+		2AF1B96CF62D240473DE9634 /* MockLocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B3113A90AC8D53137B8E40 /* MockLocationService.swift */; };
+		2BCC7FF8FC582093CC384D46 /* MockSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227F07CF6EDBCA3AE92E052E /* MockSessionManager.swift */; };
+		2E4D5CE58E45DC83C9FF16B2 /* SessionListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D681EBED297A2FED1BDCED /* SessionListViewModelTests.swift */; };
+		2FA058CDF518F16D1A8E5275 /* SystemPromptBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB03A9341CDFC46B9C689161 /* SystemPromptBuilderTests.swift */; };
+		3023DE2AA01146E1E6084B18 /* SpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB780EF847EBED35C1408434 /* SpeechService.swift */; };
+		30DAC985F0350CA4FE144A5D /* SuggestedPromptsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7342EBB4DEB9D4E5BB983B1 /* SuggestedPromptsProvider.swift */; };
+		349FAAB14ACA4B8EAF797D04 /* ShortcutIntentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA4C18E9C8001607B2230037 /* ShortcutIntentTests.swift */; };
+		36C8D6E8C0B2F120BBE4D452 /* CalendarDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FC51DEB9769AABC7F7E481D /* CalendarDataProvider.swift */; };
+		371B0A0908DB1907C4F7FBFF /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B9562EBAB662933975FE7A /* ToastView.swift */; };
+		37A3833ED9EC1589A8D5CEA9 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29A51BEC686AF34BC2FBD1B8 /* LocationService.swift */; };
+		3A543EE7308C410703786CAE /* ModelInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C3FE7BE21F46E1733F6A8F5 /* ModelInfoTests.swift */; };
+		3B85B50B117E8E11AFAD9E09 /* SiriContextStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DB7E204EB987E961E9B6E31 /* SiriContextStore.swift */; };
+		3BE9ACE379FEAFC894D245B5 /* ChatViewModelSendMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56B2C84D2B6BF8447B1C06A1 /* ChatViewModelSendMessageTests.swift */; };
+		3BFDCC91C1DFCF01C15967F4 /* ChatViewModel+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9A756F73E2E9EEBC4229E54 /* ChatViewModel+Persistence.swift */; };
+		3E5A2DC0C1084642C11D9EC0 /* CalendarActionModelsDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5261179A556554B25A3F8799 /* CalendarActionModelsDecodingTests.swift */; };
+		3EC451D491461DA11A2A2998 /* WebSearchServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9F8B7E31066E265A09C0732 /* WebSearchServiceTests.swift */; };
+		3F4802241522007B8245F02E /* WidgetConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ECCA5207A87A387648E1C94 /* WidgetConstants.swift */; };
+		3F94027036BCF63494FEFD9F /* LLMConstantsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5079C74C718D3F572085F5BC /* LLMConstantsTests.swift */; };
+		44C87FF23DA8379D8DDECDC1 /* MockSpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5BEA1FB68BFEE77BF79A9E0 /* MockSpeechService.swift */; };
+		47D3963A6EBA332BF9C26C2E /* ConflictDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF8C8BE10245F298D9D863BD /* ConflictDetailSheet.swift */; };
+		4847AEC7A5F5BDD54DEE925B /* SessionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26EB9D2D2510C8E8D0187F84 /* SessionManagerTests.swift */; };
+		48D7F65123D4B67606CD383B /* CalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1037BACDEBC436942EDADC17 /* CalendarService.swift */; };
+		49503F32075925C6B44B6064 /* CalendarCancellationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F152BE1A5AEA31BD2E914162 /* CalendarCancellationTests.swift */; };
+		4CDAC87BB69531DD2EAE4DC2 /* WebSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 299E9EEAAE81681FDB35E66D /* WebSearchService.swift */; };
+		4DA6E31DD3B8468EEEAC6A4E /* CalendarError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 243ECA614358AA9CB2A81EF5 /* CalendarError.swift */; };
+		4F9F83E021E6AE183AF4F27A /* AirPodsVoiceCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD1D2ECA5933CBC6CFBCCA6F /* AirPodsVoiceCoordinatorTests.swift */; };
+		522B7FF317E3AF03EE395070 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B6CBBF517D3889B523E989 /* ChatView.swift */; };
+		52506ED5C64A71BCE3759579 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB1D7C2636DFD4BF3CCBD4D /* ChatViewModel.swift */; };
+		5355B58B51E15FA673A161E1 /* ChatHistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6B85B03AD68177AC4FEFB5 /* ChatHistoryManager.swift */; };
+		53A5EE497D226E35EBCB7167 /* CalendarActionController+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032DBF6608D96B72FEE945D3 /* CalendarActionController+Helpers.swift */; };
+		53E9DE7D82579756AD92EE3F /* CalendarEventCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D65756566BA005BB8ED43DA /* CalendarEventCard.swift */; };
+		564F62D96B4A1AFC932F864A /* DeleteCalendarEventIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78E12C030002F3F8C542D32B /* DeleteCalendarEventIntent.swift */; };
+		5CA5DF284395CDCA615133BE /* CalendarServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8555CDC4BE395AAC001BE4 /* CalendarServiceTests.swift */; };
+		5F5B4D9BFBF069A3621561C9 /* UserDefaultsKeysTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9A90EEAB247D46DB8293D9D /* UserDefaultsKeysTests.swift */; };
+		62D27959EBFF3E7ED863B024 /* SessionListViewModelDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD2C054E5BA6994BDE96E73 /* SessionListViewModelDependencies.swift */; };
+		645D7BEB0BD14B77456259BD /* DebugLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 997184CAB30DFF7E25C4CCF1 /* DebugLogStore.swift */; };
+		64A794420FC3326232AC13D0 /* SiriEventCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FD471FCD6BD45D545E63DB7 /* SiriEventCard.swift */; };
+		6524076FAA1AD2521B71F514 /* ContextItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506C1B92F4818BE5A41F6AB2 /* ContextItem.swift */; };
+		65F7F513EAF1DCDC86EED0F0 /* AudioRouteMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D8F966D349FD783887EE95B /* AudioRouteMonitorTests.swift */; };
+		66AB4E939EF92DEAF6038D6A /* AirPodsVoiceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA10B064FDFA0C9F28DFCF9 /* AirPodsVoiceCoordinator.swift */; };
+		687409024B7B3200E3556A43 /* LlamaActor+Generate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A9CB8099AB6E1FF8F33387 /* LlamaActor+Generate.swift */; };
+		69058A6AE6FFE173CA430E4A /* MockModelDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A79B07FC9ABD737144251A2 /* MockModelDownloader.swift */; };
+		6A7F6B0BA4FA7FF41B11A347 /* ChatViewModelSystemPromptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABA34731623E81E9FDB5467 /* ChatViewModelSystemPromptTests.swift */; };
+		6D53AB3FC8B30CEB50EACC0F /* SpeechServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A08E39F5507BBC76363D462 /* SpeechServiceProtocol.swift */; };
+		6DD81CDE44616EFC6975AD94 /* AskLucidPalIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A16847781011E6D0DE3FBDA6 /* AskLucidPalIntent.swift */; };
+		6DDAC440A50DF26F7A9B3643 /* CalendarActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F751F77CDE5D3AC9F565F1 /* CalendarActionController.swift */; };
+		6F6B375210A11F134A03E58A /* DesignConstantsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8481BDFB6C13E1E4964454 /* DesignConstantsTests.swift */; };
+		7011344A4EAA13DB5EFC262B /* ChatViewModelMessageHandlingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD2674E126D2CD1E0B919D1A /* ChatViewModelMessageHandlingTests.swift */; };
+		710C20D8D694B2551D4EDB9B /* WebSearchSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0079E23981A765BFE8A1666E /* WebSearchSettingsView.swift */; };
+		7121418A3680E23002E46154 /* SettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE3B97C073F370D41DBF48A /* SettingsViewModelTests.swift */; };
+		71A711CFDDA3CB89AF178774 /* ModelInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14AC79E473F372ADB1B1C282 /* ModelInfo.swift */; };
+		7303967491B65B0F08F1FC1E /* ChatViewModelSpeechTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C2EF9E05E7D544DE6F6BC3E /* ChatViewModelSpeechTests.swift */; };
+		734F8F2D2BDF51BCE3DDF951 /* AudioRouteMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D906AF7931049384C8F85426 /* AudioRouteMonitor.swift */; };
+		7530ED932578B74C46585F3A /* SpeechServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7DB1FDB41CF4AFD6791CBC5 /* SpeechServiceTests.swift */; };
+		7574C8DFFB9C7E1BBDCAE12B /* LlamaActorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4470F1B34BF6DFF41615DF6 /* LlamaActorTests.swift */; };
+		77921D544DCFF8086E49752C /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7318CD7AE635E015DC6B0821 /* WhisperKit */; };
+		786E0BE41CB7BE88B6A77E98 /* CalendarActionPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3029BA121CB9C8E072B072B7 /* CalendarActionPill.swift */; };
+		7AC41ECB9CF66664EAB0091F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 719FB48AF0C35633A6F72316 /* AppDelegate.swift */; };
+		7F0E096769CBF9EBAB7A362A /* SiriContextStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2139EEBFF1EFCFA671D05599 /* SiriContextStoreTests.swift */; };
+		7F20CB7725CD082224F0F222 /* CalendarViewSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FD1D2B8428E7F96F02D869 /* CalendarViewSmokeTests.swift */; };
+		807BEDBF12BDADBE9B2158A5 /* DebugLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BBFEDBBC95C8D91DBA8F709 /* DebugLogView.swift */; };
+		82650CD673C4C8AE8EFD1174 /* LLMServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4115F3FB28B64A4A4281A38 /* LLMServiceProtocol.swift */; };
+		85EB78B95AFB7128C24B7CCA /* MockHapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F2A6154E146CF09A280707B /* MockHapticService.swift */; };
+		8744FCA7EC4035D25F778FB0 /* PromptSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF29937AFF234D366E1B197 /* PromptSection.swift */; };
+		87981C4B15510E40A264CE38 /* SiriIntentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2322DBE9D2D1D8250E1553 /* SiriIntentTests.swift */; };
+		8830D83795146E653A80A4ED /* ChatHistoryManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C592D32F00B9344A5F6660 /* ChatHistoryManagerTests.swift */; };
+		88E4F29BED35C770D15894AC /* ChatViewModelStreamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 941B96611B7922BC377C7329 /* ChatViewModelStreamTests.swift */; };
+		8BE25B3EFE3C56F842726417 /* ModelDownloaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840AF010AFC31FC3DAE1B1D3 /* ModelDownloaderTests.swift */; };
+		8D9D3708A793763CE21E8381 /* DesignConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BC6FAD1A6CCDDD647A17D3 /* DesignConstants.swift */; };
+		8DAD9E150DE3BAD2832296B0 /* UserDefaultsKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B305FFD8DBB2C5619158C88 /* UserDefaultsKeys.swift */; };
+		8EEFD00F6D32C07E0AF48776 /* ChatView+InputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFDF39C5210328061201EBA /* ChatView+InputBar.swift */; };
+		8F2686ABC4188E95066394C1 /* CalendarFreeSlotEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B811194DDAAB95D57F9C0D74 /* CalendarFreeSlotEngine.swift */; };
+		8F31DAB21BA984E6FA3C5EAE /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25BC62571A21016F2B1A0D28 /* ChatMessage.swift */; };
+		920B64016087FFB1CA6C6DCB /* CreateEventSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A943EC1FC502CF06B6D712D /* CreateEventSheet.swift */; };
+		941BE9F4DD0EB1E2753C1EE6 /* ChatViewModel+MessageHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = A75E4CC20841940C83B625B1 /* ChatViewModel+MessageHandling.swift */; };
+		9478EF7A8704319A6C8404C3 /* SessionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8FDD6E40CC4DDE944545049 /* SessionListView.swift */; };
+		957CB9469239E89841C49D6C /* CalendarDomainTypesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 721A1DD94F4D4F9FEF294CB2 /* CalendarDomainTypesTests.swift */; };
+		968A9FB300C14E2C963EF139 /* ConflictResolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7580A6675056EC316926112 /* ConflictResolutionTests.swift */; };
+		96A4F2C6CB5D99F7C6A0636C /* ChatMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C5B321088913B6A788FA49 /* ChatMessageTests.swift */; };
+		99D13BE0F43820ECFFFFC82E /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 30335C03FFB91046BA5D9FD0 /* SnapshotTesting */; };
+		9A20A2B1C81978B1BE8026E0 /* SuggestedPromptsProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88022637A5C511B81DA16DC9 /* SuggestedPromptsProviderTests.swift */; };
+		9AF04EACC87747682FBC682C /* MockSuggestedPromptsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21DC6A81498E2FE775274070 /* MockSuggestedPromptsProvider.swift */; };
+		9C9F1A271F96FD11AF2F8E36 /* MockLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D42DD1407676A3DE782C314 /* MockLLMService.swift */; };
+		9CF58957C5E514D6DAA82857 /* ChatViewModel+CalendarConfirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B338DBF31A30EBEB200F860C /* ChatViewModel+CalendarConfirmation.swift */; };
+		A559B6C415E1766B77EC2EF7 /* CreateEventShortcutIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 750F8FF01537BE56263992F5 /* CreateEventShortcutIntent.swift */; };
+		A6474D2D5F2079A5938433B9 /* CalendarConfirmationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6E4BBDED085C31D931BAED0 /* CalendarConfirmationTests.swift */; };
+		A8B6D6CF0380B52682719DC4 /* SuggestedPromptsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE6D22CBA7F367F4D8E03477 /* SuggestedPromptsView.swift */; };
+		AAA1534B26E17E9E19DB344F /* ChatViewModelPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5AC9EC4E86944C5FBF1991 /* ChatViewModelPersistenceTests.swift */; };
+		AD09E4F280615A64C4E42C3F /* CalendarActionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F9E8E17AA1423CD7C666B3 /* CalendarActionModels.swift */; };
+		AD20E0F257A26C47DDB5643E /* ChatView+Subviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F27ECADF31A080C7F5CE3601 /* ChatView+Subviews.swift */; };
+		B01366636D57430BB978C036 /* CheckNextMeetingIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFD7B0E4B92B24A63511A30D /* CheckNextMeetingIntent.swift */; };
+		B03D925C026CD3DFFCEBD3C0 /* ChatSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2C47642ED2D7722236F2CB /* ChatSession.swift */; };
+		B04FB06A1D7DEA7A912C579C /* WidgetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73C0DB87E9060C7C158CDB6 /* WidgetModels.swift */; };
+		B1B47564BC795E472A44DD9B /* CalendarFreeSlotEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F19EC49A0BC375AF08B48A8 /* CalendarFreeSlotEngineTests.swift */; };
+		B26DD8969DFCD88E5C138DEB /* MockWebSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 791BD110B7F827A93E75327F /* MockWebSearchService.swift */; };
+		B34C51C6C6AA918B08A31F45 /* SessionListViewModelCalendarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D5CC7811EE6801469A99EE8 /* SessionListViewModelCalendarTests.swift */; };
+		B619BB640B35401F0E33371C /* SiriCalendarBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 458822A8E158679E91460FAA /* SiriCalendarBridge.swift */; };
+		B8E3414B57863E0F431F1435 /* ChatView+Banners.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E14D252D8005280AC0AE33B /* ChatView+Banners.swift */; };
+		BA58B6726A031E68156100BD /* ModelDownloadViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE36160B2ABB2EA7635190EB /* ModelDownloadViewModel.swift */; };
+		BB8565619994F62A47AB25E1 /* ThinkingDisclosure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A4953C90A7D2B4D48CE16EF /* ThinkingDisclosure.swift */; };
+		BC817ADDD4ECD3D5019B006A /* PendingCalendarUpdateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52EA13DBB29B6B9422AA3E81 /* PendingCalendarUpdateTests.swift */; };
+		C1D0B70E0E5EB94E5E6F9C60 /* SiriCalendarBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53C6730F6ED6345F15DBDFF3 /* SiriCalendarBridgeTests.swift */; };
+		C24DFB9A82715EBECFA0594D /* LucidPalWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650A7F0D8C17920BBA599F41 /* LucidPalWidgetProvider.swift */; };
+		C364235344AFC170739DCDF7 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E96F6370EC09DF7B409863F /* SettingsViewModel.swift */; };
+		C3AD36C7CAC317C39C14F450 /* ChatViewModelSuggestedPromptsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 926293CDEAB98D4DFFBFB63F /* ChatViewModelSuggestedPromptsTests.swift */; };
+		CB58E0B6848B4ED93F4A691A /* VisionImageProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC47BEF33A2B62E89C16FE65 /* VisionImageProcessor.swift */; };
+		CBF532126155A69A2C6BC457 /* ChatViewModel+Speech.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46DB150C43C76807B8F0946B /* ChatViewModel+Speech.swift */; };
+		CC68C9A3A0F39D067A9B7D4C /* CalendarEventCard+Pending.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A7208023D50DFFC492B9487 /* CalendarEventCard+Pending.swift */; };
+		CF66A174207F460370A7E305 /* FindFreeTimeShortcutIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77F3398811A62F3EF63AE3F1 /* FindFreeTimeShortcutIntent.swift */; };
+		D18FF12816973E1F11C2BADF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC5EAE70AE42A7AEDE838EB /* ContentView.swift */; };
+		D1BF50498715A514B34D4158 /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05160250FE53C62BB0BDF07F /* SessionManager.swift */; };
+		D535F1F177DD92D78956D571 /* ChatInputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2575ED637A086F77D0ABDDC2 /* ChatInputBar.swift */; };
+		D594962811D19C29ED5D3C19 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B6A9639F86C518AA77C600 /* SettingsView.swift */; };
+		D7A481DAD5F4CC9C5803429D /* MockChatHistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FF51A361020CCE336625F51 /* MockChatHistoryManager.swift */; };
+		D8A95D838D249B371864A520 /* ChatViewModelDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EC31ABF24AE6D110D18C53 /* ChatViewModelDependencies.swift */; };
+		D9F8DC67F816B21BEE5A873F /* OnboardingCarouselView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 639847974E23A66D7EFEE47D /* OnboardingCarouselView.swift */; };
+		DA628943CCB77C6174DBB4F3 /* ChatConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D227D285B059063D460DB1B /* ChatConstants.swift */; };
+		DB04FBBDF7AEC70E34A898D1 /* SessionListView+Subviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D608BBA5453308A245186B01 /* SessionListView+Subviews.swift */; };
+		DDB1A55679F9F4E63AEF5ADA /* SiriPendingEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CDA5A4309905BCE4D23C6C2 /* SiriPendingEventTests.swift */; };
+		DE4D4CE8D641ED8A460CEB56 /* MessageBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F636D2719433B22BA9B6E0 /* MessageBubbleView.swift */; };
+		DEFF66F816776D5EFB30F7F9 /* CalendarPromptSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DDEF491D48ACC29F8AE8C50 /* CalendarPromptSection.swift */; };
+		DFB3689E03A3BEE39D4F1A73 /* VisionImageProcessorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F032E54F025A167D32671897 /* VisionImageProcessorTests.swift */; };
+		E1110D5A4583266EDFC7700C /* ChatViewModel+Publishers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3557E909929C17CE772A4F00 /* ChatViewModel+Publishers.swift */; };
+		E2D680A01D04A2B423345625 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68A87CBAE7160AA0CDA5FEE5 /* AppSettings.swift */; };
+		E2FBC5EE289450F35F50A00E /* SnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607F4F4271BCD127CB7FC630 /* SnapshotTests.swift */; };
+		E7FF786D3C0EB7A497076210 /* AppSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE59F4615F63B5028009AF55 /* AppSettingsTests.swift */; };
+		E81FEBDDDBACD5902484F56B /* LucidPalShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D2E4269C2F7709B9D6355E /* LucidPalShortcuts.swift */; };
+		EEFC1702A50C2E6A229F3795 /* CalendarEventListCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A99AA2ADC140C9AEA90FD51 /* CalendarEventListCard.swift */; };
+		F40150B3342E6BAE778FCB5F /* SystemPromptBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9802F4C807C651A4A7507D69 /* SystemPromptBuilder.swift */; };
+		F42CC5E64090BE17267C94D0 /* ChatSessionContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD1C3898B628443DDDA5365 /* ChatSessionContainer.swift */; };
+		F4ADF669B054E801B28C1BF4 /* SettingsView+VisionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C77785AD6FE0F2C960DF3DF /* SettingsView+VisionSection.swift */; };
+		F4D3FAF06D49DD11ACE0A7E4 /* WhisperSpeechServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA76EE12AAC730098F5D15D /* WhisperSpeechServiceTests.swift */; };
+		F65D76358A7F185712999F3C /* ChatViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6A50EBC1C2B4E3E2DDB0D3 /* ChatViewModelTests.swift */; };
+		F8373F3F881357FB713056A5 /* CalendarServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 874A976766C2489C6FC4525B /* CalendarServiceProtocol.swift */; };
+		F862290F0BFA9C470D1978B4 /* ViewSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5566BF2404CC579D228DA63 /* ViewSmokeTests.swift */; };
+		F8BD2DC578B983E43E0A8953 /* ContextServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371070165D33164F738790C1 /* ContextServiceProtocol.swift */; };
+		F977368BBD708C5523D95963 /* View+PremiumShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECACD340127A4BF8338E9B8E /* View+PremiumShadow.swift */; };
+		F9B6146E7ADB350F77AAC02C /* LucidPalApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 970B94C1135E6E85F549FE7D /* LucidPalApp.swift */; };
+		FA59EDE1F44E34F07DA57394 /* ContextService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E70F5C1849659D0BE9FBFB73 /* ContextService.swift */; };
+		FAC216C9BED88F1D085EEC67 /* MockCalendarActionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A79029D339A7F991B52DD16 /* MockCalendarActionController.swift */; };
+		FB963DD5F663691AB7DCDAFE /* ModelDownloadViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64441DBED39279F0F7DA2D4F /* ModelDownloadViewModelTests.swift */; };
+		FE802242AF80A44CFED8F05B /* ChatViewModelWebSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103251A96791F3AECA4A4658 /* ChatViewModelWebSearchTests.swift */; };
+		FEC63145E79EBC08B8690CAA /* AppSettingsProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA942E401F42314A7BCE6A5 /* AppSettingsProtocol.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6D4297B547765A8216DD8C42 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0F1DB7C0E3710D88CA25D895 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FBB5B25139C1869D792DE920;
+			remoteInfo = LucidPal;
+		};
+		B8CAE973070314C8E5020E06 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0F1DB7C0E3710D88CA25D895 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FBB5B25139C1869D792DE920;
+			remoteInfo = LucidPal;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0079E23981A765BFE8A1666E /* WebSearchSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSearchSettingsView.swift; sourceTree = "<group>"; };
+		00A9CB8099AB6E1FF8F33387 /* LlamaActor+Generate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LlamaActor+Generate.swift"; sourceTree = "<group>"; };
+		032DBF6608D96B72FEE945D3 /* CalendarActionController+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarActionController+Helpers.swift"; sourceTree = "<group>"; };
+		05160250FE53C62BB0BDF07F /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
+		0E14D252D8005280AC0AE33B /* ChatView+Banners.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatView+Banners.swift"; sourceTree = "<group>"; };
+		103251A96791F3AECA4A4658 /* ChatViewModelWebSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelWebSearchTests.swift; sourceTree = "<group>"; };
+		1037BACDEBC436942EDADC17 /* CalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarService.swift; sourceTree = "<group>"; };
+		11EC31ABF24AE6D110D18C53 /* ChatViewModelDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelDependencies.swift; sourceTree = "<group>"; };
+		14AC79E473F372ADB1B1C282 /* ModelInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInfo.swift; sourceTree = "<group>"; };
+		14AE03DE8A0AFABE83307CE3 /* LucidPal.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = LucidPal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1A08E39F5507BBC76363D462 /* SpeechServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechServiceProtocol.swift; sourceTree = "<group>"; };
+		1A79B07FC9ABD737144251A2 /* MockModelDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockModelDownloader.swift; sourceTree = "<group>"; };
+		1CDA5A4309905BCE4D23C6C2 /* SiriPendingEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriPendingEventTests.swift; sourceTree = "<group>"; };
+		1E2C47642ED2D7722236F2CB /* ChatSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSession.swift; sourceTree = "<group>"; };
+		1F5AC9EC4E86944C5FBF1991 /* ChatViewModelPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelPersistenceTests.swift; sourceTree = "<group>"; };
+		2139EEBFF1EFCFA671D05599 /* SiriContextStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriContextStoreTests.swift; sourceTree = "<group>"; };
+		21B27E6EC0B2B73663510E7F /* LLMServiceProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMServiceProtocolTests.swift; sourceTree = "<group>"; };
+		21DC6A81498E2FE775274070 /* MockSuggestedPromptsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSuggestedPromptsProvider.swift; sourceTree = "<group>"; };
+		227F07CF6EDBCA3AE92E052E /* MockSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSessionManager.swift; sourceTree = "<group>"; };
+		243ECA614358AA9CB2A81EF5 /* CalendarError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarError.swift; sourceTree = "<group>"; };
+		2575ED637A086F77D0ABDDC2 /* ChatInputBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInputBar.swift; sourceTree = "<group>"; };
+		25BC62571A21016F2B1A0D28 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
+		26EB9D2D2510C8E8D0187F84 /* SessionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManagerTests.swift; sourceTree = "<group>"; };
+		28B9562EBAB662933975FE7A /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
+		299E9EEAAE81681FDB35E66D /* WebSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSearchService.swift; sourceTree = "<group>"; };
+		29A51BEC686AF34BC2FBD1B8 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		2B8481BDFB6C13E1E4964454 /* DesignConstantsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignConstantsTests.swift; sourceTree = "<group>"; };
+		3029BA121CB9C8E072B072B7 /* CalendarActionPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionPill.swift; sourceTree = "<group>"; };
+		327F93D310D7A283F58227C6 /* MockSystemPromptBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSystemPromptBuilder.swift; sourceTree = "<group>"; };
+		3508CB29280F94629928558F /* AskLucidPalShortcutIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskLucidPalShortcutIntent.swift; sourceTree = "<group>"; };
+		3557E909929C17CE772A4F00 /* ChatViewModel+Publishers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatViewModel+Publishers.swift"; sourceTree = "<group>"; };
+		371070165D33164F738790C1 /* ContextServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextServiceProtocol.swift; sourceTree = "<group>"; };
+		3BB1D7C2636DFD4BF3CCBD4D /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
+		3EA76EE12AAC730098F5D15D /* WhisperSpeechServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperSpeechServiceTests.swift; sourceTree = "<group>"; };
+		41D681EBED297A2FED1BDCED /* SessionListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListViewModelTests.swift; sourceTree = "<group>"; };
+		458822A8E158679E91460FAA /* SiriCalendarBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriCalendarBridge.swift; sourceTree = "<group>"; };
+		46DB150C43C76807B8F0946B /* ChatViewModel+Speech.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatViewModel+Speech.swift"; sourceTree = "<group>"; };
+		48ABFA993438729C7ED637DA /* CalendarEventCard+Subviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarEventCard+Subviews.swift"; sourceTree = "<group>"; };
+		4A79029D339A7F991B52DD16 /* MockCalendarActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCalendarActionController.swift; sourceTree = "<group>"; };
+		4A943EC1FC502CF06B6D712D /* CreateEventSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventSheet.swift; sourceTree = "<group>"; };
+		4BBFEDBBC95C8D91DBA8F709 /* DebugLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogView.swift; sourceTree = "<group>"; };
+		4CD1C3898B628443DDDA5365 /* ChatSessionContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSessionContainer.swift; sourceTree = "<group>"; };
+		4D1324E68CF71D1A6D69E263 /* CalendarActionControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionControllerTests.swift; sourceTree = "<group>"; };
+		4FE3B97C073F370D41DBF48A /* SettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModelTests.swift; sourceTree = "<group>"; };
+		506C1B92F4818BE5A41F6AB2 /* ContextItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextItem.swift; sourceTree = "<group>"; };
+		5079C74C718D3F572085F5BC /* LLMConstantsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMConstantsTests.swift; sourceTree = "<group>"; };
+		517A7C2186DD159849187476 /* LucidPalTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LucidPalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5261179A556554B25A3F8799 /* CalendarActionModelsDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionModelsDecodingTests.swift; sourceTree = "<group>"; };
+		52EA13DBB29B6B9422AA3E81 /* PendingCalendarUpdateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingCalendarUpdateTests.swift; sourceTree = "<group>"; };
+		53C6730F6ED6345F15DBDFF3 /* SiriCalendarBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriCalendarBridgeTests.swift; sourceTree = "<group>"; };
+		53F9E8E17AA1423CD7C666B3 /* CalendarActionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionModels.swift; sourceTree = "<group>"; };
+		547CC94B219A54508ED8BDED /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
+		56B2C84D2B6BF8447B1C06A1 /* ChatViewModelSendMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelSendMessageTests.swift; sourceTree = "<group>"; };
+		5A4953C90A7D2B4D48CE16EF /* ThinkingDisclosure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkingDisclosure.swift; sourceTree = "<group>"; };
+		5D222F9207B5C4D8F6205640 /* WhisperSpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperSpeechService.swift; sourceTree = "<group>"; };
+		5D42DD1407676A3DE782C314 /* MockLLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockLLMService.swift; sourceTree = "<group>"; };
+		5D5CC7811EE6801469A99EE8 /* SessionListViewModelCalendarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListViewModelCalendarTests.swift; sourceTree = "<group>"; };
+		5E96F6370EC09DF7B409863F /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		5EC78106C18D011E2DE8D5FA /* CalendarQueryResultCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarQueryResultCard.swift; sourceTree = "<group>"; };
+		5ECCA5207A87A387648E1C94 /* WidgetConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetConstants.swift; sourceTree = "<group>"; };
+		5F19EC49A0BC375AF08B48A8 /* CalendarFreeSlotEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarFreeSlotEngineTests.swift; sourceTree = "<group>"; };
+		5FD471FCD6BD45D545E63DB7 /* SiriEventCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriEventCard.swift; sourceTree = "<group>"; };
+		602A89E6A501BAC655F88D72 /* MockContextService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockContextService.swift; sourceTree = "<group>"; };
+		607F4F4271BCD127CB7FC630 /* SnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotTests.swift; sourceTree = "<group>"; };
+		639847974E23A66D7EFEE47D /* OnboardingCarouselView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCarouselView.swift; sourceTree = "<group>"; };
+		63AFEBF4752BAB2D8D02298F /* CalendarActionControllerHelpersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionControllerHelpersTests.swift; sourceTree = "<group>"; };
+		64441DBED39279F0F7DA2D4F /* ModelDownloadViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadViewModelTests.swift; sourceTree = "<group>"; };
+		650A7F0D8C17920BBA599F41 /* LucidPalWidgetProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LucidPalWidgetProvider.swift; sourceTree = "<group>"; };
+		658734752CBBCD72F510B467 /* HapticServiceProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticServiceProtocolTests.swift; sourceTree = "<group>"; };
+		65C5B321088913B6A788FA49 /* ChatMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessageTests.swift; sourceTree = "<group>"; };
+		68A87CBAE7160AA0CDA5FEE5 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		6B305FFD8DBB2C5619158C88 /* UserDefaultsKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsKeys.swift; sourceTree = "<group>"; };
+		6B6B85B03AD68177AC4FEFB5 /* ChatHistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHistoryManager.swift; sourceTree = "<group>"; };
+		6DDEF491D48ACC29F8AE8C50 /* CalendarPromptSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPromptSection.swift; sourceTree = "<group>"; };
+		6F2A6154E146CF09A280707B /* MockHapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockHapticService.swift; sourceTree = "<group>"; };
+		6F2E89B9E9FEF842CCBA73B0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		6FC51DEB9769AABC7F7E481D /* CalendarDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarDataProvider.swift; sourceTree = "<group>"; };
+		714032A2113DC95F20A8D94A /* BulkDeletionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulkDeletionBar.swift; sourceTree = "<group>"; };
+		719FB48AF0C35633A6F72316 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		721A1DD94F4D4F9FEF294CB2 /* CalendarDomainTypesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarDomainTypesTests.swift; sourceTree = "<group>"; };
+		750F8FF01537BE56263992F5 /* CreateEventShortcutIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventShortcutIntent.swift; sourceTree = "<group>"; };
+		77655AE2BBF02BFB8E807998 /* SettingsView+Shortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+Shortcuts.swift"; sourceTree = "<group>"; };
+		77F3398811A62F3EF63AE3F1 /* FindFreeTimeShortcutIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindFreeTimeShortcutIntent.swift; sourceTree = "<group>"; };
+		78E12C030002F3F8C542D32B /* DeleteCalendarEventIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteCalendarEventIntent.swift; sourceTree = "<group>"; };
+		791BD110B7F827A93E75327F /* MockWebSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWebSearchService.swift; sourceTree = "<group>"; };
+		7A7208023D50DFFC492B9487 /* CalendarEventCard+Pending.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarEventCard+Pending.swift"; sourceTree = "<group>"; };
+		7A99AA2ADC140C9AEA90FD51 /* CalendarEventListCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventListCard.swift; sourceTree = "<group>"; };
+		7AFDF39C5210328061201EBA /* ChatView+InputBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatView+InputBar.swift"; sourceTree = "<group>"; };
+		7C3FE7BE21F46E1733F6A8F5 /* ModelInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInfoTests.swift; sourceTree = "<group>"; };
+		7D8F966D349FD783887EE95B /* AudioRouteMonitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRouteMonitorTests.swift; sourceTree = "<group>"; };
+		7FF51A361020CCE336625F51 /* MockChatHistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockChatHistoryManager.swift; sourceTree = "<group>"; };
+		840AF010AFC31FC3DAE1B1D3 /* ModelDownloaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloaderTests.swift; sourceTree = "<group>"; };
+		874A976766C2489C6FC4525B /* CalendarServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarServiceProtocol.swift; sourceTree = "<group>"; };
+		88022637A5C511B81DA16DC9 /* SuggestedPromptsProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedPromptsProviderTests.swift; sourceTree = "<group>"; };
+		88F284F6C144B4D8DABFD85B /* LucidPal.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LucidPal.entitlements; sourceTree = "<group>"; };
+		8AA10B064FDFA0C9F28DFCF9 /* AirPodsVoiceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPodsVoiceCoordinator.swift; sourceTree = "<group>"; };
+		90A30A77BCBE08A596528FBD /* llama */ = {isa = PBXFileReference; lastKnownFileType = folder; name = llama; path = Packages/llama; sourceTree = SOURCE_ROOT; };
+		91AAC7D20A5943993F923510 /* VoiceRecordingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceRecordingOverlay.swift; sourceTree = "<group>"; };
+		926293CDEAB98D4DFFBFB63F /* ChatViewModelSuggestedPromptsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelSuggestedPromptsTests.swift; sourceTree = "<group>"; };
+		941B96611B7922BC377C7329 /* ChatViewModelStreamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelStreamTests.swift; sourceTree = "<group>"; };
+		9429C60CA1BA085993603526 /* ModelDownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadView.swift; sourceTree = "<group>"; };
+		970B94C1135E6E85F549FE7D /* LucidPalApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LucidPalApp.swift; sourceTree = "<group>"; };
+		9802F4C807C651A4A7507D69 /* SystemPromptBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemPromptBuilder.swift; sourceTree = "<group>"; };
+		997184CAB30DFF7E25C4CCF1 /* DebugLogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogStore.swift; sourceTree = "<group>"; };
+		9A4E3664D0A05C417F2F6ACB /* SessionManagerMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManagerMigrationTests.swift; sourceTree = "<group>"; };
+		9C2EF9E05E7D544DE6F6BC3E /* ChatViewModelSpeechTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelSpeechTests.swift; sourceTree = "<group>"; };
+		9C77785AD6FE0F2C960DF3DF /* SettingsView+VisionSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+VisionSection.swift"; sourceTree = "<group>"; };
+		9D227D285B059063D460DB1B /* ChatConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatConstants.swift; sourceTree = "<group>"; };
+		9D65756566BA005BB8ED43DA /* CalendarEventCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventCard.swift; sourceTree = "<group>"; };
+		9DB7E204EB987E961E9B6E31 /* SiriContextStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriContextStore.swift; sourceTree = "<group>"; };
+		9EF29937AFF234D366E1B197 /* PromptSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptSection.swift; sourceTree = "<group>"; };
+		9FDBA2AD6F55E5B6DFE6248D /* ModelDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloader.swift; sourceTree = "<group>"; };
+		A0B6CBBF517D3889B523E989 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		A0BC6FAD1A6CCDDD647A17D3 /* DesignConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignConstants.swift; sourceTree = "<group>"; };
+		A0C592D32F00B9344A5F6660 /* ChatHistoryManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHistoryManagerTests.swift; sourceTree = "<group>"; };
+		A16847781011E6D0DE3FBDA6 /* AskLucidPalIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskLucidPalIntent.swift; sourceTree = "<group>"; };
+		A31B5620D40D122F48BE91D2 /* LlamaActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaActor.swift; sourceTree = "<group>"; };
+		A6C99119BC4DF91E79DDD08E /* CalendarFreeSlotIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarFreeSlotIntegrationTests.swift; sourceTree = "<group>"; };
+		A6E4BBDED085C31D931BAED0 /* CalendarConfirmationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarConfirmationTests.swift; sourceTree = "<group>"; };
+		A75E4CC20841940C83B625B1 /* ChatViewModel+MessageHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatViewModel+MessageHandling.swift"; sourceTree = "<group>"; };
+		A9A756F73E2E9EEBC4229E54 /* ChatViewModel+Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatViewModel+Persistence.swift"; sourceTree = "<group>"; };
+		AABA34731623E81E9FDB5467 /* ChatViewModelSystemPromptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelSystemPromptTests.swift; sourceTree = "<group>"; };
+		AB6A50EBC1C2B4E3E2DDB0D3 /* ChatViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelTests.swift; sourceTree = "<group>"; };
+		ADAD418E4BB1751ED32C1FB5 /* SessionListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListViewModel.swift; sourceTree = "<group>"; };
+		AE2322DBE9D2D1D8250E1553 /* SiriIntentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiriIntentTests.swift; sourceTree = "<group>"; };
+		AE36160B2ABB2EA7635190EB /* ModelDownloadViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadViewModel.swift; sourceTree = "<group>"; };
+		B2D2E4269C2F7709B9D6355E /* LucidPalShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LucidPalShortcuts.swift; sourceTree = "<group>"; };
+		B338DBF31A30EBEB200F860C /* ChatViewModel+CalendarConfirmation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatViewModel+CalendarConfirmation.swift"; sourceTree = "<group>"; };
+		B4115F3FB28B64A4A4281A38 /* LLMServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMServiceProtocol.swift; sourceTree = "<group>"; };
+		B73DEDF20A9F085A04BF493C /* LucidPalWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LucidPalWidget.entitlements; sourceTree = "<group>"; };
+		B811194DDAAB95D57F9C0D74 /* CalendarFreeSlotEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarFreeSlotEngine.swift; sourceTree = "<group>"; };
+		B8B3113A90AC8D53137B8E40 /* MockLocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockLocationService.swift; sourceTree = "<group>"; };
+		BA4C18E9C8001607B2230037 /* ShortcutIntentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutIntentTests.swift; sourceTree = "<group>"; };
+		BB03A9341CDFC46B9C689161 /* SystemPromptBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemPromptBuilderTests.swift; sourceTree = "<group>"; };
+		BB8555CDC4BE395AAC001BE4 /* CalendarServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarServiceTests.swift; sourceTree = "<group>"; };
+		BCDE734760A7EA126395E573 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		BD2674E126D2CD1E0B919D1A /* ChatViewModelMessageHandlingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelMessageHandlingTests.swift; sourceTree = "<group>"; };
+		BF353B5C4E0FA230264B010E /* LucidPalWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = LucidPalWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C3F636D2719433B22BA9B6E0 /* MessageBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageBubbleView.swift; sourceTree = "<group>"; };
+		C4470F1B34BF6DFF41615DF6 /* LlamaActorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaActorTests.swift; sourceTree = "<group>"; };
+		C5566BF2404CC579D228DA63 /* ViewSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewSmokeTests.swift; sourceTree = "<group>"; };
+		C673E05C2BB426CCCF805CC5 /* MockCalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockCalendarService.swift; sourceTree = "<group>"; };
+		C7DB1FDB41CF4AFD6791CBC5 /* SpeechServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechServiceTests.swift; sourceTree = "<group>"; };
+		C8FDD6E40CC4DDE944545049 /* SessionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListView.swift; sourceTree = "<group>"; };
+		C9A90EEAB247D46DB8293D9D /* UserDefaultsKeysTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsKeysTests.swift; sourceTree = "<group>"; };
+		CB780EF847EBED35C1408434 /* SpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechService.swift; sourceTree = "<group>"; };
+		CBC5EAE70AE42A7AEDE838EB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		CE59F4615F63B5028009AF55 /* AppSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsTests.swift; sourceTree = "<group>"; };
+		D0B6A9639F86C518AA77C600 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		D3F751F77CDE5D3AC9F565F1 /* CalendarActionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarActionController.swift; sourceTree = "<group>"; };
+		D608BBA5453308A245186B01 /* SessionListView+Subviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SessionListView+Subviews.swift"; sourceTree = "<group>"; };
+		D63931F91E36AEF6C63F8DEC /* MessageBubbleView+ImageViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MessageBubbleView+ImageViewer.swift"; sourceTree = "<group>"; };
+		D7580A6675056EC316926112 /* ConflictResolutionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictResolutionTests.swift; sourceTree = "<group>"; };
+		D7FD1D2B8428E7F96F02D869 /* CalendarViewSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarViewSmokeTests.swift; sourceTree = "<group>"; };
+		D906AF7931049384C8F85426 /* AudioRouteMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRouteMonitor.swift; sourceTree = "<group>"; };
+		D9F8B7E31066E265A09C0732 /* WebSearchServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSearchServiceTests.swift; sourceTree = "<group>"; };
+		DAD2C054E5BA6994BDE96E73 /* SessionListViewModelDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListViewModelDependencies.swift; sourceTree = "<group>"; };
+		DC47BEF33A2B62E89C16FE65 /* VisionImageProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionImageProcessor.swift; sourceTree = "<group>"; };
+		DD1D2ECA5933CBC6CFBCCA6F /* AirPodsVoiceCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPodsVoiceCoordinatorTests.swift; sourceTree = "<group>"; };
+		DFD7B0E4B92B24A63511A30D /* CheckNextMeetingIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckNextMeetingIntent.swift; sourceTree = "<group>"; };
+		E19364312E74F2D861837012 /* ContextServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextServiceTests.swift; sourceTree = "<group>"; };
+		E1D6B45D84D5B60FD2D8B124 /* MockAppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAppSettings.swift; sourceTree = "<group>"; };
+		E2062ED268B2D75C8AF44CD7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E5BEA1FB68BFEE77BF79A9E0 /* MockSpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSpeechService.swift; sourceTree = "<group>"; };
+		E70F5C1849659D0BE9FBFB73 /* ContextService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextService.swift; sourceTree = "<group>"; };
+		EA30E111CB8A029546600849 /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticService.swift; sourceTree = "<group>"; };
+		EAA942E401F42314A7BCE6A5 /* AppSettingsProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsProtocol.swift; sourceTree = "<group>"; };
+		ECACD340127A4BF8338E9B8E /* View+PremiumShadow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+PremiumShadow.swift"; sourceTree = "<group>"; };
+		EE40F8823C0E67716D529201 /* LlamaActor+Tokenize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LlamaActor+Tokenize.swift"; sourceTree = "<group>"; };
+		EFF8BE00C9420E41E22E8E88 /* ChatViewModelEdgeCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModelEdgeCaseTests.swift; sourceTree = "<group>"; };
+		F032E54F025A167D32671897 /* VisionImageProcessorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionImageProcessorTests.swift; sourceTree = "<group>"; };
+		F152BE1A5AEA31BD2E914162 /* CalendarCancellationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarCancellationTests.swift; sourceTree = "<group>"; };
+		F27ECADF31A080C7F5CE3601 /* ChatView+Subviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChatView+Subviews.swift"; sourceTree = "<group>"; };
+		F65DCF84AC19150A85E7D2D8 /* DebugLogStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogStoreTests.swift; sourceTree = "<group>"; };
+		F7342EBB4DEB9D4E5BB983B1 /* SuggestedPromptsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedPromptsProvider.swift; sourceTree = "<group>"; };
+		F73C0DB87E9060C7C158CDB6 /* WidgetModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetModels.swift; sourceTree = "<group>"; };
+		FE6D22CBA7F367F4D8E03477 /* SuggestedPromptsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedPromptsView.swift; sourceTree = "<group>"; };
+		FF8C8BE10245F298D9D863BD /* ConflictDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictDetailSheet.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		11EE82839C8D3420BCB95154 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				99D13BE0F43820ECFFFFC82E /* SnapshotTesting in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		76DAE1961E88B69E1F34EEE5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				16772475987CBA5B2DA7FFCA /* llama in Frameworks */,
+				77921D544DCFF8086E49752C /* WhisperKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		430BE834E68B41E0D1F031E1 /* WidgetExtension */ = {
+			isa = PBXGroup;
+			children = (
+				6FC51DEB9769AABC7F7E481D /* CalendarDataProvider.swift */,
+				B73DEDF20A9F085A04BF493C /* LucidPalWidget.entitlements */,
+				650A7F0D8C17920BBA599F41 /* LucidPalWidgetProvider.swift */,
+				5ECCA5207A87A387648E1C94 /* WidgetConstants.swift */,
+				F73C0DB87E9060C7C158CDB6 /* WidgetModels.swift */,
+			);
+			path = WidgetExtension;
+			sourceTree = "<group>";
+		};
+		54C1163A6AB857DA5D14EB5C /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				A16847781011E6D0DE3FBDA6 /* AskLucidPalIntent.swift */,
+				3508CB29280F94629928558F /* AskLucidPalShortcutIntent.swift */,
+				DFD7B0E4B92B24A63511A30D /* CheckNextMeetingIntent.swift */,
+				750F8FF01537BE56263992F5 /* CreateEventShortcutIntent.swift */,
+				78E12C030002F3F8C542D32B /* DeleteCalendarEventIntent.swift */,
+				77F3398811A62F3EF63AE3F1 /* FindFreeTimeShortcutIntent.swift */,
+				B2D2E4269C2F7709B9D6355E /* LucidPalShortcuts.swift */,
+				458822A8E158679E91460FAA /* SiriCalendarBridge.swift */,
+				9DB7E204EB987E961E9B6E31 /* SiriContextStore.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
+		8B959A9CF0CE013BCEEB01ED /* App */ = {
+			isa = PBXGroup;
+			children = (
+				719FB48AF0C35633A6F72316 /* AppDelegate.swift */,
+				CBC5EAE70AE42A7AEDE838EB /* ContentView.swift */,
+				6F2E89B9E9FEF842CCBA73B0 /* Info.plist */,
+				88F284F6C144B4D8DABFD85B /* LucidPal.entitlements */,
+				970B94C1135E6E85F549FE7D /* LucidPalApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		949F81B59E28BE61267BE180 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				DD1D2ECA5933CBC6CFBCCA6F /* AirPodsVoiceCoordinatorTests.swift */,
+				CE59F4615F63B5028009AF55 /* AppSettingsTests.swift */,
+				7D8F966D349FD783887EE95B /* AudioRouteMonitorTests.swift */,
+				63AFEBF4752BAB2D8D02298F /* CalendarActionControllerHelpersTests.swift */,
+				4D1324E68CF71D1A6D69E263 /* CalendarActionControllerTests.swift */,
+				5261179A556554B25A3F8799 /* CalendarActionModelsDecodingTests.swift */,
+				F152BE1A5AEA31BD2E914162 /* CalendarCancellationTests.swift */,
+				A6E4BBDED085C31D931BAED0 /* CalendarConfirmationTests.swift */,
+				721A1DD94F4D4F9FEF294CB2 /* CalendarDomainTypesTests.swift */,
+				5F19EC49A0BC375AF08B48A8 /* CalendarFreeSlotEngineTests.swift */,
+				A6C99119BC4DF91E79DDD08E /* CalendarFreeSlotIntegrationTests.swift */,
+				BB8555CDC4BE395AAC001BE4 /* CalendarServiceTests.swift */,
+				D7FD1D2B8428E7F96F02D869 /* CalendarViewSmokeTests.swift */,
+				A0C592D32F00B9344A5F6660 /* ChatHistoryManagerTests.swift */,
+				65C5B321088913B6A788FA49 /* ChatMessageTests.swift */,
+				EFF8BE00C9420E41E22E8E88 /* ChatViewModelEdgeCaseTests.swift */,
+				BD2674E126D2CD1E0B919D1A /* ChatViewModelMessageHandlingTests.swift */,
+				1F5AC9EC4E86944C5FBF1991 /* ChatViewModelPersistenceTests.swift */,
+				56B2C84D2B6BF8447B1C06A1 /* ChatViewModelSendMessageTests.swift */,
+				9C2EF9E05E7D544DE6F6BC3E /* ChatViewModelSpeechTests.swift */,
+				941B96611B7922BC377C7329 /* ChatViewModelStreamTests.swift */,
+				926293CDEAB98D4DFFBFB63F /* ChatViewModelSuggestedPromptsTests.swift */,
+				AABA34731623E81E9FDB5467 /* ChatViewModelSystemPromptTests.swift */,
+				AB6A50EBC1C2B4E3E2DDB0D3 /* ChatViewModelTests.swift */,
+				103251A96791F3AECA4A4658 /* ChatViewModelWebSearchTests.swift */,
+				D7580A6675056EC316926112 /* ConflictResolutionTests.swift */,
+				E19364312E74F2D861837012 /* ContextServiceTests.swift */,
+				F65DCF84AC19150A85E7D2D8 /* DebugLogStoreTests.swift */,
+				2B8481BDFB6C13E1E4964454 /* DesignConstantsTests.swift */,
+				658734752CBBCD72F510B467 /* HapticServiceProtocolTests.swift */,
+				C4470F1B34BF6DFF41615DF6 /* LlamaActorTests.swift */,
+				5079C74C718D3F572085F5BC /* LLMConstantsTests.swift */,
+				21B27E6EC0B2B73663510E7F /* LLMServiceProtocolTests.swift */,
+				E1D6B45D84D5B60FD2D8B124 /* MockAppSettings.swift */,
+				4A79029D339A7F991B52DD16 /* MockCalendarActionController.swift */,
+				C673E05C2BB426CCCF805CC5 /* MockCalendarService.swift */,
+				7FF51A361020CCE336625F51 /* MockChatHistoryManager.swift */,
+				602A89E6A501BAC655F88D72 /* MockContextService.swift */,
+				6F2A6154E146CF09A280707B /* MockHapticService.swift */,
+				5D42DD1407676A3DE782C314 /* MockLLMService.swift */,
+				B8B3113A90AC8D53137B8E40 /* MockLocationService.swift */,
+				1A79B07FC9ABD737144251A2 /* MockModelDownloader.swift */,
+				227F07CF6EDBCA3AE92E052E /* MockSessionManager.swift */,
+				E5BEA1FB68BFEE77BF79A9E0 /* MockSpeechService.swift */,
+				21DC6A81498E2FE775274070 /* MockSuggestedPromptsProvider.swift */,
+				327F93D310D7A283F58227C6 /* MockSystemPromptBuilder.swift */,
+				791BD110B7F827A93E75327F /* MockWebSearchService.swift */,
+				840AF010AFC31FC3DAE1B1D3 /* ModelDownloaderTests.swift */,
+				64441DBED39279F0F7DA2D4F /* ModelDownloadViewModelTests.swift */,
+				7C3FE7BE21F46E1733F6A8F5 /* ModelInfoTests.swift */,
+				52EA13DBB29B6B9422AA3E81 /* PendingCalendarUpdateTests.swift */,
+				5D5CC7811EE6801469A99EE8 /* SessionListViewModelCalendarTests.swift */,
+				41D681EBED297A2FED1BDCED /* SessionListViewModelTests.swift */,
+				9A4E3664D0A05C417F2F6ACB /* SessionManagerMigrationTests.swift */,
+				26EB9D2D2510C8E8D0187F84 /* SessionManagerTests.swift */,
+				4FE3B97C073F370D41DBF48A /* SettingsViewModelTests.swift */,
+				BA4C18E9C8001607B2230037 /* ShortcutIntentTests.swift */,
+				53C6730F6ED6345F15DBDFF3 /* SiriCalendarBridgeTests.swift */,
+				2139EEBFF1EFCFA671D05599 /* SiriContextStoreTests.swift */,
+				AE2322DBE9D2D1D8250E1553 /* SiriIntentTests.swift */,
+				1CDA5A4309905BCE4D23C6C2 /* SiriPendingEventTests.swift */,
+				607F4F4271BCD127CB7FC630 /* SnapshotTests.swift */,
+				C7DB1FDB41CF4AFD6791CBC5 /* SpeechServiceTests.swift */,
+				88022637A5C511B81DA16DC9 /* SuggestedPromptsProviderTests.swift */,
+				BB03A9341CDFC46B9C689161 /* SystemPromptBuilderTests.swift */,
+				C9A90EEAB247D46DB8293D9D /* UserDefaultsKeysTests.swift */,
+				C5566BF2404CC579D228DA63 /* ViewSmokeTests.swift */,
+				F032E54F025A167D32671897 /* VisionImageProcessorTests.swift */,
+				D9F8B7E31066E265A09C0732 /* WebSearchServiceTests.swift */,
+				3EA76EE12AAC730098F5D15D /* WhisperSpeechServiceTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		9CDCE16833A8B608494AEE96 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				14AE03DE8A0AFABE83307CE3 /* LucidPal.app */,
+				517A7C2186DD159849187476 /* LucidPalTests.xctest */,
+				BF353B5C4E0FA230264B010E /* LucidPalWidget.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A1ADA3650EDF20381CF9DD49 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				714032A2113DC95F20A8D94A /* BulkDeletionBar.swift */,
+				3029BA121CB9C8E072B072B7 /* CalendarActionPill.swift */,
+				9D65756566BA005BB8ED43DA /* CalendarEventCard.swift */,
+				7A7208023D50DFFC492B9487 /* CalendarEventCard+Pending.swift */,
+				48ABFA993438729C7ED637DA /* CalendarEventCard+Subviews.swift */,
+				7A99AA2ADC140C9AEA90FD51 /* CalendarEventListCard.swift */,
+				5EC78106C18D011E2DE8D5FA /* CalendarQueryResultCard.swift */,
+				2575ED637A086F77D0ABDDC2 /* ChatInputBar.swift */,
+				4CD1C3898B628443DDDA5365 /* ChatSessionContainer.swift */,
+				A0B6CBBF517D3889B523E989 /* ChatView.swift */,
+				0E14D252D8005280AC0AE33B /* ChatView+Banners.swift */,
+				7AFDF39C5210328061201EBA /* ChatView+InputBar.swift */,
+				F27ECADF31A080C7F5CE3601 /* ChatView+Subviews.swift */,
+				FF8C8BE10245F298D9D863BD /* ConflictDetailSheet.swift */,
+				4A943EC1FC502CF06B6D712D /* CreateEventSheet.swift */,
+				4BBFEDBBC95C8D91DBA8F709 /* DebugLogView.swift */,
+				A0BC6FAD1A6CCDDD647A17D3 /* DesignConstants.swift */,
+				C3F636D2719433B22BA9B6E0 /* MessageBubbleView.swift */,
+				D63931F91E36AEF6C63F8DEC /* MessageBubbleView+ImageViewer.swift */,
+				9429C60CA1BA085993603526 /* ModelDownloadView.swift */,
+				639847974E23A66D7EFEE47D /* OnboardingCarouselView.swift */,
+				BCDE734760A7EA126395E573 /* OnboardingView.swift */,
+				C8FDD6E40CC4DDE944545049 /* SessionListView.swift */,
+				D608BBA5453308A245186B01 /* SessionListView+Subviews.swift */,
+				D0B6A9639F86C518AA77C600 /* SettingsView.swift */,
+				77655AE2BBF02BFB8E807998 /* SettingsView+Shortcuts.swift */,
+				9C77785AD6FE0F2C960DF3DF /* SettingsView+VisionSection.swift */,
+				5FD471FCD6BD45D545E63DB7 /* SiriEventCard.swift */,
+				FE6D22CBA7F367F4D8E03477 /* SuggestedPromptsView.swift */,
+				5A4953C90A7D2B4D48CE16EF /* ThinkingDisclosure.swift */,
+				28B9562EBAB662933975FE7A /* ToastView.swift */,
+				ECACD340127A4BF8338E9B8E /* View+PremiumShadow.swift */,
+				91AAC7D20A5943993F923510 /* VoiceRecordingOverlay.swift */,
+				0079E23981A765BFE8A1666E /* WebSearchSettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		CE03B71AF67509DB35A19E80 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				E2062ED268B2D75C8AF44CD7 /* Assets.xcassets */,
+				8B959A9CF0CE013BCEEB01ED /* App */,
+				54C1163A6AB857DA5D14EB5C /* Intents */,
+				DAE2D12B5EB91E776FAED440 /* Models */,
+				E8EEBAC72D1DDA525D237C54 /* Services */,
+				E0960D87B134B9B65982D6C8 /* ViewModels */,
+				A1ADA3650EDF20381CF9DD49 /* Views */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		DAE2D12B5EB91E776FAED440 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				53F9E8E17AA1423CD7C666B3 /* CalendarActionModels.swift */,
+				25BC62571A21016F2B1A0D28 /* ChatMessage.swift */,
+				1E2C47642ED2D7722236F2CB /* ChatSession.swift */,
+				506C1B92F4818BE5A41F6AB2 /* ContextItem.swift */,
+				14AC79E473F372ADB1B1C282 /* ModelInfo.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		DE2718E27C433D94458F1755 = {
+			isa = PBXGroup;
+			children = (
+				FD2A678528A6686729AFEF4B /* Packages */,
+				CE03B71AF67509DB35A19E80 /* Sources */,
+				949F81B59E28BE61267BE180 /* Tests */,
+				430BE834E68B41E0D1F031E1 /* WidgetExtension */,
+				9CDCE16833A8B608494AEE96 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E0960D87B134B9B65982D6C8 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				68A87CBAE7160AA0CDA5FEE5 /* AppSettings.swift */,
+				EAA942E401F42314A7BCE6A5 /* AppSettingsProtocol.swift */,
+				9D227D285B059063D460DB1B /* ChatConstants.swift */,
+				3BB1D7C2636DFD4BF3CCBD4D /* ChatViewModel.swift */,
+				B338DBF31A30EBEB200F860C /* ChatViewModel+CalendarConfirmation.swift */,
+				A75E4CC20841940C83B625B1 /* ChatViewModel+MessageHandling.swift */,
+				A9A756F73E2E9EEBC4229E54 /* ChatViewModel+Persistence.swift */,
+				3557E909929C17CE772A4F00 /* ChatViewModel+Publishers.swift */,
+				46DB150C43C76807B8F0946B /* ChatViewModel+Speech.swift */,
+				11EC31ABF24AE6D110D18C53 /* ChatViewModelDependencies.swift */,
+				AE36160B2ABB2EA7635190EB /* ModelDownloadViewModel.swift */,
+				ADAD418E4BB1751ED32C1FB5 /* SessionListViewModel.swift */,
+				DAD2C054E5BA6994BDE96E73 /* SessionListViewModelDependencies.swift */,
+				5E96F6370EC09DF7B409863F /* SettingsViewModel.swift */,
+				6B305FFD8DBB2C5619158C88 /* UserDefaultsKeys.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		E8EEBAC72D1DDA525D237C54 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				8AA10B064FDFA0C9F28DFCF9 /* AirPodsVoiceCoordinator.swift */,
+				D906AF7931049384C8F85426 /* AudioRouteMonitor.swift */,
+				D3F751F77CDE5D3AC9F565F1 /* CalendarActionController.swift */,
+				032DBF6608D96B72FEE945D3 /* CalendarActionController+Helpers.swift */,
+				243ECA614358AA9CB2A81EF5 /* CalendarError.swift */,
+				B811194DDAAB95D57F9C0D74 /* CalendarFreeSlotEngine.swift */,
+				6DDEF491D48ACC29F8AE8C50 /* CalendarPromptSection.swift */,
+				1037BACDEBC436942EDADC17 /* CalendarService.swift */,
+				874A976766C2489C6FC4525B /* CalendarServiceProtocol.swift */,
+				6B6B85B03AD68177AC4FEFB5 /* ChatHistoryManager.swift */,
+				E70F5C1849659D0BE9FBFB73 /* ContextService.swift */,
+				371070165D33164F738790C1 /* ContextServiceProtocol.swift */,
+				997184CAB30DFF7E25C4CCF1 /* DebugLogStore.swift */,
+				EA30E111CB8A029546600849 /* HapticService.swift */,
+				A31B5620D40D122F48BE91D2 /* LlamaActor.swift */,
+				00A9CB8099AB6E1FF8F33387 /* LlamaActor+Generate.swift */,
+				EE40F8823C0E67716D529201 /* LlamaActor+Tokenize.swift */,
+				547CC94B219A54508ED8BDED /* LLMService.swift */,
+				B4115F3FB28B64A4A4281A38 /* LLMServiceProtocol.swift */,
+				29A51BEC686AF34BC2FBD1B8 /* LocationService.swift */,
+				9FDBA2AD6F55E5B6DFE6248D /* ModelDownloader.swift */,
+				9EF29937AFF234D366E1B197 /* PromptSection.swift */,
+				05160250FE53C62BB0BDF07F /* SessionManager.swift */,
+				CB780EF847EBED35C1408434 /* SpeechService.swift */,
+				1A08E39F5507BBC76363D462 /* SpeechServiceProtocol.swift */,
+				F7342EBB4DEB9D4E5BB983B1 /* SuggestedPromptsProvider.swift */,
+				9802F4C807C651A4A7507D69 /* SystemPromptBuilder.swift */,
+				DC47BEF33A2B62E89C16FE65 /* VisionImageProcessor.swift */,
+				299E9EEAAE81681FDB35E66D /* WebSearchService.swift */,
+				5D222F9207B5C4D8F6205640 /* WhisperSpeechService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		FD2A678528A6686729AFEF4B /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				90A30A77BCBE08A596528FBD /* llama */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		939AC8E59F1D1E0D2E721F73 /* LucidPalWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0A165D049B032BC55CF7973E /* Build configuration list for PBXNativeTarget "LucidPalWidget" */;
+			buildPhases = (
+				3CDABE3780180BFD4C6A219A /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				82FD1893D862CC762E9ECE66 /* PBXTargetDependency */,
+			);
+			name = LucidPalWidget;
+			packageProductDependencies = (
+			);
+			productName = LucidPalWidget;
+			productReference = BF353B5C4E0FA230264B010E /* LucidPalWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		ACB6D76BFCED58F61B6A2512 /* LucidPalTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BCF1FB9A950E6071ED8B46E4 /* Build configuration list for PBXNativeTarget "LucidPalTests" */;
+			buildPhases = (
+				5406B5116EE4AC06ADD71886 /* Sources */,
+				11EE82839C8D3420BCB95154 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A04755B8756F6E8999A0AC80 /* PBXTargetDependency */,
+			);
+			name = LucidPalTests;
+			packageProductDependencies = (
+				30335C03FFB91046BA5D9FD0 /* SnapshotTesting */,
+			);
+			productName = LucidPalTests;
+			productReference = 517A7C2186DD159849187476 /* LucidPalTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		FBB5B25139C1869D792DE920 /* LucidPal */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 82E07B8556F0087ECE7E56CD /* Build configuration list for PBXNativeTarget "LucidPal" */;
+			buildPhases = (
+				88C9F06ECDD805FA962578B1 /* Sources */,
+				E4D69AFC6710A2B2BEF8864A /* Resources */,
+				76DAE1961E88B69E1F34EEE5 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LucidPal;
+			packageProductDependencies = (
+				2DED8AEAC2DC7A408B680177 /* llama */,
+				7318CD7AE635E015DC6B0821 /* WhisperKit */,
+			);
+			productName = LucidPal;
+			productReference = 14AE03DE8A0AFABE83307CE3 /* LucidPal.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0F1DB7C0E3710D88CA25D895 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					939AC8E59F1D1E0D2E721F73 = {
+						DevelopmentTeam = KRPUAN3FFA;
+						ProvisioningStyle = Automatic;
+					};
+					ACB6D76BFCED58F61B6A2512 = {
+						DevelopmentTeam = KRPUAN3FFA;
+						ProvisioningStyle = Automatic;
+					};
+					FBB5B25139C1869D792DE920 = {
+						DevelopmentTeam = KRPUAN3FFA;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 59AFEADAB57811849E6E4218 /* Build configuration list for PBXProject "LucidPal" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = DE2718E27C433D94458F1755;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				98F1F3E69456DD32786623B5 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+				874140B2BA7CAB709D7B5EFF /* XCRemoteSwiftPackageReference "WhisperKit" */,
+				E3CE05455ECC963B130F8CB0 /* XCLocalSwiftPackageReference "Packages/llama" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 9CDCE16833A8B608494AEE96 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FBB5B25139C1869D792DE920 /* LucidPal */,
+				ACB6D76BFCED58F61B6A2512 /* LucidPalTests */,
+				939AC8E59F1D1E0D2E721F73 /* LucidPalWidget */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E4D69AFC6710A2B2BEF8864A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0A4830821BE3363080E4BC60 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3CDABE3780180BFD4C6A219A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				36C8D6E8C0B2F120BBE4D452 /* CalendarDataProvider.swift in Sources */,
+				C24DFB9A82715EBECFA0594D /* LucidPalWidgetProvider.swift in Sources */,
+				3F4802241522007B8245F02E /* WidgetConstants.swift in Sources */,
+				B04FB06A1D7DEA7A912C579C /* WidgetModels.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5406B5116EE4AC06ADD71886 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4F9F83E021E6AE183AF4F27A /* AirPodsVoiceCoordinatorTests.swift in Sources */,
+				E7FF786D3C0EB7A497076210 /* AppSettingsTests.swift in Sources */,
+				65F7F513EAF1DCDC86EED0F0 /* AudioRouteMonitorTests.swift in Sources */,
+				29D889181C50202FFB7FE428 /* CalendarActionControllerHelpersTests.swift in Sources */,
+				056ADB8FFE5EBF08514F6619 /* CalendarActionControllerTests.swift in Sources */,
+				3E5A2DC0C1084642C11D9EC0 /* CalendarActionModelsDecodingTests.swift in Sources */,
+				49503F32075925C6B44B6064 /* CalendarCancellationTests.swift in Sources */,
+				A6474D2D5F2079A5938433B9 /* CalendarConfirmationTests.swift in Sources */,
+				957CB9469239E89841C49D6C /* CalendarDomainTypesTests.swift in Sources */,
+				B1B47564BC795E472A44DD9B /* CalendarFreeSlotEngineTests.swift in Sources */,
+				093039DFA169F1827527355A /* CalendarFreeSlotIntegrationTests.swift in Sources */,
+				5CA5DF284395CDCA615133BE /* CalendarServiceTests.swift in Sources */,
+				7F20CB7725CD082224F0F222 /* CalendarViewSmokeTests.swift in Sources */,
+				8830D83795146E653A80A4ED /* ChatHistoryManagerTests.swift in Sources */,
+				96A4F2C6CB5D99F7C6A0636C /* ChatMessageTests.swift in Sources */,
+				00245E136D540B04342F99DC /* ChatViewModelEdgeCaseTests.swift in Sources */,
+				7011344A4EAA13DB5EFC262B /* ChatViewModelMessageHandlingTests.swift in Sources */,
+				AAA1534B26E17E9E19DB344F /* ChatViewModelPersistenceTests.swift in Sources */,
+				3BE9ACE379FEAFC894D245B5 /* ChatViewModelSendMessageTests.swift in Sources */,
+				7303967491B65B0F08F1FC1E /* ChatViewModelSpeechTests.swift in Sources */,
+				88E4F29BED35C770D15894AC /* ChatViewModelStreamTests.swift in Sources */,
+				C3AD36C7CAC317C39C14F450 /* ChatViewModelSuggestedPromptsTests.swift in Sources */,
+				6A7F6B0BA4FA7FF41B11A347 /* ChatViewModelSystemPromptTests.swift in Sources */,
+				F65D76358A7F185712999F3C /* ChatViewModelTests.swift in Sources */,
+				FE802242AF80A44CFED8F05B /* ChatViewModelWebSearchTests.swift in Sources */,
+				968A9FB300C14E2C963EF139 /* ConflictResolutionTests.swift in Sources */,
+				22F70616D0632693651CEDB9 /* ContextServiceTests.swift in Sources */,
+				15FC9FF2A5088AAD67940AD8 /* DebugLogStoreTests.swift in Sources */,
+				6F6B375210A11F134A03E58A /* DesignConstantsTests.swift in Sources */,
+				16271E0880116FA896592B59 /* HapticServiceProtocolTests.swift in Sources */,
+				3F94027036BCF63494FEFD9F /* LLMConstantsTests.swift in Sources */,
+				19AAEC3054EAC2FE7DBA9CBB /* LLMServiceProtocolTests.swift in Sources */,
+				7574C8DFFB9C7E1BBDCAE12B /* LlamaActorTests.swift in Sources */,
+				0B0DB82A045413F5701EB714 /* MockAppSettings.swift in Sources */,
+				FAC216C9BED88F1D085EEC67 /* MockCalendarActionController.swift in Sources */,
+				128B60E308D9AB3131D5D78A /* MockCalendarService.swift in Sources */,
+				D7A481DAD5F4CC9C5803429D /* MockChatHistoryManager.swift in Sources */,
+				0D2F303188ACAF4A06607DA3 /* MockContextService.swift in Sources */,
+				85EB78B95AFB7128C24B7CCA /* MockHapticService.swift in Sources */,
+				9C9F1A271F96FD11AF2F8E36 /* MockLLMService.swift in Sources */,
+				2AF1B96CF62D240473DE9634 /* MockLocationService.swift in Sources */,
+				69058A6AE6FFE173CA430E4A /* MockModelDownloader.swift in Sources */,
+				2BCC7FF8FC582093CC384D46 /* MockSessionManager.swift in Sources */,
+				44C87FF23DA8379D8DDECDC1 /* MockSpeechService.swift in Sources */,
+				9AF04EACC87747682FBC682C /* MockSuggestedPromptsProvider.swift in Sources */,
+				1BCA2F07DE3D10CA06C4D40D /* MockSystemPromptBuilder.swift in Sources */,
+				B26DD8969DFCD88E5C138DEB /* MockWebSearchService.swift in Sources */,
+				FB963DD5F663691AB7DCDAFE /* ModelDownloadViewModelTests.swift in Sources */,
+				8BE25B3EFE3C56F842726417 /* ModelDownloaderTests.swift in Sources */,
+				3A543EE7308C410703786CAE /* ModelInfoTests.swift in Sources */,
+				BC817ADDD4ECD3D5019B006A /* PendingCalendarUpdateTests.swift in Sources */,
+				B34C51C6C6AA918B08A31F45 /* SessionListViewModelCalendarTests.swift in Sources */,
+				2E4D5CE58E45DC83C9FF16B2 /* SessionListViewModelTests.swift in Sources */,
+				14045A5106A180F24C850521 /* SessionManagerMigrationTests.swift in Sources */,
+				4847AEC7A5F5BDD54DEE925B /* SessionManagerTests.swift in Sources */,
+				7121418A3680E23002E46154 /* SettingsViewModelTests.swift in Sources */,
+				349FAAB14ACA4B8EAF797D04 /* ShortcutIntentTests.swift in Sources */,
+				C1D0B70E0E5EB94E5E6F9C60 /* SiriCalendarBridgeTests.swift in Sources */,
+				7F0E096769CBF9EBAB7A362A /* SiriContextStoreTests.swift in Sources */,
+				87981C4B15510E40A264CE38 /* SiriIntentTests.swift in Sources */,
+				DDB1A55679F9F4E63AEF5ADA /* SiriPendingEventTests.swift in Sources */,
+				E2FBC5EE289450F35F50A00E /* SnapshotTests.swift in Sources */,
+				7530ED932578B74C46585F3A /* SpeechServiceTests.swift in Sources */,
+				9A20A2B1C81978B1BE8026E0 /* SuggestedPromptsProviderTests.swift in Sources */,
+				2FA058CDF518F16D1A8E5275 /* SystemPromptBuilderTests.swift in Sources */,
+				5F5B4D9BFBF069A3621561C9 /* UserDefaultsKeysTests.swift in Sources */,
+				F862290F0BFA9C470D1978B4 /* ViewSmokeTests.swift in Sources */,
+				DFB3689E03A3BEE39D4F1A73 /* VisionImageProcessorTests.swift in Sources */,
+				3EC451D491461DA11A2A2998 /* WebSearchServiceTests.swift in Sources */,
+				F4D3FAF06D49DD11ACE0A7E4 /* WhisperSpeechServiceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		88C9F06ECDD805FA962578B1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				66AB4E939EF92DEAF6038D6A /* AirPodsVoiceCoordinator.swift in Sources */,
+				7AC41ECB9CF66664EAB0091F /* AppDelegate.swift in Sources */,
+				E2D680A01D04A2B423345625 /* AppSettings.swift in Sources */,
+				FEC63145E79EBC08B8690CAA /* AppSettingsProtocol.swift in Sources */,
+				6DD81CDE44616EFC6975AD94 /* AskLucidPalIntent.swift in Sources */,
+				015EC7B28597B03FDB36100F /* AskLucidPalShortcutIntent.swift in Sources */,
+				734F8F2D2BDF51BCE3DDF951 /* AudioRouteMonitor.swift in Sources */,
+				0518CB7542106BEF580784A3 /* BulkDeletionBar.swift in Sources */,
+				53A5EE497D226E35EBCB7167 /* CalendarActionController+Helpers.swift in Sources */,
+				6DDAC440A50DF26F7A9B3643 /* CalendarActionController.swift in Sources */,
+				AD09E4F280615A64C4E42C3F /* CalendarActionModels.swift in Sources */,
+				786E0BE41CB7BE88B6A77E98 /* CalendarActionPill.swift in Sources */,
+				4DA6E31DD3B8468EEEAC6A4E /* CalendarError.swift in Sources */,
+				CC68C9A3A0F39D067A9B7D4C /* CalendarEventCard+Pending.swift in Sources */,
+				18E1232F0348253BF9A7922A /* CalendarEventCard+Subviews.swift in Sources */,
+				53E9DE7D82579756AD92EE3F /* CalendarEventCard.swift in Sources */,
+				EEFC1702A50C2E6A229F3795 /* CalendarEventListCard.swift in Sources */,
+				8F2686ABC4188E95066394C1 /* CalendarFreeSlotEngine.swift in Sources */,
+				DEFF66F816776D5EFB30F7F9 /* CalendarPromptSection.swift in Sources */,
+				105F257A88A7A29FA2ADF784 /* CalendarQueryResultCard.swift in Sources */,
+				48D7F65123D4B67606CD383B /* CalendarService.swift in Sources */,
+				F8373F3F881357FB713056A5 /* CalendarServiceProtocol.swift in Sources */,
+				DA628943CCB77C6174DBB4F3 /* ChatConstants.swift in Sources */,
+				5355B58B51E15FA673A161E1 /* ChatHistoryManager.swift in Sources */,
+				D535F1F177DD92D78956D571 /* ChatInputBar.swift in Sources */,
+				8F31DAB21BA984E6FA3C5EAE /* ChatMessage.swift in Sources */,
+				B03D925C026CD3DFFCEBD3C0 /* ChatSession.swift in Sources */,
+				F42CC5E64090BE17267C94D0 /* ChatSessionContainer.swift in Sources */,
+				B8E3414B57863E0F431F1435 /* ChatView+Banners.swift in Sources */,
+				8EEFD00F6D32C07E0AF48776 /* ChatView+InputBar.swift in Sources */,
+				AD20E0F257A26C47DDB5643E /* ChatView+Subviews.swift in Sources */,
+				522B7FF317E3AF03EE395070 /* ChatView.swift in Sources */,
+				9CF58957C5E514D6DAA82857 /* ChatViewModel+CalendarConfirmation.swift in Sources */,
+				941BE9F4DD0EB1E2753C1EE6 /* ChatViewModel+MessageHandling.swift in Sources */,
+				3BFDCC91C1DFCF01C15967F4 /* ChatViewModel+Persistence.swift in Sources */,
+				E1110D5A4583266EDFC7700C /* ChatViewModel+Publishers.swift in Sources */,
+				CBF532126155A69A2C6BC457 /* ChatViewModel+Speech.swift in Sources */,
+				52506ED5C64A71BCE3759579 /* ChatViewModel.swift in Sources */,
+				D8A95D838D249B371864A520 /* ChatViewModelDependencies.swift in Sources */,
+				B01366636D57430BB978C036 /* CheckNextMeetingIntent.swift in Sources */,
+				47D3963A6EBA332BF9C26C2E /* ConflictDetailSheet.swift in Sources */,
+				D18FF12816973E1F11C2BADF /* ContentView.swift in Sources */,
+				6524076FAA1AD2521B71F514 /* ContextItem.swift in Sources */,
+				FA59EDE1F44E34F07DA57394 /* ContextService.swift in Sources */,
+				F8BD2DC578B983E43E0A8953 /* ContextServiceProtocol.swift in Sources */,
+				920B64016087FFB1CA6C6DCB /* CreateEventSheet.swift in Sources */,
+				A559B6C415E1766B77EC2EF7 /* CreateEventShortcutIntent.swift in Sources */,
+				645D7BEB0BD14B77456259BD /* DebugLogStore.swift in Sources */,
+				807BEDBF12BDADBE9B2158A5 /* DebugLogView.swift in Sources */,
+				564F62D96B4A1AFC932F864A /* DeleteCalendarEventIntent.swift in Sources */,
+				8D9D3708A793763CE21E8381 /* DesignConstants.swift in Sources */,
+				CF66A174207F460370A7E305 /* FindFreeTimeShortcutIntent.swift in Sources */,
+				29A002E8EED7F8F4AB1FAE94 /* HapticService.swift in Sources */,
+				1B5C57919A0EAD3C955B9484 /* LLMService.swift in Sources */,
+				82650CD673C4C8AE8EFD1174 /* LLMServiceProtocol.swift in Sources */,
+				687409024B7B3200E3556A43 /* LlamaActor+Generate.swift in Sources */,
+				0C7DBF0043B20456289944FB /* LlamaActor+Tokenize.swift in Sources */,
+				211506CD2E9CDB4D72250076 /* LlamaActor.swift in Sources */,
+				37A3833ED9EC1589A8D5CEA9 /* LocationService.swift in Sources */,
+				F9B6146E7ADB350F77AAC02C /* LucidPalApp.swift in Sources */,
+				E81FEBDDDBACD5902484F56B /* LucidPalShortcuts.swift in Sources */,
+				18DD4E00F69F1206CB590A3E /* MessageBubbleView+ImageViewer.swift in Sources */,
+				DE4D4CE8D641ED8A460CEB56 /* MessageBubbleView.swift in Sources */,
+				27014658C63259B761062E49 /* ModelDownloadView.swift in Sources */,
+				BA58B6726A031E68156100BD /* ModelDownloadViewModel.swift in Sources */,
+				24F92B647C8FF42714CD50F9 /* ModelDownloader.swift in Sources */,
+				71A711CFDDA3CB89AF178774 /* ModelInfo.swift in Sources */,
+				D9F8DC67F816B21BEE5A873F /* OnboardingCarouselView.swift in Sources */,
+				0369110B740DD7187CCCAC9B /* OnboardingView.swift in Sources */,
+				8744FCA7EC4035D25F778FB0 /* PromptSection.swift in Sources */,
+				DB04FBBDF7AEC70E34A898D1 /* SessionListView+Subviews.swift in Sources */,
+				9478EF7A8704319A6C8404C3 /* SessionListView.swift in Sources */,
+				1B822B7D6C796119BC306489 /* SessionListViewModel.swift in Sources */,
+				62D27959EBFF3E7ED863B024 /* SessionListViewModelDependencies.swift in Sources */,
+				D1BF50498715A514B34D4158 /* SessionManager.swift in Sources */,
+				14E586B01CB67F547DC76C92 /* SettingsView+Shortcuts.swift in Sources */,
+				F4ADF669B054E801B28C1BF4 /* SettingsView+VisionSection.swift in Sources */,
+				D594962811D19C29ED5D3C19 /* SettingsView.swift in Sources */,
+				C364235344AFC170739DCDF7 /* SettingsViewModel.swift in Sources */,
+				B619BB640B35401F0E33371C /* SiriCalendarBridge.swift in Sources */,
+				3B85B50B117E8E11AFAD9E09 /* SiriContextStore.swift in Sources */,
+				64A794420FC3326232AC13D0 /* SiriEventCard.swift in Sources */,
+				3023DE2AA01146E1E6084B18 /* SpeechService.swift in Sources */,
+				6D53AB3FC8B30CEB50EACC0F /* SpeechServiceProtocol.swift in Sources */,
+				30DAC985F0350CA4FE144A5D /* SuggestedPromptsProvider.swift in Sources */,
+				A8B6D6CF0380B52682719DC4 /* SuggestedPromptsView.swift in Sources */,
+				F40150B3342E6BAE778FCB5F /* SystemPromptBuilder.swift in Sources */,
+				BB8565619994F62A47AB25E1 /* ThinkingDisclosure.swift in Sources */,
+				371B0A0908DB1907C4F7FBFF /* ToastView.swift in Sources */,
+				8DAD9E150DE3BAD2832296B0 /* UserDefaultsKeys.swift in Sources */,
+				F977368BBD708C5523D95963 /* View+PremiumShadow.swift in Sources */,
+				CB58E0B6848B4ED93F4A691A /* VisionImageProcessor.swift in Sources */,
+				10D5F03FBCDE15F91EB5578D /* VoiceRecordingOverlay.swift in Sources */,
+				4CDAC87BB69531DD2EAE4DC2 /* WebSearchService.swift in Sources */,
+				710C20D8D694B2551D4EDB9B /* WebSearchSettingsView.swift in Sources */,
+				1FBB83DDAD565E037AF49362 /* WhisperSpeechService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		82FD1893D862CC762E9ECE66 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FBB5B25139C1869D792DE920 /* LucidPal */;
+			targetProxy = 6D4297B547765A8216DD8C42 /* PBXContainerItemProxy */;
+		};
+		A04755B8756F6E8999A0AC80 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FBB5B25139C1869D792DE920 /* LucidPal */;
+			targetProxy = B8CAE973070314C8E5020E06 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		15EBABB4151183CD7C0643C1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = WidgetExtension/LucidPalWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KRPUAN3FFA;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.lucidpal.widget;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		5A16DA7E0435ACBCEEBF7845 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Sources/App/LucidPal.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KRPUAN3FFA;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Sources/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.lucidpal;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		604678E44EAFAF4DC88FD7E9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		61451555FA40293B37196804 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KRPUAN3FFA;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.lucidpal.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LucidPal.app/LucidPal";
+			};
+			name = Debug;
+		};
+		6358554E2D16A43495334174 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KRPUAN3FFA;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.lucidpal.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LucidPal.app/LucidPal";
+			};
+			name = Release;
+		};
+		AA2295DC10BF45D2CF7F4132 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Sources/App/LucidPal.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KRPUAN3FFA;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Sources/App/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.lucidpal;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CF7C296624F2E2B978C2C4EA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = WidgetExtension/LucidPalWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KRPUAN3FFA;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.lucidpal.widget;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E196F849CCAE2E4F7BDA80C7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0A165D049B032BC55CF7973E /* Build configuration list for PBXNativeTarget "LucidPalWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CF7C296624F2E2B978C2C4EA /* Debug */,
+				15EBABB4151183CD7C0643C1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		59AFEADAB57811849E6E4218 /* Build configuration list for PBXProject "LucidPal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				604678E44EAFAF4DC88FD7E9 /* Debug */,
+				E196F849CCAE2E4F7BDA80C7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		82E07B8556F0087ECE7E56CD /* Build configuration list for PBXNativeTarget "LucidPal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA2295DC10BF45D2CF7F4132 /* Debug */,
+				5A16DA7E0435ACBCEEBF7845 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BCF1FB9A950E6071ED8B46E4 /* Build configuration list for PBXNativeTarget "LucidPalTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				61451555FA40293B37196804 /* Debug */,
+				6358554E2D16A43495334174 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		E3CE05455ECC963B130F8CB0 /* XCLocalSwiftPackageReference "Packages/llama" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/llama;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		874140B2BA7CAB709D7B5EFF /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/WhisperKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
+		98F1F3E69456DD32786623B5 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.16.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2DED8AEAC2DC7A408B680177 /* llama */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = llama;
+		};
+		30335C03FFB91046BA5D9FD0 /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 98F1F3E69456DD32786623B5 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
+		7318CD7AE635E015DC6B0821 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 874140B2BA7CAB709D7B5EFF /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = WhisperKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 0F1DB7C0E3710D88CA25D895 /* Project object */;
+}

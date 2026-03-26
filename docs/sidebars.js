@@ -4,7 +4,7 @@ const sidebars = {
     'introduction',
     {
       type: 'category',
-      label: 'Using PocketMind',
+      label: 'Using LucidPal',
       collapsed: false,
       items: [
         'guides/calendar',
