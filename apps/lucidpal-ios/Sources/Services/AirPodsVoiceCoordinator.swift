@@ -1,0 +1,141 @@
+import AVFoundation
+import Combine
+import Foundation
+import OSLog
+
+private let coordinatorLogger = Logger(subsystem: "app.lucidpal", category: "AirPodsVoiceCoordinator")
+
+// MARK: - Protocol
+
+@MainActor
+protocol AirPodsVoiceCoordinatorProtocol: AnyObject {
+    var isAutoListening: Bool { get }
+    var isAutoListeningPublisher: AnyPublisher<Bool, Never> { get }
+    func startMonitoring()
+    func stopMonitoring()
+}
+
+// MARK: - Implementation
+
+/// Coordinates auto-voice activation based on AirPods connection state and user settings.
+@MainActor
+final class AirPodsVoiceCoordinator: ObservableObject, AirPodsVoiceCoordinatorProtocol {
+    @Published private(set) var isAutoListening = false
+
+    var isAutoListeningPublisher: AnyPublisher<Bool, Never> { $isAutoListening.eraseToAnyPublisher() }
+
+    private let audioRouteMonitor: any AudioRouteMonitorProtocol
+    private let speechService: any SpeechServiceProtocol
+    private let settings: any VoiceSettingsProtocol
+
+    private var cancellables = Set<AnyCancellable>()
+    private var shouldAutoResume = false
+    private var autoResumeTask: Task<Void, Never>?
+
+    init(audioRouteMonitor: any AudioRouteMonitorProtocol, speechService: any SpeechServiceProtocol, settings: any VoiceSettingsProtocol) {
+        self.audioRouteMonitor = audioRouteMonitor
+        self.speechService = speechService
+        self.settings = settings
+
+        observeAudioRoute()
+        observeInterruptions()
+    }
+
+    // MARK: - Public Methods
+
+    func startMonitoring() {
+        evaluateAutoVoice()
+    }
+
+    func stopMonitoring() {
+        // Cancel any pending auto-resume before stopping to prevent it from restarting recording.
+        autoResumeTask?.cancel()
+        autoResumeTask = nil
+        shouldAutoResume = false
+        // Only stop recording if auto-voice started it. Don't cancel user-initiated sessions.
+        if isAutoListening, speechService.isRecording {
+            speechService.stopRecording()
+        }
+        isAutoListening = false
+    }
+
+    // MARK: - Private Methods
+
+    private func observeAudioRoute() {
+        audioRouteMonitor.isAirPodsConnectedPublisher
+            .sink { [weak self] isConnected in
+                self?.handleAirPodsConnectionChange(isConnected)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func observeInterruptions() {
+        speechService.isInterruptedPublisher
+            .sink { [weak self] isInterrupted in
+                self?.handleInterruptionChange(isInterrupted)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func handleAirPodsConnectionChange(_ isConnected: Bool) {
+        guard settings.airpodsAutoVoiceEnabled else { return }
+
+        if isConnected {
+            coordinatorLogger.debug("AirPods connected — starting auto-voice")
+            startAutoVoice()
+        } else {
+            coordinatorLogger.debug("AirPods disconnected — stopping auto-voice")
+            stopAutoVoice()
+        }
+    }
+
+    private func handleInterruptionChange(_ isInterrupted: Bool) {
+        guard settings.airpodsAutoVoiceEnabled, audioRouteMonitor.isAirPodsConnected else { return }
+
+        if isInterrupted {
+            coordinatorLogger.debug("Audio interrupted — marking for auto-resume")
+            shouldAutoResume = isAutoListening
+        } else if shouldAutoResume {
+            coordinatorLogger.debug("Audio interruption ended — resuming auto-voice")
+            shouldAutoResume = false
+            // Delay slightly to ensure audio session is ready.
+            // Store the task so stopMonitoring() can cancel it before it fires.
+            autoResumeTask?.cancel()
+            autoResumeTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .milliseconds(ChatConstants.airPodsAutoResumeDelayMilliseconds))
+                guard !Task.isCancelled else { return }
+                self?.startAutoVoice()
+            }
+        }
+    }
+
+    private func evaluateAutoVoice() {
+        guard settings.airpodsAutoVoiceEnabled, audioRouteMonitor.isAirPodsConnected else {
+            stopAutoVoice()
+            return
+        }
+        startAutoVoice()
+    }
+
+    private func startAutoVoice() {
+        guard !speechService.isRecording, speechService.isAuthorized else { return }
+
+        do {
+            try speechService.startRecording()
+            isAutoListening = true
+            coordinatorLogger.debug("Auto-voice started")
+        } catch {
+            coordinatorLogger.error("Failed to start auto-voice: \(error)")
+            isAutoListening = false
+        }
+    }
+
+    private func stopAutoVoice() {
+        // Only stop recording if auto-voice started it. Don't cancel user-initiated sessions.
+        if isAutoListening, speechService.isRecording {
+            speechService.stopRecording()
+        }
+        isAutoListening = false
+        coordinatorLogger.debug("Auto-voice stopped")
+    }
+}
