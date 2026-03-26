@@ -1,0 +1,314 @@
+import XCTest
+
+@testable import LucidPal
+
+@MainActor
+final class CalendarConfirmationTests: XCTestCase {
+
+    var llm: MockLLMService!
+    var calendar: MockCalendarService!
+    var haptic: MockHapticService!
+    var vm: ChatViewModel!
+
+    override func setUp() async throws {
+        llm = MockLLMService()
+        llm.isLoaded = true
+        calendar = MockCalendarService()
+        haptic = MockHapticService()
+        vm = ChatViewModel(dependencies: ChatViewModelDependencies(
+            llmService: llm,
+            calendarService: calendar,
+            settings: MockAppSettings(),
+            systemPromptBuilder: MockSystemPromptBuilder(),
+            suggestedPromptsProvider: MockSuggestedPromptsProvider(),
+            speechService: MockSpeechService(),
+            hapticService: haptic,
+            historyManager: NoOpChatHistoryManager(),
+            airPodsCoordinator: nil,
+            webSearchService: nil
+        ))
+    }
+
+    // MARK: - Helpers
+
+    private func addMessageWithPreviews(_ previews: [CalendarEventPreview]) -> UUID {
+        var msg = ChatMessage(role: .assistant, content: "Done.")
+        msg.calendarEventPreviews = previews
+        vm.messages.append(msg)
+        return msg.id
+    }
+
+    private func preview(state: CalendarEventPreview.PreviewState = .pendingDeletion) -> CalendarEventPreview {
+        CalendarEventPreview(
+            title: "Dentist",
+            start: Date(timeIntervalSinceNow: 3600),
+            end: Date(timeIntervalSinceNow: 7200),
+            calendarName: "Personal",
+            state: state,
+            eventIdentifier: "evt-001"
+        )
+    }
+
+    // MARK: - confirmDeletion
+
+    func testConfirmDeletionSetsStateToDeleted() async throws {
+        let p = preview(state: .pendingDeletion)
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmDeletion(messageID: msgID, previewID: p.id)
+        XCTAssertEqual(vm.messages.last?.calendarEventPreviews.first?.state, .deleted)
+    }
+
+    func testConfirmDeletionSetsErrorMessageOnFailure() async throws {
+        calendar.shouldThrowOnDelete = true
+        let p = preview(state: .pendingDeletion)
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmDeletion(messageID: msgID, previewID: p.id)
+        let errorMsg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
+    }
+
+    func testConfirmDeletionTriggersHapticOnSuccess() async throws {
+        let p = preview(state: .pendingDeletion)
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmDeletion(messageID: msgID, previewID: p.id)
+        XCTAssertTrue(haptic.notifySuccessCalled)
+    }
+
+    // MARK: - undoDeletion
+
+    func testUndoDeletionSetsStateToRestored() async throws {
+        let p = preview(state: .deleted)
+        let msgID = addMessageWithPreviews([p])
+        await vm.undoDeletion(messageID: msgID, previewID: p.id)
+        XCTAssertEqual(vm.messages.last?.calendarEventPreviews.first?.state, .restored)
+    }
+
+    func testUndoDeletionCallsCreateEvent() async throws {
+        let p = preview(state: .deleted)
+        let msgID = addMessageWithPreviews([p])
+        await vm.undoDeletion(messageID: msgID, previewID: p.id)
+        XCTAssertEqual(calendar.createdEvents.count, 1)
+        XCTAssertEqual(calendar.createdEvents.first?.title, "Dentist")
+    }
+
+    func testUndoDeletionTriggersHapticOnSuccess() async throws {
+        let p = preview(state: .deleted)
+        let msgID = addMessageWithPreviews([p])
+        await vm.undoDeletion(messageID: msgID, previewID: p.id)
+        XCTAssertTrue(haptic.notifySuccessCalled)
+    }
+
+    func testUndoDeletionNoOpForUnknownMessageID() async throws {
+        let p = preview(state: .deleted)
+        _ = addMessageWithPreviews([p])
+        await vm.undoDeletion(messageID: UUID(), previewID: p.id)
+        XCTAssertTrue(calendar.createdEvents.isEmpty)
+    }
+
+    func testUndoDeletionSetsErrorMessageWhenCreateFails() async throws {
+        calendar.shouldThrowOnCreate = true
+        let p = preview(state: .deleted)
+        let msgID = addMessageWithPreviews([p])
+        await vm.undoDeletion(messageID: msgID, previewID: p.id)
+        let errorMsg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
+    }
+
+    func testUndoDeletionPreservesStateWhenCreateFails() async throws {
+        calendar.shouldThrowOnCreate = true
+        let p = preview(state: .deleted)
+        let msgID = addMessageWithPreviews([p])
+        await vm.undoDeletion(messageID: msgID, previewID: p.id)
+        XCTAssertEqual(vm.messages.last?.calendarEventPreviews.first?.state, .deleted)
+    }
+
+    // MARK: - confirmAllDeletions
+
+    func testConfirmAllDeletionsDeletesAllPendingPreviews() async throws {
+        let p1 = CalendarEventPreview(title: "A", start: Date(timeIntervalSinceNow: 3600),
+                                     end: Date(timeIntervalSinceNow: 7200), calendarName: "Work",
+                                     state: .pendingDeletion, eventIdentifier: "id-A")
+        let p2 = CalendarEventPreview(title: "B", start: Date(timeIntervalSinceNow: 3600),
+                                     end: Date(timeIntervalSinceNow: 7200), calendarName: "Work",
+                                     state: .pendingDeletion, eventIdentifier: "id-B")
+        let msgID = addMessageWithPreviews([p1, p2])
+        await vm.confirmAllDeletions(messageID: msgID)
+        let states = vm.messages.last?.calendarEventPreviews.map(\.state) ?? []
+        XCTAssertEqual(states, [.deleted, .deleted])
+        XCTAssertEqual(Set(calendar.deletedIdentifiers), ["id-A", "id-B"])
+    }
+
+    func testConfirmAllDeletionsIgnoresNonPendingPreviews() async throws {
+        let p = CalendarEventPreview(title: "Done", start: Date(timeIntervalSinceNow: 3600),
+                                    end: Date(timeIntervalSinceNow: 7200), calendarName: "Work",
+                                    state: .deleted, eventIdentifier: "id-done")
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmAllDeletions(messageID: msgID)
+        XCTAssertTrue(calendar.deletedIdentifiers.isEmpty)
+        XCTAssertEqual(vm.messages.last?.calendarEventPreviews.first?.state, .deleted)
+    }
+
+    func testConfirmAllDeletionsPartialFailureSetsErrorMessage() async throws {
+        calendar.shouldThrowOnDelete = true
+        let p = preview(state: .pendingDeletion)
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmAllDeletions(messageID: msgID)
+        let errorMsg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
+    }
+
+    func testConfirmAllDeletionsOnEmptyMessageIsNoOp() async throws {
+        var msg = ChatMessage(role: .assistant, content: "")
+        vm.messages.append(msg)
+        await vm.confirmAllDeletions(messageID: msg.id)
+        XCTAssertTrue(calendar.deletedIdentifiers.isEmpty)
+    }
+
+    func testConfirmAllDeletionsNoOpForUnknownMessageID() async throws {
+        await vm.confirmAllDeletions(messageID: UUID())
+        XCTAssertTrue(calendar.deletedIdentifiers.isEmpty)
+    }
+
+    // MARK: - confirmUpdate
+
+    func testConfirmUpdateCallsApplyUpdate() async throws {
+        var p = preview(state: .pendingUpdate)
+        var update = PendingCalendarUpdate()
+        update.title = "Rescheduled"
+        p.pendingUpdate = update
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmUpdate(messageID: msgID, previewID: p.id)
+        XCTAssertEqual(calendar.appliedUpdates.count, 1)
+        XCTAssertEqual(calendar.appliedUpdates.first?.1, "evt-001")
+    }
+
+    func testConfirmUpdateMirrorsFieldsOntoPreview() async throws {
+        var p = preview(state: .pendingUpdate)
+        var update = PendingCalendarUpdate()
+        update.title = "Updated Title"
+        update.start = Date(timeIntervalSinceNow: 7200)
+        update.end   = Date(timeIntervalSinceNow: 10800)
+        p.pendingUpdate = update
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmUpdate(messageID: msgID, previewID: p.id)
+        let updated = vm.messages.last?.calendarEventPreviews.first
+        XCTAssertEqual(updated?.title, "Updated Title")
+        XCTAssertEqual(updated?.start, update.start)
+        XCTAssertNil(updated?.pendingUpdate)
+    }
+
+    func testConfirmUpdateSetsTerminalState() async throws {
+        var p = preview(state: .pendingUpdate)
+        var update = PendingCalendarUpdate()
+        update.title = "Renamed"
+        p.pendingUpdate = update
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmUpdate(messageID: msgID, previewID: p.id)
+        let state = vm.messages.last?.calendarEventPreviews.first?.state
+        XCTAssertTrue(state == .updated || state == .rescheduled,
+                      "Expected .updated or .rescheduled, got \(String(describing: state))")
+    }
+
+    func testConfirmUpdateEventNotFoundSetsErrorMessage() async throws {
+        calendar.shouldThrowOnApplyUpdate = true
+        var p = preview(state: .pendingUpdate)
+        var update = PendingCalendarUpdate()
+        update.title = "Oops"
+        p.pendingUpdate = update
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmUpdate(messageID: msgID, previewID: p.id)
+        XCTAssertEqual(vm.messages.last?.calendarEventPreviews.first?.state, .updateCancelled)
+        let errorMsg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
+    }
+
+    func testConfirmUpdateNoPendingUpdateIsNoOp() async throws {
+        let p = preview(state: .pendingUpdate)
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmUpdate(messageID: msgID, previewID: p.id)
+        XCTAssertTrue(calendar.appliedUpdates.isEmpty)
+    }
+
+    func testConfirmUpdateTriggersHapticOnSuccess() async throws {
+        var p = preview(state: .pendingUpdate)
+        var update = PendingCalendarUpdate()
+        update.title = "New"
+        p.pendingUpdate = update
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmUpdate(messageID: msgID, previewID: p.id)
+        XCTAssertTrue(haptic.notifySuccessCalled)
+    }
+
+    func testConfirmUpdateEventNotFoundClearsPendingUpdate() async throws {
+        calendar.shouldThrowOnApplyUpdate = true
+        var p = preview(state: .pendingUpdate)
+        var update = PendingCalendarUpdate()
+        update.title = "Oops"
+        p.pendingUpdate = update
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmUpdate(messageID: msgID, previewID: p.id)
+        XCTAssertNil(vm.messages.last?.calendarEventPreviews.first?.pendingUpdate)
+    }
+
+    func testConfirmUpdateErrorSetsNonEmptyMessage() async throws {
+        // Verifies that errorMessage is non-empty on any applyUpdate failure.
+        // MockCalendarService throws CalendarError.eventNotFound, which sets a
+        // hardcoded non-empty message in the .eventNotFound catch branch.
+        calendar.shouldThrowOnApplyUpdate = true
+        var p = preview(state: .pendingUpdate)
+        var update = PendingCalendarUpdate()
+        update.title = "Fail"
+        p.pendingUpdate = update
+        let msgID = addMessageWithPreviews([p])
+        await vm.confirmUpdate(messageID: msgID, previewID: p.id)
+        let errorMsg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
+    }
+
+    // MARK: - cancelConflict error path
+
+    func testCancelConflictThrowSetsErrorMessage() async throws {
+        calendar.shouldThrowOnDelete = true
+        let p = preview(state: .pendingDeletion)
+        let msgID = addMessageWithPreviews([p])
+        await vm.cancelConflict(messageID: msgID, previewID: p.id)
+        let errorMsg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
+    }
+
+    func testCancelConflictThrowDoesNotMarkDeleted() async throws {
+        calendar.shouldThrowOnDelete = true
+        let p = preview(state: .pendingDeletion)
+        let msgID = addMessageWithPreviews([p])
+        await vm.cancelConflict(messageID: msgID, previewID: p.id)
+        XCTAssertNotEqual(vm.messages.last?.calendarEventPreviews.first?.state, .deleted)
+    }
+
+    // MARK: - rescheduleConflict error path
+
+    func testRescheduleConflictThrowSetsErrorMessage() async throws {
+        calendar.shouldThrowOnApplyUpdate = true
+        let p = preview(state: .pendingUpdate)
+        let msgID = addMessageWithPreviews([p])
+        let slot = CalendarFreeSlot(
+            start: Date(timeIntervalSinceNow: 3600),
+            end: Date(timeIntervalSinceNow: 7200)
+        )
+        await vm.rescheduleConflict(messageID: msgID, previewID: p.id, to: slot)
+        let errorMsg = try XCTUnwrap(vm.errorMessage)
+        XCTAssertFalse(errorMsg.isEmpty)
+    }
+
+    func testRescheduleConflictThrowDoesNotUpdatePreviewDates() async throws {
+        calendar.shouldThrowOnApplyUpdate = true
+        let p = preview(state: .pendingUpdate)
+        let originalStart = p.start
+        let msgID = addMessageWithPreviews([p])
+        let slot = CalendarFreeSlot(
+            start: Date(timeIntervalSinceNow: 86400),
+            end: Date(timeIntervalSinceNow: 90000)
+        )
+        await vm.rescheduleConflict(messageID: msgID, previewID: p.id, to: slot)
+        XCTAssertEqual(vm.messages.last?.calendarEventPreviews.first?.start, originalStart)
+    }
+}
