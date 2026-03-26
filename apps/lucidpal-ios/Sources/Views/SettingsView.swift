@@ -285,12 +285,10 @@ struct SettingsView: View {
     }
 
     #if DEBUG
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = true
-
     private var debugSection: some View {
         Section {
             Button {
-                hasCompletedOnboarding = false
+                viewModel.replayOnboarding()
             } label: {
                 Label("Replay Onboarding", systemImage: "arrow.counterclockwise")
             }

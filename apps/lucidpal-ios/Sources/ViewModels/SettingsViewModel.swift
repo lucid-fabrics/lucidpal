@@ -182,6 +182,12 @@ final class SettingsViewModel: ObservableObject {
 
     // MARK: - Voice
 
+    #if DEBUG
+    func replayOnboarding() {
+        settings.hasCompletedOnboarding = false
+    }
+    #endif
+
     func setVoiceAutoStart(_ enabled: Bool) {
         voiceAutoStartEnabled = enabled
         settings.voiceAutoStartEnabled = enabled
