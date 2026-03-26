@@ -106,14 +106,14 @@ final class SystemPromptBuilder: SystemPromptBuilderProtocol {
 
     func buildSystemPrompt() async -> String {
         let prompt = await assemblePrompt(synthesisOnly: false)
-        systemPromptLogger.info("🧠 SYSTEM_PROMPT: \(prompt, privacy: .public)")
+        systemPromptLogger.info("🧠 SYSTEM_PROMPT: \(prompt, privacy: .private)")
         DebugLogStore.shared.log("SYSTEM_PROMPT: \(prompt)", category: "Chat")
         return prompt
     }
 
     func buildSynthesisPrompt() async -> String {
         let prompt = await assemblePrompt(synthesisOnly: true)
-        systemPromptLogger.info("🧠 SYNTHESIS_PROMPT: \(prompt, privacy: .public)")
+        systemPromptLogger.info("🧠 SYNTHESIS_PROMPT: \(prompt, privacy: .private)")
         DebugLogStore.shared.log("SYNTHESIS_PROMPT: \(prompt)", category: "Chat")
         return prompt
     }

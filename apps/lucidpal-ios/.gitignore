@@ -3,3 +3,6 @@ Packages/llama/build/
 *.xcuserdata
 *.xcworkspace/xcuserdata
 DerivedData/
+*.cer
+*.p12
+*.mobileprovision

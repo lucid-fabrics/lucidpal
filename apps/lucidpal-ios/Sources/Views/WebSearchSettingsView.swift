@@ -68,7 +68,7 @@ struct WebSearchSettingsView: View {
 
     private var searxngSection: some View {
         Section {
-            TextField("http://192.168.1.x:8888", text: $viewModel.webSearchEndpoint)
+            TextField("https://searxng.example.com", text: $viewModel.webSearchEndpoint)
                 .keyboardType(.URL)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)

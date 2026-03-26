@@ -116,8 +116,8 @@ extension ChatViewModel {
             // Mark message as processed with vision if applicable
             if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
                 messages[idx].processedWithVision = useVision
-                messageHandlingLogger.info("📤 USER: \(text, privacy: .public)")
-                messageHandlingLogger.info("RAW_LLM: \(self.messages[idx].content, privacy: .public)")
+                messageHandlingLogger.info("📤 USER: \(text, privacy: .private)")
+                messageHandlingLogger.info("RAW_LLM: \(self.messages[idx].content, privacy: .private)")
                 DebugLogStore.shared.log("RAW_LLM: \(messages[idx].content)", category: "LLM")
             }
         } catch is CancellationError {
@@ -240,11 +240,11 @@ extension ChatViewModel {
         assistantID: UUID,
         showThinking: Bool
     ) async {
-        messageHandlingLogger.info("🔍 WEB_SEARCH extracted query='\(query, privacy: .public)' maxResults=\(maxResults)")
+        messageHandlingLogger.info("🔍 WEB_SEARCH extracted query='\(query, privacy: .private)' maxResults=\(maxResults)")
         DebugLogStore.shared.log("WEB_SEARCH query='\(query)' maxResults=\(maxResults)", category: "Search")
         do {
             let results = try await searchSvc.search(query: query, maxResults: maxResults)
-            messageHandlingLogger.info("🔍 WEB_SEARCH got \(results.count) results for '\(query, privacy: .public)'")
+            messageHandlingLogger.info("🔍 WEB_SEARCH got \(results.count) results for '\(query, privacy: .private)'")
             DebugLogStore.shared.log("WEB_SEARCH got \(results.count) results for '\(query)'", category: "Search")
             let resultText = results.enumerated().map { i, r in
                 // Strip any action tokens from search result content to prevent recursive
@@ -272,7 +272,7 @@ extension ChatViewModel {
                 applyStreamToken(token, rawBuffer: &raw2, thinkDone: &thinkDone2, showThinking: showThinking, idx: i)
             }
             let synthesisPreview = String(messages.first(where: { $0.id == assistantID })?.content.prefix(ChatConstants.synthesisLogPreviewLength) ?? "")
-            messageHandlingLogger.info("🔍 WEB_SEARCH synthesis done, content='\(synthesisPreview, privacy: .public)'")
+            messageHandlingLogger.info("🔍 WEB_SEARCH synthesis done, content='\(synthesisPreview, privacy: .private)'")
             DebugLogStore.shared.log("WEB_SEARCH synthesis done: '\(synthesisPreview)'", category: "Search")
             if let i = messages.firstIndex(where: { $0.id == assistantID }) {
                 messages[i].isWebSearchResult = true
