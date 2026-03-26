@@ -1,0 +1,202 @@
+import SwiftUI
+import UIKit
+
+struct ModelDownloadView: View {
+    @ObservedObject var viewModel: ModelDownloadViewModel
+
+    /// Controls which models appear in the list: text-only, vision-only, or all.
+    private let capabilityFilter: ModelCapability?
+
+    init(viewModel: ModelDownloadViewModel, capabilityFilter: ModelCapability? = nil) {
+        self.viewModel = viewModel
+        self.capabilityFilter = capabilityFilter
+    }
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Image(systemName: "brain.head.profile")
+                .font(.system(size: 56))
+                .foregroundStyle(Color.accentColor)
+
+            Text("Choose a Model")
+                .font(.title2.bold())
+
+            modelPicker
+
+            modelDetails
+
+            actionButton
+
+            if case .failed(let msg) = viewModel.downloadState {
+                Text(msg)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+
+            if let error = viewModel.loadError {
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                    Text(error)
+                        .font(.caption)
+                }
+                .foregroundStyle(.red)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+                .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: viewModel.isModelLoading)
+        .padding(24)
+        .onAppear {
+            viewModel.capabilityFilter = capabilityFilter
+            viewModel.refreshAvailableModels(filter: capabilityFilter)
+            // Auto-select first available if current selection was filtered out.
+            if !viewModel.availableModels.contains(where: { $0.id == viewModel.selectedModel.id }),
+               let first = viewModel.availableModels.first {
+                viewModel.selectModel(first)
+            }
+        }
+    }
+
+    private var modelPicker: some View {
+        VStack(spacing: 8) {
+            ForEach(viewModel.availableModels, id: \.id) { model in
+                Button {
+                    viewModel.selectModel(model)
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(model.displayName)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(.primary)
+                            if model.isDownloaded {
+                                Text("Downloaded")
+                                    .font(.caption)
+                                    .foregroundStyle(.green)
+                            } else {
+                                Text(String(format: "%.1f GB", model.fileSizeGB))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        Spacer()
+                        if viewModel.selectedModel.id == model.id {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(Color.accentColor)
+                        } else {
+                            Image(systemName: "circle")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(14)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(viewModel.selectedModel.id == model.id
+                                  ? Color.accentColor.opacity(0.1)
+                                  : Color(.systemGray6))
+                    )
+                }
+                .buttonStyle(PickerItemPressStyle())
+            }
+        }
+    }
+
+    private var modelDetails: some View {
+        Text("Recommended for your device: \(ModelInfo.recommended(physicalRAMGB: viewModel.deviceRAMGB).displayName)")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+    }
+
+    @ViewBuilder
+    private var actionButton: some View {
+        switch viewModel.downloadState {
+        case .idle:
+            if viewModel.isModelLoaded && (viewModel.selectedTextModelID == viewModel.selectedModel.id || viewModel.selectedVisionModelID == viewModel.selectedModel.id) {
+                Label("Loaded", systemImage: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .font(.subheadline.weight(.medium))
+            } else if viewModel.selectedModel.isDownloaded {
+                if viewModel.isModelLoading {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .controlSize(.large)
+                        Text("Loading \(viewModel.selectedModel.displayName)…")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.secondary)
+                        Text("This may take a moment")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .transition(.opacity)
+                } else {
+                    Button {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        Task { await viewModel.loadModel() }
+                    } label: {
+                        Text("Load Model")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .transition(.opacity)
+                }
+            } else {
+                VStack(spacing: 8) {
+                    Button("Download") {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        viewModel.startDownload()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Label("WiFi required", systemImage: "wifi")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+        case .downloading(let progress):
+            VStack(spacing: 8) {
+                ProgressView(value: progress)
+                    .progressViewStyle(.linear)
+                Text(String(format: "Downloading… %.0f%%", progress * 100))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Button("Cancel", role: .cancel) {
+                    viewModel.cancelDownload()
+                }
+                .font(.caption)
+            }
+
+        case .completed:
+            // Auto-load fires immediately via Combine — show spinner instead of a tappable button.
+            HStack(spacing: 8) {
+                ProgressView().tint(.white)
+                Text("Loading…")
+            }
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+
+        case .failed:
+            Button("Retry") {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                viewModel.startDownload()
+            }
+            .buttonStyle(.borderedProminent)
+        }
+    }
+}
+
+// MARK: - Button Styles
+
+private struct PickerItemPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .opacity(configuration.isPressed ? 0.85 : 1.0)
+            .animation(.easeInOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
