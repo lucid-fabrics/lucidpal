@@ -16,7 +16,7 @@ DerivedData/
 .DS_Store
 
 # Models (large binaries — downloaded at runtime)
-apps/pocketmind-ios/**/*.gguf
+apps/lucidpal-ios/**/*.gguf
 
 # Fastlane build artifacts
 **/fastlane/report.xml

@@ -1,4 +1,4 @@
-# PocketMind — Claude Code Instructions
+# LucidPal — Claude Code Instructions
 
 ## Code Conventions
 
@@ -10,12 +10,13 @@ Reference: `~/git/code-conventions/`
 
 - **Type:** Native iOS app (Swift/SwiftUI)
 - **LLM:** On-device llama.cpp (GGUF models)
-- **Architecture:** Nx monorepo (single `pocketmind-ios` app)
+- **Architecture:** Nx monorepo (single `lucidpal-ios` app)
 - **Stack:** SwiftUI, Combine, EventKit, StoreKit
 
 ## Vision Feature
 
 When adding vision-related code:
+
 - Image preprocessing: resize to 896×896 JPEG 0.8, base64 encode
 - Qwen3-VL uses `<|vision|><|image_1|>base64_data<|vision|>` prompt format
 - Dual-model: text model (`Qwen3-*.gguf`) + vision model (`*vision*.gguf`)
@@ -32,11 +33,11 @@ When adding vision-related code:
 
 ```bash
 # Build
-xcodebuild -project apps/pocketmind-ios/PocketMind.xcodeproj \
-  -scheme PocketMind -configuration Debug \
+xcodebuild -project apps/lucidpal-ios/LucidPal.xcodeproj \
+  -scheme LucidPal -configuration Debug \
   -destination 'platform=iOS Simulator,name=iPhone 16' build
 
 # Test
-xcodebuild test -project apps/pocketmind-ios/PocketMind.xcodeproj \
-  -scheme PocketMind -destination 'platform=iOS Simulator,name=iPhone 16'
+xcodebuild test -project apps/lucidpal-ios/LucidPal.xcodeproj \
+  -scheme LucidPal -destination 'platform=iOS Simulator,name=iPhone 16'
 ```

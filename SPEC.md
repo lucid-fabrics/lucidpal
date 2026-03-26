@@ -1,18 +1,20 @@
-# PocketMind Vision — Feature Specification
+# LucidPal Vision — Feature Specification
 
 ## Overview
 
-Enable PocketMind to accept photo attachments in chat. When an image is present, route to a vision-capable model (Qwen3-Vision). After processing, return to the text model for the response. Both models run on-device via llama.cpp.
+Enable LucidPal to accept photo attachments in chat. When an image is present, route to a vision-capable model (Qwen3-Vision). After processing, return to the text model for the response. Both models run on-device via llama.cpp.
 
 ---
 
 ## 1. Image Input & Preprocessing
 
 ### Detection
+
 - `ChatViewModel` checks if the outgoing message contains image attachments (from `PHPickerViewController` or camera)
 - Presence of any image → flag the generation as "vision mode"
 
 ### Preprocessing (before LLM call)
+
 - Resize image to max **896×896** px (Qwen3-VL's preferred resolution)
 - Convert to **JPEG** at quality **0.8**
 - Base64-encode the image data
@@ -23,6 +25,7 @@ Enable PocketMind to accept photo attachments in chat. When an image is present,
 ## 2. Model Management
 
 ### LlamaActor Changes
+
 `LlamaActor` currently owns a single `OpaquePointer` pair (model + context). Extend it to support two models:
 
 ```swift
@@ -37,6 +40,7 @@ actor LlamaActor {
 ```
 
 ### Model Switching
+
 - `loadModel(at:role:)` — load a model into a specific slot (`text` or `vision`)
 - `unloadModel(role:)` — unload a specific slot
 - `isVisionModelLoaded: Bool`
@@ -44,6 +48,7 @@ actor LlamaActor {
 - Qwen3-Vision model file: same llama.cpp GGUF format, identified by filename convention (`*vision*.gguf`)
 
 ### RAM Management
+
 - If total RAM < 6 GB: only keep one model loaded at a time (aggressive unload)
 - If RAM ≥ 6 GB: keep both loaded simultaneously
 - On `loadModel(at:role:)`, if OOM: unload the other model first, retry
@@ -99,6 +104,7 @@ struct AttachedImage: Identifiable, Codable, Equatable, Sendable {
 ## 5. ChatViewModel Changes
 
 ### Message Sending
+
 ```swift
 func sendMessage(_ text: String, images: [UIImage]) async {
     let attachments = images.map { await preprocessImage($0) }
@@ -121,6 +127,7 @@ func sendMessage(_ text: String, images: [UIImage]) async {
 ```
 
 ### Generation API Change
+
 Update `LLMServiceProtocol.generate` to accept a model role:
 
 ```swift
@@ -137,17 +144,20 @@ func generate(
 ## 6. UI — Attachment Flow
 
 ### Attachment Button
+
 - In chat input bar: add a **photo attachment button** (SF Symbol `photo.on.rectangle`)
 - Tap → `PHPickerViewController` (multi-select enabled, filter: `.images`)
 - Selected images appear as horizontal scrolling thumbnails below the input bar
 - Tap thumbnail to remove
 
 ### Sending
+
 - "vision" badge appears on send button when images are attached
 - While vision model loads: show "Loading vision model…" in chat
 - While processing: user bubble shows thumbnail + spinner
 
 ### Settings
+
 - New toggle: **"Enable Vision"** (default: on)
 - Model download section: add Qwen3-Vision to the model list alongside existing Qwen3 text models
 
@@ -156,24 +166,26 @@ func generate(
 ## 7. Model Download
 
 ### UX
+
 - Settings → "Download Models" → shows both text and vision models
 - Vision model: `Qwen3-Vision-3B-F16.gguf` (approx 6–7 GB)
 - Download via the same `ModelDownloadViewModel` flow used for text models
 
 ### Storage
-- Vision GGUF stored in the same `ApplicationSupport/PocketMind/models/` directory
+
+- Vision GGUF stored in the same `ApplicationSupport/LucidPal/models/` directory
 - Filename convention: `*vision*.gguf` triggers vision-mode eligibility
 
 ---
 
 ## 8. Error Handling
 
-| Scenario | Behavior |
-|---|---|
+| Scenario                                      | Behavior                                                                      |
+| --------------------------------------------- | ----------------------------------------------------------------------------- |
 | Image present but vision model not downloaded | Show inline prompt: "Vision model needed — download?" with Settings deep-link |
-| RAM OOM during vision model load | Attempt to unload text model, retry once; if still OOM → error bubble |
-| Image decode failure | Show error: "Couldn't read image" — message sends without image |
-| Vision model fails mid-generation | Fall back to text model with text-only prompt (image data dropped) |
+| RAM OOM during vision model load              | Attempt to unload text model, retry once; if still OOM → error bubble         |
+| Image decode failure                          | Show error: "Couldn't read image" — message sends without image               |
+| Vision model fails mid-generation             | Fall back to text model with text-only prompt (image data dropped)            |
 
 ---
 
@@ -190,21 +202,21 @@ func generate(
 
 ## 10. File Changes
 
-| File | Change |
-|---|---|
-| `Sources/Models/ChatMessage.swift` | Add `AttachedImage`, `imageAttachments`, `processedWithVision` |
-| `Sources/Services/LlamaActor.swift` | Dual-model support, vision mode |
-| `Sources/Services/LLMService.swift` | Add `modelRole` param to `generate()` |
-| `Sources/Services/LLMServiceProtocol.swift` | Update protocol |
-| `Sources/ViewModels/ChatViewModel.swift` | Image attachment handling |
-| `Sources/ViewModels/ChatViewModel+MessageHandling.swift` | Vision routing |
-| `Sources/Services/SystemPromptBuilder.swift` | Vision tag insertion |
-| `Sources/Services/VisionImageProcessor.swift` | **New** — resize, JPEG encode, base64 |
-| `Sources/Views/ChatInputBar.swift` | Photo attachment button + thumbnail strip |
-| `Sources/Views/MessageBubbleView.swift` | Image attachment display |
-| `Sources/Views/SettingsView.swift` | Vision toggle + model download |
-| `Tests/` | Unit tests for image processing + vision prompt building |
-| `CLAUDE.md` | Reference code-conventions |
+| File                                                     | Change                                                         |
+| -------------------------------------------------------- | -------------------------------------------------------------- |
+| `Sources/Models/ChatMessage.swift`                       | Add `AttachedImage`, `imageAttachments`, `processedWithVision` |
+| `Sources/Services/LlamaActor.swift`                      | Dual-model support, vision mode                                |
+| `Sources/Services/LLMService.swift`                      | Add `modelRole` param to `generate()`                          |
+| `Sources/Services/LLMServiceProtocol.swift`              | Update protocol                                                |
+| `Sources/ViewModels/ChatViewModel.swift`                 | Image attachment handling                                      |
+| `Sources/ViewModels/ChatViewModel+MessageHandling.swift` | Vision routing                                                 |
+| `Sources/Services/SystemPromptBuilder.swift`             | Vision tag insertion                                           |
+| `Sources/Services/VisionImageProcessor.swift`            | **New** — resize, JPEG encode, base64                          |
+| `Sources/Views/ChatInputBar.swift`                       | Photo attachment button + thumbnail strip                      |
+| `Sources/Views/MessageBubbleView.swift`                  | Image attachment display                                       |
+| `Sources/Views/SettingsView.swift`                       | Vision toggle + model download                                 |
+| `Tests/`                                                 | Unit tests for image processing + vision prompt building       |
+| `CLAUDE.md`                                              | Reference code-conventions                                     |
 
 ---
 
