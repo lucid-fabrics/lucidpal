@@ -1,0 +1,226 @@
+fastlane_version "2.225.0"
+
+default_platform(:ios)
+
+SCHEME      = "LucidPal"
+PROJECT     = "LucidPal.xcodeproj"
+BUNDLE_ID   = "app.lucidpal"
+TEAM_ID     = "KRPUAN3FFA"
+# Override via: export DEVICE_UDID=<your-udid>  (xcrun xctrace list devices)
+DEVICE_UDID = ENV["DEVICE_UDID"] || "00008150-000C08842604401C"
+
+platform :ios do
+
+  # ─────────────────────────────────────────────
+  # Register App IDs, enable App Groups capability,
+  # create group.app.lucidpal, and associate with both targets.
+  # Run once after a bundle ID rename or new capability.
+  #
+  # Requires CI secrets:
+  #   FASTLANE_USER     = wassimmehanna@gmail.com
+  #   FASTLANE_PASSWORD = <apple id password>
+  #
+  # fastlane ios provision
+  # ─────────────────────────────────────────────
+  desc "Register App IDs + App Group on Apple Developer Portal"
+  lane :provision do
+    app_ids = {
+      BUNDLE_ID             => "LucidPal",
+      "#{BUNDLE_ID}.widget" => "LucidPal Widget"
+    }
+
+    app_ids.each do |identifier, name|
+      produce(
+        app_identifier:  identifier,
+        app_name:        name,
+        team_id:         TEAM_ID,
+        skip_itc:        true,
+        enable_services: { app_group: "on" }
+      )
+    end
+
+    # Create the App Group (no-op if already exists)
+    sh("bundle exec fastlane produce group " \
+       "-g group.#{BUNDLE_ID} -n 'LucidPal' " \
+       "--team_id #{TEAM_ID} 2>&1 || true")
+
+    # Associate group with both App IDs
+    app_ids.each_key do |identifier|
+      sh("bundle exec fastlane produce associate_group " \
+         "-a #{identifier} group.#{BUNDLE_ID} " \
+         "--team_id #{TEAM_ID}")
+    end
+
+    UI.success("Provisioning complete — run 'fastlane ios device' to build.")
+  end
+
+  # ─────────────────────────────────────────────
+  # Regenerate Xcode project from project.yml
+  # ─────────────────────────────────────────────
+  desc "Regenerate .xcodeproj from project.yml using xcodegen"
+  lane :generate do
+    # __dir__ resolves to the fastlane/ directory regardless of cwd
+    project_root = File.expand_path("..", __dir__)
+    sh("cd #{project_root} && USER=$(id -un) /opt/homebrew/bin/xcodegen generate")
+  end
+
+  # ─────────────────────────────────────────────
+  # Prepare device: enable Developer Mode + verify trust
+  # iOS requires one manual tap on the device to confirm Developer Mode.
+  # After that first tap, this lane is fully silent on repeat runs.
+  # ─────────────────────────────────────────────
+  desc "Enable Developer Mode on device and verify connectivity (USB or Wi-Fi)"
+  lane :prepare do
+    UI.message("Checking device connectivity...")
+
+    # Use xcrun xctrace — works over both USB and Wi-Fi (no libimobiledevice needed)
+    found = false
+    10.times do |i|
+      result = sh("xcrun xctrace list devices 2>&1", error_callback: ->(r) {})
+      if result.include?(DEVICE_UDID)
+        UI.success("Device found")
+        found = true
+        break
+      else
+        UI.important("[Attempt #{i+1}/10] Unlock iPhone and ensure it's connected (USB or Wi-Fi). Retrying in 5s...") if i == 0
+        sleep(5)
+      end
+    end
+    UI.shell_error!("Device #{DEVICE_UDID} not found after 10 attempts.") unless found
+
+    UI.important("Make sure Developer Mode is ON: Settings → Privacy & Security → Developer Mode")
+    UI.success("Device ready for development")
+  end
+
+  # ─────────────────────────────────────────────
+  # Build debug IPA and install on connected device.
+  # Uses App Store Connect API key — no Apple ID needed, CI/CD safe.
+  #
+  # Requires CI secrets:
+  #   APP_STORE_CONNECT_API_KEY_ID
+  #   APP_STORE_CONNECT_API_ISSUER_ID
+  #   APP_STORE_CONNECT_API_KEY_CONTENT  (base64-encoded .p8)
+  #
+  # fastlane ios device
+  # ─────────────────────────────────────────────
+  desc "Prepare device, build debug build, and install on connected iPhone"
+  lane :device do
+    prepare
+    generate
+
+    # Write API key to temp file for xcodebuild native auth (CI only).
+    # Locally, Xcode's existing session handles provisioning — no key needed.
+    key_id      = ENV["APP_STORE_CONNECT_API_KEY_ID"]
+    key_content_b64 = ENV["APP_STORE_CONNECT_API_KEY_CONTENT"]
+    use_api_key = key_id && !key_id.empty? && key_content_b64 && !key_content_b64.empty?
+
+    key_path = nil
+    if use_api_key
+      key_content = Base64.decode64(key_content_b64)
+      key_path    = "/tmp/AuthKey_#{key_id}.p8"
+      File.write(key_path, key_content)
+    end
+
+    xcargs_parts = [
+      "DEVELOPMENT_TEAM=#{TEAM_ID}",
+      "CODE_SIGN_STYLE=Automatic",
+      "-allowProvisioningUpdates",
+      "-allowProvisioningDeviceRegistration"
+    ]
+    if use_api_key
+      xcargs_parts += [
+        "-authenticationKeyPath #{key_path}",
+        "-authenticationKeyID #{key_id}",
+        "-authenticationKeyIssuerID #{ENV["APP_STORE_CONNECT_API_ISSUER_ID"]}"
+      ]
+    end
+
+    build_app(
+      project:          PROJECT,
+      scheme:           SCHEME,
+      configuration:    "Debug",
+      export_method:    "development",
+      destination:      "id=#{DEVICE_UDID}",
+      output_directory: "./build",
+      output_name:      "LucidPal-debug.ipa",
+      clean:            true,
+      xcargs:           xcargs_parts.join(" ")
+    )
+
+    File.delete(key_path) if key_path && File.exist?(key_path)
+
+    install_on_device(
+      device_id: DEVICE_UDID,
+      ipa:       "./build/LucidPal-debug.ipa"
+    )
+
+    UI.success("LucidPal installed on Wass iPhone")
+  end
+
+  # ─────────────────────────────────────────────
+  # Build release IPA and upload to TestFlight
+  # fastlane ios beta
+  # ─────────────────────────────────────────────
+  desc "Build release and upload to TestFlight"
+  lane :beta do
+    generate
+
+    increment_build_number(
+      build_number: latest_testflight_build_number + 1,
+      xcodeproj: PROJECT
+    )
+
+    build_app(
+      project: PROJECT,
+      scheme: SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "LucidPal.ipa",
+      clean: true,
+      xcargs: "DEVELOPMENT_TEAM=#{TEAM_ID} -allowProvisioningUpdates"
+    )
+
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+
+    UI.success("LucidPal uploaded to TestFlight")
+  end
+
+  # ─────────────────────────────────────────────
+  # Build release IPA and submit to App Store
+  # fastlane ios release
+  # ─────────────────────────────────────────────
+  desc "Build release and submit to App Store"
+  lane :release do
+    generate
+
+    increment_build_number(
+      build_number: latest_testflight_build_number + 1,
+      xcodeproj: PROJECT
+    )
+
+    build_app(
+      project: PROJECT,
+      scheme: SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "LucidPal.ipa",
+      clean: true,
+      xcargs: "DEVELOPMENT_TEAM=#{TEAM_ID} -allowProvisioningUpdates"
+    )
+
+    deliver(
+      force: true,
+      submit_for_review: false,
+      automatic_release: false,
+      precheck_include_in_app_purchases: false
+    )
+
+    UI.success("LucidPal submitted to App Store Connect")
+    UI.message("Go to App Store Connect to submit for review when ready")
+  end
+
+end
