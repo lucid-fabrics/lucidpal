@@ -35,6 +35,10 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
     let mmprojURL: URL?
     /// Filename for the mmproj file on disk.
     let mmprojFilename: String?
+    /// Expected SHA256 hex digest of the downloaded GGUF file.
+    /// Sourced from HuggingFace LFS metadata (lfs.oid field).
+    /// nil = no checksum enforcement (e.g. custom/sideloaded models).
+    let sha256: String?
 
     var localURL: URL {
         let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
@@ -81,7 +85,8 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
         minimumRAMGB: 2,
         capabilities: .textOnly,
         mmprojURL: nil,
-        mmprojFilename: nil
+        mmprojFilename: nil,
+        sha256: "bd258782e35f7f458f8aced1adc053e6e92e89bc735ba3be89d38a06121dc517"
     )
 
     static let qwen3_5_2B = ModelInfo(
@@ -93,7 +98,8 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
         minimumRAMGB: 3,
         capabilities: .textOnly,
         mmprojURL: nil,
-        mmprojFilename: nil
+        mmprojFilename: nil,
+        sha256: "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223"
     )
 
     static let qwen3_5_4B = ModelInfo(
@@ -105,7 +111,8 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
         minimumRAMGB: 5,
         capabilities: .textOnly,
         mmprojURL: nil,
-        mmprojFilename: nil
+        mmprojFilename: nil,
+        sha256: "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4"
     )
 
     /// Qwen3.5 Vision 4B — integrated model: handles both text AND vision.
@@ -119,7 +126,8 @@ struct ModelInfo: Identifiable, Hashable, Sendable {
         minimumRAMGB: 5,
         capabilities: .integrated,
         mmprojURL: knownURL("https://huggingface.co/bjivanovich/Qwen3.5-4B-Vision-GGUF/resolve/main/Qwen3.5-4B.BF16-mmproj.gguf"),
-        mmprojFilename: "Qwen3.5-4B.BF16-mmproj.gguf"
+        mmprojFilename: "Qwen3.5-4B.BF16-mmproj.gguf",
+        sha256: "9e63c847c78bb282afbcce7b1c70fdb0eb0ecd752e3de1b8f96a49d745ef2069"
     )
 
     // MARK: - Filters
