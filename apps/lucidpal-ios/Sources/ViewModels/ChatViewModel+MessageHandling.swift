@@ -49,20 +49,25 @@ extension ChatViewModel {
 
     // MARK: - sendMessage
 
+    // swiftlint:disable:next function_body_length
     func sendMessage() async {
         cancelSuggestionsGeneration()
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         let attachments = imageAttachments
-
-        // Auto-load vision model if needed but not loaded
         let hasImages = !attachments.isEmpty
         let needsVision = hasImages && settings.visionEnabled
+
+        // Guard runs synchronously on @MainActor — no suspension between the check and
+        // isPreparing = true, so no concurrent sendMessage call can slip through.
+        guard !text.isEmpty || !attachments.isEmpty, !isGenerating, !isPreparing, isModelLoaded else { return }
+        isPreparing = true
+        defer { isPreparing = false }
+
+        // Auto-load vision model if needed but not loaded
         if needsVision && !llmService.isVisionModelLoaded {
             let prepared = await prepareVisionModel()
             guard prepared else { return }
         }
-
-        guard !text.isEmpty || !attachments.isEmpty, !isGenerating, !isPreparing, isModelLoaded else { return }
 
         hapticService.impact(.light)
         inputText = ""
@@ -92,8 +97,6 @@ extension ChatViewModel {
         let assistantID = assistantMsg.id
 
         // Build system prompt (GeneratingStatusView is visible during this await).
-        isPreparing = true
-        defer { isPreparing = false }
         let systemPrompt = await systemPromptBuilder.buildSystemPrompt()
 
         // Snapshot history without the empty assistant placeholder.
@@ -123,7 +126,11 @@ extension ChatViewModel {
                 DebugLogStore.shared.log("RAW_LLM: \(messages[idx].content)", category: "LLM")
             }
         } catch is CancellationError {
-            // User cancelled — leave partial content visible
+            // User cancelled — remove placeholder if no content arrived yet to avoid a ghost bubble.
+            if let idx = messages.firstIndex(where: { $0.id == assistantID }),
+               messages[idx].content.isEmpty, messages[idx].thinkingContent == nil {
+                messages.remove(at: idx)
+            }
         } catch {
             if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
                 messages[idx].content = "Error: \(error.localizedDescription)"
