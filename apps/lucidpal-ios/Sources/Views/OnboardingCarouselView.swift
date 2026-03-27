@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 import SwiftUI
 import UIKit
 
@@ -6,6 +7,7 @@ struct OnboardingCarouselView: View {
     @Binding var hasCompletedOnboarding: Bool
 
     @State private var currentPage = 0
+    @State private var onboardingVisionModel: ModelInfo?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private static let infoPages: [OnboardingPage] = [
@@ -77,8 +79,11 @@ struct OnboardingCarouselView: View {
                         OnboardingPageView(page: page, pageIndex: index, currentPage: currentPage)
                             .tag(index)
                     }
-                    ModelSelectionPageView(downloadViewModel: downloadViewModel)
-                        .tag(Self.infoPages.count)
+                    ModelSelectionPageView(
+                        downloadViewModel: downloadViewModel,
+                        selectedVisionModel: $onboardingVisionModel
+                    )
+                    .tag(Self.infoPages.count)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(reduceMotion ? .none : .spring(duration: 0.45, bounce: 0.1), value: currentPage)
@@ -162,7 +167,7 @@ struct OnboardingCarouselView: View {
         if !downloadViewModel.availableModels.isEmpty,
            !downloadViewModel.selectedModel.isDownloaded,
            !isActivelyDownloading {
-            downloadViewModel.startDownload()
+            downloadViewModel.startDownload(then: onboardingVisionModel)
         }
         if reduceMotion {
             hasCompletedOnboarding = true
@@ -219,11 +224,17 @@ struct OnboardingCarouselView: View {
 
 private struct ModelSelectionPageView: View {
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
+    @Binding var selectedVisionModel: ModelInfo?
 
-    private var recommendedModel: ModelInfo? {
-        let recommended = ModelInfo.recommended(physicalRAMGB: downloadViewModel.deviceRAMGB)
-        // Only return if present in the visible list — avoids badge/footer mismatch
-        return downloadViewModel.availableModels.first(where: { $0.id == recommended.id })
+    private var allModels: [ModelInfo] {
+        ModelInfo.available(physicalRAMGB: downloadViewModel.deviceRAMGB)
+    }
+    private var textModels: [ModelInfo] { allModels.filter { $0.capabilities == .text } }
+    private var visionModels: [ModelInfo] { allModels.filter { $0.capabilities.contains(.vision) } }
+
+    private var recommendedTextModel: ModelInfo? {
+        let rec = ModelInfo.recommended(physicalRAMGB: downloadViewModel.deviceRAMGB)
+        return textModels.first(where: { $0.id == rec.id })
     }
 
     var body: some View {
@@ -231,7 +242,7 @@ private struct ModelSelectionPageView: View {
             VStack(spacing: 0) {
                 Spacer(minLength: 20)
 
-                // Central icon (matches info page style)
+                // Hero icon
                 ZStack {
                     Circle()
                         .fill(Color.accentColor.opacity(0.08))
@@ -248,7 +259,7 @@ private struct ModelSelectionPageView: View {
                         .symbolRenderingMode(.hierarchical)
                 }
 
-                Spacer(minLength: 28)
+                Spacer(minLength: 24)
 
                 Text("DOWNLOAD ONCE · WORKS OFFLINE")
                     .font(.caption.weight(.semibold))
@@ -261,7 +272,7 @@ private struct ModelSelectionPageView: View {
 
                 Spacer(minLength: 28)
 
-                if downloadViewModel.availableModels.isEmpty {
+                if textModels.isEmpty {
                     VStack(spacing: 12) {
                         Image(systemName: "exclamationmark.triangle")
                             .font(.system(size: 32, weight: .medium))
@@ -273,49 +284,145 @@ private struct ModelSelectionPageView: View {
                     }
                     .padding(.horizontal, 32)
                 } else {
+                    // Text model section
+                    modelSectionHeader(
+                        title: "Text Model",
+                        icon: "cpu",
+                        color: .purple,
+                        subtitle: "Required"
+                    )
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 10)
+
                     VStack(spacing: 8) {
-                        ForEach(downloadViewModel.availableModels) { model in
+                        ForEach(textModels) { model in
                             ModelRowButton(
                                 model: model,
                                 isSelected: downloadViewModel.selectedModel.id == model.id,
-                                isRecommended: model.id == recommendedModel?.id
+                                isRecommended: model.id == recommendedTextModel?.id,
+                                icon: "cpu",
+                                accentColor: .purple
                             ) {
                                 downloadViewModel.selectModel(model)
                             }
                         }
                     }
                     .padding(.horizontal, 32)
+
+                    if !visionModels.isEmpty {
+                        Spacer(minLength: 28)
+
+                        // Vision model section
+                        modelSectionHeader(
+                            title: "Vision Model",
+                            icon: "camera.viewfinder",
+                            color: .orange,
+                            subtitle: "Optional · Enables photo analysis"
+                        )
+                        .padding(.horizontal, 32)
+                        .padding(.bottom, 10)
+
+                        VStack(spacing: 8) {
+                            // "None" option
+                            ModelRowButton(
+                                model: nil,
+                                isSelected: selectedVisionModel == nil,
+                                isRecommended: false,
+                                icon: "xmark",
+                                accentColor: .secondary
+                            ) {
+                                selectedVisionModel = nil
+                            }
+
+                            ForEach(visionModels) { model in
+                                ModelRowButton(
+                                    model: model,
+                                    isSelected: selectedVisionModel?.id == model.id,
+                                    isRecommended: false,
+                                    icon: model.isIntegrated ? "sparkles" : "camera.viewfinder",
+                                    accentColor: .orange
+                                ) {
+                                    selectedVisionModel = model
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 32)
+
+                        Text("Vision models are downloaded after the text model. You can also add one later in Settings.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                            .padding(.top, 10)
+                    }
                 }
 
-                Spacer(minLength: 16)
-
-                if let rec = recommendedModel {
-                    Text("Recommended for your device: \(rec.displayName)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.bottom, 8)
-                }
+                Spacer(minLength: 24)
             }
+        }
+    }
+
+    @ViewBuilder
+    private func modelSectionHeader(
+        title: String,
+        icon: String,
+        color: Color,
+        subtitle: String
+    ) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 20, height: 20)
+                .background(color, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                Text(subtitle)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
         }
     }
 }
 
 private struct ModelRowButton: View {
-    let model: ModelInfo
+    /// nil = "None" option (used for the vision model skip option).
+    let model: ModelInfo?
     let isSelected: Bool
     let isRecommended: Bool
+    let icon: String
+    let accentColor: Color
     let onSelect: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private var sizeLabel: String { String(format: "%.1f GB", model.fileSizeGB) }
+    private var displayName: String { model?.displayName ?? "None" }
+    private var subtitle: String {
+        guard let model else { return "Skip vision model" }
+        if model.isDownloaded { return "On device" }
+        return String(format: "%.1f GB", model.fileSizeGB)
+    }
 
     var body: some View {
         Button(action: onSelect) {
-            HStack {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(isSelected ? .white : accentColor)
+                    .frame(width: 30, height: 30)
+                    .background(
+                        isSelected ? AnyShapeStyle(accentColor) : AnyShapeStyle(accentColor.opacity(0.1)),
+                        in: RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    )
+                    .accessibilityHidden(true)
+
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
-                        Text(model.displayName)
+                        Text(displayName)
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(.primary)
                         if isRecommended {
@@ -326,14 +433,22 @@ private struct ModelRowButton: View {
                                 .padding(.vertical, 2)
                                 .background(Color.accentColor, in: Capsule())
                         }
+                        if model?.isIntegrated == true {
+                            Text("Integrated")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(.purple)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.purple.opacity(0.12), in: Capsule())
+                        }
                     }
-                    Text(sizeLabel)
+                    Text(subtitle)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(model?.isDownloaded == true ? .green : .secondary)
                 }
                 Spacer()
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(isSelected ? Color.accentColor : Color(.systemGray4))
+                    .foregroundStyle(isSelected ? accentColor : Color(.systemGray4))
                     .font(.title3)
                     .accessibilityHidden(true)
             }
@@ -341,11 +456,11 @@ private struct ModelRowButton: View {
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(isSelected ? Color.accentColor.opacity(0.08) : Color(.systemGray6))
+                    .fill(isSelected ? accentColor.opacity(0.08) : Color(.systemGray6))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
                             .strokeBorder(
-                                isSelected ? Color.accentColor.opacity(0.3) : Color.clear,
+                                isSelected ? accentColor.opacity(0.3) : Color.clear,
                                 lineWidth: 1
                             )
                     )
@@ -353,7 +468,7 @@ private struct ModelRowButton: View {
         }
         .buttonStyle(.plain)
         .animation(reduceMotion ? .none : .easeInOut(duration: 0.15), value: isSelected)
-        .accessibilityLabel("\(model.displayName), \(sizeLabel)\(model.isDownloaded ? ", Downloaded" : "")\(isRecommended ? ", Recommended" : "")")
+        .accessibilityLabel(displayName + (isRecommended ? ", Recommended" : "") + (isSelected ? ", Selected" : ""))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

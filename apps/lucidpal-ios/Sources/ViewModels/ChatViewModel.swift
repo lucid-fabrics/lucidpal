@@ -13,6 +13,7 @@ final class ChatViewModel: ObservableObject {
     @Published var isGenerating = false
     @Published var isPreparing = false
     @Published var isModelLoaded = false
+    @Published var isModelLoading = false
     @Published var errorMessage: String?
     @Published var toast: ToastItem?
 
@@ -109,6 +110,7 @@ final class ChatViewModel: ObservableObject {
         self.pendingInput = pendingInput
         self.voiceAutoStartEnabled = dependencies.settings.voiceAutoStartEnabled
         self.isModelLoaded = dependencies.llmService.isLoaded
+        self.isModelLoading = dependencies.llmService.isLoading
 
         var loaded = session?.messages ?? dependencies.historyManager.load()
         ChatViewModel.sanitizeStaleState(&loaded)
@@ -191,6 +193,5 @@ final class ChatViewModel: ObservableObject {
         guard index > 0 else { return true }
         return !Calendar.current.isDate(messages[index].timestamp, inSameDayAs: messages[index - 1].timestamp)
     }
-
 
 }

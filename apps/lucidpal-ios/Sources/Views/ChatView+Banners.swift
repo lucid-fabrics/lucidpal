@@ -34,8 +34,57 @@ extension ChatView {
         }
     }
 
-    var modelNotLoadedBanner: some View {
-        ModelNotLoadedBannerContent()
+    @ViewBuilder var modelNotLoadedBanner: some View {
+        if !viewModel.isModelLoaded {
+            if viewModel.isModelLoading {
+                ModelWarmingUpBannerContent()
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            } else {
+                ModelNotLoadedBannerContent()
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+    }
+}
+
+// MARK: - Model warming up banner
+
+private struct ModelWarmingUpBannerContent: View {
+    @State private var shimmer = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "cpu")
+                .foregroundStyle(Color.accentColor)
+                .opacity(shimmer ? 0.4 : 1.0)
+                .animation(
+                    reduceMotion ? nil : .easeInOut(duration: 1.0).repeatForever(autoreverses: true),
+                    value: shimmer
+                )
+                .accessibilityHidden(true)
+            Text("Warming up your on-device AI…")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Spacer()
+            ProgressView()
+                .scaleEffect(0.7)
+                .tint(.secondary)
+                .accessibilityHidden(true) // label provided by parent .accessibilityElement(children: .combine)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.accentColor.opacity(0.06))
+        .overlay(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(Color.accentColor)
+                .frame(width: 3)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("AI model warming up")
+        .onAppear { if !reduceMotion { shimmer = true } }
+        .onChange(of: reduceMotion) { _, reduced in shimmer = !reduced }
     }
 }
 
@@ -50,6 +99,7 @@ private struct ModelNotLoadedBannerContent: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(.orange)
                 .opacity(pulse ? 0.4 : 1.0)
+                .accessibilityHidden(true)
                 .animation(
                     reduceMotion ? nil : .easeInOut(duration: 1.2).repeatForever(autoreverses: true),
                     value: pulse
@@ -67,7 +117,10 @@ private struct ModelNotLoadedBannerContent: View {
                 .fill(Color.orange)
                 .frame(width: 3)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("No AI model loaded. Go to Settings to download one.")
         .onAppear { if !reduceMotion { pulse = true } }
+        .onChange(of: reduceMotion) { _, reduced in pulse = !reduced }
     }
 }
 

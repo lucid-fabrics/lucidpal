@@ -1,6 +1,7 @@
+// swiftlint:disable file_length
+import PhotosUI
 import SwiftUI
 import UIKit
-import PhotosUI
 
 struct ChatView: View {
     @ObservedObject var viewModel: ChatViewModel
@@ -15,9 +16,8 @@ struct ChatView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if !viewModel.isModelLoaded {
-                modelNotLoadedBanner
-            }
+            modelNotLoadedBanner
+                .animation(.easeInOut(duration: 0.2), value: ModelBannerState(isLoaded: viewModel.isModelLoaded, isLoading: viewModel.isModelLoading))
             if viewModel.isAutoListening {
                 autoListeningBanner
             }
@@ -283,7 +283,7 @@ struct ChatView: View {
 
 // MARK: - Message grouping
 
-fileprivate struct MessageGroupInfo {
+private struct MessageGroupInfo {
     let isFirst: Bool
     let isLast: Bool
     let spacing: CGFloat
@@ -291,7 +291,7 @@ fileprivate struct MessageGroupInfo {
 }
 
 extension ChatView {
-    fileprivate func groupInfo(at index: Int) -> MessageGroupInfo {
+    private func groupInfo(at index: Int) -> MessageGroupInfo {
         let msgs = viewModel.messages
         let message = msgs[index]
         let prevRole = index > 0 ? msgs[index - 1].role : nil
@@ -305,6 +305,8 @@ extension ChatView {
         return MessageGroupInfo(isFirst: isFirst, isLast: isLast, spacing: spacing, precedingUserPrompt: prompt)
     }
 }
+
+private struct ModelBannerState: Equatable { let isLoaded: Bool; let isLoading: Bool }
 
 // MARK: - Disable swipe-back navigation
 

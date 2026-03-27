@@ -5,6 +5,9 @@ struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
     @State private var showDeleteError = false
+    #if DEBUG
+    @State private var showUnsupportedDevicePreview = false
+    #endif
 
     var body: some View {
         NavigationStack {
@@ -33,6 +36,15 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
+            #if DEBUG
+            .fullScreenCover(isPresented: $showUnsupportedDevicePreview) {
+                UnsupportedDeviceView()
+                    .overlay(alignment: .topTrailing) {
+                        Button("Done") { showUnsupportedDevicePreview = false }
+                            .font(.body.weight(.semibold)).padding(.horizontal, 20).padding(.top, 60)
+                    }
+            }
+            #endif
             .onChange(of: downloadViewModel.deleteError) { _, error in
                 if error != nil { showDeleteError = true }
             }
@@ -149,6 +161,7 @@ struct SettingsView: View {
         } header: {
             sectionHeader("Location", icon: "location.fill", color: .blue)
         } footer: {
+            // swiftlint:disable:next line_length
             Text("When enabled, your city is included in the AI prompt so responses like weather and local recommendations are relevant to you. Location is never stored on servers.")
         }
     }
@@ -244,6 +257,7 @@ struct SettingsView: View {
             }
             .pickerStyle(.menu)
 
+            // swiftlint:disable:next line_length
             Text("How many tokens the model keeps in memory. Larger = longer conversations but slower load and more RAM. Takes effect next time the model loads. Your device supports up to \(maxCtx) tokens.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -296,6 +310,9 @@ struct SettingsView: View {
                 viewModel.replayOnboarding()
             } label: {
                 Label("Replay Onboarding", systemImage: "arrow.counterclockwise")
+            }
+            Button { showUnsupportedDevicePreview = true } label: {
+                Label("Preview Unsupported Device Screen", systemImage: "memorychip")
             }
             Button(role: .destructive) {
                 if let domain = Bundle.main.bundleIdentifier {

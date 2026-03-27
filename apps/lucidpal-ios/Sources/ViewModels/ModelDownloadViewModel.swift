@@ -13,11 +13,15 @@ final class ModelDownloadViewModel: ObservableObject {
     @Published private(set) var isModelLoading = false
     @Published var loadError: String?
     @Published var deleteError: String?
+    /// Vision model queued to download automatically after the current text model finishes.
+    @Published private(set) var pendingVisionDownload: ModelInfo?
 
     private let downloader: any ModelDownloaderProtocol
     private let llmService: any LLMServiceProtocol
     private let settings: any AppSettingsProtocol
     private var cancellables = Set<AnyCancellable>()
+    /// Stashed text model during sequential vision download, restored after vision loads.
+    private var textModelBeforeSequentialVisionDownload: ModelInfo?
 
     // MARK: - Pass-throughs (keep settings private, publish for SwiftUI)
 
@@ -63,6 +67,8 @@ final class ModelDownloadViewModel: ObservableObject {
         // Auto-load immediately when download finishes.
         // Capture the model that was selected at download-start time to avoid loading
         // a different model if selectedModel changed during the download.
+        // Sequential vision download: after text model loads, kick off the vision download
+        // if one was queued via startDownload(then:). After vision loads, restore selectedModel.
         downloader.statePublisher
             .compactMap { state -> URL? in
                 if case .completed(let url) = state { return url }
@@ -71,11 +77,23 @@ final class ModelDownloadViewModel: ObservableObject {
             .sink { [weak self] _ in
                 guard let self else { return }
                 let modelAtCompletion = self.selectedModel
+                let pendingVision = self.pendingVisionDownload
+                let textBeforeVision = self.textModelBeforeSequentialVisionDownload
                 Task { [weak self] in
                     guard let self else { return }
-                    // Only auto-load if selectedModel hasn't changed since download started.
                     guard self.selectedModel.id == modelAtCompletion.id else { return }
                     await self.loadModel()
+                    if let vision = pendingVision {
+                        // Text loaded — start vision download.
+                        self.pendingVisionDownload = nil
+                        self.textModelBeforeSequentialVisionDownload = modelAtCompletion
+                        self.selectedModel = vision
+                        self.downloader.download(model: vision)
+                    } else if textBeforeVision != nil {
+                        // Vision loaded — restore UI to text model.
+                        self.textModelBeforeSequentialVisionDownload = nil
+                        if let text = textBeforeVision { self.selectedModel = text }
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -146,11 +164,16 @@ final class ModelDownloadViewModel: ObservableObject {
         selectedModel = model
     }
 
-    func startDownload() {
+    /// Starts downloading the current selectedModel.
+    /// Pass `visionModel` to automatically queue a vision download after the text model loads.
+    func startDownload(then visionModel: ModelInfo? = nil) {
+        pendingVisionDownload = visionModel
         downloader.download(model: selectedModel)
     }
 
     func cancelDownload() {
+        pendingVisionDownload = nil
+        textModelBeforeSequentialVisionDownload = nil
         downloader.cancel()
     }
 
