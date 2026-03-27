@@ -1,8 +1,8 @@
 import BackgroundTasks
 import EventKit
+import os
 import OSLog
 import UIKit
-import os
 
 private let bgLogger = Logger(subsystem: "app.lucidpal", category: "BackgroundTask")
 

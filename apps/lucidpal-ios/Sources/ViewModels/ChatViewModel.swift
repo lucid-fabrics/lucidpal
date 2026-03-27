@@ -194,5 +194,4 @@ final class ChatViewModel: ObservableObject {
         return !Calendar.current.isDate(messages[index].timestamp, inSameDayAs: messages[index - 1].timestamp)
     }
 
-
 }

@@ -41,9 +41,7 @@ struct SettingsView: View {
                 UnsupportedDeviceView()
                     .overlay(alignment: .topTrailing) {
                         Button("Done") { showUnsupportedDevicePreview = false }
-                            .font(.body.weight(.semibold))
-                            .padding(.horizontal, 20)
-                            .padding(.top, 60) // fixed safe value; view has its own safe area
+                            .font(.body.weight(.semibold)).padding(.horizontal, 20).padding(.top, 60)
                     }
             }
             #endif
@@ -163,6 +161,7 @@ struct SettingsView: View {
         } header: {
             sectionHeader("Location", icon: "location.fill", color: .blue)
         } footer: {
+            // swiftlint:disable:next line_length
             Text("When enabled, your city is included in the AI prompt so responses like weather and local recommendations are relevant to you. Location is never stored on servers.")
         }
     }
@@ -258,6 +257,7 @@ struct SettingsView: View {
             }
             .pickerStyle(.menu)
 
+            // swiftlint:disable:next line_length
             Text("How many tokens the model keeps in memory. Larger = longer conversations but slower load and more RAM. Takes effect next time the model loads. Your device supports up to \(maxCtx) tokens.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -311,9 +311,7 @@ struct SettingsView: View {
             } label: {
                 Label("Replay Onboarding", systemImage: "arrow.counterclockwise")
             }
-            Button {
-                showUnsupportedDevicePreview = true
-            } label: {
+            Button { showUnsupportedDevicePreview = true } label: {
                 Label("Preview Unsupported Device Screen", systemImage: "memorychip")
             }
             Button(role: .destructive) {
