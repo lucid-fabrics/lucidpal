@@ -183,9 +183,17 @@ extension LlamaActor {
         let ctxSize = llama_n_ctx(ctx)
         logger.info("generateWithImages: chunks=\(nChunks) totalTokens=\(totalTokens) ctxSize=\(ctxSize) useMRoPE=\(mtmd_decode_use_mrope(mtmdCtx))")
 
+        // Guard: vision prompt (image embeddings + text) must fit within the context window.
+        guard Int(ctxSize) > Int(LLMConstants.maxNewTokens),
+              Int(totalTokens) <= Int(ctxSize) - Int(LLMConstants.maxNewTokens) else {
+            continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
+                domain: "mtmd", code: 0,
+                userInfo: [NSLocalizedDescriptionKey: "Vision prompt too large: \(totalTokens) tokens exceed context window (\(ctxSize))."])))
+            return
+        }
+
         var newNPast: Int32 = 0
-        let nBatch: Int32 = 2048
-        let evalResult = mtmd_helper_eval_chunks(mtmdCtx, ctx, chunks, 0, 0, nBatch, true, &newNPast)
+        let evalResult = mtmd_helper_eval_chunks(mtmdCtx, ctx, chunks, 0, 0, 2048, true, &newNPast)
 
         guard evalResult == 0 else {
             logger.error("generateWithImages: mtmd_helper_eval_chunks failed with \(evalResult), " +

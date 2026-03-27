@@ -53,8 +53,12 @@ final class ModelDownloader: NSObject {
     private let minimumExpectedModelBytes: Int64 = 10 * 1024 * 1024
 
     func download(model: ModelInfo) {
-        // Idempotency guard — prevent double-download race condition
-        guard downloadTask == nil else { return }
+        // Idempotency guard — prevent double-download race condition.
+        // Also check session == nil: background sessions are identified by a string;
+        // iOS disallows two concurrent sessions with the same identifier. The old session
+        // is invalidated asynchronously, so we must wait for it to fully drain (session=nil)
+        // before creating a new one.
+        guard downloadTask == nil, session == nil else { return }
 
         destinationURL = model.localURL
 
