@@ -90,6 +90,12 @@ extension ChatViewModel {
         }
         errorMessage = nil
 
+        // Snapshot history BEFORE appending the placeholder — avoids dropLast() fragility
+        // if anything else appends to messages during the buildSystemPrompt() suspension.
+        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / ChatConstants.bytesPerGB)
+        let historyLimit = ramGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeHistoryLimit : ChatConstants.smallHistoryLimit
+        let historyMessages = Array(messages.suffix(historyLimit))
+
         // Append the assistant placeholder immediately so GeneratingStatusView
         // is visible during the system-prompt build — no blank gap during prefill.
         let assistantMsg = ChatMessage(role: .assistant, content: "")
@@ -98,11 +104,6 @@ extension ChatViewModel {
 
         // Build system prompt (GeneratingStatusView is visible during this await).
         let systemPrompt = await systemPromptBuilder.buildSystemPrompt()
-
-        // Snapshot history without the empty assistant placeholder.
-        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / ChatConstants.bytesPerGB)
-        let historyLimit = ramGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeHistoryLimit : ChatConstants.smallHistoryLimit
-        let historyMessages = Array(messages.dropLast().suffix(historyLimit))
 
         let showThinking = thinkingEnabled
 
@@ -140,7 +141,10 @@ extension ChatViewModel {
             errorMessage = error.localizedDescription
         }
 
-        await finalizeResponse(assistantID: assistantID, text: text, showThinking: showThinking)
+        // Skip finalization if the assistant message was removed (cancelled with no content).
+        if messages.contains(where: { $0.id == assistantID }) {
+            await finalizeResponse(assistantID: assistantID, text: text, showThinking: showThinking)
+        }
     }
 
     // MARK: - Vision model preparation
@@ -262,7 +266,7 @@ extension ChatViewModel {
                 // [WEB_SEARCH:...] or [CALENDAR_ACTION:...] blocks from being executed.
                 let safeTitle   = r.title.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
                 let safeSnippet = r.snippet.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
-                let safeURL     = r.url.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
+                let safeURL     = r.url.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:").replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
                 return "[\(i + 1)] \(safeTitle)\nURL: \(safeURL)\n\(safeSnippet)"
             }.joined(separator: "\n\n")
             let toolMsg = ChatMessage(
