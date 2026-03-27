@@ -20,8 +20,9 @@ final class MockLLMService: LLMServiceProtocol {
     private let isLoadingSubject    = CurrentValueSubject<Bool, Never>(false)
     private let isGeneratingSubject = CurrentValueSubject<Bool, Never>(false)
 
+    let contextTruncatedSubject = PassthroughSubject<Void, Never>()
     var contextTruncatedPublisher: AnyPublisher<Void, Never> {
-        Empty().eraseToAnyPublisher()
+        contextTruncatedSubject.eraseToAnyPublisher()
     }
 
     var isLoadedPublisher: AnyPublisher<Bool, Never> {

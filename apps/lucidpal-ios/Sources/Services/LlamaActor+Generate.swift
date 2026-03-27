@@ -115,7 +115,7 @@ extension LlamaActor {
     }
 
     /// Generates a response using mtmd for proper CLIP-based image understanding.
-    func generateWithImages(prompt: String, imageDataList: [Data], role: ModelType, continuation: AsyncThrowingStream<String, Error>.Continuation) async {
+    func generateWithImages(prompt: String, imageDataList: [Data], role: ModelType, onTruncated: (@Sendable () -> Void)? = nil, continuation: AsyncThrowingStream<String, Error>.Continuation) async {
         let logger = Logger(subsystem: "app.lucidpal", category: "LlamaActor")
 
         let ctx = textCtxPointer
@@ -130,7 +130,7 @@ extension LlamaActor {
 
         guard let mtmdCtx = mtmdCtxPointer else {
             logger.warning("generateWithImages: mtmd not available, falling back to text-only")
-            await generate(prompt: prompt, role: .text, continuation: continuation)
+            await generate(prompt: prompt, role: .text, onTruncated: onTruncated, continuation: continuation)
             return
         }
 
