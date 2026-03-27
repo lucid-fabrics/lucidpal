@@ -32,22 +32,33 @@ extension LlamaActor {
         let contextLength = Int(llama_n_ctx(ctx))
         let maxPromptTokens = contextLength - Int(maxNew)
 
+        // Guard: context must have room for at least one output token.
+        guard maxPromptTokens > 0 else {
+            continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
+                domain: "llama", code: 0,
+                userInfo: [NSLocalizedDescriptionKey: "Context window (\(contextLength)) is too small to generate any output."])))
+            return
+        }
+
         var tokens = tokenize(text: prompt, addBOS: true, parseSpecial: true, vocab: vocab)
         guard !tokens.isEmpty else {
             continuation.finish()
             return
         }
 
+        // Truncate to context window first — keeps the most recent content.
+        if tokens.count > maxPromptTokens {
+            tokens = Array(tokens.suffix(maxPromptTokens))
+            onTruncated?()
+        }
+
+        // Batch capacity check runs after truncation so long-context models don't
+        // hit this wall for prompts that would fit after context-window trimming.
         if tokens.count > Int(LLMConstants.batchCapacity) {
             continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
                 domain: "llama", code: 0,
                 userInfo: [NSLocalizedDescriptionKey: "Prompt too large for batch (\(tokens.count) tokens, max \(LLMConstants.batchCapacity))"])))
             return
-        }
-
-        if tokens.count > maxPromptTokens {
-            tokens = Array(tokens.suffix(maxPromptTokens))
-            onTruncated?()
         }
 
         llama_memory_clear(llama_get_memory(ctx), false)
