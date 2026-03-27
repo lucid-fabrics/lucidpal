@@ -15,6 +15,11 @@ final class CalendarActionController: CalendarActionControllerProtocol {
     /// to avoid matching stale events from years ago when names recur (e.g. "Dentist").
     static let actionSearchWindowDays = 60
 
+    // Cached detector — NSDataDetector construction is expensive (compiles an automaton);
+    // instantiating it once and reusing avoids repeated allocation on every date field.
+    private static let dateDetector: NSDataDetector? =
+        try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue)
+
     // Date formats the LLM might generate — tried in order
     private static let dateFormats: [String] = [
         "yyyy-MM-dd'T'HH:mm:ss",   // canonical ISO8601 (no tz)
@@ -52,9 +57,15 @@ final class CalendarActionController: CalendarActionControllerProtocol {
             // Final fallback: NSDataDetector for natural language dates
             // ("tomorrow at 3pm", "next Monday", "in 2 hours", etc.).
             // Respects device locale and timezone automatically.
-            if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue) {
+            // Skip ISO-like strings (digit + 'T'/'-') to avoid silent misparse of
+            // exotic ISO variants the formatters above didn't handle.
+            let looksLikeISO = raw.contains("T") || (raw.contains("-") && raw.first?.isNumber == true)
+            if !looksLikeISO, let detector = Self.dateDetector {
                 let nsRange = NSRange(raw.startIndex..., in: raw)
+                // Require a full-string match — reject partial hits like "tomorrow" inside
+                // "meeting tomorrow with Alice" where the intent is ambiguous.
                 if let match = detector.firstMatch(in: raw, options: [], range: nsRange),
+                   match.range == nsRange,
                    let date = match.date {
                     return date
                 }
