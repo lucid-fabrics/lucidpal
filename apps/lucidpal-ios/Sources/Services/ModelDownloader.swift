@@ -358,7 +358,7 @@ extension ModelDownloader: URLSessionDownloadDelegate {
 
         // Stale or corrupt resume data — the system cannot continue from the saved offset.
         // Clear it so the next retry starts fresh rather than looping on the same bad data.
-        if nsError.code == NSURLErrorCannotResumeDownload {
+        if nsError.code == -3006 { // NSURLErrorCannotResumeDownload
             Task { @MainActor [weak self] in
                 self?.pendingResumeData = nil
                 self?.downloadTask = nil

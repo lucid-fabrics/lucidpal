@@ -151,7 +151,7 @@ actor LlamaActor {
 
     /// Loads a model for the given role. If loading a vision model on a low-RAM device
     /// with the text model already loaded, unloads the text model first.
-    func loadModel(at path: String, contextSize: UInt32, role: ModelType, isIntegrated: Bool = false, mmprojPath: String? = nil) throws {
+    func loadModel(at path: String, contextSize: UInt32, temperature: Float = LLMConstants.samplerTemperature, role: ModelType, isIntegrated: Bool = false, mmprojPath: String? = nil) throws {
         let logger = Logger(subsystem: "app.lucidpal", category: "LlamaActor")
         logger.info("loadModel: path=\(path) role=\(String(describing: role)) isIntegrated=\(isIntegrated) mmproj=\(mmprojPath ?? "none")")
         if role == .vision && deviceRAMGB < LLMConstants.visionModelMinRAMGB && textModel != nil {
@@ -160,7 +160,7 @@ actor LlamaActor {
 
         switch role {
         case .text:
-            try loadSingleModel(at: path, contextSize: contextSize, role: role, into: &textModel, &textCtx, &textVocab, &textSampler)
+            try loadSingleModel(at: path, contextSize: contextSize, temperature: temperature, role: role, into: &textModel, &textCtx, &textVocab, &textSampler)
             textModelSupportsVision = isIntegrated
 
             if let mmprojPath, let model = textModel {
@@ -183,7 +183,7 @@ actor LlamaActor {
 
             logger.info("loadModel: text slot loaded, textModelSupportsVision=\(self.textModelSupportsVision)")
         case .vision:
-            try loadSingleModel(at: path, contextSize: contextSize, role: role, into: &visionModel, &visionCtx, &visionVocab, &visionSampler)
+            try loadSingleModel(at: path, contextSize: contextSize, temperature: temperature, role: role, into: &visionModel, &visionCtx, &visionVocab, &visionSampler)
             logger.info("loadModel: vision slot loaded, visionModel=\(self.visionModel != nil)")
         }
         activeRole = role
@@ -192,6 +192,7 @@ actor LlamaActor {
     private func loadSingleModel(
         at path: String,
         contextSize: UInt32,
+        temperature: Float,
         role: ModelType,
         into modelPtr: inout OpaquePointer?,
         _ ctxPtr: inout OpaquePointer?,
@@ -236,7 +237,7 @@ actor LlamaActor {
 
         let sparams = llama_sampler_chain_default_params()
         let s = llama_sampler_chain_init(sparams)
-        llama_sampler_chain_add(s, llama_sampler_init_temp(LLMConstants.samplerTemperature))
+        llama_sampler_chain_add(s, llama_sampler_init_temp(temperature))
         llama_sampler_chain_add(s, llama_sampler_init_dist(UInt32.random(in: 0...UInt32.max)))
         samplerPtr = s
     }

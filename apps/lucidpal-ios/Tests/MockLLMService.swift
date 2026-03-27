@@ -44,7 +44,7 @@ final class MockLLMService: LLMServiceProtocol {
     var cancelCalled = false
     private(set) var generateCallCount = 0
 
-    func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool, modelRole: ModelType) -> AsyncThrowingStream<String, Error> {
+    func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool, modelRole: ModelType, maxNewTokens: Int32 = Int32(LLMConstants.maxNewTokens)) -> AsyncThrowingStream<String, Error> {
         generateCallCount += 1
         let tokens = generateCallCount > 1 && !secondStubbedTokens.isEmpty ? secondStubbedTokens : stubbedTokens
         let error = shouldThrowOnGenerate
@@ -63,7 +63,7 @@ final class MockLLMService: LLMServiceProtocol {
         }
     }
 
-    func loadModel(at url: URL, contextSize: UInt32, role: ModelType, isIntegrated: Bool, mmprojURL: URL? = nil) async throws {
+    func loadModel(at url: URL, contextSize: UInt32, temperature: Float = LLMConstants.samplerTemperature, role: ModelType, isIntegrated: Bool, mmprojURL: URL? = nil) async throws {
         loadedURL = url
         isLoaded = true  // didSet fires isLoadedSubject
     }

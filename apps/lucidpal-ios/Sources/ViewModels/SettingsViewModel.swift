@@ -31,6 +31,9 @@ final class SettingsViewModel: ObservableObject {
     @Published var airpodsAutoVoiceEnabled: Bool = false
     @Published var speechAutoSendEnabled: Bool = false
     @Published var contextSize: Int = ChatConstants.defaultContextSizeTokens
+    @Published var temperature: Double = Double(LLMConstants.samplerTemperature)
+    @Published var maxResponseTokens: Int = Int(LLMConstants.maxNewTokens)
+    @Published var generationTimeout: Double = ChatConstants.generationTimeoutSeconds
 
     // MARK: - Web Search
     @Published var webSearchEnabled: Bool = false
@@ -85,6 +88,9 @@ final class SettingsViewModel: ObservableObject {
         self.airpodsAutoVoiceEnabled = settings.airpodsAutoVoiceEnabled
         self.speechAutoSendEnabled = settings.speechAutoSendEnabled
         self.contextSize = settings.contextSize
+        self.temperature = settings.temperature
+        self.maxResponseTokens = settings.maxResponseTokens
+        self.generationTimeout = settings.generationTimeout
         self.webSearchEnabled = settings.webSearchEnabled
         self.webSearchProvider = settings.webSearchProvider
         self.braveApiKey = settings.braveApiKey
@@ -138,6 +144,15 @@ final class SettingsViewModel: ObservableObject {
             .store(in: &cancellables)
         $contextSize.dropFirst()
             .sink { [weak self] in self?.settings.contextSize = $0 }
+            .store(in: &cancellables)
+        $temperature.dropFirst()
+            .sink { [weak self] in self?.settings.temperature = $0 }
+            .store(in: &cancellables)
+        $maxResponseTokens.dropFirst()
+            .sink { [weak self] in self?.settings.maxResponseTokens = $0 }
+            .store(in: &cancellables)
+        $generationTimeout.dropFirst()
+            .sink { [weak self] in self?.settings.generationTimeout = $0 }
             .store(in: &cancellables)
 
         // Vision mirror → settings

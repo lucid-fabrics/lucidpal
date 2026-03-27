@@ -216,7 +216,7 @@ final class ModelDownloadViewModel: ObservableObject {
                 ? max(UInt32(settings.contextSize), UInt32(LLMConstants.largeContextSize))
                 : UInt32(settings.contextSize)
             modelDownloadLogger.info("loadModel: model=\(self.selectedModel.displayName) role=\(String(describing: role)) isIntegrated=\(self.selectedModel.isIntegrated) ctx=\(ctxSize) mmproj=\(mmprojPath?.path ?? "none")")
-            try await llmService.loadModel(at: selectedModel.localURL, contextSize: ctxSize, role: role, isIntegrated: selectedModel.isIntegrated, mmprojURL: mmprojPath)
+            try await llmService.loadModel(at: selectedModel.localURL, contextSize: ctxSize, temperature: Float(settings.temperature), role: role, isIntegrated: selectedModel.isIntegrated, mmprojURL: mmprojPath)
             // Update the appropriate saved model ID (settings + published).
             if role == .text {
                 settings.selectedTextModelID = selectedModel.id
