@@ -129,6 +129,17 @@ extension ChatViewModel {
             // Only finalize on success — error path sets an error string which must not
             // be passed through calendar/web-search action extraction.
             await finalizeResponse(assistantID: assistantID, text: text, showThinking: showThinking)
+        } catch LLMError.timeout {
+            // Generation stalled — keep any partial response and append a timeout notice.
+            // Must be caught before CancellationError since timeout cancels the group too.
+            llmService.cancelGeneration()
+            if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
+                let partial = messages[idx].content
+                messages[idx].content = partial.isEmpty
+                    ? "Response timed out. Try a shorter message."
+                    : partial + "\n\n*(Response timed out)*"
+            }
+            errorMessage = "Response timed out after \(Int(ChatConstants.generationTimeoutSeconds))s."
         } catch is CancellationError {
             // User cancelled — remove placeholder if no visible content arrived yet.
             // thinkingContent may be partially set mid-think-block, so treat empty string as absent.
@@ -242,12 +253,31 @@ extension ChatViewModel {
         showThinking: Bool,
         modelRole: ModelType
     ) async throws {
-        var raw = ""
-        var thinkDone = false
-
-        for try await token in llmService.generate(systemPrompt: systemPrompt, messages: historyMessages, thinkingEnabled: showThinking, modelRole: modelRole) {
-            guard let idx = messages.firstIndex(where: { $0.id == assistantID }) else { break }
-            applyStreamToken(token, rawBuffer: &raw, thinkDone: &thinkDone, showThinking: showThinking, idx: idx)
+        // Race generation against a 90-second timeout. If the model hangs (e.g. OOM stall,
+        // infinite loop in llama.cpp), the timeout task throws LLMError.timeout, which
+        // cancels the generation task and surfaces a user-readable error.
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask { @MainActor [weak self] in
+                guard let self else { return }
+                var raw = ""
+                var thinkDone = false
+                for try await token in self.llmService.generate(
+                    systemPrompt: systemPrompt,
+                    messages: historyMessages,
+                    thinkingEnabled: showThinking,
+                    modelRole: modelRole
+                ) {
+                    guard let idx = self.messages.firstIndex(where: { $0.id == assistantID }) else { break }
+                    self.applyStreamToken(token, rawBuffer: &raw, thinkDone: &thinkDone, showThinking: showThinking, idx: idx)
+                }
+            }
+            group.addTask {
+                try await Task.sleep(for: .seconds(ChatConstants.generationTimeoutSeconds))
+                throw LLMError.timeout
+            }
+            // Whichever task completes (or throws) first wins; cancel the other.
+            try await group.next()
+            group.cancelAll()
         }
     }
 
@@ -295,14 +325,26 @@ extension ChatViewModel {
             DebugLogStore.shared.log("WEB_SEARCH starting synthesis pass", category: "Search")
             var raw2 = ""
             var thinkDone2 = false
-            for try await token in llmService.generate(
-                systemPrompt: synthesisPrompt,
-                messages: [toolMsg],
-                thinkingEnabled: showThinking,
-                modelRole: .text
-            ) {
-                guard let i = messages.firstIndex(where: { $0.id == assistantID }) else { break }
-                applyStreamToken(token, rawBuffer: &raw2, thinkDone: &thinkDone2, showThinking: showThinking, idx: i)
+            // Apply the same 90-second timeout as the primary generation pass.
+            try await withThrowingTaskGroup(of: Void.self) { group in
+                group.addTask { @MainActor [weak self] in
+                    guard let self else { return }
+                    for try await token in self.llmService.generate(
+                        systemPrompt: synthesisPrompt,
+                        messages: [toolMsg],
+                        thinkingEnabled: showThinking,
+                        modelRole: .text
+                    ) {
+                        guard let i = self.messages.firstIndex(where: { $0.id == assistantID }) else { break }
+                        self.applyStreamToken(token, rawBuffer: &raw2, thinkDone: &thinkDone2, showThinking: showThinking, idx: i)
+                    }
+                }
+                group.addTask {
+                    try await Task.sleep(for: .seconds(ChatConstants.generationTimeoutSeconds))
+                    throw LLMError.timeout
+                }
+                try await group.next()
+                group.cancelAll()
             }
             let synthesisPreview = String(messages.first(where: { $0.id == assistantID })?.content.prefix(ChatConstants.synthesisLogPreviewLength) ?? "")
             messageHandlingLogger.info("🔍 WEB_SEARCH synthesis done, content='\(synthesisPreview, privacy: .private)'")
@@ -310,6 +352,16 @@ extension ChatViewModel {
             if let i = messages.firstIndex(where: { $0.id == assistantID }) {
                 messages[i].isWebSearchResult = true
             }
+        } catch LLMError.timeout {
+            // Synthesis stalled — keep any partial content and flag as timed out.
+            llmService.cancelGeneration()
+            if let i = messages.firstIndex(where: { $0.id == assistantID }) {
+                let partial = messages[i].content
+                messages[i].content = partial.isEmpty
+                    ? "Response timed out. Try a shorter message."
+                    : partial + "\n\n*(Response timed out)*"
+            }
+            errorMessage = "Response timed out after \(Int(ChatConstants.generationTimeoutSeconds))s."
         } catch is CancellationError {
             // User cancelled mid-search — content was cleared before search started;
             // remove the blank bubble if nothing arrived.

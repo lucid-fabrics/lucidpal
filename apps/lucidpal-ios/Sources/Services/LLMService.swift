@@ -243,6 +243,7 @@ enum LLMError: LocalizedError {
     case generationInProgress
     case loadFailed(underlying: Error)
     case generateFailed
+    case timeout
 
     var errorDescription: String? {
         switch self {
@@ -254,6 +255,8 @@ enum LLMError: LocalizedError {
             return "Failed to load model: \(e.localizedDescription)"
         case .generateFailed:
             return "Token generation failed. Try reloading the model."
+        case .timeout:
+            return "Response timed out. Try a shorter message or restart the app."
         }
     }
 }
