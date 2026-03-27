@@ -95,10 +95,15 @@ struct LucidPalApp: App {
             downloader: modelDownloader
         )
 
-        // Cancel LLM generation on memory pressure to avoid Jetsam crash.
+        // On memory pressure: cancel generation AND unload the model to free KV-cache
+        // and model weights. Without unloading, Jetsam can still kill the app because
+        // the model remains resident even after generation stops.
         let service = llmService
         memoryWarningObserver = MemoryPressureObserver {
-            Task { @MainActor in service.cancelGeneration() }
+            Task { @MainActor in
+                service.cancelGeneration()
+                service.unload()
+            }
         }
     }
 
@@ -189,9 +194,10 @@ private struct RootView: View {
         #if targetEnvironment(simulator)
         return true
         #else
-        // 5 GB threshold cleanly separates 4 GB devices (iPhone 12/mini) from
-        // 6 GB devices (iPhone 12 Pro+). physicalMemory on 4 GB devices ≈ 4_294_967_296.
-        let minRAMThreshold: UInt64 = 5_368_709_120
+        // 3 GB threshold blocks devices with less than 3 GB RAM (too small even for the
+        // 0.8 B model). 4 GB devices (iPhone 12/13/SE3) are supported with a reduced
+        // 2048-token context window. physicalMemory on 4 GB devices ≈ 4_294_967_296.
+        let minRAMThreshold: UInt64 = 3_221_225_472
         return ProcessInfo.processInfo.physicalMemory >= minRAMThreshold
         #endif
     }()

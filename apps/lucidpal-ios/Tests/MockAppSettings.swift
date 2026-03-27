@@ -39,7 +39,9 @@ final class MockAppSettings: AppSettingsProtocol {
 
     var deviceRAMGB: Int = 4
     var maxContextSize: Int {
-        deviceRAMGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeContextSizeTokens : ChatConstants.defaultContextSizeTokens
+        deviceRAMGB >= ChatConstants.largeContextRAMThresholdGB
+            ? ChatConstants.largeContextSizeTokens
+            : ChatConstants.tinyContextSizeTokens
     }
 
     // Backwards-compat
