@@ -5,7 +5,12 @@ import OSLog
 // MARK: - Generate (text only)
 
 extension LlamaActor {
-    func generate(prompt: String, role: ModelType, onTruncated: (@Sendable () -> Void)? = nil, continuation: AsyncThrowingStream<String, Error>.Continuation) async {
+    func generate(
+        prompt: String,
+        role: ModelType,
+        onTruncated: (@Sendable () -> Void)? = nil,
+        continuation: AsyncThrowingStream<String, Error>.Continuation
+    ) async {
         let useTextSlotForVision = role == .vision && !isVisionModelLoaded && textModelSupportsVision && isTextModelLoaded
         let actualCtx: OpaquePointer?
         let actualVocab: OpaquePointer?
@@ -126,7 +131,13 @@ extension LlamaActor {
     }
 
     /// Generates a response using mtmd for proper CLIP-based image understanding.
-    func generateWithImages(prompt: String, imageDataList: [Data], role: ModelType, onTruncated: (@Sendable () -> Void)? = nil, continuation: AsyncThrowingStream<String, Error>.Continuation) async {
+    func generateWithImages(
+        prompt: String,
+        imageDataList: [Data],
+        role: ModelType,
+        onTruncated: (@Sendable () -> Void)? = nil,
+        continuation: AsyncThrowingStream<String, Error>.Continuation
+    ) async {
         let logger = Logger(subsystem: "app.lucidpal", category: "LlamaActor")
 
         let ctx = textCtxPointer
@@ -172,12 +183,21 @@ extension LlamaActor {
         let ctxSize = llama_n_ctx(ctx)
         logger.info("generateWithImages: chunks=\(nChunks) totalTokens=\(totalTokens) ctxSize=\(ctxSize) useMRoPE=\(mtmd_decode_use_mrope(mtmdCtx))")
 
+        // Guard: vision prompt (image embeddings + text) must fit within the context window.
+        guard Int(ctxSize) > Int(LLMConstants.maxNewTokens),
+              Int(totalTokens) <= Int(ctxSize) - Int(LLMConstants.maxNewTokens) else {
+            continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
+                domain: "mtmd", code: 0,
+                userInfo: [NSLocalizedDescriptionKey: "Vision prompt too large: \(totalTokens) tokens exceed context window (\(ctxSize))."])))
+            return
+        }
+
         var newNPast: Int32 = 0
-        let nBatch: Int32 = 2048
-        let evalResult = mtmd_helper_eval_chunks(mtmdCtx, ctx, chunks, 0, 0, nBatch, true, &newNPast)
+        let evalResult = mtmd_helper_eval_chunks(mtmdCtx, ctx, chunks, 0, 0, 2048, true, &newNPast)
 
         guard evalResult == 0 else {
-            logger.error("generateWithImages: mtmd_helper_eval_chunks failed with \(evalResult), chunks=\(nChunks) totalTokens=\(totalTokens) ctxSize=\(ctxSize)")
+            logger.error("generateWithImages: mtmd_helper_eval_chunks failed with \(evalResult), " +
+                         "chunks=\(nChunks) totalTokens=\(totalTokens) ctxSize=\(ctxSize)")
             continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
                 domain: "mtmd", code: Int(evalResult),
                 userInfo: [NSLocalizedDescriptionKey: "Vision encoding failed (chunks=\(nChunks), tokens=\(totalTokens), ctx=\(ctxSize), err=\(evalResult))"])))
