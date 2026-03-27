@@ -79,7 +79,10 @@ final class CalendarActionController: CalendarActionControllerProtocol {
                 && chars[2].isNumber && chars[3].isNumber
                 && chars[4] == "-"
                 && chars[5].isNumber && chars[6].isNumber
-            let looksLikeISO = hasISODatePrefix || raw.contains("T")
+            // hasISODatePrefix already covers all ISO datetimes (YYYY-MM-DDThh:mm:ss...),
+            // so the former raw.contains("T") guard is omitted — it incorrectly blocked
+            // natural language strings like "Tomorrow at 3pm" or "Next Tuesday at noon".
+            let looksLikeISO = hasISODatePrefix
             if !looksLikeISO, let detector = Self.dateDetector {
                 let nsRange = NSRange(raw.startIndex..., in: raw)
                 // Require a full-string match — reject partial hits like "tomorrow" inside
