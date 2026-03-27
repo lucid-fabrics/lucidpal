@@ -1,4 +1,7 @@
 import Foundation
+import OSLog
+
+private let calendarActionLogger = Logger(subsystem: "app.lucidpal", category: "CalendarActionController")
 
 // Types: see CalendarActionModels.swift
 
@@ -17,8 +20,16 @@ final class CalendarActionController: CalendarActionControllerProtocol {
 
     // Cached detector — NSDataDetector construction is expensive (compiles an automaton);
     // instantiating it once and reusing avoids repeated allocation on every date field.
-    private static let dateDetector: NSDataDetector? =
-        try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue)
+    private static let dateDetector: NSDataDetector? = {
+        do {
+            return try NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue)
+        } catch {
+            // Construction failure is a programming error (invalid type mask) — surface loudly.
+            assertionFailure("NSDataDetector failed to initialize: \(error)")
+            calendarActionLogger.fault("NSDataDetector construction failed — relative date parsing disabled: \(error.localizedDescription, privacy: .public)")
+            return nil
+        }
+    }()
 
     // Date formats the LLM might generate — tried in order
     private static let dateFormats: [String] = [
@@ -57,9 +68,18 @@ final class CalendarActionController: CalendarActionControllerProtocol {
             // Final fallback: NSDataDetector for natural language dates
             // ("tomorrow at 3pm", "next Monday", "in 2 hours", etc.).
             // Respects device locale and timezone automatically.
-            // Skip ISO-like strings (digit + 'T'/'-') to avoid silent misparse of
-            // exotic ISO variants the formatters above didn't handle.
-            let looksLikeISO = raw.contains("T") || (raw.contains("-") && raw.first?.isNumber == true)
+            // Skip strings that look like ISO 8601 dates (YYYY-MM prefix or 'T' separator)
+            // to avoid silently misparsing exotic variants the formatters above didn't catch.
+            // Use a character-level ISO date prefix check (4 digits + '-' + 2 digits) rather
+            // than raw.contains("-") to avoid blocking NL strings like "2-hour meeting" or
+            // "1-on-1 at 3pm" which contain a hyphen with a leading digit.
+            let chars = Array(raw)
+            let hasISODatePrefix = chars.count >= 7
+                && chars[0].isNumber && chars[1].isNumber
+                && chars[2].isNumber && chars[3].isNumber
+                && chars[4] == "-"
+                && chars[5].isNumber && chars[6].isNumber
+            let looksLikeISO = hasISODatePrefix || raw.contains("T")
             if !looksLikeISO, let detector = Self.dateDetector {
                 let nsRange = NSRange(raw.startIndex..., in: raw)
                 // Require a full-string match — reject partial hits like "tomorrow" inside
