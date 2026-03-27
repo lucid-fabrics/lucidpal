@@ -67,4 +67,6 @@ enum ChatConstants {
     static let generatingPhraseIntervalSeconds: Double = 4.5
     /// Nanoseconds to wait before resetting the photo picker selection.
     static let photoPickerResetDelayNanoseconds: UInt64 = 100_000_000
+    /// Seconds before a hanging generation is cancelled and an error is shown to the user.
+    static let generationTimeoutSeconds: Double = 90
 }

@@ -137,6 +137,16 @@ extension ChatViewModel {
                messages[idx].thinkingContent?.isEmpty ?? true {
                 messages.remove(at: idx)
             }
+        } catch LLMError.timeout {
+            // Generation stalled — keep any partial response and append a timeout notice.
+            llmService.cancelGeneration()
+            if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
+                let partial = messages[idx].content
+                messages[idx].content = partial.isEmpty
+                    ? "Response timed out. Try a shorter message."
+                    : partial + "\n\n*(Response timed out)*"
+            }
+            errorMessage = "Response timed out after \(Int(ChatConstants.generationTimeoutSeconds))s."
         } catch {
             if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
                 messages[idx].content = "Error: \(error.localizedDescription)"
@@ -242,12 +252,31 @@ extension ChatViewModel {
         showThinking: Bool,
         modelRole: ModelType
     ) async throws {
-        var raw = ""
-        var thinkDone = false
-
-        for try await token in llmService.generate(systemPrompt: systemPrompt, messages: historyMessages, thinkingEnabled: showThinking, modelRole: modelRole) {
-            guard let idx = messages.firstIndex(where: { $0.id == assistantID }) else { break }
-            applyStreamToken(token, rawBuffer: &raw, thinkDone: &thinkDone, showThinking: showThinking, idx: idx)
+        // Race generation against a 90-second timeout. If the model hangs (e.g. OOM stall,
+        // infinite loop in llama.cpp), the timeout task throws LLMError.timeout, which
+        // cancels the generation task and surfaces a user-readable error.
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask { @MainActor [weak self] in
+                guard let self else { return }
+                var raw = ""
+                var thinkDone = false
+                for try await token in self.llmService.generate(
+                    systemPrompt: systemPrompt,
+                    messages: historyMessages,
+                    thinkingEnabled: showThinking,
+                    modelRole: modelRole
+                ) {
+                    guard let idx = self.messages.firstIndex(where: { $0.id == assistantID }) else { break }
+                    self.applyStreamToken(token, rawBuffer: &raw, thinkDone: &thinkDone, showThinking: showThinking, idx: idx)
+                }
+            }
+            group.addTask {
+                try await Task.sleep(for: .seconds(ChatConstants.generationTimeoutSeconds))
+                throw LLMError.timeout
+            }
+            // Whichever task completes (or throws) first wins; cancel the other.
+            try await group.next()
+            group.cancelAll()
         }
     }
 
