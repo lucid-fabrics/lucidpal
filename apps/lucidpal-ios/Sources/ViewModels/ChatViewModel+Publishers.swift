@@ -71,6 +71,10 @@ extension ChatViewModel {
             .sink { [weak self] in self?.isAutoListening = $0 }
             .store(in: &cancellables)
 
+        setupErrorDismissPublisher()
+    }
+
+    private func setupErrorDismissPublisher() {
         // Auto-dismiss error banner after errorAutoDismissSeconds
         $errorMessage
             .receive(on: DispatchQueue.main)

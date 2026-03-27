@@ -1,6 +1,6 @@
 import Foundation
-import OSLog
 import llama
+import OSLog
 
 private let llmServiceLogger = Logger(subsystem: "app.lucidpal", category: "LLMService")
 
@@ -90,7 +90,9 @@ final class LLMService: LLMServiceProtocol {
             let body = messages.filter { $0.role != .system }
             let lastUserMessage = body.last(where: { $0.role == .user })
             let imageDataList = Self.extractImageData(from: lastUserMessage)
-            let prompt = Self.buildVisionPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled, imageCount: imageDataList.count)
+            let prompt = Self.buildVisionPrompt(
+                systemPrompt: systemPrompt, messages: messages,
+                thinkingEnabled: thinkingEnabled, imageCount: imageDataList.count)
             let truncatedSubject = contextTruncatedSubject
 
             return AsyncThrowingStream { continuation in

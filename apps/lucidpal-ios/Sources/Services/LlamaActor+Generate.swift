@@ -5,7 +5,12 @@ import OSLog
 // MARK: - Generate (text only)
 
 extension LlamaActor {
-    func generate(prompt: String, role: ModelType, onTruncated: (@Sendable () -> Void)? = nil, continuation: AsyncThrowingStream<String, Error>.Continuation) async {
+    func generate(
+        prompt: String,
+        role: ModelType,
+        onTruncated: (@Sendable () -> Void)? = nil,
+        continuation: AsyncThrowingStream<String, Error>.Continuation
+    ) async {
         let useTextSlotForVision = role == .vision && !isVisionModelLoaded && textModelSupportsVision && isTextModelLoaded
         let actualCtx: OpaquePointer?
         let actualVocab: OpaquePointer?
@@ -126,7 +131,13 @@ extension LlamaActor {
     }
 
     /// Generates a response using mtmd for proper CLIP-based image understanding.
-    func generateWithImages(prompt: String, imageDataList: [Data], role: ModelType, onTruncated: (@Sendable () -> Void)? = nil, continuation: AsyncThrowingStream<String, Error>.Continuation) async {
+    func generateWithImages(
+        prompt: String,
+        imageDataList: [Data],
+        role: ModelType,
+        onTruncated: (@Sendable () -> Void)? = nil,
+        continuation: AsyncThrowingStream<String, Error>.Continuation
+    ) async {
         let logger = Logger(subsystem: "app.lucidpal", category: "LlamaActor")
 
         let ctx = textCtxPointer
@@ -177,7 +188,8 @@ extension LlamaActor {
         let evalResult = mtmd_helper_eval_chunks(mtmdCtx, ctx, chunks, 0, 0, nBatch, true, &newNPast)
 
         guard evalResult == 0 else {
-            logger.error("generateWithImages: mtmd_helper_eval_chunks failed with \(evalResult), chunks=\(nChunks) totalTokens=\(totalTokens) ctxSize=\(ctxSize)")
+            logger.error("generateWithImages: mtmd_helper_eval_chunks failed with \(evalResult), " +
+                         "chunks=\(nChunks) totalTokens=\(totalTokens) ctxSize=\(ctxSize)")
             continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
                 domain: "mtmd", code: Int(evalResult),
                 userInfo: [NSLocalizedDescriptionKey: "Vision encoding failed (chunks=\(nChunks), tokens=\(totalTokens), ctx=\(ctxSize), err=\(evalResult))"])))
