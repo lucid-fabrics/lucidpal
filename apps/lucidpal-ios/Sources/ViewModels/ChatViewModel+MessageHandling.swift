@@ -126,6 +126,9 @@ extension ChatViewModel {
                 messageHandlingLogger.info("RAW_LLM: \(self.messages[idx].content, privacy: .private)")
                 DebugLogStore.shared.log("RAW_LLM: \(messages[idx].content)", category: "LLM")
             }
+            // Only finalize on success — error path sets an error string which must not
+            // be passed through calendar/web-search action extraction.
+            await finalizeResponse(assistantID: assistantID, text: text, showThinking: showThinking)
         } catch is CancellationError {
             // User cancelled — remove placeholder if no visible content arrived yet.
             // thinkingContent may be partially set mid-think-block, so treat empty string as absent.
@@ -139,11 +142,6 @@ extension ChatViewModel {
                 messages[idx].content = "Error: \(error.localizedDescription)"
             }
             errorMessage = error.localizedDescription
-        }
-
-        // Skip finalization if the assistant message was removed (cancelled with no content).
-        if messages.contains(where: { $0.id == assistantID }) {
-            await finalizeResponse(assistantID: assistantID, text: text, showThinking: showThinking)
         }
     }
 
@@ -269,9 +267,14 @@ extension ChatViewModel {
                 let safeURL     = r.url.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:").replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
                 return "[\(i + 1)] \(safeTitle)\nURL: \(safeURL)\n\(safeSnippet)"
             }.joined(separator: "\n\n")
+            // Sanitize query to prevent injection tokens from being re-executed by the synthesis pass.
+            let safeQuery = query
+                .replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:")
+                .replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
+                .replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
             let toolMsg = ChatMessage(
                 role: .user,
-                content: "[SEARCH_RESULTS for \"\(query)\"]:\n\(resultText)\n\nAnswer the original question directly. No preamble. No disclaimers. Be concise. Use location/timezone from context."
+                content: "[SEARCH_RESULTS for \"\(safeQuery)\"]:\n\(resultText)\n\nAnswer the original question directly. No preamble. No disclaimers. Be concise. Use location/timezone from context."
             )
             let synthesisPrompt = await systemPromptBuilder.buildSynthesisPrompt()
             messageHandlingLogger.info("🔍 WEB_SEARCH starting synthesis pass")
@@ -294,7 +297,13 @@ extension ChatViewModel {
                 messages[i].isWebSearchResult = true
             }
         } catch is CancellationError {
-            // User cancelled — leave partial content visible
+            // User cancelled mid-search — content was cleared before search started;
+            // remove the blank bubble if nothing arrived.
+            if let i = messages.firstIndex(where: { $0.id == assistantID }),
+               messages[i].content.isEmpty,
+               messages[i].thinkingContent?.isEmpty ?? true {
+                messages.remove(at: i)
+            }
         } catch {
             messageHandlingLogger.error("🔍 WEB_SEARCH failed: \(error.localizedDescription, privacy: .public)")
             DebugLogStore.shared.log("WEB_SEARCH failed: \(error.localizedDescription)", category: "Search", level: .error)
