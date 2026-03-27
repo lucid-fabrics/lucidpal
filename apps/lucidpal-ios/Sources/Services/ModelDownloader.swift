@@ -1,4 +1,5 @@
 import Combine
+import CryptoKit
 import Foundation
 import OSLog
 
@@ -45,10 +46,23 @@ final class ModelDownloader: NSObject {
     // cancellation is issued — no concurrent read/write overlap.
     nonisolated(unsafe) private var userCancelled = false
 
+    // Written on @MainActor in download() before the task starts; read synchronously in
+    // the delegate callback after the file lands. Same safety pattern as destinationURL.
+    nonisolated(unsafe) private var expectedSHA256: String?
+
     // Set by AppDelegate when the OS wakes the app for a completed background session.
     // Called in urlSessionDidFinishEvents to signal the OS that processing is complete.
     // nonisolated(unsafe): written once from AppDelegate before concurrent URLSession callbacks begin.
     nonisolated(unsafe) static var backgroundSessionCompletion: (() -> Void)?
+
+    // Stored so auto-retry after checksum failure can restart the same model download.
+    private var currentModel: ModelInfo?
+    // Tracks how many consecutive checksum failures have triggered auto-retries.
+    // Capped at 2 to prevent infinite retry loops on persistently corrupt CDN responses.
+    private var checksumRetryCount = 0
+    // Set during the 1.5 s sleep between checksum retries. Blocks download() so a
+    // concurrent user-initiated retry cannot race with the scheduled auto-retry.
+    private var isRetryingChecksum = false
 
     private let minimumExpectedModelBytes: Int64 = 10 * 1024 * 1024
 
@@ -58,9 +72,13 @@ final class ModelDownloader: NSObject {
         // iOS disallows two concurrent sessions with the same identifier. The old session
         // is invalidated asynchronously, so we must wait for it to fully drain (session=nil)
         // before creating a new one.
-        guard downloadTask == nil, session == nil else { return }
+        // isRetryingChecksum blocks entry during the 1.5 s sleep between auto-retries so
+        // a manual user tap cannot race with the scheduled restart.
+        guard downloadTask == nil, session == nil, !isRetryingChecksum else { return }
 
         destinationURL = model.localURL
+        expectedSHA256 = model.sha256
+        currentModel = model
 
         // Background session: download continues even when the app is suspended.
         // The same identifier is used across launches so the system can reconnect.
@@ -88,6 +106,10 @@ final class ModelDownloader: NSObject {
     func cancel() {
         userCancelled = true
         pendingResumeData = nil  // discard — explicit user cancel, do not resume
+        expectedSHA256 = nil
+        currentModel = nil
+        checksumRetryCount = 0
+        isRetryingChecksum = false
         downloadTask?.cancel()
         downloadTask = nil
         session?.invalidateAndCancel()
@@ -146,12 +168,18 @@ extension ModelDownloader: URLSessionDownloadDelegate {
             return
         }
 
+        // SHA256 integrity check — synchronous on the delegate queue (safe: URLSession
+        // serialises callbacks). Returns true if validation passed or is not configured.
+        if !verifyChecksum(of: location) { return }
+
         do {
             try moveDownloadedFile(from: location, to: destination)
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
                 self?.session?.finishTasksAndInvalidate()
                 self?.session = nil
+                self?.checksumRetryCount = 0  // reset after successful download
+                self?.currentModel = nil
                 self?.state = .completed(url: destination)
             }
         } catch {
@@ -189,6 +217,72 @@ extension ModelDownloader: URLSessionDownloadDelegate {
         }
 
         return nil
+    }
+
+    /// Verifies the SHA256 of `location` against `expectedSHA256`.
+    /// Returns true if the hash matches (or no expected hash is configured).
+    /// On mismatch: deletes the temp file and schedules an auto-retry on MainActor.
+    /// Uses CryptoKit Digest equality (constant-time) rather than hex-string comparison.
+    private nonisolated func verifyChecksum(of location: URL) -> Bool {
+        guard let expectedHex = expectedSHA256 else { return true }
+        guard let actual = sha256Digest(of: location) else {
+            logger.error("SHA256: could not read temp file at \(location.path)")
+            Task { @MainActor [weak self] in
+                self?.downloadTask = nil
+                self?.session?.finishTasksAndInvalidate()
+                self?.session = nil
+                self?.state = .failed(message: "Could not verify download integrity.")
+            }
+            return false
+        }
+        // Decode expected hex to raw bytes and compare via Digest — constant-time equality.
+        let expectedBytes = stride(from: 0, to: expectedHex.count, by: 2).compactMap { i -> UInt8? in
+            let start = expectedHex.index(expectedHex.startIndex, offsetBy: i)
+            let end = expectedHex.index(start, offsetBy: 2)
+            return UInt8(expectedHex[start..<end], radix: 16)
+        }
+        guard expectedBytes.count == SHA256.Digest.byteCount,
+              actual.elementsEqual(expectedBytes) else {
+            let actualHex = actual.map { String(format: "%02x", $0) }.joined()
+            logger.error("SHA256 mismatch: expected \(expectedHex), got \(actualHex)")
+            try? FileManager.default.removeItem(at: location)
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.downloadTask = nil
+                self.session?.finishTasksAndInvalidate()
+                self.session = nil
+                self.pendingResumeData = nil  // corrupt session — must restart fresh
+                if self.checksumRetryCount < 2, let model = self.currentModel {
+                    self.checksumRetryCount += 1
+                    self.isRetryingChecksum = true
+                    self.state = .downloading(progress: 0)
+                    try? await Task.sleep(for: .milliseconds(1_500))
+                    self.isRetryingChecksum = false
+                    guard self.state != .idle else { return }  // user cancelled during sleep
+                    self.download(model: model)
+                } else {
+                    self.checksumRetryCount = 0
+                    self.state = .failed(
+                        message: "Download corrupted. Please tap retry to download again.")
+                }
+            }
+            return false
+        }
+        return true
+    }
+
+    /// Streams the file at `url` through SHA256 in 64 KB chunks and returns the Digest.
+    /// Returns nil only if the file cannot be opened.
+    private nonisolated func sha256Digest(of url: URL) -> SHA256.Digest? {
+        guard let handle = try? FileHandle(forReadingFrom: url) else { return nil }
+        defer { try? handle.close() }
+        var hasher = SHA256()
+        while true {
+            // read(upToCount:) is the non-deprecated replacement for readData(ofLength:).
+            guard let chunk = try? handle.read(upToCount: 65_536), !chunk.isEmpty else { break }
+            hasher.update(data: chunk)
+        }
+        return hasher.finalize()
     }
 
     /// Moves the temporary download to the final destination, replacing any existing file.
