@@ -242,7 +242,7 @@ extension ModelDownloader: URLSessionDownloadDelegate {
             return UInt8(expectedHex[start..<end], radix: 16)
         }
         guard expectedBytes.count == SHA256.Digest.byteCount,
-              actual == SHA256.Digest(expectedBytes) else {
+              actual.elementsEqual(expectedBytes) else {
             let actualHex = actual.map { String(format: "%02x", $0) }.joined()
             logger.error("SHA256 mismatch: expected \(expectedHex), got \(actualHex)")
             try? FileManager.default.removeItem(at: location)
