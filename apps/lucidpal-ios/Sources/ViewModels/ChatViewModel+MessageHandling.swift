@@ -49,20 +49,25 @@ extension ChatViewModel {
 
     // MARK: - sendMessage
 
+    // swiftlint:disable:next function_body_length
     func sendMessage() async {
         cancelSuggestionsGeneration()
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         let attachments = imageAttachments
-
-        // Auto-load vision model if needed but not loaded
         let hasImages = !attachments.isEmpty
         let needsVision = hasImages && settings.visionEnabled
+
+        // Guard runs synchronously on @MainActor — no suspension between the check and
+        // isPreparing = true, so no concurrent sendMessage call can slip through.
+        guard !text.isEmpty || !attachments.isEmpty, !isGenerating, !isPreparing, isModelLoaded else { return }
+        isPreparing = true
+        defer { isPreparing = false }
+
+        // Auto-load vision model if needed but not loaded
         if needsVision && !llmService.isVisionModelLoaded {
             let prepared = await prepareVisionModel()
             guard prepared else { return }
         }
-
-        guard !text.isEmpty || !attachments.isEmpty, !isGenerating, isModelLoaded else { return }
 
         hapticService.impact(.light)
         inputText = ""
@@ -85,19 +90,20 @@ extension ChatViewModel {
         }
         errorMessage = nil
 
-        // Build system prompt before showing the assistant placeholder.
-        isPreparing = true
-        defer { isPreparing = false }
-        let systemPrompt = await systemPromptBuilder.buildSystemPrompt()
+        // Snapshot history BEFORE appending the placeholder — avoids dropLast() fragility
+        // if anything else appends to messages during the buildSystemPrompt() suspension.
+        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / ChatConstants.bytesPerGB)
+        let historyLimit = ramGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeHistoryLimit : ChatConstants.smallHistoryLimit
+        let historyMessages = Array(messages.suffix(historyLimit))
 
+        // Append the assistant placeholder immediately so GeneratingStatusView
+        // is visible during the system-prompt build — no blank gap during prefill.
         let assistantMsg = ChatMessage(role: .assistant, content: "")
         messages.append(assistantMsg)
         let assistantID = assistantMsg.id
 
-        // Snapshot history without the empty assistant placeholder.
-        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / ChatConstants.bytesPerGB)
-        let historyLimit = ramGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeHistoryLimit : ChatConstants.smallHistoryLimit
-        let historyMessages = Array(messages.dropLast().suffix(historyLimit))
+        // Build system prompt (GeneratingStatusView is visible during this await).
+        let systemPrompt = await systemPromptBuilder.buildSystemPrompt()
 
         let showThinking = thinkingEnabled
 
@@ -120,16 +126,23 @@ extension ChatViewModel {
                 messageHandlingLogger.info("RAW_LLM: \(self.messages[idx].content, privacy: .private)")
                 DebugLogStore.shared.log("RAW_LLM: \(messages[idx].content)", category: "LLM")
             }
+            // Only finalize on success — error path sets an error string which must not
+            // be passed through calendar/web-search action extraction.
+            await finalizeResponse(assistantID: assistantID, text: text, showThinking: showThinking)
         } catch is CancellationError {
-            // User cancelled — leave partial content visible
+            // User cancelled — remove placeholder if no visible content arrived yet.
+            // thinkingContent may be partially set mid-think-block, so treat empty string as absent.
+            if let idx = messages.firstIndex(where: { $0.id == assistantID }),
+               messages[idx].content.isEmpty,
+               messages[idx].thinkingContent?.isEmpty ?? true {
+                messages.remove(at: idx)
+            }
         } catch {
             if let idx = messages.firstIndex(where: { $0.id == assistantID }) {
                 messages[idx].content = "Error: \(error.localizedDescription)"
             }
             errorMessage = error.localizedDescription
         }
-
-        await finalizeResponse(assistantID: assistantID, text: text, showThinking: showThinking)
     }
 
     // MARK: - Vision model preparation
@@ -206,12 +219,17 @@ extension ChatViewModel {
         // Calendar actions on final output
         if let finalIdx = messages.firstIndex(where: { $0.id == assistantID }) {
             messages[finalIdx].isThinking = false
-            let (content, previews, freeSlots) = await systemPromptBuilder.executeCalendarActions(in: messages[finalIdx].content)
-            messages[finalIdx].content = content
-            messages[finalIdx].calendarEventPreviews = previews
-            messages[finalIdx].calendarFreeSlots = freeSlots
-            messageHandlingLogger.info("✅ FINAL: \(content, privacy: .public) | events=\(previews.count) slots=\(freeSlots.count)")
-            DebugLogStore.shared.log("FINAL: events=\(previews.count) slots=\(freeSlots.count) — \(String(content.prefix(ChatConstants.rawLogPreviewLength)))", category: "LLM")
+            let contentForCalendar = messages[finalIdx].content
+            let (content, previews, freeSlots) = await systemPromptBuilder.executeCalendarActions(in: contentForCalendar)
+            // Re-lookup after suspension — user may delete messages during async calendar processing.
+            if let postIdx = messages.firstIndex(where: { $0.id == assistantID }) {
+                messages[postIdx].content = content
+                messages[postIdx].calendarEventPreviews = previews
+                messages[postIdx].calendarFreeSlots = freeSlots
+                messageHandlingLogger.info("✅ FINAL: \(content, privacy: .public) | events=\(previews.count) slots=\(freeSlots.count)")
+                let logPreview = String(content.prefix(ChatConstants.rawLogPreviewLength))
+                DebugLogStore.shared.log("FINAL: events=\(previews.count) slots=\(freeSlots.count) — \(logPreview)", category: "LLM")
+            }
         }
     }
 
@@ -233,6 +251,7 @@ extension ChatViewModel {
         }
     }
 
+    // swiftlint:disable:next function_body_length
     func performWebSearch(
         query: String,
         maxResults: Int,
@@ -249,14 +268,28 @@ extension ChatViewModel {
             let resultText = results.enumerated().map { i, r in
                 // Strip any action tokens from search result content to prevent recursive
                 // [WEB_SEARCH:...] or [CALENDAR_ACTION:...] blocks from being executed.
-                let safeTitle   = r.title.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
-                let safeSnippet = r.snippet.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
-                return "[\(i + 1)] \(safeTitle)\nURL: \(r.url)\n\(safeSnippet)"
+                let safeTitle = r.title
+                    .replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:")
+                    .replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
+                    .replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
+                let safeSnippet = r.snippet
+                    .replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:")
+                    .replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
+                    .replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
+                let safeURL = r.url
+                    .replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:")
+                    .replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
+                    .replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
+                return "[\(i + 1)] \(safeTitle)\nURL: \(safeURL)\n\(safeSnippet)"
             }.joined(separator: "\n\n")
-            let toolMsg = ChatMessage(
-                role: .user,
-                content: "[SEARCH_RESULTS for \"\(query)\"]:\n\(resultText)\n\nAnswer the original question directly. No preamble. No disclaimers. Be concise. Use location/timezone from context."
-            )
+            // Sanitize query to prevent injection tokens from being re-executed by the synthesis pass.
+            let safeQuery = query
+                .replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:")
+                .replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
+                .replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
+            let toolMsgContent = "[SEARCH_RESULTS for \"\(safeQuery)\"]:\n\(resultText)"
+                + "\n\nAnswer the original question directly. No preamble. No disclaimers. Be concise. Use location/timezone from context."
+            let toolMsg = ChatMessage(role: .user, content: toolMsgContent)
             let synthesisPrompt = await systemPromptBuilder.buildSynthesisPrompt()
             messageHandlingLogger.info("🔍 WEB_SEARCH starting synthesis pass")
             DebugLogStore.shared.log("WEB_SEARCH starting synthesis pass", category: "Search")
@@ -278,7 +311,13 @@ extension ChatViewModel {
                 messages[i].isWebSearchResult = true
             }
         } catch is CancellationError {
-            // User cancelled — leave partial content visible
+            // User cancelled mid-search — content was cleared before search started;
+            // remove the blank bubble if nothing arrived.
+            if let i = messages.firstIndex(where: { $0.id == assistantID }),
+               messages[i].content.isEmpty,
+               messages[i].thinkingContent?.isEmpty ?? true {
+                messages.remove(at: i)
+            }
         } catch {
             messageHandlingLogger.error("🔍 WEB_SEARCH failed: \(error.localizedDescription, privacy: .public)")
             DebugLogStore.shared.log("WEB_SEARCH failed: \(error.localizedDescription)", category: "Search", level: .error)
