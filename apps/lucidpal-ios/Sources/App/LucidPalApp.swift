@@ -1,3 +1,4 @@
+import Metal
 import OSLog
 import SwiftUI
 
@@ -55,6 +56,10 @@ struct LucidPalApp: App {
     // MARK: - Initialization
 
     init() {
+        // Force Metal driver initialization before model loading begins.
+        // Eliminates 1–3 s of shader compilation from the first model load.
+        _ = MTLCreateSystemDefaultDevice()
+
         let actionController = CalendarActionController(calendarService: calendarService, settings: settings)
         calendarActionController = actionController
         airPodsCoordinator = AirPodsVoiceCoordinator(
@@ -112,8 +117,38 @@ struct LucidPalApp: App {
             if phase == .active {
                 consumePendingSiriQuery()
                 consumePendingSiriEvent()
+                hintModelPageCache()
+            }
+            if phase == .background {
+                AppDelegate.scheduleCalendarRefresh()
             }
             // Background persistence is handled per-session by ChatSessionContainer.
+        }
+    }
+
+    // MARK: - Page Cache Warming
+
+    /// Tracks an in-flight page cache hint task to avoid redundant concurrent hints.
+    /// All reads and writes are on the MainActor (hintModelPageCache is @MainActor,
+    /// the Task callback uses MainActor.run). @MainActor annotation enforces this.
+    @MainActor private static var activeHintTask: Task<Void, Never>?
+
+    /// Hints the kernel to prefetch the selected model file's first 64 MB into the
+    /// page cache via F_RDADVISE before llama.cpp mmap-loads it. Reduces demand-paging
+    /// stalls on initial inference. No-op if the model is already loaded or not downloaded.
+    /// At most one hint runs at a time — rapid scene-phase transitions are collapsed.
+    @MainActor private func hintModelPageCache() {
+        guard !downloadViewModel.isModelLoaded, !downloadViewModel.isModelLoading else { return }
+        guard Self.activeHintTask == nil else { return } // hint already in flight
+        let id = settings.selectedTextModelID
+        guard !id.isEmpty else { return }
+        let models = ModelInfo.available(physicalRAMGB: settings.deviceRAMGB)
+        guard let model = models.first(where: { $0.id == id }), model.isDownloaded else { return }
+        Self.activeHintTask = Task.detached(priority: .utility) {
+            ModelPageCacheWarmer.hint(fileURL: model.localURL)
+            // Clear on all exit paths (completion and cancellation) so hintModelPageCache
+            // can start a fresh hint the next time the app becomes active.
+            await MainActor.run { Self.activeHintTask = nil }
         }
     }
 
@@ -147,6 +182,20 @@ private struct RootView: View {
     @ObservedObject var settingsViewModel: SettingsViewModel
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
 
+    /// True when the device has ≥ 6 GB physical RAM (iPhone 12 Pro minimum).
+    /// Always true in the simulator so developers can work normally.
+    /// Computed once as a `let` — physicalMemory is constant for the device lifetime.
+    static let isDeviceSupported: Bool = {
+        #if targetEnvironment(simulator)
+        return true
+        #else
+        // 5 GB threshold cleanly separates 4 GB devices (iPhone 12/mini) from
+        // 6 GB devices (iPhone 12 Pro+). physicalMemory on 4 GB devices ≈ 4_294_967_296.
+        let minRAMThreshold: UInt64 = 5_368_709_120
+        return ProcessInfo.processInfo.physicalMemory >= minRAMThreshold
+        #endif
+    }()
+
     /// Auto-loads the last used text model on app launch if one was previously selected and downloaded.
     private func autoLoadLastModel() async {
         guard !downloadViewModel.isModelLoaded,
@@ -162,11 +211,9 @@ private struct RootView: View {
     }
 
     var body: some View {
-        // Gate only on hasCompletedOnboarding — not isModelLoaded.
-        // If the model unloads post-onboarding (memory pressure, delete), the user
-        // stays in ContentView where ChatView shows the "no model" banner + Settings
-        // link. Kicking back to Onboarding would orphan chat history.
-        if settings.hasCompletedOnboarding {
+        if !Self.isDeviceSupported {
+            UnsupportedDeviceView()
+        } else if settings.hasCompletedOnboarding {
             ContentView(
                 sessionListViewModel: sessionListViewModel,
                 settingsViewModel: settingsViewModel,

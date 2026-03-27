@@ -15,9 +15,8 @@ struct ChatView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if !viewModel.isModelLoaded {
-                modelNotLoadedBanner
-            }
+            modelNotLoadedBanner
+                .animation(.easeInOut(duration: 0.2), value: ModelBannerState(isLoaded: viewModel.isModelLoaded, isLoading: viewModel.isModelLoading))
             if viewModel.isAutoListening {
                 autoListeningBanner
             }
@@ -304,6 +303,13 @@ extension ChatView {
         let prompt = msgs[..<index].last(where: { $0.role == .user })?.content
         return MessageGroupInfo(isFirst: isFirst, isLast: isLast, spacing: spacing, precedingUserPrompt: prompt)
     }
+}
+
+// MARK: - Model banner animation key
+
+private struct ModelBannerState: Equatable {
+    let isLoaded: Bool
+    let isLoading: Bool
 }
 
 // MARK: - Disable swipe-back navigation

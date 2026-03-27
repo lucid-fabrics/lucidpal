@@ -15,7 +15,12 @@ extension ChatViewModel {
 
     private func setupServicePublishers() {
         // Publishers — sink used instead of assign(to:) because existentials can't project @Published.
+        llmService.isLoadingPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.isModelLoading = $0 }
+            .store(in: &cancellables)
         llmService.isLoadedPublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] loaded in
                 self?.isModelLoaded = loaded
                 guard loaded, self?.messages.isEmpty == true, self?.pendingInput == nil else { return }
@@ -23,25 +28,31 @@ extension ChatViewModel {
             }
             .store(in: &cancellables)
         llmService.isGeneratingPublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.isGenerating = $0 }
             .store(in: &cancellables)
         speechService.isRecordingPublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.isSpeechRecording = $0 }
             .store(in: &cancellables)
         speechService.isAuthorizedPublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.isSpeechAvailable = $0 }
             .store(in: &cancellables)
         speechService.isTranscribingPublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.isSpeechTranscribing = $0 }
             .store(in: &cancellables)
         speechService.transcriptionErrorPublisher
             .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.errorMessage = $0 }
             .store(in: &cancellables)
 
         // Forward live transcript into the input field while recording
         speechService.transcriptPublisher
             .filter { !$0.isEmpty }
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 guard let self, !self.discardNextTranscript else { return }
                 self.inputText = $0
@@ -50,11 +61,13 @@ extension ChatViewModel {
 
         // Observe AirPods auto-listening state
         airPodsCoordinator?.isAutoListeningPublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in self?.isAutoListening = $0 }
             .store(in: &cancellables)
 
         // Auto-dismiss error banner after errorAutoDismissSeconds
         $errorMessage
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] msg in
                 self?.errorDismissTask?.cancel()
                 guard msg != nil else { return }

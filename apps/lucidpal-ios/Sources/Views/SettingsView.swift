@@ -5,6 +5,9 @@ struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
     @ObservedObject var downloadViewModel: ModelDownloadViewModel
     @State private var showDeleteError = false
+    #if DEBUG
+    @State private var showUnsupportedDevicePreview = false
+    #endif
 
     var body: some View {
         NavigationStack {
@@ -33,6 +36,17 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
+            #if DEBUG
+            .fullScreenCover(isPresented: $showUnsupportedDevicePreview) {
+                UnsupportedDeviceView()
+                    .overlay(alignment: .topTrailing) {
+                        Button("Done") { showUnsupportedDevicePreview = false }
+                            .font(.body.weight(.semibold))
+                            .padding(.horizontal, 20)
+                            .padding(.top, 60) // fixed safe value; view has its own safe area
+                    }
+            }
+            #endif
             .onChange(of: downloadViewModel.deleteError) { _, error in
                 if error != nil { showDeleteError = true }
             }
@@ -296,6 +310,11 @@ struct SettingsView: View {
                 viewModel.replayOnboarding()
             } label: {
                 Label("Replay Onboarding", systemImage: "arrow.counterclockwise")
+            }
+            Button {
+                showUnsupportedDevicePreview = true
+            } label: {
+                Label("Preview Unsupported Device Screen", systemImage: "memorychip")
             }
             Button(role: .destructive) {
                 if let domain = Bundle.main.bundleIdentifier {
