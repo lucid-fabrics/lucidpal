@@ -219,12 +219,16 @@ extension ChatViewModel {
         // Calendar actions on final output
         if let finalIdx = messages.firstIndex(where: { $0.id == assistantID }) {
             messages[finalIdx].isThinking = false
-            let (content, previews, freeSlots) = await systemPromptBuilder.executeCalendarActions(in: messages[finalIdx].content)
-            messages[finalIdx].content = content
-            messages[finalIdx].calendarEventPreviews = previews
-            messages[finalIdx].calendarFreeSlots = freeSlots
-            messageHandlingLogger.info("✅ FINAL: \(content, privacy: .public) | events=\(previews.count) slots=\(freeSlots.count)")
-            DebugLogStore.shared.log("FINAL: events=\(previews.count) slots=\(freeSlots.count) — \(String(content.prefix(ChatConstants.rawLogPreviewLength)))", category: "LLM")
+            let contentForCalendar = messages[finalIdx].content
+            let (content, previews, freeSlots) = await systemPromptBuilder.executeCalendarActions(in: contentForCalendar)
+            // Re-lookup after suspension — user may delete messages during async calendar processing.
+            if let postIdx = messages.firstIndex(where: { $0.id == assistantID }) {
+                messages[postIdx].content = content
+                messages[postIdx].calendarEventPreviews = previews
+                messages[postIdx].calendarFreeSlots = freeSlots
+                messageHandlingLogger.info("✅ FINAL: \(content, privacy: .public) | events=\(previews.count) slots=\(freeSlots.count)")
+                DebugLogStore.shared.log("FINAL: events=\(previews.count) slots=\(freeSlots.count) — \(String(content.prefix(ChatConstants.rawLogPreviewLength)))", category: "LLM")
+            }
         }
     }
 
@@ -262,8 +266,8 @@ extension ChatViewModel {
             let resultText = results.enumerated().map { i, r in
                 // Strip any action tokens from search result content to prevent recursive
                 // [WEB_SEARCH:...] or [CALENDAR_ACTION:...] blocks from being executed.
-                let safeTitle   = r.title.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
-                let safeSnippet = r.snippet.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
+                let safeTitle   = r.title.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:").replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
+                let safeSnippet = r.snippet.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:").replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
                 let safeURL     = r.url.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:").replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
                 return "[\(i + 1)] \(safeTitle)\nURL: \(safeURL)\n\(safeSnippet)"
             }.joined(separator: "\n\n")
