@@ -62,7 +62,7 @@ extension ChatViewModel {
             guard prepared else { return }
         }
 
-        guard !text.isEmpty || !attachments.isEmpty, !isGenerating, isModelLoaded else { return }
+        guard !text.isEmpty || !attachments.isEmpty, !isGenerating, !isPreparing, isModelLoaded else { return }
 
         hapticService.impact(.light)
         inputText = ""
@@ -85,14 +85,16 @@ extension ChatViewModel {
         }
         errorMessage = nil
 
-        // Build system prompt before showing the assistant placeholder.
-        isPreparing = true
-        defer { isPreparing = false }
-        let systemPrompt = await systemPromptBuilder.buildSystemPrompt()
-
+        // Append the assistant placeholder immediately so GeneratingStatusView
+        // is visible during the system-prompt build — no blank gap during prefill.
         let assistantMsg = ChatMessage(role: .assistant, content: "")
         messages.append(assistantMsg)
         let assistantID = assistantMsg.id
+
+        // Build system prompt (GeneratingStatusView is visible during this await).
+        isPreparing = true
+        defer { isPreparing = false }
+        let systemPrompt = await systemPromptBuilder.buildSystemPrompt()
 
         // Snapshot history without the empty assistant placeholder.
         let ramGB = Int(ProcessInfo.processInfo.physicalMemory / ChatConstants.bytesPerGB)
