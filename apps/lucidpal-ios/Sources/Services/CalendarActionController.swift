@@ -116,11 +116,13 @@ final class CalendarActionController: CalendarActionControllerProtocol {
         do {
             payload = try Self.decoder.decode(CalendarActionPayload.self, from: data)
         } catch {
-            return .failure("Could not parse action [\(json)]: \(error.localizedDescription)")
+            calendarActionLogger.error("Failed to decode action payload: \(error.localizedDescription, privacy: .public) — payload: \(json, privacy: .private)")
+            return .failure("Could not understand the action. Please try again.")
         }
 
         guard let action = payload.action else {
-            return .failure("Could not parse action [\(json)]: missing required 'action' field.")
+            calendarActionLogger.error("Action payload missing 'action' field — payload: \(json, privacy: .private)")
+            return .failure("Could not understand the action: missing action type.")
         }
         switch action {
         case .create:
