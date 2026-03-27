@@ -16,6 +16,9 @@ protocol LLMServiceProtocol: AnyObject {
     var isLoadingPublisher: AnyPublisher<Bool, Never> { get }
     var isGeneratingPublisher: AnyPublisher<Bool, Never> { get }
 
+    /// Fires when the prompt was silently truncated to fit the context window.
+    var contextTruncatedPublisher: AnyPublisher<Void, Never> { get }
+
     /// Generates a response using the specified model role.
     func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool, modelRole: ModelType) -> AsyncThrowingStream<String, Error>
 
