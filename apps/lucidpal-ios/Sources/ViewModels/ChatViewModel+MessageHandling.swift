@@ -126,9 +126,11 @@ extension ChatViewModel {
                 DebugLogStore.shared.log("RAW_LLM: \(messages[idx].content)", category: "LLM")
             }
         } catch is CancellationError {
-            // User cancelled — remove placeholder if no content arrived yet to avoid a ghost bubble.
+            // User cancelled — remove placeholder if no visible content arrived yet.
+            // thinkingContent may be partially set mid-think-block, so treat empty string as absent.
             if let idx = messages.firstIndex(where: { $0.id == assistantID }),
-               messages[idx].content.isEmpty, messages[idx].thinkingContent == nil {
+               messages[idx].content.isEmpty,
+               messages[idx].thinkingContent?.isEmpty ?? true {
                 messages.remove(at: idx)
             }
         } catch {
@@ -260,7 +262,8 @@ extension ChatViewModel {
                 // [WEB_SEARCH:...] or [CALENDAR_ACTION:...] blocks from being executed.
                 let safeTitle   = r.title.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
                 let safeSnippet = r.snippet.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
-                return "[\(i + 1)] \(safeTitle)\nURL: \(r.url)\n\(safeSnippet)"
+                let safeURL     = r.url.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
+                return "[\(i + 1)] \(safeTitle)\nURL: \(safeURL)\n\(safeSnippet)"
             }.joined(separator: "\n\n")
             let toolMsg = ChatMessage(
                 role: .user,
