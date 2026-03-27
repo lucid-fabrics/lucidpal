@@ -38,9 +38,21 @@ struct ContentView: View {
         // and the transition fires within the animation context from value:.
         .overlay(alignment: .top) {
             if isDownloading {
-                DownloadProgressPill(progress: downloadProgress)
-                    .padding(.top, 8)
-                    .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
+                Button {
+                    selectedTab = .settings
+                    let sel = UISelectionFeedbackGenerator()
+                    sel.prepare()
+                    sel.selectionChanged()
+                } label: {
+                    DownloadProgressPill(
+                        progress: downloadProgress,
+                        modelName: downloadViewModel.selectedModel.displayName,
+                        hasPendingVision: downloadViewModel.pendingVisionDownload != nil
+                    )
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 8)
+                .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
             }
         }
         .animation(reduceMotion ? .none : .spring(duration: 0.5, bounce: 0.2), value: isDownloading)
@@ -75,6 +87,8 @@ struct ContentView: View {
 
 private struct DownloadProgressPill: View {
     let progress: Double
+    let modelName: String
+    let hasPendingVision: Bool
 
     var body: some View {
         HStack(spacing: 10) {
@@ -91,14 +105,26 @@ private struct DownloadProgressPill: View {
             }
             .frame(width: 26, height: 26)
 
-            Text("Downloading AI model…")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.white)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Downloading \(modelName)…")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.white)
+                if hasPendingVision {
+                    Text("Vision model queued")
+                        .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.75))
+                }
+            }
+
+            Image(systemName: "chevron.right")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.6))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .background(Color.accentColor.opacity(0.92))
         .clipShape(Capsule())
+        .shadow(color: Color.accentColor.opacity(0.3), radius: 8, y: 3)
     }
 }
 
