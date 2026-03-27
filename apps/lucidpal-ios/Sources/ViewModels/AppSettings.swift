@@ -123,7 +123,14 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         speechAutoSendEnabled = defaults.object(forKey: UserDefaultsKeys.speechAutoSendEnabled) as? Bool ?? true
         voiceAutoStartEnabled = defaults.object(forKey: UserDefaultsKeys.voiceAutoStartEnabled) as? Bool ?? false
         airpodsAutoVoiceEnabled = defaults.object(forKey: UserDefaultsKeys.airpodsAutoVoiceEnabled) as? Bool ?? false
-        contextSize = defaults.object(forKey: UserDefaultsKeys.contextSize) as? Int ?? ChatConstants.defaultContextSizeTokens
+        // Clamp the saved context size to the device's RAM-safe maximum.
+        // Prevents OOM on 4 GB devices that had a larger value stored from a previous device.
+        let ramGB = Int(ProcessInfo.processInfo.physicalMemory / 1_073_741_824)
+        let contextSizeCap = ramGB >= ChatConstants.largeContextRAMThresholdGB
+            ? ChatConstants.largeContextSizeTokens
+            : ChatConstants.tinyContextSizeTokens
+        let savedContextSize = defaults.object(forKey: UserDefaultsKeys.contextSize) as? Int ?? ChatConstants.defaultContextSizeTokens
+        contextSize = min(savedContextSize, contextSizeCap)
         temperature = defaults.object(forKey: UserDefaultsKeys.temperature) as? Double ?? Double(LLMConstants.samplerTemperature)
         maxResponseTokens = defaults.object(forKey: UserDefaultsKeys.maxResponseTokens) as? Int ?? Int(LLMConstants.maxNewTokens)
         generationTimeout = defaults.object(forKey: UserDefaultsKeys.generationTimeout) as? Double ?? ChatConstants.generationTimeoutSeconds
@@ -163,7 +170,9 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
     }
 
     var maxContextSize: Int {
-        deviceRAMGB >= ChatConstants.largeContextRAMThresholdGB ? ChatConstants.largeContextSizeTokens : ChatConstants.defaultContextSizeTokens
+        deviceRAMGB >= ChatConstants.largeContextRAMThresholdGB
+            ? ChatConstants.largeContextSizeTokens
+            : ChatConstants.tinyContextSizeTokens
     }
 
     // Backwards-compat alias for existing code that reads selectedModelID

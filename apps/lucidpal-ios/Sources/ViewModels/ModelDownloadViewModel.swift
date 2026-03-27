@@ -211,10 +211,22 @@ final class ModelDownloadViewModel: ObservableObject {
             // Integrated models and text models both load as .text; purely vision models load as .vision.
             let role: ModelType = selectedModel.supportsVision && !selectedModel.isIntegrated ? .vision : .text
             let mmprojPath = selectedModel.mmprojLocalURL
+
+            // Guard: vision models require enough RAM for CLIP embeddings + KV cache.
+            // The UI already filters the model list, but this prevents a crash if the
+            // stored selectedVisionModelID refers to a model that no longer fits.
+            if selectedModel.supportsVision && settings.deviceRAMGB < LLMConstants.visionModelMinRAMGB {
+                loadError = "Vision model requires at least \(LLMConstants.visionModelMinRAMGB) GB RAM. Use a text-only model on this device."
+                downloader.resetState()
+                return
+            }
+
+            // Cap context to the device's RAM-safe maximum to prevent OOM on 4 GB devices.
+            let safeCap = UInt32(settings.maxContextSize)
             // Vision models need at least 8192 context for CLIP image embeddings
             let ctxSize = selectedModel.supportsVision
-                ? max(UInt32(settings.contextSize), UInt32(LLMConstants.largeContextSize))
-                : UInt32(settings.contextSize)
+                ? max(min(UInt32(settings.contextSize), safeCap), UInt32(LLMConstants.largeContextSize))
+                : min(UInt32(settings.contextSize), safeCap)
             modelDownloadLogger.info("loadModel: model=\(self.selectedModel.displayName) role=\(String(describing: role)) isIntegrated=\(self.selectedModel.isIntegrated) ctx=\(ctxSize) mmproj=\(mmprojPath?.path ?? "none")")
             try await llmService.loadModel(at: selectedModel.localURL, contextSize: ctxSize, temperature: Float(settings.temperature), role: role, isIntegrated: selectedModel.isIntegrated, mmprojURL: mmprojPath)
             // Update the appropriate saved model ID (settings + published).
