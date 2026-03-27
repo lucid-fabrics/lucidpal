@@ -229,6 +229,9 @@ struct SettingsView: View {
                 }
             }
             contextSizePicker
+            temperatureSlider
+            maxResponseTokensPicker
+            generationTimeoutStepper
         } header: {
             sectionHeader("Inference", icon: "waveform", color: .indigo)
         } footer: {
@@ -236,7 +239,8 @@ struct SettingsView: View {
                 "\"Start voice on open\" automatically starts listening when you open a new chat. " +
                 "\"AirPods auto-voice\" starts listening automatically when AirPods are connected. " +
                 "Auto-send submits voice input when speech recognition finishes. " +
-                "Thinking mode can be toggled per chat via the brain icon in the chat toolbar."
+                "Thinking mode can be toggled per chat via the brain icon in the chat toolbar. " +
+                "Temperature, max tokens, and timeout take effect immediately for the next message."
             )
         }
     }
@@ -262,6 +266,39 @@ struct SettingsView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .padding(.top, 4)
+        }
+    }
+
+    @ViewBuilder
+    private var temperatureSlider: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Label("Temperature: \(viewModel.temperature, specifier: "%.2f")", systemImage: "thermometer.medium")
+            Slider(value: $viewModel.temperature, in: 0.0...2.0, step: 0.05)
+                .accessibilityLabel("Temperature")
+                .accessibilityValue("\(viewModel.temperature, specifier: "%.2f")")
+            Text("Lower = more focused; higher = more creative. Takes effect next time the model loads.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 2)
+    }
+
+    @ViewBuilder
+    private var maxResponseTokensPicker: some View {
+        Picker(selection: $viewModel.maxResponseTokens) {
+            ForEach([128, 256, 512, 768, 1024, 2048], id: \.self) { n in
+                Text("\(n) tokens").tag(n)
+            }
+        } label: {
+            Label("Max Response Length", systemImage: "text.badge.checkmark")
+        }
+        .pickerStyle(.menu)
+    }
+
+    @ViewBuilder
+    private var generationTimeoutStepper: some View {
+        Stepper(value: $viewModel.generationTimeout, in: 30...300, step: 30) {
+            Label("Timeout: \(Int(viewModel.generationTimeout))s", systemImage: "timer")
         }
     }
 

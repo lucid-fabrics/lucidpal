@@ -139,7 +139,7 @@ extension ChatViewModel {
                     ? "Response timed out. Try a shorter message."
                     : partial + "\n\n*(Response timed out)*"
             }
-            errorMessage = "Response timed out after \(Int(ChatConstants.generationTimeoutSeconds))s."
+            errorMessage = "Response timed out after \(Int(settings.generationTimeout))s."
         } catch is CancellationError {
             // User cancelled — remove placeholder if no visible content arrived yet.
             // thinkingContent may be partially set mid-think-block, so treat empty string as absent.
@@ -193,6 +193,7 @@ extension ChatViewModel {
             try await llmService.loadModel(
                 at: visionModel.localURL,
                 contextSize: visionContextSize,
+                temperature: Float(settings.temperature),
                 role: loadRole,
                 isIntegrated: visionModel.isIntegrated,
                 mmprojURL: mmprojPath
@@ -253,31 +254,49 @@ extension ChatViewModel {
         showThinking: Bool,
         modelRole: ModelType
     ) async throws {
-        // Race generation against a 90-second timeout. If the model hangs (e.g. OOM stall,
+        // Race generation against a configurable timeout. If the model hangs (e.g. OOM stall,
         // infinite loop in llama.cpp), the timeout task throws LLMError.timeout, which
         // cancels the generation task and surfaces a user-readable error.
+        let timeout = settings.generationTimeout
         try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask { @MainActor [weak self] in
+            group.addTask { [weak self] in
                 guard let self else { return }
-                var raw = ""
-                var thinkDone = false
-                for try await token in self.llmService.generate(
+                try await self.runGenerationLoop(
                     systemPrompt: systemPrompt,
                     messages: historyMessages,
-                    thinkingEnabled: showThinking,
-                    modelRole: modelRole
-                ) {
-                    guard let idx = self.messages.firstIndex(where: { $0.id == assistantID }) else { break }
-                    self.applyStreamToken(token, rawBuffer: &raw, thinkDone: &thinkDone, showThinking: showThinking, idx: idx)
-                }
+                    showThinking: showThinking,
+                    modelRole: modelRole,
+                    assistantID: assistantID
+                )
             }
             group.addTask {
-                try await Task.sleep(for: .seconds(ChatConstants.generationTimeoutSeconds))
+                try await Task.sleep(for: .seconds(timeout))
                 throw LLMError.timeout
             }
             // Whichever task completes (or throws) first wins; cancel the other.
             try await group.next()
             group.cancelAll()
+        }
+    }
+
+    private func runGenerationLoop(
+        systemPrompt: String,
+        messages: [ChatMessage],
+        showThinking: Bool,
+        modelRole: ModelType,
+        assistantID: UUID
+    ) async throws {
+        var raw = ""
+        var thinkDone = false
+        for try await token in llmService.generate(
+            systemPrompt: systemPrompt,
+            messages: messages,
+            thinkingEnabled: showThinking,
+            modelRole: modelRole,
+            maxNewTokens: Int32(settings.maxResponseTokens)
+        ) {
+            guard let idx = self.messages.firstIndex(where: { $0.id == assistantID }) else { break }
+            applyStreamToken(token, rawBuffer: &raw, thinkDone: &thinkDone, showThinking: showThinking, idx: idx)
         }
     }
 
@@ -323,24 +342,21 @@ extension ChatViewModel {
             let synthesisPrompt = await systemPromptBuilder.buildSynthesisPrompt()
             messageHandlingLogger.info("🔍 WEB_SEARCH starting synthesis pass")
             DebugLogStore.shared.log("WEB_SEARCH starting synthesis pass", category: "Search")
-            var raw2 = ""
-            var thinkDone2 = false
-            // Apply the same 90-second timeout as the primary generation pass.
+            let synthesisTimeout = settings.generationTimeout
+            // Apply the same timeout as the primary generation pass.
             try await withThrowingTaskGroup(of: Void.self) { group in
-                group.addTask { @MainActor [weak self] in
+                group.addTask { [weak self] in
                     guard let self else { return }
-                    for try await token in self.llmService.generate(
+                    try await self.runGenerationLoop(
                         systemPrompt: synthesisPrompt,
                         messages: [toolMsg],
-                        thinkingEnabled: showThinking,
-                        modelRole: .text
-                    ) {
-                        guard let i = self.messages.firstIndex(where: { $0.id == assistantID }) else { break }
-                        self.applyStreamToken(token, rawBuffer: &raw2, thinkDone: &thinkDone2, showThinking: showThinking, idx: i)
-                    }
+                        showThinking: showThinking,
+                        modelRole: .text,
+                        assistantID: assistantID
+                    )
                 }
                 group.addTask {
-                    try await Task.sleep(for: .seconds(ChatConstants.generationTimeoutSeconds))
+                    try await Task.sleep(for: .seconds(synthesisTimeout))
                     throw LLMError.timeout
                 }
                 try await group.next()
@@ -361,7 +377,7 @@ extension ChatViewModel {
                     ? "Response timed out. Try a shorter message."
                     : partial + "\n\n*(Response timed out)*"
             }
-            errorMessage = "Response timed out after \(Int(ChatConstants.generationTimeoutSeconds))s."
+            errorMessage = "Response timed out after \(Int(settings.generationTimeout))s."
         } catch is CancellationError {
             // User cancelled mid-search — content was cleared before search started;
             // remove the blank bubble if nothing arrived.

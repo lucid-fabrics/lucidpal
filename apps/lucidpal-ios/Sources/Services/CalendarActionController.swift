@@ -85,7 +85,7 @@ final class CalendarActionController: CalendarActionControllerProtocol {
             // so the former raw.contains("T") guard is omitted — it incorrectly blocked
             // natural language strings like "Tomorrow at 3pm" or "Next Tuesday at noon".
             let looksLikeISO = hasISODatePrefix
-            if !looksLikeISO, let detector = Self.dateDetector {
+            if !looksLikeISO, let detector = CalendarActionController.dateDetector {
                 let nsRange = NSRange(raw.startIndex..., in: raw)
                 // Require a full-string match — reject partial hits like "tomorrow" inside
                 // "meeting tomorrow with Alice" where the intent is ambiguous.

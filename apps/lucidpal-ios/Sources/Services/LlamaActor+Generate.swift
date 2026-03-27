@@ -8,6 +8,7 @@ extension LlamaActor {
     func generate(
         prompt: String,
         role: ModelType,
+        maxNew: Int32 = Int32(LLMConstants.maxNewTokens),
         onTruncated: (@Sendable () -> Void)? = nil,
         continuation: AsyncThrowingStream<String, Error>.Continuation
     ) async {
@@ -33,7 +34,6 @@ extension LlamaActor {
             return
         }
 
-        let maxNew: Int32 = LLMConstants.maxNewTokens
         let contextLength = Int(llama_n_ctx(ctx))
         let maxPromptTokens = contextLength - Int(maxNew)
 
@@ -135,6 +135,7 @@ extension LlamaActor {
         prompt: String,
         imageDataList: [Data],
         role: ModelType,
+        maxNew: Int32 = Int32(LLMConstants.maxNewTokens),
         onTruncated: (@Sendable () -> Void)? = nil,
         continuation: AsyncThrowingStream<String, Error>.Continuation
     ) async {
@@ -196,8 +197,7 @@ extension LlamaActor {
         let evalResult = mtmd_helper_eval_chunks(mtmdCtx, ctx, chunks, 0, 0, 2048, true, &newNPast)
 
         guard evalResult == 0 else {
-            logger.error("generateWithImages: mtmd_helper_eval_chunks failed with \(evalResult), " +
-                         "chunks=\(nChunks) totalTokens=\(totalTokens) ctxSize=\(ctxSize)")
+            logger.error("generateWithImages: mtmd_helper_eval_chunks failed err=\(evalResult) chunks=\(nChunks) tokens=\(totalTokens) ctx=\(ctxSize)")
             continuation.finish(throwing: LLMError.loadFailed(underlying: NSError(
                 domain: "mtmd", code: Int(evalResult),
                 userInfo: [NSLocalizedDescriptionKey: "Vision encoding failed (chunks=\(nChunks), tokens=\(totalTokens), ctx=\(ctxSize), err=\(evalResult))"])))
@@ -207,7 +207,6 @@ extension LlamaActor {
         setCursor(newNPast)
         logger.info("generateWithImages: eval done, n_past=\(newNPast)")
 
-        let maxNew: Int32 = LLMConstants.maxNewTokens
         let contextLength = Int(llama_n_ctx(ctx))
         streamTokens(maxNew: maxNew, contextLength: contextLength, ctx: ctx, vocab: vocab, sampler: sampler, continuation: continuation)
         continuation.finish()

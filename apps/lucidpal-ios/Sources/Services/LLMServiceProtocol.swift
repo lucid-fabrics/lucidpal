@@ -20,10 +20,10 @@ protocol LLMServiceProtocol: AnyObject {
     var contextTruncatedPublisher: AnyPublisher<Void, Never> { get }
 
     /// Generates a response using the specified model role.
-    func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool, modelRole: ModelType) -> AsyncThrowingStream<String, Error>
+    func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool, modelRole: ModelType, maxNewTokens: Int32) -> AsyncThrowingStream<String, Error>
 
     /// Loads the model at the given URL for the specified role.
-    func loadModel(at url: URL, contextSize: UInt32, role: ModelType, isIntegrated: Bool, mmprojURL: URL?) async throws
+    func loadModel(at url: URL, contextSize: UInt32, temperature: Float, role: ModelType, isIntegrated: Bool, mmprojURL: URL?) async throws
 
     /// Unloads the model for the specified role.
     func unloadModel(role: ModelType)

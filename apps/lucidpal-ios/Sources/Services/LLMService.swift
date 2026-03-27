@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import llama
 import OSLog
@@ -21,7 +22,7 @@ final class LLMService: LLMServiceProtocol {
 
     private let llama = LlamaActor()
     private var currentTask: Task<Void, Never>?
-    private let contextTruncatedSubject = PassthroughSubject<Void, Never>()
+    nonisolated(unsafe) private let contextTruncatedSubject = PassthroughSubject<Void, Never>()
 
     var contextTruncatedPublisher: AnyPublisher<Void, Never> {
         contextTruncatedSubject.eraseToAnyPublisher()
@@ -29,11 +30,11 @@ final class LLMService: LLMServiceProtocol {
 
     var isVisionModelLoaded: Bool { visionLoaded || textModelSupportsVision }
 
-    func loadModel(at url: URL, contextSize: UInt32, role: ModelType, isIntegrated: Bool, mmprojURL: URL? = nil) async throws {
+    func loadModel(at url: URL, contextSize: UInt32, temperature: Float = LLMConstants.samplerTemperature, role: ModelType, isIntegrated: Bool, mmprojURL: URL? = nil) async throws {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
-        try await llama.loadModel(at: url.path, contextSize: contextSize, role: role, isIntegrated: isIntegrated, mmprojPath: mmprojURL?.path)
+        try await llama.loadModel(at: url.path, contextSize: contextSize, temperature: temperature, role: role, isIntegrated: isIntegrated, mmprojPath: mmprojURL?.path)
         await llama.warmup(role: role)
         isLoaded = true
         if role == .vision { visionLoaded = true }
@@ -74,7 +75,7 @@ final class LLMService: LLMServiceProtocol {
         isGenerating = false
     }
 
-    func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true, modelRole: ModelType) -> AsyncThrowingStream<String, Error> {
+    func generate(systemPrompt: String, messages: [ChatMessage], thinkingEnabled: Bool = true, modelRole: ModelType, maxNewTokens: Int32 = Int32(LLMConstants.maxNewTokens)) -> AsyncThrowingStream<String, Error> {
         guard !isGenerating else {
             return AsyncThrowingStream { $0.finish(throwing: LLMError.generationInProgress) }
         }
@@ -93,18 +94,16 @@ final class LLMService: LLMServiceProtocol {
             let prompt = Self.buildVisionPrompt(
                 systemPrompt: systemPrompt, messages: messages,
                 thinkingEnabled: thinkingEnabled, imageCount: imageDataList.count)
-            let truncatedSubject = contextTruncatedSubject
-
             return AsyncThrowingStream { continuation in
-                let task = Task {
+                let task = Task { [weak self] in
                     defer {
                         Task { @MainActor [weak self] in
                             self?.isGenerating = false
                             self?.currentTask  = nil
                         }
                     }
-                    await llamaRef.generateWithImages(prompt: prompt, imageDataList: imageDataList, role: modelRole, onTruncated: {
-                        Task { @MainActor in truncatedSubject.send(()) }
+                    await llamaRef.generateWithImages(prompt: prompt, imageDataList: imageDataList, role: modelRole, maxNew: maxNewTokens, onTruncated: { [weak self] in
+                        Task { @MainActor in self?.contextTruncatedSubject.send(()) }
                     }, continuation: continuation)
                 }
                 MainActor.assumeIsolated { [weak self] in self?.currentTask = task }
@@ -114,18 +113,17 @@ final class LLMService: LLMServiceProtocol {
 
         // Text path: standard prompt
         let prompt = Self.buildPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
-        let truncatedSubject = contextTruncatedSubject
 
         return AsyncThrowingStream { continuation in
-            let task = Task {
+            let task = Task { [weak self] in
                 defer {
                     Task { @MainActor [weak self] in
                         self?.isGenerating = false
                         self?.currentTask  = nil
                     }
                 }
-                await llamaRef.generate(prompt: prompt, role: modelRole, onTruncated: {
-                    Task { @MainActor in truncatedSubject.send(()) }
+                await llamaRef.generate(prompt: prompt, role: modelRole, maxNew: maxNewTokens, onTruncated: { [weak self] in
+                    Task { @MainActor in self?.contextTruncatedSubject.send(()) }
                 }, continuation: continuation)
             }
             MainActor.assumeIsolated { [weak self] in self?.currentTask = task }

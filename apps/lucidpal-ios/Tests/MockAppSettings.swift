@@ -12,6 +12,9 @@ final class MockAppSettings: AppSettingsProtocol {
     var voiceAutoStartEnabled: Bool = false
     var airpodsAutoVoiceEnabled: Bool = false
     var contextSize: Int = ChatConstants.defaultContextSizeTokens
+    var temperature: Double = Double(LLMConstants.samplerTemperature)
+    var maxResponseTokens: Int = Int(LLMConstants.maxNewTokens)
+    var generationTimeout: Double = ChatConstants.generationTimeoutSeconds
     var notesAccessEnabled: Bool = false
     var remindersAccessEnabled: Bool = false
     var mailAccessEnabled: Bool = false

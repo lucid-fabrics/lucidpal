@@ -48,6 +48,18 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         didSet { UserDefaults.standard.set(contextSize, forKey: UserDefaultsKeys.contextSize) }
     }
 
+    @Published var temperature: Double {
+        didSet { UserDefaults.standard.set(temperature, forKey: UserDefaultsKeys.temperature) }
+    }
+
+    @Published var maxResponseTokens: Int {
+        didSet { UserDefaults.standard.set(maxResponseTokens, forKey: UserDefaultsKeys.maxResponseTokens) }
+    }
+
+    @Published var generationTimeout: Double {
+        didSet { UserDefaults.standard.set(generationTimeout, forKey: UserDefaultsKeys.generationTimeout) }
+    }
+
     @Published var notesAccessEnabled: Bool {
         didSet { UserDefaults.standard.set(notesAccessEnabled, forKey: UserDefaultsKeys.notesAccessEnabled) }
     }
@@ -112,6 +124,9 @@ final class AppSettings: ObservableObject, AppSettingsProtocol {
         voiceAutoStartEnabled = defaults.object(forKey: UserDefaultsKeys.voiceAutoStartEnabled) as? Bool ?? false
         airpodsAutoVoiceEnabled = defaults.object(forKey: UserDefaultsKeys.airpodsAutoVoiceEnabled) as? Bool ?? false
         contextSize = defaults.object(forKey: UserDefaultsKeys.contextSize) as? Int ?? ChatConstants.defaultContextSizeTokens
+        temperature = defaults.object(forKey: UserDefaultsKeys.temperature) as? Double ?? Double(LLMConstants.samplerTemperature)
+        maxResponseTokens = defaults.object(forKey: UserDefaultsKeys.maxResponseTokens) as? Int ?? Int(LLMConstants.maxNewTokens)
+        generationTimeout = defaults.object(forKey: UserDefaultsKeys.generationTimeout) as? Double ?? ChatConstants.generationTimeoutSeconds
         notesAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.notesAccessEnabled)
         remindersAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.remindersAccessEnabled)
         mailAccessEnabled = defaults.bool(forKey: UserDefaultsKeys.mailAccessEnabled)

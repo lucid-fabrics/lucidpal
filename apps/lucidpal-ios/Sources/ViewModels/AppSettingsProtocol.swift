@@ -18,6 +18,13 @@ protocol InferenceSettingsProtocol: AnyObject {
     var selectedTextModel: ModelInfo { get }
     var maxContextSize: Int { get }
     var deviceRAMGB: Int { get }
+    /// Sampler temperature (0.0–2.0). Lower = more focused; higher = more creative.
+    /// Takes effect the next time the model is loaded.
+    var temperature: Double { get set }
+    /// Maximum tokens generated per response (e.g. 128–2048).
+    var maxResponseTokens: Int { get set }
+    /// Seconds before an in-progress generation is cancelled and an error is shown.
+    var generationTimeout: Double { get set }
 }
 
 /// Voice and speech input settings.
