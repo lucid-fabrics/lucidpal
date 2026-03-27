@@ -30,6 +30,8 @@ final class ModelDownloader: NSObject {
 
     private var session: URLSession?
     private var downloadTask: URLSessionDownloadTask?
+    // Stored on failure so the next download() call can resume instead of restarting from 0%.
+    private var pendingResumeData: Data?
 
     // Safety: destinationURL is written on @MainActor before the download task starts,
     // and only read in URLSession delegate callbacks (which fire after the task resumes).
@@ -65,7 +67,15 @@ final class ModelDownloader: NSObject {
         let session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
         self.session = session
 
-        let task = session.downloadTask(with: model.downloadURL)
+        // Resume from saved data if available — avoids restarting a 600 MB+ download from 0%.
+        let task: URLSessionDownloadTask
+        if let resumeData = pendingResumeData {
+            task = session.downloadTask(withResumeData: resumeData)
+            pendingResumeData = nil
+            logger.info("Resuming download from saved resume data (\(resumeData.count) bytes)")
+        } else {
+            task = session.downloadTask(with: model.downloadURL)
+        }
         downloadTask = task
         state = .downloading(progress: 0)
         task.resume()
@@ -73,6 +83,7 @@ final class ModelDownloader: NSObject {
 
     func cancel() {
         userCancelled = true
+        pendingResumeData = nil  // discard — explicit user cancel, do not resume
         downloadTask?.cancel()
         downloadTask = nil
         session?.invalidateAndCancel()
@@ -124,6 +135,8 @@ extension ModelDownloader: URLSessionDownloadDelegate {
         if let failure = validateDownloadedFile(at: location, response: downloadTask.response) {
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
+                self?.session?.finishTasksAndInvalidate()
+                self?.session = nil
                 self?.state = .failed(message: failure)
             }
             return
@@ -138,7 +151,9 @@ extension ModelDownloader: URLSessionDownloadDelegate {
                 self?.state = .completed(url: destination)
             }
         } catch {
-            cleanupPartialFile(at: destination, context: error)
+            // Do NOT clean up destination: moveItem is atomic (nothing written on failure),
+            // and replaceItemAt preserves the original file on failure.
+            // Deleting destination here would remove the user's existing valid model.
             let message = (error as? CocoaError)?.code == .fileWriteOutOfSpace
                 ? "Not enough storage space. Free up space and try again."
                 : error.localizedDescription
@@ -173,19 +188,18 @@ extension ModelDownloader: URLSessionDownloadDelegate {
     }
 
     /// Moves the temporary download to the final destination, replacing any existing file.
+    /// Uses replaceItemAt when a prior file exists — this is atomic on the same volume,
+    /// so a failed replacement leaves the original intact rather than deleting it first.
     private nonisolated func moveDownloadedFile(from source: URL, to destination: URL) throws {
         if FileManager.default.fileExists(atPath: destination.path) {
-            try FileManager.default.removeItem(at: destination)
-        }
-        try FileManager.default.moveItem(at: source, to: destination)
-    }
-
-    /// Best-effort cleanup of a partial file after a move failure.
-    private nonisolated func cleanupPartialFile(at url: URL, context: Error) {
-        do {
-            try FileManager.default.removeItem(at: url)
-        } catch {
-            logger.error("Cleanup failed after \(context.localizedDescription): \(error)")
+            _ = try FileManager.default.replaceItemAt(
+                destination,
+                withItemAt: source,
+                backupItemName: nil,
+                options: .usingNewMetadataOnly
+            )
+        } else {
+            try FileManager.default.moveItem(at: source, to: destination)
         }
     }
 
@@ -219,21 +233,51 @@ extension ModelDownloader: URLSessionDownloadDelegate {
         guard let error else { return }
         let nsError = error as NSError
 
+        // Capture resume data before branching — the system attaches it to the error
+        // for both network failures and system-initiated cancellations (e.g. no WiFi).
+        let resumeData = nsError.userInfo[NSURLSessionDownloadTaskResumeData] as? Data
+
         // NSURLErrorCancelled fires for both user cancellation and cellular restriction
         // (allowsCellularAccess=false with no WiFi). Suppress only explicit user cancels.
         if nsError.code == NSURLErrorCancelled {
             let wasUserCancelled = userCancelled
             userCancelled = false
-            guard !wasUserCancelled else { return }
+            if wasUserCancelled {
+                // Explicit cancel — pendingResumeData already cleared in cancel(). Nothing to do.
+                return
+            }
+            // System cancellation (e.g. WiFi dropped) — store resume data so the next
+            // download() call picks up from where the transfer stopped.
+            Task { @MainActor [weak self] in
+                self?.pendingResumeData = resumeData
+                self?.downloadTask = nil
+                self?.session?.finishTasksAndInvalidate()
+                self?.session = nil
+                self?.state = .failed(message: "WiFi required to download models. Please connect to WiFi and try again.")
+            }
+            return
         }
 
-        let message = nsError.code == NSURLErrorCancelled
-            ? "WiFi required to download models. Please connect to WiFi and try again."
-            : error.localizedDescription
+        // Stale or corrupt resume data — the system cannot continue from the saved offset.
+        // Clear it so the next retry starts fresh rather than looping on the same bad data.
+        if nsError.code == NSURLErrorCannotResumeDownload {
+            Task { @MainActor [weak self] in
+                self?.pendingResumeData = nil
+                self?.downloadTask = nil
+                self?.session?.finishTasksAndInvalidate()
+                self?.session = nil
+                self?.state = .failed(message: "Download could not be resumed. Tap retry to start over.")
+            }
+            return
+        }
 
+        // Network or server failure — store resume data so retry resumes mid-file.
         Task { @MainActor [weak self] in
+            self?.pendingResumeData = resumeData
             self?.downloadTask = nil
-            self?.state = .failed(message: message)
+            self?.session?.finishTasksAndInvalidate()
+            self?.session = nil
+            self?.state = .failed(message: error.localizedDescription)
         }
     }
 }

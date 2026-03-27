@@ -21,6 +21,11 @@ final class LLMService: LLMServiceProtocol {
 
     private let llama = LlamaActor()
     private var currentTask: Task<Void, Never>?
+    private let contextTruncatedSubject = PassthroughSubject<Void, Never>()
+
+    var contextTruncatedPublisher: AnyPublisher<Void, Never> {
+        contextTruncatedSubject.eraseToAnyPublisher()
+    }
 
     var isVisionModelLoaded: Bool { visionLoaded || textModelSupportsVision }
 
@@ -86,6 +91,7 @@ final class LLMService: LLMServiceProtocol {
             let lastUserMessage = body.last(where: { $0.role == .user })
             let imageDataList = Self.extractImageData(from: lastUserMessage)
             let prompt = Self.buildVisionPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled, imageCount: imageDataList.count)
+            let truncatedSubject = contextTruncatedSubject
 
             return AsyncThrowingStream { continuation in
                 let task = Task {
@@ -95,7 +101,9 @@ final class LLMService: LLMServiceProtocol {
                             self?.currentTask  = nil
                         }
                     }
-                    await llamaRef.generateWithImages(prompt: prompt, imageDataList: imageDataList, role: modelRole, continuation: continuation)
+                    await llamaRef.generateWithImages(prompt: prompt, imageDataList: imageDataList, role: modelRole, onTruncated: {
+                        Task { @MainActor in truncatedSubject.send(()) }
+                    }, continuation: continuation)
                 }
                 MainActor.assumeIsolated { [weak self] in self?.currentTask = task }
                 continuation.onTermination = { _ in task.cancel() }
@@ -104,6 +112,7 @@ final class LLMService: LLMServiceProtocol {
 
         // Text path: standard prompt
         let prompt = Self.buildPrompt(systemPrompt: systemPrompt, messages: messages, thinkingEnabled: thinkingEnabled)
+        let truncatedSubject = contextTruncatedSubject
 
         return AsyncThrowingStream { continuation in
             let task = Task {
@@ -113,7 +122,9 @@ final class LLMService: LLMServiceProtocol {
                         self?.currentTask  = nil
                     }
                 }
-                await llamaRef.generate(prompt: prompt, role: modelRole, continuation: continuation)
+                await llamaRef.generate(prompt: prompt, role: modelRole, onTruncated: {
+                    Task { @MainActor in truncatedSubject.send(()) }
+                }, continuation: continuation)
             }
             MainActor.assumeIsolated { [weak self] in self?.currentTask = task }
             continuation.onTermination = { _ in task.cancel() }
