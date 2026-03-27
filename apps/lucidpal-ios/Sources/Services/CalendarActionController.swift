@@ -33,12 +33,14 @@ final class CalendarActionController: CalendarActionControllerProtocol {
 
     // Date formats the LLM might generate — tried in order
     private static let dateFormats: [String] = [
-        "yyyy-MM-dd'T'HH:mm:ss",   // canonical ISO8601 (no tz)
-        "yyyy-MM-dd HH:mm:ss",     // space instead of T
-        "yyyy-MM-dd'T'HH:mm:ssZ",  // with timezone
-        "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-        "yyyy-MM-dd HH:mm",        // no seconds
+        "yyyy-MM-dd'T'HH:mm:ss",      // canonical ISO8601 (no tz)
+        "yyyy-MM-dd HH:mm:ss",        // space instead of T
+        "yyyy-MM-dd'T'HH:mm:ssZ",     // with timezone
+        "yyyy-MM-dd'T'HH:mm:ss.SSSZ", // with millis + timezone
+        "yyyy-MM-dd'T'HH:mm:ss.SSS",  // with millis, no timezone
+        "yyyy-MM-dd HH:mm",           // no seconds
         "yyyy-MM-dd'T'HH:mm",
+        "yyyy-MM-dd",                 // date-only (all-day events)
     ]
 
     private static let decoder: JSONDecoder = {
