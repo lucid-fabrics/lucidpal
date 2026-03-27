@@ -30,6 +30,8 @@ final class ModelDownloader: NSObject {
 
     private var session: URLSession?
     private var downloadTask: URLSessionDownloadTask?
+    // Stored on failure so the next download() call can resume instead of restarting from 0%.
+    private var pendingResumeData: Data?
 
     // Safety: destinationURL is written on @MainActor before the download task starts,
     // and only read in URLSession delegate callbacks (which fire after the task resumes).
@@ -65,7 +67,15 @@ final class ModelDownloader: NSObject {
         let session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
         self.session = session
 
-        let task = session.downloadTask(with: model.downloadURL)
+        // Resume from saved data if available — avoids restarting a 600 MB+ download from 0%.
+        let task: URLSessionDownloadTask
+        if let resumeData = pendingResumeData {
+            task = session.downloadTask(withResumeData: resumeData)
+            pendingResumeData = nil
+            logger.info("Resuming download from saved resume data (\(resumeData.count) bytes)")
+        } else {
+            task = session.downloadTask(with: model.downloadURL)
+        }
         downloadTask = task
         state = .downloading(progress: 0)
         task.resume()
@@ -73,6 +83,7 @@ final class ModelDownloader: NSObject {
 
     func cancel() {
         userCancelled = true
+        pendingResumeData = nil  // discard — explicit user cancel, do not resume
         downloadTask?.cancel()
         downloadTask = nil
         session?.invalidateAndCancel()
@@ -219,21 +230,34 @@ extension ModelDownloader: URLSessionDownloadDelegate {
         guard let error else { return }
         let nsError = error as NSError
 
+        // Capture resume data before branching — the system attaches it to the error
+        // for both network failures and system-initiated cancellations (e.g. no WiFi).
+        let resumeData = nsError.userInfo[NSURLSessionDownloadTaskResumeData] as? Data
+
         // NSURLErrorCancelled fires for both user cancellation and cellular restriction
         // (allowsCellularAccess=false with no WiFi). Suppress only explicit user cancels.
         if nsError.code == NSURLErrorCancelled {
             let wasUserCancelled = userCancelled
             userCancelled = false
-            guard !wasUserCancelled else { return }
+            if wasUserCancelled {
+                // Explicit cancel — pendingResumeData already cleared in cancel(). Nothing to do.
+                return
+            }
+            // System cancellation (e.g. WiFi dropped) — store resume data so the next
+            // download() call picks up from where the transfer stopped.
+            Task { @MainActor [weak self] in
+                self?.pendingResumeData = resumeData
+                self?.downloadTask = nil
+                self?.state = .failed(message: "WiFi required to download models. Please connect to WiFi and try again.")
+            }
+            return
         }
 
-        let message = nsError.code == NSURLErrorCancelled
-            ? "WiFi required to download models. Please connect to WiFi and try again."
-            : error.localizedDescription
-
+        // Network or server failure — store resume data so retry resumes mid-file.
         Task { @MainActor [weak self] in
+            self?.pendingResumeData = resumeData
             self?.downloadTask = nil
-            self?.state = .failed(message: message)
+            self?.state = .failed(message: error.localizedDescription)
         }
     }
 }
