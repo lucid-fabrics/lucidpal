@@ -38,7 +38,7 @@ final class CalendarActionController: CalendarActionControllerProtocol {
                 if let date = formatter.date(from: raw) { return date }
             }
 
-            // Last resort: ISO8601DateFormatter with various options
+            // Second attempt: ISO8601DateFormatter with various options
             let iso = ISO8601DateFormatter()
             for opt: ISO8601DateFormatter.Options in [
                 [.withInternetDateTime],
@@ -47,6 +47,17 @@ final class CalendarActionController: CalendarActionControllerProtocol {
             ] {
                 iso.formatOptions = opt
                 if let date = iso.date(from: raw) { return date }
+            }
+
+            // Final fallback: NSDataDetector for natural language dates
+            // ("tomorrow at 3pm", "next Monday", "in 2 hours", etc.).
+            // Respects device locale and timezone automatically.
+            if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue) {
+                let nsRange = NSRange(raw.startIndex..., in: raw)
+                if let match = detector.firstMatch(in: raw, options: [], range: nsRange),
+                   let date = match.date {
+                    return date
+                }
             }
 
             throw DecodingError.dataCorruptedError(
