@@ -135,6 +135,8 @@ extension ModelDownloader: URLSessionDownloadDelegate {
         if let failure = validateDownloadedFile(at: location, response: downloadTask.response) {
             Task { @MainActor [weak self] in
                 self?.downloadTask = nil
+                self?.session?.finishTasksAndInvalidate()
+                self?.session = nil
                 self?.state = .failed(message: failure)
             }
             return
@@ -184,11 +186,19 @@ extension ModelDownloader: URLSessionDownloadDelegate {
     }
 
     /// Moves the temporary download to the final destination, replacing any existing file.
+    /// Uses replaceItemAt when a prior file exists — this is atomic on the same volume,
+    /// so a failed replacement leaves the original intact rather than deleting it first.
     private nonisolated func moveDownloadedFile(from source: URL, to destination: URL) throws {
         if FileManager.default.fileExists(atPath: destination.path) {
-            try FileManager.default.removeItem(at: destination)
+            _ = try FileManager.default.replaceItemAt(
+                destination,
+                withItemAt: source,
+                backupItemName: nil,
+                options: .usingNewMetadataOnly
+            )
+        } else {
+            try FileManager.default.moveItem(at: source, to: destination)
         }
-        try FileManager.default.moveItem(at: source, to: destination)
     }
 
     /// Best-effort cleanup of a partial file after a move failure.
@@ -249,6 +259,17 @@ extension ModelDownloader: URLSessionDownloadDelegate {
                 self?.pendingResumeData = resumeData
                 self?.downloadTask = nil
                 self?.state = .failed(message: "WiFi required to download models. Please connect to WiFi and try again.")
+            }
+            return
+        }
+
+        // Stale or corrupt resume data — the system cannot continue from the saved offset.
+        // Clear it so the next retry starts fresh rather than looping on the same bad data.
+        if nsError.code == NSURLErrorCannotResumeDownload {
+            Task { @MainActor [weak self] in
+                self?.pendingResumeData = nil
+                self?.downloadTask = nil
+                self?.state = .failed(message: "Download could not be resumed. Tap retry to start over.")
             }
             return
         }
