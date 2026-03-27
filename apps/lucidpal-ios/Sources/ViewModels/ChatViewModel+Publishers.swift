@@ -32,6 +32,7 @@ extension ChatViewModel {
             .sink { [weak self] in self?.isGenerating = $0 }
             .store(in: &cancellables)
         llmService.contextTruncatedPublisher
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 self?.showToast("Conversation too long — oldest messages were trimmed.", systemImage: "scissors")
             }
