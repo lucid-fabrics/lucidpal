@@ -5,7 +5,7 @@ import OSLog
 // MARK: - Generate (text only)
 
 extension LlamaActor {
-    func generate(prompt: String, role: ModelType, continuation: AsyncThrowingStream<String, Error>.Continuation) async {
+    func generate(prompt: String, role: ModelType, onTruncated: (@Sendable () -> Void)? = nil, continuation: AsyncThrowingStream<String, Error>.Continuation) async {
         let useTextSlotForVision = role == .vision && !isVisionModelLoaded && textModelSupportsVision && isTextModelLoaded
         let actualCtx: OpaquePointer?
         let actualVocab: OpaquePointer?
@@ -47,6 +47,7 @@ extension LlamaActor {
 
         if tokens.count > maxPromptTokens {
             tokens = Array(tokens.suffix(maxPromptTokens))
+            onTruncated?()
         }
 
         llama_memory_clear(llama_get_memory(ctx), false)

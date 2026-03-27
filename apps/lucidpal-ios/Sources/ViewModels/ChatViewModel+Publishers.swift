@@ -25,6 +25,11 @@ extension ChatViewModel {
         llmService.isGeneratingPublisher
             .sink { [weak self] in self?.isGenerating = $0 }
             .store(in: &cancellables)
+        llmService.contextTruncatedPublisher
+            .sink { [weak self] in
+                self?.showToast("Conversation too long — oldest messages were trimmed.", systemImage: "scissors")
+            }
+            .store(in: &cancellables)
         speechService.isRecordingPublisher
             .sink { [weak self] in self?.isSpeechRecording = $0 }
             .store(in: &cancellables)
