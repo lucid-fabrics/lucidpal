@@ -178,6 +178,8 @@ extension ModelDownloader: URLSessionDownloadDelegate {
                 self?.downloadTask = nil
                 self?.session?.finishTasksAndInvalidate()
                 self?.session = nil
+                self?.checksumRetryCount = 0  // reset after successful download
+                self?.currentModel = nil
                 self?.state = .completed(url: destination)
             }
         } catch {
