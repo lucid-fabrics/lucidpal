@@ -227,7 +227,8 @@ extension ChatViewModel {
                 messages[postIdx].calendarEventPreviews = previews
                 messages[postIdx].calendarFreeSlots = freeSlots
                 messageHandlingLogger.info("✅ FINAL: \(content, privacy: .public) | events=\(previews.count) slots=\(freeSlots.count)")
-                DebugLogStore.shared.log("FINAL: events=\(previews.count) slots=\(freeSlots.count) — \(String(content.prefix(ChatConstants.rawLogPreviewLength)))", category: "LLM")
+                let logPreview = String(content.prefix(ChatConstants.rawLogPreviewLength))
+                DebugLogStore.shared.log("FINAL: events=\(previews.count) slots=\(freeSlots.count) — \(logPreview)", category: "LLM")
             }
         }
     }
@@ -250,6 +251,7 @@ extension ChatViewModel {
         }
     }
 
+    // swiftlint:disable:next function_body_length
     func performWebSearch(
         query: String,
         maxResults: Int,
@@ -266,9 +268,18 @@ extension ChatViewModel {
             let resultText = results.enumerated().map { i, r in
                 // Strip any action tokens from search result content to prevent recursive
                 // [WEB_SEARCH:...] or [CALENDAR_ACTION:...] blocks from being executed.
-                let safeTitle   = r.title.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:").replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
-                let safeSnippet = r.snippet.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:").replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
-                let safeURL     = r.url.replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:").replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:").replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
+                let safeTitle = r.title
+                    .replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:")
+                    .replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
+                    .replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
+                let safeSnippet = r.snippet
+                    .replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:")
+                    .replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
+                    .replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
+                let safeURL = r.url
+                    .replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:")
+                    .replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
+                    .replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
                 return "[\(i + 1)] \(safeTitle)\nURL: \(safeURL)\n\(safeSnippet)"
             }.joined(separator: "\n\n")
             // Sanitize query to prevent injection tokens from being re-executed by the synthesis pass.
@@ -276,10 +287,9 @@ extension ChatViewModel {
                 .replacingOccurrences(of: "[WEB_SEARCH:", with: "[WEB_SEARCH\u{200B}:")
                 .replacingOccurrences(of: "[CALENDAR_ACTION:", with: "[CALENDAR_ACTION\u{200B}:")
                 .replacingOccurrences(of: "[SEARCH_RESULTS", with: "[SEARCH_RESULTS\u{200B}")
-            let toolMsg = ChatMessage(
-                role: .user,
-                content: "[SEARCH_RESULTS for \"\(safeQuery)\"]:\n\(resultText)\n\nAnswer the original question directly. No preamble. No disclaimers. Be concise. Use location/timezone from context."
-            )
+            let toolMsgContent = "[SEARCH_RESULTS for \"\(safeQuery)\"]:\n\(resultText)"
+                + "\n\nAnswer the original question directly. No preamble. No disclaimers. Be concise. Use location/timezone from context."
+            let toolMsg = ChatMessage(role: .user, content: toolMsgContent)
             let synthesisPrompt = await systemPromptBuilder.buildSynthesisPrompt()
             messageHandlingLogger.info("🔍 WEB_SEARCH starting synthesis pass")
             DebugLogStore.shared.log("WEB_SEARCH starting synthesis pass", category: "Search")
