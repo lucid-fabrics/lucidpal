@@ -1,22 +1,26 @@
+/* LucidPal — accent: #63A5EA (sRGB 0.388 / 0.647 / 0.918) */
+
 :root {
-  --ifm-color-primary: #0070f3;
-  --ifm-color-primary-dark: #0064da;
-  --ifm-color-primary-darker: #005ecd;
-  --ifm-color-primary-darkest: #004daa;
-  --ifm-color-primary-light: #1a7ef5;
-  --ifm-color-primary-lighter: #2784f5;
-  --ifm-color-primary-lightest: #4d97f7;
+  /* Darker shade used in light mode for WCAG AA contrast on white */
+  --ifm-color-primary: #2474d4;
+  --ifm-color-primary-dark: #1e65b9;
+  --ifm-color-primary-darker: #1a5caa;
+  --ifm-color-primary-darkest: #144a8c;
+  --ifm-color-primary-light: #3882de;
+  --ifm-color-primary-lighter: #4a8ee1;
+  --ifm-color-primary-lightest: #75acee;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
 [data-theme='dark'] {
-  --ifm-color-primary: #60a5fa;
-  --ifm-color-primary-dark: #3b8ff8;
-  --ifm-color-primary-darker: #2984f7;
-  --ifm-color-primary-darkest: #0a6def;
-  --ifm-color-primary-light: #85bbfb;
-  --ifm-color-primary-lighter: #97c5fc;
-  --ifm-color-primary-lightest: #cce0fe;
+  /* App's actual accent used in dark mode (sufficient contrast on dark bg) */
+  --ifm-color-primary: #63a5ea;
+  --ifm-color-primary-dark: #4a93e3;
+  --ifm-color-primary-darker: #3d88df;
+  --ifm-color-primary-darkest: #2474d4;
+  --ifm-color-primary-light: #7db5ee;
+  --ifm-color-primary-lighter: #8dbdf0;
+  --ifm-color-primary-lightest: #b8d5f5;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
