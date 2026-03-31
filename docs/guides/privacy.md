@@ -24,6 +24,7 @@ Every word you type, every calendar event you manage, and every AI response is p
 | Your messages         | On-device AI inference           | Never          |
 | Calendar events       | Reading and writing via EventKit | Never          |
 | Microphone (optional) | Speech-to-text recognition       | Never          |
+| Contacts (optional)   | Looking up contacts via Siri     | Never          |
 | Device RAM            | Selecting the right AI model     | Never          |
 
 ---

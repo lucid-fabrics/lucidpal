@@ -6,7 +6,7 @@ sidebar_position: 2
 
 Manage your calendar hands-free using Siri and LucidPal.
 
-LucidPal includes six built-in Siri shortcuts. You can trigger them with your voice without ever opening the app.
+LucidPal includes ten built-in Siri shortcuts. You can trigger them with your voice without ever opening the app.
 
 ## Available Shortcuts
 
@@ -18,6 +18,10 @@ LucidPal includes six built-in Siri shortcuts. You can trigger them with your vo
 | Find Free Time        | "Find free time in LucidPal"         | Finds a free 1-hour slot today                                                                                     |
 | Delete Calendar Event | "Delete event in LucidPal"           | Searches for an event, shows a preview, and deletes it after confirmation                                          |
 | Undo Last Action      | "Undo my last LucidPal action"       | Reverses the most recent calendar action (create, delete, or update) — whether triggered by Siri or inside the app |
+| Save Note             | "Save note to LucidPal"              | Saves a titled note to LucidPal's notes store — runs without opening the app                                       |
+| Find Contact          | "Find contact in LucidPal"           | Looks up a contact's phone number and email by name — runs without opening the app                                 |
+| Log Habit             | "Log habit in LucidPal"              | Records a habit entry to LucidPal's habit store — runs without opening the app                                     |
+| Create Event Shortcut | "Create event shortcut in LucidPal"  | Creates a calendar event via a dedicated shortcut intent                                                           |
 
 ---
 
@@ -27,7 +31,7 @@ On iOS 16.4 and later, shortcuts are suggested automatically after you use Lucid
 
 1. **Open the Shortcuts app** — find it on your Home Screen or search in Spotlight.
 2. **Tap the + button** — create a new shortcut.
-3. **Search for LucidPal** — all six intents appear in the app actions list.
+3. **Search for LucidPal** — all ten intents appear in the app actions list.
 4. **Add a Siri phrase** — tap **Add to Siri** and record your preferred trigger phrase.
 
 ---
