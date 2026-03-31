@@ -26,6 +26,7 @@ const sidebars = {
       items: [
         'architecture/overview',
         'architecture/llm-inference',
+        'architecture/turboquant',
         'architecture/calendar',
         'architecture/sessions',
         'architecture/siri',
