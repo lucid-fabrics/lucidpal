@@ -4,7 +4,7 @@ An on-device AI assistant for iOS with native calendar access. All inference run
 
 Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [llama.cpp](https://github.com/ggml-org/llama.cpp).
 
-**[Full documentation →](https://lucid-fabrics.github.io/lucidpal)**
+**[Full documentation →](https://lucid-fabrics.github.io/lucidpal)** · **[GitHub →](https://github.com/lucid-fabrics/lucidpal)**
 
 ---
 
