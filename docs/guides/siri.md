@@ -1,0 +1,96 @@
+---
+sidebar_position: 2
+---
+
+# Siri Shortcuts
+
+Manage your calendar hands-free using Siri and LucidPal.
+
+LucidPal includes six built-in Siri shortcuts. You can trigger them with your voice without ever opening the app.
+
+## Available Shortcuts
+
+| Shortcut              | Example phrase                       | What it does                                                                                                       |
+| --------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Ask LucidPal          | "Ask LucidPal what's on my schedule" | Opens the app and sends your question                                                                              |
+| Check My Calendar     | "Check my LucidPal calendar"         | Shows today's events                                                                                               |
+| Add Calendar Event    | "Add dentist to LucidPal"            | Starts an event creation                                                                                           |
+| Find Free Time        | "Find free time in LucidPal"         | Finds a free 1-hour slot today                                                                                     |
+| Delete Calendar Event | "Delete event in LucidPal"           | Searches for an event, shows a preview, and deletes it after confirmation                                          |
+| Undo Last Action      | "Undo my last LucidPal action"       | Reverses the most recent calendar action (create, delete, or update) — whether triggered by Siri or inside the app |
+
+---
+
+## Setting Up Siri Shortcuts
+
+On iOS 16.4 and later, shortcuts are suggested automatically after you use LucidPal a few times. On earlier versions:
+
+1. **Open the Shortcuts app** — find it on your Home Screen or search in Spotlight.
+2. **Tap the + button** — create a new shortcut.
+3. **Search for LucidPal** — all six intents appear in the app actions list.
+4. **Add a Siri phrase** — tap **Add to Siri** and record your preferred trigger phrase.
+
+---
+
+## How It Works
+
+Because LucidPal runs entirely on-device, Siri can't process your request directly. Instead:
+
+1. You say your phrase — Siri confirms with a brief spoken reply (e.g. _"Let me check your calendar."_)
+2. LucidPal opens in the foreground.
+3. Your request is automatically sent to the AI — no typing required.
+4. The response appears in a new conversation.
+
+---
+
+## Examples
+
+**Checking your day:**
+
+> "Hey Siri, check my LucidPal calendar"
+
+Siri replies: _"Let me check your calendar."_ LucidPal opens and immediately shows today's events.
+
+**Adding an event by voice:**
+
+> "Hey Siri, add dentist to LucidPal"
+
+Siri asks: _"What would you like to add to your calendar?"_
+You say: _"Dentist appointment Friday at 10am"_
+LucidPal opens and shows a preview card ready to confirm.
+
+**Finding a meeting slot:**
+
+> "Hey Siri, find free time in LucidPal"
+
+LucidPal opens and searches for the next free 1-hour slot today.
+
+**Deleting an event by voice:**
+
+> "Hey Siri, delete event in LucidPal"
+
+Siri replies: _"Which event would you like to delete?"_
+You say: _"Team standup tomorrow"_
+LucidPal shows a preview card of the matching event and asks you to confirm before deleting.
+
+**Undoing your last action:**
+
+> "Hey Siri, undo my last LucidPal action"
+
+LucidPal looks at what you did most recently — inside the app or via Siri — and reverses it:
+
+| Last action                    | What happens                                                |
+| ------------------------------ | ----------------------------------------------------------- |
+| Deleted an event               | LucidPal asks you to confirm, then restores it              |
+| Created an event               | LucidPal asks you to confirm, then deletes it               |
+| Updated / rescheduled an event | LucidPal informs you that undo of edits isn't supported yet |
+
+---
+
+## Tips
+
+- Shortcuts work on iPhone, iPad, HomePod, AirPods, Apple Watch, and CarPlay.
+- You can customize the trigger phrase to anything you like in the Shortcuts app.
+- The **Add Calendar Event** shortcut lets you dictate the full event detail in one sentence — Siri passes everything to LucidPal.
+- The **Delete Calendar Event** shortcut also responds to _"Delete a LucidPal event"_ and _"Remove event from LucidPal"_.
+- The **Undo Last Action** shortcut also responds to _"Undo what I just did in LucidPal"_, _"Undo last LucidPal change"_, _"Restore deleted event in LucidPal"_, and _"Undo LucidPal deletion"_.
