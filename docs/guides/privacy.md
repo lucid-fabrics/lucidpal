@@ -38,7 +38,7 @@ To grant or revoke access: **iOS Settings → Privacy & Security → Calendars �
 
 ## Speech Recognition
 
-If you use the microphone button in LucidPal, speech recognition runs **on-device** via **WhisperKit** (OpenAI Whisper tiny model, downloaded once and stored locally). Audio is recorded to a temporary file, transcribed on-device, and then deleted. Audio is never sent to a server.
+If you use the microphone button in LucidPal, speech recognition runs **on-device** via Apple's `SFSpeechRecognizer`. Audio is never sent to a server.
 
 Microphone access is optional. The app works fully without it.
 

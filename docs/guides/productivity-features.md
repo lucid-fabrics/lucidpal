@@ -59,17 +59,3 @@ Long-press a chip to remove it. You can pin up to **20 prompts**. Pins are saved
 :::tip
 Pin prompts like "What's on my calendar today?" or "Find my next free hour" to access your most common queries instantly.
 :::
-
----
-
-## AirPods Auto-Voice
-
-When AirPods are connected, LucidPal can automatically activate voice recording when you open a chat — so you can speak your question without tapping the microphone button.
-
-Enable in **Settings → Voice → Auto-voice with AirPods**.
-
-When active, an **Auto-listening** banner appears at the top of the chat view to indicate the mic is open. Speaking naturally starts your query. A silence timeout of 30 seconds automatically stops recording if no speech is detected.
-
-:::note
-Auto-voice requires microphone permission and AirPods (or compatible wireless headphones) to be the active audio route.
-:::
