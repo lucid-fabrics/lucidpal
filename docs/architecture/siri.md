@@ -8,7 +8,7 @@ How LucidPal integrates with Siri using the AppIntents framework.
 
 ## Overview
 
-LucidPal registers six Siri intents via the **AppIntents** framework. Because on-device inference cannot run inside a Siri extension, the intents use a **handoff pattern**: they store a pending query in `UserDefaults`, tell Siri a brief spoken confirmation, and open the app. The app picks up the pending query when its scene becomes active.
+LucidPal registers nine Siri intents via the **AppIntents** framework. Calendar and AI intents use a **handoff pattern**: they store a pending query in `UserDefaults`, tell Siri a brief spoken confirmation, and open the app. The app picks up the pending query when its scene becomes active. The three background-action intents — `SaveNoteIntent`, `FindContactIntent`, and `LogHabitIntent` — run entirely without opening the app (`openAppWhenRun: false`) and write directly to the app's shared document storage.
 
 ```
 User: "Add dentist Friday at 10am to LucidPal"
@@ -28,14 +28,17 @@ LLM generates CALENDAR_ACTION block → CalendarEventPreview shown
 
 ## Intent Inventory
 
-| Intent                      | Trigger phrases                                                                                 | Pre-seeded query                | User parameter                 |
-| --------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------- | ------------------------------ |
-| `AskLucidPalIntent`         | "Ask LucidPal [question]"                                                                       | User-provided `query`           | `@Parameter query: String`     |
-| `CheckCalendarIntent`       | "Check my LucidPal calendar"                                                                    | "What's on my calendar today?"  | —                              |
-| `AddCalendarEventIntent`    | "Add [event] to LucidPal"                                                                       | "Add [event] to my calendar"    | `@Parameter event: String`     |
-| `FindFreeTimeIntent`        | "Find free time in LucidPal"                                                                    | "Find a free 1-hour slot today" | —                              |
-| `DeleteCalendarEventIntent` | "Delete [event] in LucidPal"                                                                    | —                               | `@Parameter eventName: String` |
-| `UndoLastDeletionIntent`    | "Undo my last LucidPal action", "Undo what I just did in LucidPal", "Undo last LucidPal change" | —                               | —                              |
+| Intent                      | Pattern     | Trigger phrases                                                                                 | Pre-seeded query                | User parameter                 |
+| --------------------------- | ----------- | ----------------------------------------------------------------------------------------------- | ------------------------------- | ------------------------------ |
+| `AskLucidPalIntent`         | handoff     | "Ask LucidPal [question]"                                                                       | User-provided `query`           | `@Parameter query: String`     |
+| `CheckCalendarIntent`       | handoff     | "Check my LucidPal calendar"                                                                    | "What's on my calendar today?"  | —                              |
+| `AddCalendarEventIntent`    | handoff     | "Add [event] to LucidPal"                                                                       | "Add [event] to my calendar"    | `@Parameter event: String`     |
+| `FindFreeTimeIntent`        | handoff     | "Find free time in LucidPal"                                                                    | "Find a free 1-hour slot today" | —                              |
+| `DeleteCalendarEventIntent` | handoff     | "Delete [event] in LucidPal"                                                                    | —                               | `@Parameter eventName: String` |
+| `UndoLastDeletionIntent`    | handoff     | "Undo my last LucidPal action", "Undo what I just did in LucidPal", "Undo last LucidPal change" | —                               | —                              |
+| `SaveNoteIntent`            | background  | "Save note to LucidPal", "Add note to LucidPal", "Jot down in LucidPal"                        | —                               | `@Parameter title: String`, `@Parameter content: String` |
+| `FindContactIntent`         | background  | "Find contact in LucidPal", "Look up contact in LucidPal", "Get phone number from LucidPal"    | —                               | `@Parameter name: String`      |
+| `LogHabitIntent`            | background  | "Log habit in LucidPal", "Track habit with LucidPal", "Log my workout in LucidPal"             | —                               | `@Parameter habitName: String`, `@Parameter value: Double` |
 
 ## Handoff Key
 

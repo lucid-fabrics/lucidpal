@@ -20,6 +20,7 @@ MVVM layers, dependency injection, and actor isolation in LucidPal.
 │  LLMService  CalendarService        │
 │  SessionManager  SpeechService      │
 │  HapticService  ModelDownloader     │
+│  ContactsService  HabitStore        │
 ├─────────────────────────────────────┤
 │         Models / Domain Types       │  ← Pure data, no UIKit/SwiftUI
 │  ChatMessage  ChatSession           │
@@ -50,6 +51,8 @@ let llmService: LLMService
     private let llmService = LLMService()
     private let calendarService = CalendarService()
     private let hapticService = HapticService()
+    private let contactsService = ContactsService()
+    private let habitStore = HabitStore()
     // ...injected into SessionListViewModel
 }
 ```
@@ -86,6 +89,9 @@ actor LlamaActor {
 | `PinnedPromptsStoreProtocol`       | `PinnedPromptsStore`                            | —                              |
 | `NotificationServiceProtocol`      | `NotificationService`                           | —                              |
 | `LiveActivityServiceProtocol`      | `LiveActivityService`                           | —                              |
+| `NotesStoreProtocol`               | `NotesStore`                                    | —                              |
+| `ContactsServiceProtocol`          | `ContactsService`                               | —                              |
+| `HabitStoreProtocol`               | `HabitStore`                                    | —                              |
 
 ## File Structure
 
@@ -113,7 +119,11 @@ Sources/
 │   ├── HapticService.swift       ← UIImpactFeedbackGenerator wrapper
 │   ├── LiveActivityService.swift ← Live Activity start/update/end
 │   ├── NotificationService.swift ← UNUserNotificationCenter wrapper
-│   └── PinnedPromptsStore.swift  ← Pinned prompts persistence
+│   ├── PinnedPromptsStore.swift  ← Pinned prompts persistence
+│   ├── ContactsService.swift     ← Contacts framework abstraction
+│   ├── ContactsServiceProtocol.swift ← Protocol for contacts access
+│   ├── HabitStore.swift          ← Habit log persistence (ObservableObject)
+│   └── HabitStoreProtocol.swift  ← Protocol for habit store
 ├── ViewModels/
 │   ├── ChatViewModel.swift       ← Core message/stream logic
 │   ├── ChatViewModel+CalendarConfirmation.swift ← Confirm/cancel/undo

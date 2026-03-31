@@ -14,7 +14,7 @@ LucidPal is an on-device AI assistant that understands and manages your iOS cale
 | ------------------------ | ----------------------------------------------------------------------------------------------------------- |
 | **100% On-Device**       | All inference runs via llama.cpp on the Neural Engine. No API keys, no subscriptions, no internet required. |
 | **Calendar Integration** | Create, update, delete and query events using plain English. Conflict detection included.                   |
-| **Siri Shortcuts**       | Four built-in Siri intents let you manage your calendar without ever opening the app.                       |
+| **Siri Shortcuts**       | Ten built-in Siri intents let you manage your calendar, notes, contacts, and habits without ever opening the app. |
 | **Multi-Session**        | Full conversation history with named sessions, persisted locally across launches.                           |
 
 ## Models
