@@ -34,14 +34,14 @@ The result is a KV cache that takes **~4.9× less memory** with effectively no m
 
 The official llama.cpp doesn't include TurboQuant yet (an upstream contribution PR is open). LucidPal is built against [TheTom's fork](https://github.com/TheTom/llama-cpp-turboquant), which implements TurboQuant with **Metal GPU kernels for Apple Silicon** — meaning the compression and decompression happen on the iPhone's GPU, not the CPU. This is what makes it fast enough to be practical on a mobile device.
 
-The fork adds two new KV cache types:
+The fork adds two new GGML quantization types used for both model weights and KV cache:
 
-| Type | Bits per element | Notes |
-|------|-----------------|-------|
-| `turbo3` | 3-bit | Maximum compression, slight quality tradeoff on models < 8B |
-| `turbo4` | 4-bit | **Used by LucidPal** — near-lossless on all Qwen3.5 sizes |
+| GGML type | Bits per element | Notes |
+|-----------|-----------------|-------|
+| `GGML_TYPE_TQ1_0` | 1-bit | Maximum compression, noticeable quality loss on models < 8B |
+| `GGML_TYPE_TQ2_0` | 2-bit | **Used by LucidPal** — near-lossless on all Qwen3.5 sizes |
 
-LucidPal uses **turbo4** across all model sizes and all context window tiers.
+LucidPal activates TurboQuant KV cache compression by setting both `type_k` and `type_v` to `GGML_TYPE_TQ2_0` when initialising the llama.cpp context (`LlamaActor.swift`). This requires flash attention, which is also enabled.
 
 ---
 
