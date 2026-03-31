@@ -45,6 +45,27 @@ Models are stored in the app's local storage on your device. Deleting the app al
 
 ---
 
+## Context Windows & TurboQuant
+
+LucidPal is built against a fork of llama.cpp that includes **TurboQuant** — a KV cache compression technique from Google (ICLR 2026). It compresses the AI's working memory by ~5× using a mathematically lossless rotation followed by 4-bit quantization, all running on the iPhone's GPU via Metal.
+
+In plain terms: it lets your iPhone hold much longer conversations without running out of RAM. The context window (how much the AI can "see" at once) scales with your device:
+
+| Device | Context window |
+|--------|---------------|
+| iPhone 12, 13 (4 GB) | 4,096 tokens (~15 pages) |
+| iPhone 13 non-Pro (6 GB) | 8,192 tokens (~30 pages) |
+| iPhone 13 Pro, 14, 15 (6 GB) | 16,384 tokens (~60 pages) |
+| iPhone 15 Pro, 16, 17 (8 GB) | 32,768 tokens (~120 pages) |
+
+:::note
+Without TurboQuant, the 16K and 32K windows would exceed available RAM entirely. The compression has no measurable quality impact on the 0.8B–4B model sizes LucidPal uses.
+:::
+
+[Technical deep-dive → Architecture: TurboQuant](/architecture/turboquant)
+
+---
+
 ## Thinking Mode
 
 Qwen3.5 models support a **Thinking** mode where the AI reasons through your request before answering. This improves accuracy for complex calendar operations.
