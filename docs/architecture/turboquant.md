@@ -21,28 +21,40 @@ Why LucidPal uses a custom llama.cpp fork and what TurboQuant brings.
 
 The official llama.cpp doesn't include TurboQuant yet (an upstream PR is open). LucidPal is built against [TheTom's fork](https://github.com/TheTom/llama-cpp-turboquant), which implements TurboQuant with **Metal GPU kernels for Apple Silicon**.
 
-The fork introduces two new GGML quantization types:
+The fork introduces new GGML quantization types:
 
 | GGML type | Bits per element | Use case |
 |-----------|-----------------|----------|
 | `GGML_TYPE_TQ1_0` | 1-bit | Maximum compression — quality loss on models < 8B |
 | `GGML_TYPE_TQ2_0` | 2-bit | Near-lossless on models ≥ 1B |
+| `GGML_TYPE_TURBO4_0` | 4-bit | KV cache compression — active in LucidPal |
 
-Both types are compiled into LucidPal's `llama.xcframework` — the quantize, dequantize, and dot-product kernels are present in the binary.
-
----
-
-## Current status: weight quantization only
-
-The TQ types are currently used for **model weight quantization** (i.e. loading a GGUF model file that was quantized with TQ1 or TQ2). LucidPal currently ships with `Q4_K_M` model files, not TQ-quantized files.
-
-**KV cache compression** (setting `type_k`/`type_v` to a TQ type at runtime) requires dedicated Metal attention kernels for those types. These kernels are marked `[EXPERIMENTAL]` in the llama.cpp API and, as of this build, are not available for the iOS Metal backend — attempting to enable them causes a crash at model load.
+All types are compiled into LucidPal's `llama.xcframework` — the quantize, dequantize, and dot-product kernels, including Metal GPU kernels for TURBO2_0/TURBO3_0/TURBO4_0, are present in the binary.
 
 ---
 
-## Context windows without KV cache compression
+## Current status: KV cache active
 
-Without KV cache compression, context window sizes are constrained by device RAM. LucidPal uses context sizes tuned to leave enough headroom for the model weights:
+`GGML_TYPE_TURBO4_0` KV cache compression is **enabled** in LucidPal as of the `feature/turboquant-kv-cache` branch. Both `type_k` and `type_v` are set to `TURBO4_0` at model load in `LlamaActor.loadSingleModel`:
+
+```swift
+cp.type_k = GGML_TYPE_TURBO4_0
+cp.type_v = GGML_TYPE_TURBO4_0
+```
+
+The dedicated Metal attention kernels for TURBO4_0 landed in TheTom's fork and are compiled into LucidPal's `llama.xcframework`. On every model load, LucidPal logs:
+
+```
+KV cache types: type_k=turbo4_0 type_v=turbo4_0
+```
+
+The active type is visible in **Settings → Advanced → KV Cache** (shows `turbo4_0`). Model weights continue to ship as `Q4_K_M` GGUF files — the TQ1/TQ2 weight-quantized formats remain available for future use.
+
+---
+
+## Context windows with TURBO4_0 KV cache compression
+
+With `GGML_TYPE_TURBO4_0` KV cache compression active, context window sizes are significantly larger than what device RAM would otherwise allow. LucidPal uses context sizes tuned to leave enough headroom for the model weights:
 
 | Device RAM | Model | Context window |
 |-----------|-------|---------------|
@@ -50,19 +62,6 @@ Without KV cache compression, context window sizes are constrained by device RAM
 | 3–5 GB (iPhone 13 non-Pro) | Qwen3.5 2B | 8K tokens |
 | 5–7 GB (iPhone 13 Pro, 14, 15) | Qwen3.5 4B | 16K tokens |
 | 7 GB+ (iPhone 15 Pro, 16, 17) | Qwen3.5 4B | 32K tokens |
-
----
-
-## What to watch
-
-Once the TurboQuant Metal KV cache kernels land in TheTom's fork (tracked in [turboquant_plus #27](https://github.com/TheTom/turboquant_plus/issues/27)), LucidPal can activate them with two lines in `LlamaActor.swift`:
-
-```swift
-cp.type_k = GGML_TYPE_TQ2_0
-cp.type_v = GGML_TYPE_TQ2_0
-```
-
-That would deliver ~4–5× KV cache memory reduction, enabling significantly larger context windows within the same RAM budget.
 
 ---
 

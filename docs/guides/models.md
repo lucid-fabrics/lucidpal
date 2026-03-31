@@ -104,6 +104,7 @@ Go to **Settings → Advanced** to tune inference behavior:
 | Max Response Tokens | 768    | Maximum number of tokens generated per response.              |
 | Generation Timeout | 90 s    | Cancel and preserve partial response if generation stalls.    |
 | Context Size       | Auto    | How many tokens the model can "see". Set automatically by RAM.|
+| KV Cache           | turbo4_0 | Compression type for the model's working memory. Read-only.  |
 
 :::note
 The context size is set automatically based on your device's RAM. Manual overrides are capped to a RAM-safe maximum to prevent out-of-memory crashes.
