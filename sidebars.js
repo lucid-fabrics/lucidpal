@@ -14,6 +14,7 @@ const sidebars = {
         'guides/widgets-notifications',
         'guides/templates-live-activity',
         'guides/models',
+        'guides/voice-input',
         'guides/privacy',
       ],
     },

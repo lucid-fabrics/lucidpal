@@ -78,7 +78,8 @@ actor LlamaActor {
 | `CalendarServiceProtocol`          | `CalendarService`                               | `MockCalendarService`          |
 | `CalendarActionControllerProtocol` | `CalendarActionController`                      | `MockCalendarActionController` |
 | `SessionManagerProtocol`           | `SessionManager`                                | `MockSessionManager`           |
-| `SpeechServiceProtocol`            | `SpeechService`                                 | `MockSpeechService`            |
+| `SpeechServiceProtocol`            | `WhisperSpeechService`                          | `MockSpeechService`            |
+| `AirPodsVoiceCoordinatorProtocol`  | `AirPodsVoiceCoordinator`                       | —                              |
 | `HapticServiceProtocol`            | `HapticService`                                 | `MockHapticService`            |
 | `ChatHistoryManagerProtocol`       | `ChatHistoryManager` / `NoOpChatHistoryManager` | —                              |
 | `ModelDownloaderProtocol`          | `ModelDownloader`                               | `MockModelDownloader`          |
@@ -113,7 +114,10 @@ Sources/
 │   ├── HapticService.swift       ← UIImpactFeedbackGenerator wrapper
 │   ├── LiveActivityService.swift ← Live Activity start/update/end
 │   ├── NotificationService.swift ← UNUserNotificationCenter wrapper
-│   └── PinnedPromptsStore.swift  ← Pinned prompts persistence
+│   ├── PinnedPromptsStore.swift  ← Pinned prompts persistence
+│   ├── WhisperSpeechService.swift← On-device STT via WhisperKit
+│   ├── AirPodsVoiceCoordinator.swift ← AirPods auto-voice activation
+│   └── AudioRouteMonitor.swift   ← AVAudioSession route change observer
 ├── ViewModels/
 │   ├── ChatViewModel.swift       ← Core message/stream logic
 │   ├── ChatViewModel+CalendarConfirmation.swift ← Confirm/cancel/undo
