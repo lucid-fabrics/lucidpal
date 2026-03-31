@@ -85,7 +85,7 @@ function HomepageHeader() {
           </Link>
           <Link
             className="button button--secondary button--lg"
-            href="https://github.com/lucid-fabrics/lucidpal-dev">
+            href="https://github.com/lucid-fabrics/lucidpal">
             GitHub
           </Link>
         </div>
@@ -222,7 +222,7 @@ function CTA() {
           </Link>
           <Link
             className="button button--secondary button--lg"
-            href="https://github.com/lucid-fabrics/lucidpal-dev">
+            href="https://github.com/lucid-fabrics/lucidpal">
             View Source
           </Link>
         </div>
