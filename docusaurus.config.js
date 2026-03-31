@@ -5,7 +5,7 @@ const { themes } = require('prism-react-renderer');
 const config = {
   title: 'LucidPal',
   tagline: 'On-device AI calendar assistant for iOS',
-  favicon: 'img/favicon.ico',
+  favicon: undefined,
 
   url: 'https://lucid-fabrics.github.io',
   baseUrl: '/lucidpal/',
