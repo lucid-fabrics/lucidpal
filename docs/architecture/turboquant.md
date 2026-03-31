@@ -4,50 +4,45 @@ sidebar_position: 6
 
 # TurboQuant
 
-How LucidPal fits a long-context AI into your iPhone's RAM.
+Why LucidPal uses a custom llama.cpp fork and what TurboQuant brings.
 
 ---
 
-## The problem: KV cache eats memory
+## Background
 
-Every time the AI generates a response, it maintains a **KV cache** — a running scratchpad of everything said so far in the conversation. The longer the conversation, the bigger the cache. On a desktop with 64 GB of RAM this isn't a concern. On an iPhone with 4–8 GB, it absolutely is.
+**TurboQuant** (Zandieh et al., ICLR 2026) is a quantization algorithm published by Google. It compresses neural network tensors — both model weights and the KV cache used during inference — down to 1–2 bits per element using a two-step pipeline:
 
-Without compression, a 4B model with a 32K-token context window would need several gigabytes of RAM for the KV cache alone — on top of the model weights. That doesn't leave enough headroom to actually run.
-
----
-
-## What TurboQuant does
-
-**TurboQuant** (Zandieh et al., ICLR 2026) is a KV cache compression algorithm published by Google. Instead of storing each key and value at full 32-bit float precision, it compresses them down to **4 bits per element** — roughly an 8× reduction — with negligible quality loss.
-
-The technique works in two steps:
-
-1. **Randomized Hadamard Transform** — a mathematically precise rotation that spreads the energy of each vector evenly across all its coordinates. After this step, every coordinate has a similar scale and distribution, which makes it possible to quantize them accurately.
-
-2. **Lloyd-Max scalar quantization** — since the distribution after the rotation is known analytically (it's Gaussian), the algorithm computes the theoretically optimal set of quantization buckets. No calibration data, no fine-tuning, no dataset required — it works on any model out of the box.
-
-The result is a KV cache that takes **~4.9× less memory** with effectively no measurable difference in output quality.
+1. **Randomized Hadamard Transform** — spreads energy uniformly across all coordinates, making the distribution analytically predictable.
+2. **Lloyd-Max scalar quantization** — computes the theoretically optimal quantization buckets for that distribution. No calibration data or fine-tuning required.
 
 ---
 
 ## The fork: TheTom/llama-cpp-turboquant
 
-The official llama.cpp doesn't include TurboQuant yet (an upstream contribution PR is open). LucidPal is built against [TheTom's fork](https://github.com/TheTom/llama-cpp-turboquant), which implements TurboQuant with **Metal GPU kernels for Apple Silicon** — meaning the compression and decompression happen on the iPhone's GPU, not the CPU. This is what makes it fast enough to be practical on a mobile device.
+The official llama.cpp doesn't include TurboQuant yet (an upstream PR is open). LucidPal is built against [TheTom's fork](https://github.com/TheTom/llama-cpp-turboquant), which implements TurboQuant with **Metal GPU kernels for Apple Silicon**.
 
-The fork adds two new GGML quantization types used for both model weights and KV cache:
+The fork introduces two new GGML quantization types:
 
-| GGML type | Bits per element | Notes |
-|-----------|-----------------|-------|
-| `GGML_TYPE_TQ1_0` | 1-bit | Maximum compression, noticeable quality loss on models < 8B |
-| `GGML_TYPE_TQ2_0` | 2-bit | **Used by LucidPal** — near-lossless on all Qwen3.5 sizes |
+| GGML type | Bits per element | Use case |
+|-----------|-----------------|----------|
+| `GGML_TYPE_TQ1_0` | 1-bit | Maximum compression — quality loss on models < 8B |
+| `GGML_TYPE_TQ2_0` | 2-bit | Near-lossless on models ≥ 1B |
 
-LucidPal activates TurboQuant KV cache compression by setting both `type_k` and `type_v` to `GGML_TYPE_TQ2_0` when initialising the llama.cpp context (`LlamaActor.swift`). This requires flash attention, which is also enabled.
+Both types are compiled into LucidPal's `llama.xcframework` — the quantize, dequantize, and dot-product kernels are present in the binary.
 
 ---
 
-## What this enables in practice
+## Current status: weight quantization only
 
-Without TurboQuant, the context windows would need to be much smaller to stay within iPhone RAM budgets. With it:
+The TQ types are currently used for **model weight quantization** (i.e. loading a GGUF model file that was quantized with TQ1 or TQ2). LucidPal currently ships with `Q4_K_M` model files, not TQ-quantized files.
+
+**KV cache compression** (setting `type_k`/`type_v` to a TQ type at runtime) requires dedicated Metal attention kernels for those types. These kernels are marked `[EXPERIMENTAL]` in the llama.cpp API and, as of this build, are not available for the iOS Metal backend — attempting to enable them causes a crash at model load.
+
+---
+
+## Context windows without KV cache compression
+
+Without KV cache compression, context window sizes are constrained by device RAM. LucidPal uses context sizes tuned to leave enough headroom for the model weights:
 
 | Device RAM | Model | Context window |
 |-----------|-------|---------------|
@@ -56,13 +51,18 @@ Without TurboQuant, the context windows would need to be much smaller to stay wi
 | 5–7 GB (iPhone 13 Pro, 14, 15) | Qwen3.5 4B | 16K tokens |
 | 7 GB+ (iPhone 15 Pro, 16, 17) | Qwen3.5 4B | 32K tokens |
 
-A 32K-token context fits roughly 100 pages of text — enough to hold a very long conversation, your entire calendar month, and supporting detail all in a single session.
-
 ---
 
-## Why not turbo3?
+## What to watch
 
-The 3-bit variant offers more compression but quality degrades noticeably on models smaller than 8B — exactly the size range LucidPal targets (0.8B–4B). Turbo4 hits the sweet spot: the compression gain is large enough to matter, and the accuracy impact is effectively unmeasurable at these model sizes.
+Once the TurboQuant Metal KV cache kernels land in TheTom's fork (tracked in [turboquant_plus #27](https://github.com/TheTom/turboquant_plus/issues/27)), LucidPal can activate them with two lines in `LlamaActor.swift`:
+
+```swift
+cp.type_k = GGML_TYPE_TQ2_0
+cp.type_v = GGML_TYPE_TQ2_0
+```
+
+That would deliver ~4–5× KV cache memory reduction, enabling significantly larger context windows within the same RAM budget.
 
 ---
 
@@ -70,4 +70,4 @@ The 3-bit variant offers more compression but quality degrades noticeably on mod
 
 - [TurboQuant ICLR 2026 discussion — ggml-org/llama.cpp #20969](https://github.com/ggml-org/llama.cpp/discussions/20969)
 - [TheTom/llama-cpp-turboquant](https://github.com/TheTom/llama-cpp-turboquant)
-- [Feature request upstream — #20977](https://github.com/ggml-org/llama.cpp/issues/20977)
+- [Upstream contribution tracking — turboquant_plus #27](https://github.com/TheTom/turboquant_plus/issues/27)
