@@ -69,6 +69,19 @@ Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [lla
 
 > "What's my first meeting tomorrow and how long do I have before it?"
 
+**Via Siri (hands-free):**
+> "Ask LucidPal what I have tomorrow"
+
+> "Check my LucidPal schedule"
+
+> "Add a LucidPal event"
+
+> "Find free time in LucidPal"
+
+> "Delete event in LucidPal"
+
+> "Undo my last LucidPal action"
+
 ---
 
 ## Models
