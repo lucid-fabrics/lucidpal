@@ -45,7 +45,7 @@ LucidPal is an agentic AI assistant that runs fully on-device via [llama.cpp](ht
 
 No subscription. No API key. No account. Zero telemetry.
 
-> Built solo in my free time. If it's useful, [a coffee helps](https://ko-fi.com/lucidfabrics). ☕
+> Built solo. If it's useful, [a coffee helps](https://ko-fi.com/lucidfabrics). ☕
 
 ---
 
@@ -131,7 +131,7 @@ All models support thinking mode. Disable it in Settings for faster, more concis
 
 ## 💖 Support the Project
 
-This project is free and open source. If it saves you time or you just like where it's going, a star or a coffee keeps it alive.
+LucidPal is free to use. If it saves you time or you want to support what's coming next, a coffee goes a long way.
 
 <p align="center">
   <a href="https://ko-fi.com/lucidfabrics">
@@ -155,4 +155,4 @@ This project is free and open source. If it saves you time or you just like wher
 
 ## License
 
-MIT
+All rights reserved. LucidPal is free to use. Premium features are coming.
