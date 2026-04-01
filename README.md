@@ -5,8 +5,9 @@
 </h1>
 
 <p align="center">
-  <strong>Your AI calendar assistant. Runs entirely on your iPhone.</strong><br>
-  No internet. No API keys. No cloud. Your data stays on your device — always.
+  <strong>A private AI assistant that lives on your iPhone and actually does things.</strong><br>
+  Manages your calendar, notes, and habits. Searches the web. Analyzes photos.<br>
+  All on-device. No cloud. No accounts. No data leaving your phone.
 </p>
 
 <p align="center">
@@ -27,20 +28,24 @@
 
 ## 🧰 What It Does
 
-LucidPal is an AI assistant that lives entirely on your iPhone and knows your calendar. Ask it anything about your schedule, tell it to book something, or have it find you a free slot — it figures out the rest.
+LucidPal is an agentic AI assistant that runs fully on-device via [llama.cpp](https://github.com/ggml-org/llama.cpp). It doesn't just answer questions — it takes action. Book a meeting, save a note, log a habit, look up a contact, search the web, or analyze a photo. All from a single chat.
 
 **You get:**
-- A chat interface backed by a real LLM — running in your phone's RAM, not a server
-- Full calendar read & write — events appear instantly in the iOS Calendar app
-- Free time finder — asks about your day, finds the gaps, handles conflicts
-- Voice input — speak your question, transcribed on-device by WhisperKit
-- Siri shortcuts — trigger anything hands-free from the Lock Screen
-- Multiple chat sessions with local history
-- Home Screen widgets showing your upcoming events
-- Live Activity on the Dynamic Island while you chat
-- Pinned prompts and conversation templates for repeat workflows
+- **On-device LLM inference** — runs on your Neural Engine, not a server
+- **Calendar management** — create, update, delete, and query events in plain English
+- **Notes** — ask it to save ideas, and they persist in a dedicated tab
+- **Habit tracking** — log workouts, habits, streaks — from chat or the dashboard
+- **Contacts** — look up phone numbers, emails by name
+- **Web search** — real-time weather, news, stocks, flights — no separate app needed
+- **Vision** — attach a photo and ask anything about it
+- **Siri Shortcuts** — trigger actions hands-free from the Lock Screen
+- **Home Screen widgets** and **Live Activity** on the Dynamic Island
+- **Multiple chat sessions** with persistent local history
+- **Thinking mode** — see the model's reasoning before its answer
 
-No account. No subscription. No data leaving your phone.
+No subscription. No API key. No account. Zero telemetry.
+
+> Built solo in my free time. If it's useful, [a coffee helps](https://ko-fi.com/lucidfabrics). ☕
 
 ---
 
@@ -48,69 +53,47 @@ No account. No subscription. No data leaving your phone.
 
 1. **Download** from the App Store _(coming soon)_
 2. **Pick a model** — the app recommends one based on your device RAM
-3. **Download the model** — fetched directly from Hugging Face (~0.5–2.5 GB, Wi-Fi recommended)
-4. **Grant calendar access** — optional; required for reading/writing events
+3. **Download the model** — fetched from Hugging Face (~0.5–2.5 GB, Wi-Fi recommended)
+4. **Grant access** — calendar, contacts, microphone — all optional, all on-device
 5. **Start chatting**
-
-> Built solo in my free time. If it saves you a meeting conflict or two, [a coffee helps](https://ko-fi.com/lucidfabrics). ☕
 
 ---
 
 ## 💬 Examples
 
-**Check your schedule:**
+**Calendar:**
 > "What do I have tomorrow?"
 
-> "Do I have anything this Friday afternoon?"
-
-**Create an event:**
 > "Schedule a dentist appointment Friday at 10am"
 
-> "Add a team standup every Monday at 9am"
-
-**Reschedule or update:**
-> "Move my dentist appointment to 2pm"
-
-> "Rename 'Meeting' to 'Design Review'"
-
-**Find free time:**
 > "When am I free for a 1-hour call this week?"
 
-**General questions:**
-> "Summarize my week"
+**Notes:**
+> "Save this: call the landlord about the leak"
 
-> "What's my first meeting tomorrow and how long do I have before it?"
+> "What did I note about the project last week?"
+
+**Habits:**
+> "Log my workout for today"
+
+> "How's my meditation streak?"
+
+**Web search:**
+> "What's the weather this weekend?"
+
+> "Any news on the Apple event?"
+
+**Vision:**
+> "What's in this photo?" _(attach an image)_
+
+> "Read the text from this receipt"
 
 **Via Siri (hands-free):**
 > "Ask LucidPal what I have tomorrow"
 
-> "Check my LucidPal schedule"
-
-> "Add a LucidPal event"
-
 > "Find free time in LucidPal"
 
-> "Delete event in LucidPal"
-
 > "Undo my last LucidPal action"
-
----
-
-## ⚡ Conflict Detection
-
-When a new or rescheduled event overlaps something on your calendar, an orange banner appears on the card:
-
-> ⚠ Conflicts with 1 event — tap to review
-
-Tapping it opens a sheet with three options:
-
-| Action | What it does |
-|--------|-------------|
-| **Keep Anyway** | Saves the event as-is |
-| **Find Free Slot** | Searches the next 3 days for an open window |
-| **Cancel Event** | Deletes the newly created event |
-
-Tapping a free slot reschedules instantly.
 
 ---
 
@@ -132,22 +115,23 @@ Tapping a free slot reschedules instantly.
 | Qwen3.5 2B Q4_K_M   | 1.2 GB  | Devices with 3–5 GB RAM |
 | Qwen3.5 4B Q4_K_M   | 2.5 GB  | Devices with 5 GB+ RAM  |
 
-All models support thinking mode — the model shows its reasoning before answering. Turn it off in Settings for faster, more concise replies.
+All models support thinking mode. Disable it in Settings for faster, more concise answers.
 
 ---
 
 ## 🔒 Privacy
 
 - No analytics, no tracking, no accounts
-- The model runs in your app's private sandboxed container
-- Calendar data never leaves the device
+- All inference runs on your device — nothing is sent to any server
+- Calendar, contacts, and notes never leave your phone
 - Voice is transcribed on-device by [WhisperKit](https://github.com/argmaxinc/WhisperKit) and discarded immediately
+- Web search is opt-in and scoped to your query only
 
 ---
 
 ## 💖 Support the Project
 
-This project is free and open source. If it's useful to you, a star or a coffee keeps it moving.
+This project is free and open source. If it saves you time or you just like where it's going, a star or a coffee keeps it alive.
 
 <p align="center">
   <a href="https://ko-fi.com/lucidfabrics">
