@@ -4,7 +4,7 @@ An on-device AI assistant for iOS with native calendar access. All inference run
 
 Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [llama.cpp](https://github.com/ggml-org/llama.cpp).
 
-**[GitHub →](https://github.com/lucid-fabrics/lucidpal)**
+**[Documentation →](https://lucid-fabrics.github.io/lucidpal)**
 
 ---
 
@@ -41,6 +41,33 @@ Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [lla
 2. **Choose a model** — the app recommends one based on your device RAM
 3. **Grant calendar access** — optional; required for reading/writing events
 4. **Start chatting**
+
+---
+
+## Examples
+
+**Check your schedule:**
+> "What do I have tomorrow?"
+
+> "Do I have anything this Friday afternoon?"
+
+**Create an event:**
+> "Schedule a dentist appointment Friday at 10am"
+
+> "Add a team standup every Monday at 9am"
+
+**Reschedule or update:**
+> "Move my dentist appointment to 2pm"
+
+> "Rename 'Meeting' to 'Design Review'"
+
+**Find free time:**
+> "When am I free for a 1-hour call this week?"
+
+**General questions:**
+> "Summarize my week"
+
+> "What's my first meeting tomorrow and how long do I have before it?"
 
 ---
 
