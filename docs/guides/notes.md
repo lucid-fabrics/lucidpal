@@ -16,9 +16,41 @@ LucidPal has a built-in note-taking layer that stores text notes on-device. Note
 
 ## Viewing Your Notes
 
-Tap the **Notes** tab (notebook icon) in the bottom navigation bar to open the notes list. Notes are sorted by last-modified date.
+Tap the **Notes** tab (notebook icon) in the bottom navigation bar to open the notes list. Notes are sorted by last-modified date. Each row shows the note's **category icon** and an **AI-generated summary** instead of raw body text, so you can scan content at a glance. If a note has extracted action items, a badge shows the count.
 
-Tap any note card to open the full **Note Editor**, where you can read, edit, and save changes.
+Notes created by the AI from a conversation show a small **source icon** to distinguish them from manually written notes.
+
+Tap any note card to open the **Note Detail View**. By default the view is in **read mode** — tap **Edit** (top-right) to enter edit mode and make changes. A **Share** button in the toolbar opens the standard iOS share sheet so you can export the note to any app.
+
+---
+
+## Pinned Notes
+
+Pin any note so it stays visible at the top of the list in a horizontal **pinned carousel**.
+
+- **Pin:** Swipe left on a note card → tap **Pin**
+- **Unpin:** Swipe left on a pinned note → tap **Unpin**
+
+Pinned notes still appear in the main list below the carousel (with a pin indicator) and are included in search and category filtering.
+
+---
+
+## Category Filter
+
+Below the pinned carousel, a row of **category chips** lets you filter the note list instantly. Tap a chip to show only notes in that category; tap it again (or tap **All**) to clear the filter.
+
+| Chip | Category |
+|------|----------|
+| All | Every note |
+| 💡 | Idea |
+| 🛠 | Task |
+| 📓 | Journal |
+| 🩺 | Health |
+| 🎯 | Goal |
+| 🧠 | Memory |
+| 💰 | Finance |
+
+Categories are assigned automatically by the AI after you save a note. You cannot set them manually.
 
 ---
 
@@ -26,7 +58,7 @@ Tap any note card to open the full **Note Editor**, where you can read, edit, an
 
 1. In the Notes list, tap the **+** button in the top-right corner.
 2. Type a title (optional) and your note body.
-3. Tap **Save** — the note appears immediately in the list.
+3. Tap **Done** in the toolbar — the note appears immediately in the list.
 
 :::tip
 Notes support plain text only. Use line breaks to structure content — the AI can read and summarize multi-line notes without any special formatting.
@@ -81,9 +113,31 @@ In the Notes list, pull down to reveal the search bar. Typing filters notes in r
 
 ---
 
+## AI-Enhanced Notes
+
+After you save a note (manually or via the AI), LucidPal enriches it in the background using the on-device model. No action required on your part.
+
+The AI automatically:
+
+- **Assigns a category** — one of the eight categories listed in the Category Filter section above
+- **Generates a summary** — a concise one- or two-sentence recap of the content
+- **Extracts action items** — any tasks or to-dos mentioned in the note
+
+Open the note and scroll below the body to find the **AI Insights** section, which shows:
+
+- A category chip
+- The generated summary
+- Action items rendered as checkboxes
+
+:::note
+Enrichment happens after saving and may take a few seconds. If you open a note immediately after creating it, the AI Insights section may still be loading.
+:::
+
+---
+
 ## Deleting a Note
 
-Swipe left on any note card in the list, then tap **Delete**. This action is permanent.
+Swipe **right-to-left** (trailing swipe) on any note card in the list, then tap **Delete**. This action is permanent.
 
 :::warning
 Deleted notes cannot be recovered. There is no trash or undo.

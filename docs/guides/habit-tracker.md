@@ -16,13 +16,26 @@ LucidPal includes a full habit tracking system. Create habits, log completions, 
 
 ## The Habit Dashboard
 
-Tap the **Habits** tab (checkmark icon) in the navigation bar to open the dashboard. Each habit is shown as a card with:
+Tap the **Habits** tab (checkmark icon) in the navigation bar to open the dashboard. At the top, a **progress bar** shows how many habits you've completed today (e.g. "3 of 5 done today").
+
+Each habit card shows:
 
 - The habit name and icon
 - Today's completion status
 - Your current streak (consecutive days completed)
+- A **`+` button** in the bottom-right corner for quick-logging (see [Logging a Completion](#logging-a-completion))
 
-Tap any card to open the **Habit Detail View**, which shows a chart of your completion history over the past weeks.
+Tap any card to open the **Habit Detail View**, which shows stats and a chart of your completion history.
+
+If you have no habits yet, the dashboard shows **template cards** (Meditate, Exercise, Water, Read, Sleep, Journal, No Sugar, Cold Shower). Tap any template to open the creation sheet pre-filled with that habit's name and settings.
+
+---
+
+## Starting from a Template
+
+When the dashboard is empty, template cards give you a one-tap starting point. Tap any template card (Meditate, Exercise, Water, Read, Sleep, Journal, No Sugar, Cold Shower) to open the creation sheet with the habit name and type pre-filled. Adjust anything you like, then tap **Create**.
+
+Templates are only shown when you have no habits. Once you have at least one habit, use the **+** button to create new ones.
 
 ---
 
@@ -34,8 +47,7 @@ Tap any card to open the **Habit Detail View**, which shows a chart of your comp
 | Field | Description |
 |---|---|
 | **Name** | What the habit is (e.g., "Meditate", "Read 20 pages") |
-| **Frequency** | Daily, weekdays only, or custom days |
-| **Reminder** | Optional time-based notification |
+| **Frequency** | **Daily** or **Weekly** |
 
 3. Tap **Create** — the habit appears on your dashboard immediately.
 
@@ -44,8 +56,15 @@ Tap any card to open the **Habit Detail View**, which shows a chart of your comp
 ## Logging a Completion
 
 **Manually:**
-- From the dashboard, tap the circle on a habit card to mark it complete for today.
-- To log with a note, tap the habit card, then tap **Log** on the detail screen and add optional notes.
+
+Tap the **`+` button** in the bottom-right corner of a habit card:
+
+- **Boolean habit** (done / not done) — logs immediately. You'll feel a haptic tap and the ring around the card turns **green**.
+- **Count or duration habit** — opens a sheet where you enter the value, then confirm.
+
+If the habit is already logged today, the `+` is replaced by a checkmark.
+
+Alternatively, tap the habit card to open the detail view and use the **Log** button there — useful if you want to review history at the same time.
 
 **Via chat:**
 > "I just meditated"
@@ -91,7 +110,7 @@ The detail view shows a bar chart (powered by Swift Charts) of your daily comple
 - **Filled bar** — habit completed
 - **Empty bar** — habit not completed (or not yet due)
 
-The chart defaults to the last 30 days. Swipe left to see older data.
+Use the **segmented picker** above the chart to choose your time window: **14d**, **30d**, or **90d**.
 
 :::tip
 Tap any bar in the chart to see the date and any note you logged for that day.
@@ -112,6 +131,31 @@ A streak counts consecutive days you completed a habit. Missing a day resets the
 :::note
 Streaks are calculated based on your local time zone. Logging at midnight edge cases count toward the correct calendar day.
 :::
+
+### Stats Row
+
+The Habit Detail View shows a row of five stats:
+
+| Stat | What it shows |
+|------|--------------|
+| 🔥 Streak | Current consecutive-day streak |
+| 🏆 Best | Your all-time best streak |
+| 📅 This Month | Completions in the current calendar month |
+| 📊 30d Rate | Completion percentage over the last 30 days |
+| Σ Total | All-time completion count |
+
+### Milestone Badges
+
+When your best streak reaches a milestone, a badge appears in the detail view:
+
+| Badge | Milestone |
+|-------|-----------|
+| 🔥 7-Day | Best streak ≥ 7 days |
+| ⚡️ 14-Day | Best streak ≥ 14 days |
+| 🏆 30-Day | Best streak ≥ 30 days |
+| 🌟 100-Day | Best streak ≥ 100 days |
+
+When you hit one of these milestones by quick-logging a boolean habit, a **celebration overlay** animates on screen to mark the achievement.
 
 ---
 

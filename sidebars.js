@@ -33,6 +33,7 @@ const sidebars = {
         'architecture/calendar',
         'architecture/sessions',
         'architecture/siri',
+        'architecture/note-enrichment',
       ],
     },
   ],
