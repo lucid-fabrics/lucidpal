@@ -6,6 +6,10 @@ Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [lla
 
 **[Documentation →](https://lucid-fabrics.github.io/lucidpal)**
 
+[![Ko-fi](https://img.shields.io/badge/Support-Ko--fi-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/lucidfabrics)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/lucidfabrics)
+[![Sponsor on GitHub](https://img.shields.io/badge/Sponsor-GitHub-EA4AAA?logo=github&logoColor=white)](https://github.com/sponsors/lucid-fabrics)
+
 ---
 
 ## Features
@@ -99,6 +103,12 @@ Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [lla
 - No analytics, no tracking, no accounts
 - Calendar data never leaves the device
 - Microphone audio is transcribed on-device by [WhisperKit](https://github.com/argmaxinc/WhisperKit) and discarded immediately
+
+---
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=lucid-fabrics/lucidpal&type=date)](https://www.star-history.com/#lucid-fabrics/lucidpal&type=date)
 
 ---
 
