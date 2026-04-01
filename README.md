@@ -1,54 +1,62 @@
-# LucidPal
+<h1 align="center">
+  <br>
+  🧠 LucidPal
+  <br>
+</h1>
 
-An on-device AI assistant for iOS with native calendar access. All inference runs locally — no internet connection, no API keys, no data leaves your phone.
+<p align="center">
+  <strong>Your AI calendar assistant. Runs entirely on your iPhone.</strong><br>
+  No internet. No API keys. No cloud. Your data stays on your device — always.
+</p>
 
-Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [llama.cpp](https://github.com/ggml-org/llama.cpp).
-
-**[Documentation →](https://lucid-fabrics.github.io/lucidpal)**
-
-[![Ko-fi](https://img.shields.io/badge/Support-Ko--fi-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/lucidfabrics)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/lucidfabrics)
-[![Sponsor on GitHub](https://img.shields.io/badge/Sponsor-GitHub-EA4AAA?logo=github&logoColor=white)](https://github.com/sponsors/lucid-fabrics)
-
----
-
-## Features
-
-- **Fully on-device** — model runs in your iPhone's RAM, nothing is sent to any server
-- **Calendar read & write** — create, rename, delete, or look up events; they appear instantly in the iOS Calendar app
-- **Free time finder** — ask for a free slot and it checks your calendar for conflicts automatically
-- **Conflict detection** — when a new or rescheduled event overlaps an existing one, a conflict banner appears on the card
-- **Multiple chat sessions** — create, rename, and switch between conversations; history is saved locally
-- **Voice input** — tap the mic and speak your question; transcription runs on-device via WhisperKit
-- **Siri shortcuts** — ask a question, check your schedule, add an event, or find free time hands-free
-- **Pinned prompts** — pin frequently used questions; tap to reuse in one tap
-- **Conversation templates** — save and reuse chat session starters for repeated workflows
-- **Event reminders** — push notifications 10 minutes before upcoming calendar events
-- **Live Activity** — see the current session on the Dynamic Island and Lock Screen
-- **Home Screen widgets** — small, medium, and large widgets showing your upcoming calendar
+<p align="center">
+  <img alt="iOS" src="https://img.shields.io/badge/iOS-16%2B-111111?logo=apple&logoColor=white">
+  <img alt="On-device AI" src="https://img.shields.io/badge/AI-On--Device-34C759?logo=llama&logoColor=white">
+  <a href="https://lucid-fabrics.github.io/lucidpal/">
+    <img alt="Documentation" src="https://img.shields.io/badge/Docs-Read%20the%20Docs-blue?logo=readthedocs&logoColor=white">
+  </a>
+  <a href="https://ko-fi.com/lucidfabrics">
+    <img alt="Support on Ko-fi" src="https://img.shields.io/badge/Support-Ko--fi-FF5E5B?logo=ko-fi&logoColor=white">
+  </a>
+  <a href="https://buymeacoffee.com/lucidfabrics">
+    <img alt="Buy Me a Coffee" src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?logo=buymeacoffee&logoColor=black">
+  </a>
+</p>
 
 ---
 
-## Requirements
+## 🧰 What It Does
 
-|              | Minimum                                                   |
-| ------------ | --------------------------------------------------------- |
-| iPhone       | Any model with 2 GB RAM (iPhone 12 or newer recommended)  |
-| iOS          | 16.0                                                      |
-| Free storage | 1 GB (0.8B model), 2 GB (2B model), or 3 GB (4B model)    |
+LucidPal is an AI assistant that lives entirely on your iPhone and knows your calendar. Ask it anything about your schedule, tell it to book something, or have it find you a free slot — it figures out the rest.
+
+**You get:**
+- A chat interface backed by a real LLM — running in your phone's RAM, not a server
+- Full calendar read & write — events appear instantly in the iOS Calendar app
+- Free time finder — asks about your day, finds the gaps, handles conflicts
+- Voice input — speak your question, transcribed on-device by WhisperKit
+- Siri shortcuts — trigger anything hands-free from the Lock Screen
+- Multiple chat sessions with local history
+- Home Screen widgets showing your upcoming events
+- Live Activity on the Dynamic Island while you chat
+- Pinned prompts and conversation templates for repeat workflows
+
+No account. No subscription. No data leaving your phone.
 
 ---
 
-## Getting started
+## 🚀 Getting Started
 
 1. **Download** from the App Store _(coming soon)_
-2. **Choose a model** — the app recommends one based on your device RAM
-3. **Grant calendar access** — optional; required for reading/writing events
-4. **Start chatting**
+2. **Pick a model** — the app recommends one based on your device RAM
+3. **Download the model** — fetched directly from Hugging Face (~0.5–2.5 GB, Wi-Fi recommended)
+4. **Grant calendar access** — optional; required for reading/writing events
+5. **Start chatting**
+
+> Built solo in my free time. If it saves you a meeting conflict or two, [a coffee helps](https://ko-fi.com/lucidfabrics). ☕
 
 ---
 
-## Examples
+## 💬 Examples
 
 **Check your schedule:**
 > "What do I have tomorrow?"
@@ -88,7 +96,35 @@ Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [lla
 
 ---
 
-## Models
+## ⚡ Conflict Detection
+
+When a new or rescheduled event overlaps something on your calendar, an orange banner appears on the card:
+
+> ⚠ Conflicts with 1 event — tap to review
+
+Tapping it opens a sheet with three options:
+
+| Action | What it does |
+|--------|-------------|
+| **Keep Anyway** | Saves the event as-is |
+| **Find Free Slot** | Searches the next 3 days for an open window |
+| **Cancel Event** | Deletes the newly created event |
+
+Tapping a free slot reschedules instantly.
+
+---
+
+## 📋 Requirements
+
+|              | Minimum                                                   |
+| ------------ | --------------------------------------------------------- |
+| iPhone       | Any model with 2 GB RAM (iPhone 12 or newer recommended)  |
+| iOS          | 16.0                                                      |
+| Free storage | 1 GB (0.8B model), 2 GB (2B model), or 3 GB (4B model)    |
+
+---
+
+## 🤖 Models
 
 | Model               | Size    | Best for                |
 | ------------------- | ------- | ----------------------- |
@@ -96,17 +132,38 @@ Powered by [Qwen3.5](https://huggingface.co/collections/unsloth/qwen35) and [lla
 | Qwen3.5 2B Q4_K_M   | 1.2 GB  | Devices with 3–5 GB RAM |
 | Qwen3.5 4B Q4_K_M   | 2.5 GB  | Devices with 5 GB+ RAM  |
 
+All models support thinking mode — the model shows its reasoning before answering. Turn it off in Settings for faster, more concise replies.
+
 ---
 
-## Privacy
+## 🔒 Privacy
 
 - No analytics, no tracking, no accounts
+- The model runs in your app's private sandboxed container
 - Calendar data never leaves the device
-- Microphone audio is transcribed on-device by [WhisperKit](https://github.com/argmaxinc/WhisperKit) and discarded immediately
+- Voice is transcribed on-device by [WhisperKit](https://github.com/argmaxinc/WhisperKit) and discarded immediately
 
 ---
 
-## Star History
+## 💖 Support the Project
+
+This project is free and open source. If it's useful to you, a star or a coffee keeps it moving.
+
+<p align="center">
+  <a href="https://ko-fi.com/lucidfabrics">
+    <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support me on Ko-fi">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://buymeacoffee.com/lucidfabrics">
+    <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy Me a Coffee">
+  </a>
+</p>
+
+---
+
+## ⭐ Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=lucid-fabrics/lucidpal&type=date)](https://www.star-history.com/#lucid-fabrics/lucidpal&type=date)
 
