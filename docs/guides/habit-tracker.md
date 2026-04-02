@@ -67,6 +67,10 @@ Tap the **`+` button** on a habit card:
 
 If the habit is already logged today, the `+` is replaced by a checkmark.
 
+:::note
+Logging a habit a second time on the same day **replaces** the earlier entry — it does not add to it. The most recent log value is kept. This applies to both manual logs and AI-triggered logs.
+:::
+
 Alternatively, tap the habit card to open the detail view and use the **Log** button there — useful if you want to review history at the same time.
 
 **Via chat:**
@@ -180,3 +184,10 @@ Open the Habit Detail View, scroll to the bottom, and tap **Delete Habit**. This
 :::warning
 Deleting a habit also deletes all logged completions for that habit. This cannot be undone.
 :::
+
+<details>
+<summary>For developers</summary>
+
+See [architecture/habit-store](../architecture/habit-store) for how habit definitions, completion logs, and streak calculations are persisted on-device.
+
+</details>

@@ -115,6 +115,16 @@ Swipe right on any session and tap **Rename**, or long-press any session and tap
 
 ---
 
+## Session Storage
+
+Sessions are stored individually on your device with no enforced count limit. Each session file is small (text only), so hundreds of sessions have negligible storage impact.
+
+:::tip
+If you have many old sessions, use **Edit → Select All → Delete** to clear them in one step and keep the list tidy.
+:::
+
+---
+
 ## Deleting Sessions
 
 **Single session:** Swipe left on a session and tap **Delete**.
@@ -255,3 +265,10 @@ If you try to use the input bar while a model is still downloading, a download p
 ## Siri Opens a New Session
 
 When you use a Siri shortcut, LucidPal always opens a **new session** for that request. Your existing conversations are not affected.
+
+<details>
+<summary>For developers</summary>
+
+See [architecture/chat-viewmodel](../architecture/chat-viewmodel) for how session state, message history, and generation lifecycle are managed.
+
+</details>

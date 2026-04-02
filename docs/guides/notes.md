@@ -162,6 +162,16 @@ Enrichment happens after saving and may take a few seconds. If you open a note i
 
 ---
 
+## Note Storage Limit
+
+LucidPal stores up to **500 notes** on your device.
+
+:::warning
+When you reach the 500-note cap and create a new note, the **oldest note is automatically deleted** to make room. Delete old notes regularly if you want to keep your most important ones safe.
+:::
+
+---
+
 ## Deleting a Note
 
 Swipe **right-to-left** (trailing swipe) on any note card in the list, then tap **Delete**. This action is permanent.
@@ -192,5 +202,12 @@ The AI does not see the full body of notes beyond the 200-character snippet unle
 <summary>What data is stored and where?</summary>
 
 All notes are saved locally on your device in the app's sandboxed storage. They are included in standard iPhone backups (iCloud or iTunes) if backup is enabled. Notes are never sent to any server.
+
+</details>
+
+<details>
+<summary>For developers</summary>
+
+See [architecture/notes-store](../architecture/notes-store) for how notes are persisted, enriched, and queried on-device.
 
 </details>
