@@ -89,6 +89,12 @@ Tap any chip above the input bar to fill the input field with that prompt. Edit 
 
 Long-press a chip to remove it. You can pin up to **20 prompts**. Pins are saved across app restarts.
 
+When the 20-prompt limit is reached, adding a new prompt automatically removes the least-used one (or the oldest if usage counts are tied), so your most-used shortcuts are never evicted.
+
+:::note Storage
+Pinned prompts are saved as a JSON file in the app's Documents directory (`pinned_prompts.json`), protected with iOS complete-file protection. They are **not** stored in iCloud or on any server.
+:::
+
 :::tip
 Pin prompts like "What's on my calendar today?" or "Find my next free hour" to access your most common queries instantly.
 :::

@@ -39,6 +39,7 @@ const sidebars = {
         'architecture/siri',
         'architecture/note-enrichment',
         'architecture/system-prompt',
+        'architecture/chat-viewmodel',
       ],
     },
   ],

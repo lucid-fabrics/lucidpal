@@ -20,6 +20,8 @@ These toggles control which personal data LucidPal can read and act on. All proc
 | **Habits** | Habits | LucidPal can log and query habits — "log my workout", "did I meditate today?" |
 | **Contacts** | Contacts Access | LucidPal can look up phone numbers and email addresses from your contacts |
 | **Calendar** | Use calendar in chat | Upcoming events are included in the AI prompt for scheduling and reminders |
+| **Reminders** | Reminders Access | LucidPal can read and create iOS Reminders — "remind me to call John at 3 PM" |
+| **Mail** | Mail Access | LucidPal can read recent mail to answer questions like "any emails from Alex today?" |
 | **Location** | Include city in AI context | Your detected city is added to the AI prompt for location-relevant answers |
 | **Web Search** | *(tap to open sub-screen)* | Configure web search provider and API key — see [Web Search](./web-search) |
 
