@@ -81,6 +81,24 @@ SettingsView ──observes──▶ SettingsViewModel
                AppSettings  CalendarService  LocationService
 ```
 
+### Combine Mirror Pattern
+
+`SettingsViewModel` does **not** write directly to `AppSettings` from `didSet` or computed setters. Instead, each `@Published` property is wired to `AppSettings` via a Combine sink:
+
+```swift
+// Seed from settings on init
+self.settingsMode = settings.settingsMode
+
+// Wire change propagation
+$settingsMode.dropFirst()
+    .sink { [weak self] in self?.settings.settingsMode = $0 }
+    .store(in: &cancellables)
+```
+
+The `dropFirst()` skips the initial value emitted at subscription time (which would be the seed value just written), preventing a redundant write-back loop. Every preference follows the same pattern — `calendarAccessEnabled`, `temperature`, `visionEnabled`, `settingsMode`, etc.
+
+This approach keeps `SettingsView` decoupled from `AppSettings`: the view binds only to `SettingsViewModel`, and the view model owns the propagation responsibility.
+
 Key responsibilities:
 
 | Responsibility | Detail |
