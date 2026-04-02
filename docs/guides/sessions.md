@@ -8,9 +8,51 @@ How to create, manage, and switch between chat sessions in LucidPal.
 
 LucidPal saves each conversation as a separate session. You can pick up any previous chat or start fresh at any time.
 
+## Home Screen
+
+When you open LucidPal, the home screen greets you with an at-a-glance view of your day before you start a conversation.
+
+### Greeting and date
+
+A time-based greeting appears at the top — "Good morning", "Good afternoon", "Good evening", or "Good night" — alongside today's weekday, month, and date.
+
+### Today's events
+
+Below the greeting, LucidPal shows how many calendar events you have today: "3 events today" or "Free today" if your calendar is clear.
+
+### Next Event Card
+
+If you have an upcoming event, a tappable card shows its title and how long until it starts (for example, "in 45 min"). Tap the card to ask LucidPal anything about that event.
+
+### Mic button
+
+The large mic button in the centre of the screen starts a voice conversation. Two rings of icons orbit around it — calendar, mic, bolt, grid, and brain — with a subtle 3D depth effect. Tap it to speak your request.
+
+A short hint below the button changes based on context to suggest what you can ask.
+
+### Quick-action chips
+
+Three chips sit below the mic button for common requests:
+
+- **What's on today?** — summarises your day's events
+- **When am I free?** — finds open time in your schedule
+- **Find a free slot** — suggests a time for something new
+
+Tap any chip to send that question instantly.
+
+### New text chat
+
+Tap **New text chat** to open a keyboard-based conversation instead of using voice.
+
+### Search empty state
+
+If you search for a session and nothing matches, a message confirms that no sessions were found. Clear the search to return to the full list.
+
+---
+
 ## Starting a New Conversation
 
-Tap the **compose** icon in the top-right corner of the session list to start a new chat. Each session gets an automatic title based on your first message.
+Use the **mic button** on the home screen to start a voice conversation, or tap **New text chat** for a keyboard-based session. Each session gets an automatic title based on your first message.
 
 ---
 

@@ -53,7 +53,8 @@ let llmService: LLMService
     private let hapticService = HapticService()
     private let contactsService = ContactsService()
     private let habitStore = HabitStore()
-    // ...injected into SessionListViewModel
+    private let noteEnrichmentService = NoteEnrichmentService()
+    // noteEnrichmentService injected into NotesListViewModel alongside notesStore
 }
 ```
 
@@ -93,6 +94,8 @@ actor LlamaActor {
 | `ContactsServiceProtocol`          | `ContactsService`                               | —                              |
 | `HabitStoreProtocol`               | `HabitStore`                                    | —                              |
 
+> **Note:** `NoteEnrichmentService` is a concrete service (no protocol) — it is injected directly into `NotesListViewModel` for async LLM-driven note enrichment.
+
 ## File Structure
 
 ```
@@ -108,7 +111,8 @@ Sources/
 │   ├── ConversationTemplate.swift← Template definitions for system prompts
 │   ├── PinnedPrompt.swift        ← Pinned prompt data model
 │   ├── LucidPalActivityAttributes.swift ← Live Activity attributes
-│   └── ModelInfo.swift           ← GGUF model metadata
+│   ├── ModelInfo.swift           ← GGUF model metadata
+│   └── NoteItem.swift            ← Note model with AI metadata fields
 ├── Services/
 │   ├── LLMService.swift          ← Model load/unload, streaming
 │   ├── LlamaActor.swift          ← llama.cpp serial actor
@@ -123,7 +127,8 @@ Sources/
 │   ├── ContactsService.swift     ← Contacts framework abstraction
 │   ├── ContactsServiceProtocol.swift ← Protocol for contacts access
 │   ├── HabitStore.swift          ← Habit log persistence (ObservableObject)
-│   └── HabitStoreProtocol.swift  ← Protocol for habit store
+│   ├── HabitStoreProtocol.swift  ← Protocol for habit store
+│   └── NoteEnrichmentService.swift ← Async LLM enrichment for notes
 ├── ViewModels/
 │   ├── ChatViewModel.swift       ← Core message/stream logic
 │   ├── ChatViewModel+CalendarConfirmation.swift ← Confirm/cancel/undo
@@ -145,5 +150,6 @@ Sources/
     ├── SessionListView+Subviews.swift ← Search bar + row subviews
     ├── CalendarEventCard.swift   ← Event preview card
     ├── ThinkingDisclosure.swift  ← Expandable thinking block
-    └── SettingsView.swift        ← Settings form
+    ├── SettingsView.swift        ← Settings form
+    └── HabitCelebrationOverlay.swift ← Canvas confetti celebration overlay
 ```
