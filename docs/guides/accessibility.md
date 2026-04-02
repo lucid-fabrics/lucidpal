@@ -55,7 +55,7 @@ The following are marked `accessibilityHidden(true)` because they are decorative
 - Orbital ring in session list
 - Decorative icons in `ChatView+Banners` (3 instances)
 - Decorative illustrations in `UnsupportedDeviceView` (4 instances)
-- Decorative images in `OnboardingCarouselView` (4 instances)
+- Decorative images in `OnboardingCarouselView` (5 instances)
 
 ---
 

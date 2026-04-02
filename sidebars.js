@@ -48,6 +48,8 @@ const sidebars = {
         'architecture/notes-store',
         'architecture/note-enrichment',
         'architecture/model-download',
+        'architecture/settings',
+        'architecture/onboarding',
         'architecture/testing',
         'architecture/ci-cd',
       ],

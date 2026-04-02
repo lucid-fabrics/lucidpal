@@ -16,8 +16,8 @@ At the top of Settings, a **segmented picker** lets you switch between two views
 
 | Mode | What you see |
 |------|-------------|
-| **Simple** | Data Sources, Vision toggle, Text Model, and Notifications — the controls most users need every day |
-| **Advanced** | Everything in Simple, plus: Inference parameters (context window, temperature, max tokens, timeout), Vision model picker, Shortcuts/Siri section, and Debug Logs |
+| **Simple** | Data Sources (Notes, Habits, Contacts, Calendar, Location, Web Search), AI Model (text model picker + Download More), Voice, and General (Notifications, About, Debug Logs) |
+| **Advanced** | Everything in Simple, plus: Vision toggle and vision model picker, full Inference controls (context window, temperature, max tokens, timeout, KV Cache info), and Shortcuts/Siri section |
 
 The selected mode is remembered across app launches. New users start in **Simple** mode.
 
@@ -37,25 +37,31 @@ These toggles control which personal data LucidPal can read and act on. All proc
 | **Habits** | Habits | LucidPal can log and query habits — "log my workout", "did I meditate today?" |
 | **Contacts** | Contacts Access | LucidPal can look up phone numbers and email addresses from your contacts |
 | **Calendar** | Use calendar in chat | Upcoming events are included in the AI prompt for scheduling and reminders |
-| **Reminders** | Reminders Access | LucidPal can read and create iOS Reminders — "remind me to call John at 3 PM" |
-| **Mail** | Mail Access | LucidPal can read recent mail to answer questions like "any emails from Alex today?" |
 | **Location** | Include city in AI context | Your detected city is added to the AI prompt for location-relevant answers |
 | **Web Search** | *(tap to open sub-screen)* | Configure web search provider and API key — see [Web Search](./web-search) |
 
 ### Calendar
 
-Granting calendar access requires an iOS permission prompt. After granting:
+The Calendar row adapts to the current permission state:
 
-- **Use calendar in chat** — toggle to include or exclude event context from the AI.
-- **Default Calendar** — picker for which calendar new events are created in. "System Default" uses the iOS default.
+| State | What you see |
+|-------|-------------|
+| Not authorized | **Allow Access** button — tap to trigger the iOS permission prompt |
+| Authorized | Toggle to include or exclude event context from the AI |
+
+Once access is granted, a **Default Calendar** picker also appears — choose which calendar new events are created in ("System Default" uses the iOS default).
 
 ### Location
 
-Tap **Enable Location** to detect your city. After detection:
+The Location row shows different states depending on permission:
 
-- **Detected city** shows the resolved city name.
-- **Refresh Location** re-runs detection if you've moved.
-- The city string is included in the system prompt — never stored on any server.
+| State | What you see |
+|-------|-------------|
+| Not yet requested | **Enable** button — tap to request iOS location permission |
+| Granted | Row label shows the detected city inline, e.g. "Location — Montreal" |
+| Denied | **Denied** badge — re-enable via iOS Settings → Privacy & Security → Location Services → LucidPal |
+
+The city string is included in the system prompt — never stored on any server.
 
 ---
 
