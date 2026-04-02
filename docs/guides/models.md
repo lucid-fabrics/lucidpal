@@ -64,7 +64,7 @@ Models that exceed your device's RAM threshold are hidden from the selection lis
 
 Go to **Settings** → **AI Model** to switch between models. The new model loads the next time you start a conversation.
 
-The model UI adapts to your [Settings Mode](./settings#simple-vs-advanced-mode):
+The model UI adapts to your [Simple vs Advanced Mode](./settings#simple-vs-advanced-mode) setting:
 
 | Mode | What you see |
 |------|-------------|

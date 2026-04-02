@@ -47,8 +47,8 @@ A progress bar at the bottom reflects `currentPage / (totalPages - 1)`.
 
 Navigation:
 - **Next / Get Started** button advances or completes onboarding.
-- **Skip** (visible on info pages) jumps to the last page (model selection).
-- **Back** (visible on the last page only) returns to the previous page.
+- **Skip** (visible on info pages 0–2) jumps directly to the model-selection page (index 3), bypassing the remaining info pages.
+- **Back** (visible on the Data Sources page only) returns to the model-selection page.
 
 ---
 

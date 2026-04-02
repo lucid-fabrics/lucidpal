@@ -36,7 +36,7 @@ enum SettingsMode: String {
 
 | Mode | Visible sections |
 |------|-----------------|
-| `simple` | Data Sources, AI Model, Voice, General (Notifications, About, Debug Logs) |
+| `simple` | Data Sources, Text Model, Voice, General (Notifications, About, Debug Logs) |
 | `advanced` | Everything in Simple + Vision model picker, full Inference controls (temperature, max tokens, timeout, KV cache), Siri Shortcuts section |
 
 New installs default to `.simple`. The selected mode persists across launches.

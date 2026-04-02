@@ -12,7 +12,7 @@ LucidPal is an on-device AI assistant that understands and manages your iOS cale
 
 | Feature                       | Description                                                                                                 |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **100% On-Device**            | All inference runs via llama.cpp on the Neural Engine. No API keys, no subscriptions, no internet required. |
+| **100% On-Device**            | All inference runs via llama.cpp on the Neural Engine. No API keys, no internet required. All users currently have full Pro access — see [Premium](./guides/premium). |
 | **Calendar Integration**      | Create, update, delete and query events using plain English. Conflict detection included.                   |
 | **Siri Shortcuts**            | Ten built-in Siri intents let you manage your calendar, notes, contacts, and habits without ever opening the app. |
 | **Multi-Session**             | Full conversation history with named sessions, persisted locally across launches.                           |
@@ -30,6 +30,7 @@ LucidPal is an on-device AI assistant that understands and manages your iOS cale
 | **Privacy**                   | Full explanation of the on-device architecture and what data never leaves your phone. See the [Privacy guide](./guides/privacy). |
 | **Models**                    | How to download, switch, and manage GGUF models from the app. See the [Models guide](./guides/models). |
 | **Accessibility**             | VoiceOver support, Dynamic Type, Reduce Motion, and other accessibility features. See the [Accessibility guide](./guides/accessibility). |
+| **Premium**                   | Entitlement system (PremiumManager) that gates Pro features. All users currently have Pro access at no cost. See the [Premium guide](./guides/premium). |
 
 ## Quick Start
 

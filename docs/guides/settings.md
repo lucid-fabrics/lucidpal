@@ -16,7 +16,7 @@ At the top of Settings, a **segmented picker** lets you switch between two views
 
 | Mode | What you see |
 |------|-------------|
-| **Simple** | Data Sources (Notes, Habits, Contacts, Calendar, Location, Web Search), AI Model (text model picker + Download More), Voice, and General (Notifications, About, Debug Logs) |
+| **Simple** | Data Sources (Notes, Habits, Contacts, Calendar, Location, Web Search), Text Model (model picker + Download More), Voice, and General (Notifications, About, Debug Logs) |
 | **Advanced** | Everything in Simple, plus: Vision toggle and vision model picker, full Inference controls (context window, temperature, max tokens, timeout, KV Cache info), and Shortcuts/Siri section |
 
 The selected mode is remembered across app launches. New users start in **Simple** mode.

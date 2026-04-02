@@ -115,6 +115,8 @@ See [LLM Inference](./llm-inference) for full `LlamaActor` internals, model load
 - `NotesStoreProtocol` → [Notes Store](./notes-store)
 - `NoteEnrichmentService` → [Note Enrichment](./note-enrichment)
 - `ContextServiceProtocol` / `SuggestedPromptsProviderProtocol` → [Chat ViewModel](./chat-viewmodel)
+- `AppSettings` / `AppSettingsProtocol` → [Settings System](./settings)
+- `OnboardingCarouselView` / `DataSourcesPageView` → [Onboarding](./onboarding)
 
 ## Model Download Pipeline
 
