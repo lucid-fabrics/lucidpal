@@ -1,10 +1,43 @@
 ---
-sidebar_position: 4
+sidebar_position: 16
 ---
 
 # Productivity Features
 
-Export conversations, search messages, and pin your most-used prompts.
+Export conversations, search messages, pin your most-used prompts, and let the AI take action on your behalf.
+
+---
+
+## AI Actions from Chat
+
+LucidPal's on-device AI can manage your notes and habits directly from the chat — no need to navigate to another screen. Speak or type naturally; the AI figures out what to do.
+
+### Notes
+
+| Request | What happens |
+|---------|-------------|
+| "Save a note: dentist Tuesday 3 PM" | Creates a note with title and body |
+| "Note that I need to review the proposal" | Creates a note with AI-chosen title |
+| "What notes do I have about the project?" | Searches notes, returns up to 5 results |
+| "Update my shopping list — add oat milk" | Patches the body of the matching note |
+| "Delete my draft ideas note" | Permanently deletes the matching note |
+
+The AI can set **title**, **body**, and **tags** when creating or updating a note. See the [Notes guide](./notes.md) for full details.
+
+### Habits
+
+| Request | What happens |
+|---------|-------------|
+| "Log my run for today" | Records an entry for a matching habit |
+| "I did 20 push-ups" | Logs 20 against a push-ups habit |
+| "Create a daily meditation habit" | Creates a new habit definition |
+| "How is my water habit going?" | Returns a 7-day summary and streak |
+
+When creating a habit the AI can set: **name**, **emoji**, **unit** (boolean, count, duration), and **frequency** (daily, weekly). When logging, it can set an optional **value** (defaults to 1 for boolean habits). Querying returns a 7-day summary and current streak.
+
+:::tip
+Ask the AI to query a habit before logging to confirm the name it will match against.
+:::
 
 ---
 
@@ -56,6 +89,19 @@ Tap any chip above the input bar to fill the input field with that prompt. Edit 
 
 Long-press a chip to remove it. You can pin up to **20 prompts**. Pins are saved across app restarts.
 
+When the 20-prompt limit is reached, adding a new prompt automatically removes the least-used one (or the oldest if usage counts are tied), so your most-used shortcuts are never evicted.
+
+:::note Storage
+Pinned prompts are saved as a JSON file in the app's Documents directory (`pinned_prompts.json`), protected with iOS complete-file protection. They are **not** stored in iCloud or on any server.
+:::
+
 :::tip
 Pin prompts like "What's on my calendar today?" or "Find my next free hour" to access your most common queries instantly.
 :::
+
+<details>
+<summary>For developers</summary>
+
+See [architecture/system-prompt](../architecture/system-prompt) for how the AI's context window is assembled — including calendar data, notes, habits, and user preferences — before each inference call.
+
+</details>

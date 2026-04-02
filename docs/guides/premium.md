@@ -1,0 +1,59 @@
+---
+sidebar_position: 20
+---
+
+# Premium
+
+LucidPal's premium tier and entitlement system.
+
+---
+
+## Overview
+
+LucidPal uses a built-in entitlement manager (`PremiumManager`) to gate features by subscription level. The manager is available throughout the app as an `@EnvironmentObject` so any view can check the current entitlement without making a network call.
+
+:::note
+In the current release, **all users have Pro access** — no purchase is required. The premium infrastructure is in place for a future paid tier.
+:::
+
+---
+
+## Entitlement Levels
+
+| Entitlement | Description |
+|-------------|-------------|
+| **Free** | Base tier — core AI chat, calendar, and notes |
+| **Pro** | Full access to all features, including advanced inference controls and future premium additions |
+| **Lifetime** | Same as Pro, unlocked permanently via a one-time purchase |
+
+---
+
+## How It Works
+
+`PremiumManager` is an `ObservableObject` that publishes `isPro: Bool` and the raw `PremiumEntitlement` value. Views observe it to show or hide premium-only UI.
+
+```swift
+// Example: check pro status in a SwiftUI view
+@EnvironmentObject var premium: PremiumManager
+
+if premium.isPro {
+    // show advanced feature
+}
+```
+
+Because `isPro` is currently `true` for all users, no paywall or upgrade prompt will appear. When the paid tier launches, `PremiumManager` will validate receipts via StoreKit and update `isPro` accordingly — no view changes required.
+
+---
+
+## Future Premium Features
+
+The following capabilities are planned for the paid tier:
+
+- Extended context window sizes
+- Priority model downloads
+- Cloud sync for notes and sessions (opt-in)
+- Advanced analytics and habit insights
+
+:::tip
+If you are using LucidPal today, you already have access to everything — including features that will become Pro-only in a future version.
+:::

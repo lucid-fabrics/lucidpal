@@ -1,5 +1,5 @@
 ---
-sidebar_position: 6
+sidebar_position: 12
 ---
 
 # Document & File Summarization
@@ -14,8 +14,10 @@ LucidPal can process documents entirely on-device. Attach a PDF or plain-text fi
 
 | Supported format | How text is extracted |
 |---|---|
-| PDF | PDFKit (text layer) + Vision OCR fallback for scans |
+| PDF (`.pdf`) | PDFKit (text layer) + Vision OCR fallback for scans |
 | Plain text (`.txt`) | Read directly |
+| Markdown (`.md`, `.markdown`) | Read directly — open via Files app and use **Share → LucidPal** |
+| Rich Text (`.rtf`) | NSAttributedString parser |
 
 ---
 
@@ -47,10 +49,10 @@ Once a document is attached, the AI has access to its full text for that message
 ## Limitations
 
 :::note
-- **Maximum file size:** Large files are processed page-by-page; very long documents may be truncated to fit within the model's context window.
+- **Text limit:** Document text is capped at 8,000 characters. Pages are read in order until the limit is reached; content beyond that is not sent to the model.
 - **Scanned PDFs:** LucidPal uses on-device OCR to extract text from image-based PDFs. Accuracy depends on scan quality.
 - **No persistent storage:** Attached documents are processed for the current message only. They are not saved to your notes or any persistent store.
-- **One attachment per message:** Each message supports a single file attachment.
+- **One file per tap:** The document picker is single-select. Tap the paperclip again to add another file; each appears as its own pill above the input bar. Tap **×** on a pill to remove it before sending.
 :::
 
 ---
