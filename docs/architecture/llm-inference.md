@@ -186,7 +186,7 @@ LucidPal supports two model roles via the `ModelType` enum:
 ```swift
 enum ModelType: Sendable {
     case text    // Qwen3.x text model
-    case vision  // Qwen3-VL vision model (or integrated text+vision)
+    case vision  // Qwen3.5 Vision 4B model (or integrated text+vision)
 }
 ```
 
@@ -239,7 +239,7 @@ If `mtmdCtx` is not available (no mmproj loaded), falls back to text-only genera
 
 ### Integrated vision model
 
-When a text model also handles vision (e.g. Qwen3-VL integrated), `textModelSupportsVision = true`. In this case `generate(role: .vision)` transparently uses the text model slot — no separate vision slot needed.
+When a text model also handles vision (e.g. Qwen3.5 Vision 4B integrated), `textModelSupportsVision = true`. In this case `generate(role: .vision)` transparently uses the text model slot — no separate vision slot needed.
 
 :::warning
 `LlamaActor` requires a physical device — the llama.cpp Metal backend does not run in the Simulator. GPU layers are set to 0 in `#if targetEnvironment(simulator)`.

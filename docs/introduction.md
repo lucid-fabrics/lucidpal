@@ -20,7 +20,7 @@ LucidPal is an on-device AI assistant that understands and manages your iOS cale
 | **Habit Tracker**             | Track daily habits and log streaks through natural language. See the [Habits guide](./guides/habit-tracker). |
 | **Document Summarization**    | Summarize PDFs and text files entirely on-device. See the [Document Summarization guide](./guides/document-summarization). |
 | **Web Search**                | Query DuckDuckGo, Brave, or a self-hosted SearXNG instance — results synthesized locally. See the [Web Search guide](./guides/web-search). |
-| **Vision / Photo Analysis**   | Describe images and photos using an optional on-device vision model (Qwen3-VL). See the [Vision & Photos guide](./guides/vision-photos). |
+| **Vision / Photo Analysis**   | Describe images and photos using an optional on-device vision model (Qwen3.5 Vision 4B). See the [Vision & Photos guide](./guides/vision-photos). |
 | **Contacts**                  | Look up phone numbers and email addresses from your contacts in chat. See the [Contacts guide](./guides/contacts). |
 | **Reminders**                 | Set one-off reminders through natural language — synced to the iOS Reminders app. See the [Reminders guide](./guides/reminders). |
 | **Productivity Features**     | AI actions for notes and habits from chat, conversation export, full-text message search, and pinned prompts. See the [Productivity guide](./guides/productivity-features). |
