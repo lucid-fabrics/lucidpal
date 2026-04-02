@@ -7,8 +7,8 @@ const config = {
   tagline: 'On-device AI calendar assistant for iOS',
   favicon: 'img/favicon.ico',
 
-  url: 'https://lucid-fabrics.github.io',
-  baseUrl: '/lucidpal/',
+  url: 'https://docs.lucidpal.app',
+  baseUrl: '/',
 
   organizationName: 'lucid-fabrics',
   projectName: 'lucidpal',
