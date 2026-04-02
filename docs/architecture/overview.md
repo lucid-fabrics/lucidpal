@@ -83,7 +83,7 @@ actor LlamaActor {
 | ---------------------------------- | ----------------------------------------------- | ------------------------------ |
 | `LLMServiceProtocol`               | `LLMService`                                    | `MockLLMService`               |
 | `CalendarServiceProtocol`          | `CalendarService`                               | `MockCalendarService`          |
-| `CalendarActionControllerProtocol` | `CalendarActionController`                      | `MockCalendarActionController` |
+| `DocumentProcessorProtocol`        | `DocumentProcessor`                             | —                              |
 | `SessionManagerProtocol`           | `SessionManager`                                | `MockSessionManager`           |
 | `SpeechServiceProtocol`            | `SpeechService`                                 | `MockSpeechService`            |
 | `HapticServiceProtocol`            | `HapticService`                                 | `MockHapticService`            |
@@ -186,14 +186,20 @@ Sources/
 │   └── WhisperSpeechService.swift     ← On-device Whisper transcription
 ├── ViewModels/
 │   ├── AppSettings.swift              ← @AppStorage preferences
+│   ├── AppSettingsProtocol.swift      ← Protocol for app settings
+│   ├── ChatConstants.swift            ← Shared chat constants (token limits etc.)
 │   ├── ChatViewModel.swift            ← Core message/stream logic
 │   ├── ChatViewModel+CalendarConfirmation.swift ← Confirm/cancel/undo
 │   ├── ChatViewModel+MessageHandling.swift ← Send/stream/live-activity
 │   ├── ChatViewModel+Persistence.swift ← Save/load message history
 │   ├── ChatViewModel+Publishers.swift  ← Combine subscriptions
 │   ├── ChatViewModel+Speech.swift     ← Voice recording + haptics
+│   ├── ChatViewModelDependencies.swift ← Dependency container for ChatViewModel
+│   ├── ModelDownloadViewModel.swift   ← Model download progress and state
 │   ├── SessionListViewModel.swift     ← Session CRUD + Siri routing
-│   └── SettingsViewModel.swift        ← Settings form logic
+│   ├── SessionListViewModelDependencies.swift ← Dependency container for SessionListViewModel
+│   ├── SettingsViewModel.swift        ← Settings form logic
+│   └── UserDefaultsKeys.swift        ← UserDefaults key constants
 └── Views/
     ├── BulkDeletionBar.swift          ← Multi-select delete toolbar
     ├── CalendarActionPill.swift       ← Inline calendar action confirmation
