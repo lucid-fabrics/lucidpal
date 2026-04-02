@@ -114,3 +114,4 @@ The card's date badge uses a **red header** for active events and a **grey heade
 - The **Add Calendar Event** shortcut lets you dictate the full event detail in one sentence — Siri passes everything to LucidPal.
 - The **Delete Calendar Event** shortcut also responds to _"Delete a LucidPal event"_ and _"Remove event from LucidPal"_.
 - The **Undo Last Action** shortcut also responds to _"Undo what I just did in LucidPal"_, _"Undo last LucidPal change"_, _"Restore deleted event in LucidPal"_, and _"Undo LucidPal deletion"_.
+- For notification-based reminders (not calendar events), use the chat directly — see the [Reminders guide](./reminders).

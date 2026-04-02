@@ -22,7 +22,7 @@ LucidPal can query the web on your behalf and include results in its response. T
 
 ## Enabling Web Search
 
-1. Open **Settings** → **Web Search**.
+1. Open [**Settings**](./settings) → **Web Search**.
 2. Choose a provider.
 3. If using **Brave Search**, paste your API key.
 4. If using **SearXNG**, enter your instance URL (must be `https://`).
@@ -49,7 +49,7 @@ Zero-config. LucidPal scrapes DuckDuckGo's HTML search results using a mobile Sa
 
 ### Brave Search
 
-Requires a [Brave Search API](https://brave.com/search/api/) key (free tier available). Enter the key in **Settings → Web Search → Brave API Key**.
+Requires a [Brave Search API](https://brave.com/search/api/) key (free tier available). Enter the key in [**Settings**](./settings) → **Web Search → Brave API Key**.
 
 ### SearXNG (Self-Hosted)
 

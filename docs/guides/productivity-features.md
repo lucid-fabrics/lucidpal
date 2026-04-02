@@ -4,7 +4,40 @@ sidebar_position: 4
 
 # Productivity Features
 
-Export conversations, search messages, and pin your most-used prompts.
+Export conversations, search messages, pin your most-used prompts, and let the AI take action on your behalf.
+
+---
+
+## AI Actions from Chat
+
+LucidPal's on-device AI can manage your notes and habits directly from the chat — no need to navigate to another screen. Speak or type naturally; the AI figures out what to do.
+
+### Notes
+
+| Request | What happens |
+|---------|-------------|
+| "Save a note: dentist Tuesday 3 PM" | Creates a note with title and body |
+| "Note that I need to review the proposal" | Creates a note with AI-chosen title |
+| "What notes do I have about the project?" | Searches notes, returns up to 5 results |
+| "Update my shopping list — add oat milk" | Patches the body of the matching note |
+| "Delete my draft ideas note" | Permanently deletes the matching note |
+
+The AI can set **title**, **body**, and **tags** when creating or updating a note. See the [Notes guide](./notes.md) for full details.
+
+### Habits
+
+| Request | What happens |
+|---------|-------------|
+| "Log my run for today" | Records an entry for a matching habit |
+| "I did 20 push-ups" | Logs 20 against a push-ups habit |
+| "Create a daily meditation habit" | Creates a new habit definition |
+| "How is my water habit going?" | Returns a 7-day summary and streak |
+
+When creating a habit the AI can set: **name**, **emoji**, **unit** (boolean, count, duration, distance, volume, weight), and **frequency** (daily, weekly).
+
+:::tip
+Ask the AI to query a habit before logging to confirm the name it will match against.
+:::
 
 ---
 

@@ -73,7 +73,7 @@ Integrated models show an **Integrated** badge in Settings. Separate vision mode
 
 ## Vision Settings
 
-Go to **Settings → Vision** to control vision behaviour.
+Go to [**Settings**](./settings) → **Vision** to control vision behaviour.
 
 ### Vision Toggle
 
@@ -84,7 +84,7 @@ A single **Vision** toggle (under the Vision section header) enables or disables
 
 ### Vision Model Selection
 
-Under **Settings → Vision Model**, you can:
+Under [**Settings**](./settings) → **Vision Model**, you can:
 
 - **Select which vision model is active** — tap any downloaded model to make it the active vision model
 - **Download a new vision model** — tap **Download Vision Models** to browse available options
@@ -101,7 +101,7 @@ If you select an integrated model here, it also becomes your active text model �
 | **Model must be downloaded first** | Vision only works when a vision or integrated model is downloaded and selected. The toggle is disabled until then. |
 | **RAM requirement** | Qwen3.5 Vision 4B requires ~5 GB of available RAM — iPhone 14 Pro, 15, or 16 series recommended. |
 | **One image per message** | Multiple attachments in a single message are not supported. |
-| **Image size cap** | Images are auto-downscaled to 896 × 896 px max. Very large originals lose no important detail, but microscopic text may not be legible. |
+| **Image size cap** | Images are auto-downscaled so their longest side is at most 896 px (aspect ratio preserved). Very large originals lose no important detail, but microscopic text may not be legible. |
 | **Image types** | Works best with clear, well-lit photos. Blurry, very dark, or heavily compressed images produce less accurate results. |
 | **No video** | Only still images (JPEG, PNG, HEIF) are supported. |
 | **No PDF pages** | For PDF documents, use the [Document Summarization](./document-summarization) feature instead. |

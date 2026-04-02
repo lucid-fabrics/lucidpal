@@ -67,7 +67,7 @@ The Qwen3.5 model files are stored locally after download. Once downloaded, Luci
 
 If you use the optional vision model, any photos or images you share are processed entirely **on-device** by the vision model. Images are resized and passed to the local model for analysis — they are never uploaded to any server.
 
-To enable vision: select a vision model during onboarding or in **Settings → AI Model**.
+To enable vision: select a vision model during onboarding or in [**Settings**](./settings) → **AI Model**. See the [Vision & Photos guide](./vision-photos) for full details.
 
 ---
 

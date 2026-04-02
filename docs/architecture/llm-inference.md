@@ -13,7 +13,7 @@ User sends message
        ↓
 ChatViewModel.sendMessage()
        ↓
-Build system prompt (calendar context injected)
+Build system prompt (calendar context injected — see [System Prompt Builder](./system-prompt))
        ↓
 llmService.generate() → AsyncThrowingStream<String>
        ↓

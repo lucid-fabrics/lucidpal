@@ -77,20 +77,39 @@ The AI can act on notes directly from the chat using natural language. No need t
 
 > "Note that I need to review the project proposal before Friday"
 
-### Retrieve notes
+When creating a note the AI can set:
+- **Title** — a short label for the note
+- **Body** — the full note content
+- **Tags** — one or more keywords (e.g. `work`, `health`) for your own reference
+
+### Search notes
 
 > "What notes do I have about the project?"
 
 > "Show me everything I saved this week"
 
+The AI searches note titles and body text and returns up to five matching results as preview cards.
+
 ### Update a note
 
 > "Update my shopping list note — add oat milk"
 
+> "Change the title of my dentist note to 'Dentist – rescheduled'"
+
+The AI locates the note by searching first, then patches the **title**, **body**, and/or **tags** you specify. Fields you omit remain unchanged.
+
+### Delete a note
+
+> "Delete my draft ideas note"
+
+> "Remove the note about last week's meeting"
+
+The AI finds the matching note and permanently deletes it. This cannot be undone.
+
 The AI responds with a confirmation card showing the note title and a preview of the content.
 
 :::note
-The AI matches your query against note titles and body text. Phrase your requests naturally — exact titles are not required.
+The AI matches your request against note titles and body text. Phrase requests naturally — exact titles are not required.
 :::
 
 ---
@@ -130,7 +149,7 @@ Open the note and scroll below the body to find the **AI Insights** section, whi
 - The generated summary
 - Action items rendered as checkboxes
 
-Tap any action item checkbox to send it to LucidPal as a reminder. The app schedules an iOS notification for that item so you get an alert at your chosen time — without leaving the note.
+Tap any action item checkbox to send it to LucidPal as a reminder. The app schedules an iOS notification for that item so you get an alert at your chosen time — without leaving the note. See the [Reminders guide](./reminders) for details on how reminders work.
 
 :::note
 Enrichment happens after saving and may take a few seconds. If you open a note immediately after creating it, the AI Insights section may still be loading.

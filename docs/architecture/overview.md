@@ -29,6 +29,8 @@ MVVM layers, dependency injection, and actor isolation in LucidPal.
 └─────────────────────────────────────┘
 ```
 
+For how the Services layer assembles the AI system prompt, see [System Prompt Builder](./system-prompt).
+
 ## Dependency Injection
 
 LucidPal uses **constructor injection** throughout. All service dependencies are declared as protocol existentials (`any XProtocol`), never concrete types.

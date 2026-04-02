@@ -86,7 +86,7 @@ The model file is removed immediately. You can re-download it at any time.
 
 ## Integrated Vision Models
 
-Some models combine text and vision capabilities in a single download. **Qwen3.5 Vision 4B** is one example — it can read and describe images in addition to handling calendar requests, without requiring a separate vision model file.
+Some models combine text and vision capabilities in a single download. **Qwen3.5 Vision 4B** is one example — it can read and describe images in addition to handling calendar requests, without requiring a separate vision model file. See [Vision & Photos](./vision-photos) for how to attach and analyze images.
 
 When you select an integrated model in the onboarding carousel or in [**Settings**](./settings) → **Text Model**, an **Integrated** badge appears next to its name. The app automatically hides any text-only models of the same tier to avoid confusion — there is no need to download both.
 
