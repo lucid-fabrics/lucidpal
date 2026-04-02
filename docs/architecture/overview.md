@@ -21,6 +21,7 @@ MVVM layers, dependency injection, and actor isolation in LucidPal.
 │  SessionManager  SpeechService      │
 │  HapticService  ModelDownloader     │
 │  ContactsService  HabitStore        │
+│  SystemPromptBuilder  NotesStore    │
 ├─────────────────────────────────────┤
 │         Models / Domain Types       │  ← Pure data, no UIKit/SwiftUI
 │  ChatMessage  ChatSession           │
@@ -93,6 +94,8 @@ actor LlamaActor {
 | `NotesStoreProtocol`               | `NotesStore`                                    | —                              |
 | `ContactsServiceProtocol`          | `ContactsService`                               | —                              |
 | `HabitStoreProtocol`               | `HabitStore`                                    | —                              |
+| `ContextServiceProtocol`           | `ContextService`                                | —                              |
+| `SuggestedPromptsProviderProtocol` | `SuggestedPromptsProvider`                      | —                              |
 
 > **Note:** `NoteEnrichmentService` is a concrete service (no protocol) — it is injected directly into `NotesListViewModel` for async LLM-driven note enrichment.
 

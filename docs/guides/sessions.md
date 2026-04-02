@@ -44,6 +44,41 @@ Tap any chip to send that question instantly.
 
 Tap **New text chat** to open a keyboard-based conversation instead of using voice. From a text session you can also capture [Notes](./notes) and ask about [habits](./habit-tracker) or [documents](./document-summarization).
 
+---
+
+## Suggested Prompts
+
+When you open a text chat session before typing anything, LucidPal shows four contextual prompt chips above the input bar. These are generated automatically based on your calendar data, time of day, and day of week — no configuration required.
+
+### What they look like
+
+Each chip is a tappable rounded pill with full-width text. Tap one to instantly pre-fill the input bar and send that question — no typing needed. While the prompts are loading, animated shimmer chips appear as placeholders.
+
+### How they are chosen
+
+LucidPal picks four prompts across four categories every time you open a new chat:
+
+| Category | Examples |
+|---|---|
+| Schedule overview | "What's my day looking like?", "What's left on my schedule today?", "What's on my agenda tomorrow?" |
+| Next specific event | "When does [Event] start?", "How long until [Event]?", "What time is [Event] tomorrow?" |
+| General productivity | "Help me draft a quick email", "Summarize my day for me", "Help me write a short message" |
+| Contextual utility | "When am I free today?", "What's on this weekend?", "What's my busiest day this week?" |
+
+The exact wording adapts to context:
+
+- **Time of day** — morning prompts focus on planning ahead; evening prompts lean toward review and wind-down.
+- **Day of week** — Monday mornings show weekly-overview prompts; Thursdays and Fridays surface weekend-availability prompts.
+- **Your calendar** — if you have a specific event coming up soon, its title appears directly in the prompt (e.g. "How long until Team Standup?").
+
+### Without calendar access
+
+If you have not granted calendar permission, LucidPal still shows four general productivity prompts (writing, decision-making, task management) that do not require any calendar data.
+
+### Updating suggestions
+
+Suggested prompts are generated fresh each time you open a new chat session. They are not stored or personalised over time — each session starts from the current calendar state and time.
+
 ### Search empty state
 
 If you search for a session and nothing matches, a message confirms that no sessions were found. Clear the search to return to the full list.
