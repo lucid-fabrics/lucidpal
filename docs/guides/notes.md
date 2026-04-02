@@ -18,9 +18,31 @@ LucidPal has a built-in note-taking layer that stores text notes on-device. Note
 
 Tap the **Notes** tab (notebook icon) in the bottom navigation bar to open the notes list. Notes are sorted by last-modified date. Each row shows the note's **category icon** and an **AI-generated summary** instead of raw body text, so you can scan content at a glance. If a note has extracted action items, a badge shows the count.
 
-Notes created by the AI from a conversation show a small **source icon** to distinguish them from manually written notes.
+Notes created by the AI from a conversation show a small **source icon** to distinguish them from manually written notes. Notes created via voice dictation or an AI chat session also display an indigo **"From chat"** badge on the note card, making it easy to identify AI-assisted entries at a glance.
 
 Tap any note card to open the **Note Detail View**. By default the view is in **read mode** — tap **Edit** (top-right) to enter edit mode and make changes. A **Share** button in the toolbar opens the standard iOS share sheet so you can export the note to any app.
+
+---
+
+## Recently Referenced
+
+Notes that the AI has surfaced during a conversation appear in a **Recently Referenced** section at the very top of the notes list. A note qualifies if it was returned as a search result in the last **7 days**. This section is hidden when no notes meet that threshold.
+
+This makes it easy to pick up where you left off — if you asked the AI about a project note yesterday, it reappears here today without searching.
+
+---
+
+## From Conversation
+
+You can ask the AI to remember anything directly from the chat:
+
+> "Remember: buy oat milk"
+
+> "Save a note: call dentist Tuesday at 3 PM"
+
+> "Note that I need to finish the report by Friday"
+
+The assistant creates the note automatically and confirms with a **"Note saved"** card in the chat. No need to switch to the Notes tab. The saved note appears immediately in the notes list and is enriched in the background (category, summary, action items) like any manually created note.
 
 ---
 

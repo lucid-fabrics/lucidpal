@@ -113,6 +113,20 @@ else          → current = 1
 
 Returns the longest consecutive-day run found.
 
+### `topStreaks(limit:)`
+
+```swift
+func topStreaks(limit: Int = 3) -> [(habit: HabitDefinition, streak: Int)]
+```
+
+Returns the top `limit` habits ranked by current streak length (descending). Rules:
+
+- Archived habits (`isArchived == true`) are excluded.
+- Only habits with `streak > 0` are included.
+- Ties are broken by habit name (alphabetical).
+
+Used by `DailyBriefingBuilder` and the widget snapshot writer to surface the most notable active streaks.
+
 ### `completionRate(for:days:)`
 
 ```
@@ -140,6 +154,22 @@ The "skip today if not yet logged" rule means a user who logs yesterday but hasn
 Multi-month queries (`recentEntries`, `bestStreak`) compute a list of month offsets and call `loadEntries(for:)` for each. The cache keyed by `"YYYY-MM"` string ensures each unique month file is read from disk at most once per session, regardless of how many queries reference it.
 
 A `seen: Set<String>` guard in `recentEntries` prevents double-loading the same month when the offset arithmetic produces duplicates at boundaries.
+
+## Widget Snapshot Trigger
+
+`HabitStore` calls `WidgetSnapshotWriter.writeHabits(...)` after three mutating operations to keep widget data in sync:
+
+| Trigger | Method |
+|---------|--------|
+| Habit created or updated | `save(_:)` |
+| Completion logged | `logEntry(_:)` |
+| Habit hard-deleted | `delete(id:)` |
+
+`WidgetSnapshotWriter` reads the existing snapshot from the App Group container, updates only the habit-related fields (`habitsToday`, `habitsTotal`, `topStreakName`, `topStreakDays`), and writes back atomically. This merge pattern ensures note fields written by `NoteActionController` are not clobbered.
+
+See [architecture/widget-data-flow](./widget-data-flow) for the full snapshot model and App Group setup.
+
+---
 
 ## HabitStoreProtocol
 

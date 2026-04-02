@@ -128,6 +128,37 @@ and inline code (`code`). Keep responses short."
 
 The section is adaptive — capability clauses (calendar, notes/reminders/mail) are omitted when permissions are not granted.
 
+## Daily Briefing Context
+
+`DailyBriefingBuilder` assembles a session-open briefing shown to the user once per calendar day on cold open (first app launch since midnight). It is not injected into the system prompt — instead it is rendered as a dedicated UI card above the chat input.
+
+### Data Sources
+
+| Field | Source |
+|-------|--------|
+| Habit completion count | `HabitStore.todayCompletionSummary()` → `(done, total)` |
+| Top active streaks | `HabitStore.topStreaks(limit: 3)` |
+| Pinned note count | `NotesStore.notes.filter(\.isPinned).count` |
+| Most recent note title | `NotesStore.notes.first?.title` |
+| Calendar event count | `CalendarPromptSection` event list for today |
+
+### Evening Nudge Mode
+
+After **6 PM**, if `todayCompletionSummary().done < todayCompletionSummary().total`, `DailyBriefingBuilder` sets `isEveningNudge = true`. In this mode the briefing leads with:
+
+> "X habits still unlogged today"
+
+This surfaces incomplete habits prominently during the evening review window without requiring the user to navigate to the Habits tab.
+
+### Appearance Rules
+
+- Shown **once per calendar day** — gated by a `lastShownDate` stored in `UserDefaults`.
+- Only on **cold open** — not on every session switch within the same app lifecycle.
+- Dismissed by: tapping the microphone, starting to type, or tapping the **×** button.
+- The **Log** button pre-seeds a new chat with "Log my habits for today".
+
+---
+
 ## Extension Points
 
 To add a new tool capability:

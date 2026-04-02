@@ -26,6 +26,7 @@ sidebar_label: NotesStore
 | `aiCategory` | `NoteCategory?` | AI-assigned category (nil until enriched) |
 | `source` | `NoteSource` | How the note was created (default `.manual`) |
 | `isPinned` | `Bool` | Whether the note is pinned (default `false`) |
+| `lastReferencedAt` | `Date?` | Last time this note was surfaced as a search result in a chat session; `nil` for notes never referenced in conversation |
 
 The `Codable` implementation uses `decodeIfPresent` with safe defaults for all AI fields and `source`/`isPinned`, ensuring backward compatibility when older persisted files lack those keys.
 
@@ -144,6 +145,34 @@ There are no `@Published` wrappers inside `NotesStore` itself; reactivity is del
 | `title` | `String` | Note title |
 | `snippet` | `String` | First 200 characters of `body` |
 | `state` | `NotePreviewState` | `.created`, `.updated`, `.deleted`, `.searchResult` |
+
+---
+
+## lastReferencedAt
+
+`NoteItem.lastReferencedAt` is set by `NoteActionController.searchNotes()` each time a note is returned as a search result during a conversation. The timestamp records when the note was most recently surfaced, not when it was last edited.
+
+`NotesStore` exposes a computed helper for the UI:
+
+```swift
+var recentlyReferenced: [NoteItem] {
+    let cutoff = Calendar.current.date(byAdding: .day, value: -7, to: .now)!
+    return notes.filter { ($0.lastReferencedAt ?? .distantPast) >= cutoff }
+                .sorted { ($0.lastReferencedAt ?? .distantPast) > ($1.lastReferencedAt ?? .distantPast) }
+}
+```
+
+Notes in this list are shown in the **Recently Referenced** section at the top of the Notes tab.
+
+---
+
+## Widget Snapshot Trigger
+
+`NoteActionController` calls `WidgetSnapshotWriter.writeNote(pinnedNote:)` after **create** and **update** operations. The writer reads the existing snapshot, updates only the `pinnedNote` field (the title of the most recently pinned note, or the most recently created note if none are pinned), and writes back atomically.
+
+This ensures the widget always reflects the latest pinned note without overwriting habit fields written by `HabitStore`.
+
+See [architecture/widget-data-flow](./widget-data-flow) for the full snapshot model.
 
 ---
 

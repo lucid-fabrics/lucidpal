@@ -12,46 +12,78 @@ Keep your schedule visible at a glance with Home Screen widgets and smart pre-ev
 
 LucidPal provides three widget sizes. Add them via the iOS widget picker (long-press the Home Screen → **+** → LucidPal).
 
-| Size   | What it shows                                                                                                               |
-| ------ | --------------------------------------------------------------------------------------------------------------------------- |
-| Small  | Countdown to next event (e.g. "45m"), event title, and start time. Shows "Free today" with a chat prompt when no events remain. |
-| Medium | Left panel: next event title, start time, and countdown. Right panel: up to 3 free time slots today (duration + start time). Shows "No gaps today" when the work day is fully booked. |
-| Large  | Full-day header with today's date, up to 4 remaining events (title + time range + countdown badge if within 1 hour), overflow count for additional events, and an "Ask your AI" CTA. Shows "Free day — tap to plan it" when the calendar is empty. |
+### Small Widget
 
-:::tip
-Use the **Medium** widget on your most-visited Home Screen page for an instant overview of what's next and when you're free.
-:::
+Shows your **habit progress ring** (habits done / total today) with the percentage filled in the centre, plus the name and day-count of your **top active streak** below it.
 
-### What counts as a free slot?
+**Fallback priority (left to right):**
+1. Habit progress ring + top streak — default when habits are configured
+2. Next calendar event (title + countdown) — shown when all habits are already done for the day
+3. "Free today" — shown when no habits are configured
 
-Free slots are gaps in your calendar **between 9 AM and 5 PM** that are at least **15 minutes** long. All-day events are excluded from the free-slot calculation. The widget surfaces up to 3 slots in the Medium size.
+### Medium Widget
 
-### Timeline refresh policy
+Split into two panels:
 
-The widget timeline refreshes **every 15 minutes** when no upcoming event is found. When an event is coming up, the widget schedules targeted entries:
+| Panel | Content |
+|-------|---------|
+| Left | Next calendar event — title, start time, and countdown |
+| Right | Habit progress (done/total) → pinned note title → free time slots (shown in priority order; first available content wins) |
 
-- **Now** — low relevance unless the event starts within 30 minutes.
+### Large Widget
+
+Three stacked sections:
+
+1. **Today's Events** — up to 3 upcoming events (title + time range + countdown badge if within 1 hour)
+2. **Habit Progress** — a progress bar (habits done / total) and the top streak name + days as a capsule
+3. **Pinned Note** — the title of your most recently pinned note, if any
+
+### App Group Data Flow
+
+Habit and note data reaches the widget through a shared JSON snapshot, not direct file access:
+
+1. The main app writes `lucidpal_widget_snapshot.json` to the **`group.app.lucidpal`** App Group container after every habit log and note save.
+2. The widget extension reads the snapshot at refresh time via `WidgetSnapshotReader.read()`.
+
+The `WidgetSnapshot` model contains:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `writtenAt` | `Date` | Timestamp of the last write |
+| `habitsToday` | `Int` | Habits completed today |
+| `habitsTotal` | `Int` | Total active habits |
+| `topStreakName` | `String?` | Name of the habit with the longest active streak |
+| `topStreakDays` | `Int` | Day count of that streak |
+| `pinnedNote` | `String?` | Title of the most recently pinned note |
+
+### Timeline Refresh Policy
+
+The widget timeline refreshes on `.after(eventEnd)` for each scheduled event end, or every **15 minutes** as a fallback. The snapshot is read fresh on each reload.
+
+When an event is coming up, the widget schedules targeted entries:
+
 - **Event − 30 min** — relevance score boosted to surface the widget in Smart Stack.
 - **Event start** — maximum relevance for the full duration of the event.
 - **Event end** — relevance drops back to idle; a fresh timeline fetch is triggered.
 
-### Empty states
+### Empty States
 
 | Condition | Small | Medium | Large |
 |-----------|-------|--------|-------|
-| No events today or in next 7 days | "Free today / Tap to ask anything" | "Free today / Ask anything" + no free-slot panel | "Free day — tap to plan it" |
-| No free gaps in 9–5 window | — | "No gaps today" | — |
+| No habits configured | "Free today / Tap to ask anything" | Next event + free slots only | Events only |
+| All habits done | Next event or "Free today" | Next event + first available right-panel content | Full layout, progress bar shows 100% |
+| No events today | Habit ring + top streak | Habit ring on right | Habit section only, events section hidden |
 
-### Tapping the widget
+### Tapping the Widget
 
-Every tap (on any widget element) opens LucidPal and starts a **new chat** via the `lucidpal://newchat` deep link. There is no event-specific deep link — tapping an individual event row in the Large widget also opens a new chat.
+Every tap opens LucidPal and starts a **new chat** via the `lucidpal://newchat` deep link.
 
-### Data source
+### Data Source
 
-The widget reads your calendar **directly via EventKit** — it does not share data through an App Group with the main app. Calendar access (`fullAccess` or the legacy `authorized` status) must be granted for any data to appear. If access is denied, all three widgets show their empty state.
+Calendar data is read **directly via EventKit**. Habit and note data is read from the **`group.app.lucidpal`** App Group container. Both calendar access and the App Group entitlement must be configured for all widget content to display.
 
 :::note
-The widget extension reads only from the default EventKit store. It queries events from **now through end of today** for the day view, and **now through 7 days ahead** to find the next upcoming event.
+The widget extension queries calendar events from **now through end of today** for the day view, and **now through 7 days ahead** to find the next upcoming event.
 :::
 
 ---
