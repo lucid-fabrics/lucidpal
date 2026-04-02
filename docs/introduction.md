@@ -27,6 +27,16 @@ LucidPal is an on-device AI assistant that understands and manages your iOS cale
 | **Widgets & Notifications**   | Home-screen widgets and pre-event push notifications. See the [Widgets guide](./guides/widgets-notifications). |
 | **Live Activity & Templates** | Dynamic Island / Live Activity during generation, plus conversation templates. See the [Templates guide](./guides/templates-live-activity). |
 | **Settings**                  | Full reference for every setting in the app. See the [Settings guide](./guides/settings). |
+| **Privacy**                   | Full explanation of the on-device architecture and what data never leaves your phone. See the [Privacy guide](./guides/privacy). |
+| **Models**                    | How to download, switch, and manage GGUF models from the app. See the [Models guide](./guides/models). |
+| **Accessibility**             | VoiceOver support, Dynamic Type, Reduce Motion, and other accessibility features. See the [Accessibility guide](./guides/accessibility). |
+
+## Quick Start
+
+1. **Download LucidPal** from the App Store and open it.
+2. **Download an AI model** — pick the recommended model for your device on the "Choose Your AI" screen and tap **Download & Get Started**.
+3. **Grant calendar permission** — LucidPal will ask during onboarding so it can read and write your events.
+4. **Start chatting** — type or tap the mic and ask anything: *"What do I have tomorrow?"*, *"Schedule a dentist appointment Friday at 3 pm"*, or *"Clear my Tuesday afternoon."*
 
 ## First-Run Experience
 

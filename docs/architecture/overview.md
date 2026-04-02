@@ -22,6 +22,9 @@ MVVM layers, dependency injection, and actor isolation in LucidPal.
 │  HapticService  ModelDownloader     │
 │  ContactsService  HabitStore        │
 │  SystemPromptBuilder  NotesStore    │
+│  NoteEnrichmentService  ContextService│
+│  SuggestedPromptsProvider           │
+│  WebSearchService                   │
 ├─────────────────────────────────────┤
 │         Models / Domain Types       │  ← Pure data, no UIKit/SwiftUI
 │  ChatMessage  ChatSession           │
@@ -77,6 +80,8 @@ actor LlamaActor {
 }
 ```
 
+See [LLM Inference](./llm-inference) for full `LlamaActor` internals, model loading, and streaming token generation.
+
 ## Protocol Inventory
 
 | Protocol                           | Conforming Type                                 | Mock                           |
@@ -101,6 +106,14 @@ actor LlamaActor {
 
 > **Note:** `NoteEnrichmentService` is a concrete service (no protocol) — it is injected directly into `NotesListViewModel` for async LLM-driven note enrichment.
 
+**Deep-dive pages for key protocols:**
+
+- `SessionManagerProtocol` → [Sessions](./sessions)
+- `HabitStoreProtocol` → [Habit Store](./habit-store)
+- `NotesStoreProtocol` → [Notes Store](./notes-store)
+- `NoteEnrichmentService` → [Note Enrichment](./note-enrichment)
+- `ContextServiceProtocol` / `SuggestedPromptsProviderProtocol` → [Chat ViewModel](./chat-viewmodel)
+
 ## Model Download Pipeline
 
 The download pipeline involves two services working in sequence:
@@ -111,6 +124,13 @@ The download pipeline involves two services working in sequence:
 | `ModelPageCacheWarmer` | After a successful download, prefetches model pages into RAM using `mlock`-style reads. This reduces the cold-start latency the first time `LLMService` loads the model. |
 
 `ModelDownloader` uses session identifier `app.lucidpal.model-download`, which lets iOS reconnect to an in-progress transfer across app launches. `AppDelegate` stores the system's completion handler in `ModelDownloader.backgroundSessionCompletion` so the OS is notified once all background events are processed.
+
+For the full download state machine, background session handling, and cache warming details, see [Model Download](./model-download).
+
+## Testing and CI/CD
+
+- Unit and integration test patterns → [Testing](./testing)
+- Fastlane lanes, GitHub Actions workflows → [CI/CD](./ci-cd)
 
 ## File Structure
 

@@ -11,9 +11,9 @@ How LucidPal keeps your data entirely on your device.
 Every word you type, every calendar event you manage, and every AI response is processed **locally on your iPhone**. Nothing leaves your device.
 
 - No account required
-- No API keys
+- No API keys for AI inference
 - No subscription
-- No internet connection needed to use the AI
+- No internet connection needed to use the AI (after initial model download)
 
 ---
 
@@ -59,7 +59,7 @@ Your chat sessions are saved locally in the app's private storage on your device
 
 ## The AI Model
 
-The Qwen3.5 model files are stored locally after download. Once downloaded, LucidPal works completely offline. The model weights are never sent anywhere — all inference runs via **llama.cpp** with Metal GPU acceleration directly on your iPhone's Neural Engine.
+The Qwen3.5 model files are downloaded once from **HuggingFace** (`huggingface.co`) and stored locally on your device. Once downloaded, LucidPal works completely offline — no internet connection is needed for AI inference. The model weights are never sent anywhere — all inference runs via **llama.cpp** with Metal GPU acceleration directly on your iPhone's Neural Engine.
 
 ---
 
@@ -68,6 +68,22 @@ The Qwen3.5 model files are stored locally after download. Once downloaded, Luci
 If you use the optional vision model, any photos or images you share are processed entirely **on-device** by the vision model. Images are resized and passed to the local model for analysis — they are never uploaded to any server.
 
 To enable vision: select a vision model during onboarding or in [**Settings**](./settings) → **AI Model**. See the [Vision & Photos guide](./vision-photos) for full details.
+
+---
+
+## Web Search (Optional)
+
+Web search is **off by default**. When enabled, LucidPal supports three providers:
+
+| Provider | What is sent externally | To whom |
+|----------|-------------------------|---------|
+| DuckDuckGo (default) | Search query only | DuckDuckGo (`html.duckduckgo.com`) |
+| Brave Search | Search query + your API key | Brave (`api.search.brave.com`) |
+| SearXNG | Search query only | Your own self-hosted instance |
+
+Your messages, calendar data, and conversation history are **never** included in search requests — only the query text extracted by the AI is sent.
+
+The Brave API key is stored only on your device (iOS Keychain via `UserDefaults`). It is never transmitted to Anthropic or to LucidPal servers.
 
 ---
 
