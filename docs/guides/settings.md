@@ -102,15 +102,15 @@ Expand the **Advanced** disclosure group for fine-grained inference controls.
 
 | Setting | Range | Default | What it does |
 |---------|-------|---------|--------------|
-| **Temperature** | 0.0 – 2.0 | ~0.7 | Lower = focused/deterministic; higher = creative/varied |
-| **Max Response Length** | 128 – 2048 tokens | 512 | Cap on how long a single reply can be |
-| **Timeout** | 30 – 300 s | 60 s | Generation is cancelled if it takes longer than this |
+| **Temperature** | 0.0 – 2.0 | 0.35 | Lower = focused/deterministic; higher = creative/varied |
+| **Max Response Length** | 128 – 2048 tokens | 768 | Cap on how long a single reply can be |
+| **Timeout** | 30 – 300 s | 90 s | Generation is cancelled if it takes longer than this |
 | **KV Cache** | — | Fixed | Shows the quantization type used for the key-value cache (read-only) |
 
 Temperature and context window changes take effect the next time the model loads (i.e., next new chat).
 
 :::tip Thinking Mode
-Thinking mode is toggled per-chat via the **brain icon** in the chat toolbar, not here. Enable it globally from [AI Models → Thinking Mode](./models#thinking-mode).
+Thinking mode is toggled per-chat via the **brain icon** in the chat toolbar. The last state is remembered across chats. See [AI Models → Thinking Mode](./models#thinking-mode) for details on which models support it.
 :::
 
 ---

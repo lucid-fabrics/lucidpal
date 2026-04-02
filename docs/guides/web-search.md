@@ -39,9 +39,15 @@ Once enabled, ask naturally:
 
 LucidPal fetches up to 5 results, summarizes them, and cites sources inline.
 
+:::note
+The AI uses a two-pass approach: the first pass detects a search intent and fetches results; the second pass synthesizes the answer. The synthesis pass cannot trigger another web search — only one search round-trip occurs per message.
+:::
+
 ---
 
 ## Provider Details
+
+All providers use a **10-second request timeout**. If the provider does not respond in time, the search fails and the AI reports the error inline.
 
 ### DuckDuckGo
 

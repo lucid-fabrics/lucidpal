@@ -31,15 +31,15 @@ LucidPal only reads contacts in response to an explicit request. It does not sca
 
 ## Searching Contacts via Chat
 
-Ask naturally — the AI searches by name, company, or any combination:
+Ask naturally — the AI searches by full or partial name:
 
 > "What's Sarah's phone number?"
 
-> "Find the email for anyone at Acme Corp"
+> "Find the email for John Smith"
 
 > "Show me contacts named Jordan"
 
-The AI displays a **Contact Card** in the chat with the matched contact's name, phone numbers, email addresses, and company — exactly as stored in your Contacts app.
+The AI displays a **Contact Card** in the chat with the matched contact's name, phone numbers, email addresses, and company — exactly as stored in your Contacts app. Up to 5 matching contacts are shown at once.
 
 ---
 
