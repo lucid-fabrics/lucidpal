@@ -39,7 +39,7 @@ Ask naturally — the AI searches by full or partial name:
 
 > "Show me contacts named Jordan"
 
-The AI displays a **Contact Card** in the chat with the matched contact's name, phone numbers, email addresses, and company — exactly as stored in your Contacts app. Up to 5 matching contacts are shown at once.
+The AI displays a **Contact Result Card** in the chat with the matched contact's name, phone numbers, email addresses, and company — exactly as stored in your Contacts app. Up to 5 matching contacts are shown at once.
 
 ---
 
@@ -55,7 +55,7 @@ You can also trigger this from the **Shortcuts** app to build automation workflo
 
 ---
 
-## What Is Shown in a Contact Card
+## What Is Shown in a Contact Result Card
 
 | Field | Shown if available |
 |---|---|
@@ -81,6 +81,6 @@ Contact data is used only to respond to the current query. LucidPal does not sto
 <details>
 <summary>What if a contact has multiple matches?</summary>
 
-When a query matches more than one contact, LucidPal shows all matches as separate Contact Cards in the chat. Ask a follow-up question to narrow down — for example: "The one at Acme Corp" or "The one with a 514 area code".
+When a query matches more than one contact, LucidPal shows all matches as separate Contact Result Cards in the chat. Ask a follow-up question to narrow down — for example: "The one at Acme Corp" or "The one with a 514 area code".
 
 </details>
