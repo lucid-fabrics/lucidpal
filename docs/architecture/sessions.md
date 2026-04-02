@@ -74,6 +74,51 @@ func searchMessages(query: String) -> [(meta: ChatSessionMeta, snippet: String)]
 
 The search is case-insensitive and scans message content across every session. Each result includes a centred snippet (≈60 characters of context around the first match) for display in the session list. The ViewModel layer debounces the query and calls this to power the session list search bar.
 
+## SessionListViewModel
+
+`SessionListViewModel` is the `@MainActor ObservableObject` that drives the session list UI. It owns the in-memory `[ChatSessionMeta]` array and bridges between `SessionManager` and the SwiftUI views.
+
+### Responsibilities
+
+| Responsibility | Method(s) |
+|---|---|
+| Session CRUD | `createSession(templateID:)`, `deleteSession(id:)`, `renameSession(id:title:)`, `refreshSessions()` |
+| Pinning | `togglePin(id:)` |
+| Session grouping & search | `groupedSessions(searchText:)`, `filteredSessions(searchText:)` |
+| Siri routing | `scheduleSiriQuery(_:)`, `siriNavigationMeta` published property |
+| Siri "Add Event" routing | `scheduleCreateEvent(_:)`, `pendingEventCreation` published property |
+| Calendar event creation | `createCalendarEvent(title:start:end:isAllDay:location:notes:)` |
+| ChatViewModel factory | `makeChatViewModel(for:initialQuery:startWithVoice:)` |
+| Calendar hero panel data | `nextUpcomingEvent()`, `todayEventCount()` |
+
+### groupedSessions(searchText:)
+
+Returns `[SessionGroup]` for display in the session list. Groups are built from `filteredSessions(searchText:)` and ordered:
+
+1. **Pinned** — sessions with `isPinned == true` (omitted when empty)
+2. **Today** — `updatedAt` is today
+3. **Yesterday** — `updatedAt` is yesterday
+4. **This Week** — `updatedAt` within the last 7 days (exclusive of today and yesterday)
+5. **Earlier** — everything older
+
+Empty groups are omitted. Within each group, sessions retain their sort order from `filteredSessions`.
+
+When `searchText` is non-empty, `filteredSessions` runs a two-phase search:
+1. Title match — `localizedCaseInsensitiveContains`
+2. Content match — calls `SessionManager.searchMessages(query:)` for sessions not already matched by title; the matching message snippet replaces `lastMessagePreview` for display
+
+### pendingQueryBySessionID
+
+```swift
+var pendingQueryBySessionID: [UUID: String] = [:]
+```
+
+Set by `scheduleSiriQuery(_:)` when a Siri intent arrives. `SessionListView` creates a new session, stores the query here keyed by the new session's UUID, then navigates to it. `ChatSessionContainer` consumes the entry on init and auto-sends the query as the first message.
+
+### createCalendarEvent()
+
+Delegates to `CalendarServiceProtocol.createEvent(...)` with the parameters supplied by `CreateEventSheet`. This is the write path for Siri "Add Event" intents — `scheduleCreateEvent(_:)` populates `pendingEventCreation` which triggers `CreateEventSheet`; the sheet calls `createCalendarEvent()` on confirmation.
+
 ## NoOpChatHistoryManager
 
 When `ChatViewModel` operates in session mode (i.e., a `SessionManager` is active), the old single-file `ChatHistoryManager` is replaced by `NoOpChatHistoryManager`:

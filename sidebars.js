@@ -43,6 +43,7 @@ const sidebars = {
         'architecture/chat-viewmodel',
         'architecture/testing',
         'architecture/ci-cd',
+        'architecture/model-download',
       ],
     },
   ],

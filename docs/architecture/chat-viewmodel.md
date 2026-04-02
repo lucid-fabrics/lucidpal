@@ -140,7 +140,13 @@ state = .restored
 confirmUpdate()
    └─ calendarService.applyUpdate(pendingUpdate, to: identifier)
    └─ Mirror changed fields onto preview
+   └─ pendingUpdate = nil
    └─ state = .updated / .rescheduled
+        (CalendarError.eventNotFound → state = .updateCancelled, pendingUpdate = nil)
+
+cancelUpdate()
+   └─ state = .updateCancelled
+   └─ pendingUpdate = nil
 
 ── Conflict path ─────────────────────────────────────
 hasConflict = true → conflict card shown
