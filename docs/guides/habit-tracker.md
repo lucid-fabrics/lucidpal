@@ -14,6 +14,32 @@ LucidPal includes a full habit tracking system. Create habits, log completions, 
 
 ---
 
+## Voice Logging
+
+Speak naturally in the chat to log a habit — no tapping required.
+
+> "I just meditated for 10 minutes"
+
+> "I ran 5km"
+
+> "Did my cold shower this morning"
+
+LucidPal extracts the habit name and value from your sentence and logs the entry immediately. The AI confirms with an inline card showing the habit emoji, name, and current streak. If no matching habit is found, it offers to create one.
+
+---
+
+## Streak Heroes
+
+At the top of the Habits tab, up to **three Streak Hero cards** highlight your longest active streaks. Each card shows:
+
+- The habit emoji and name
+- The current streak length (e.g. "12 days")
+- A flame icon indicating an active run
+
+Cards are ranked by streak length (longest first) and only appear for habits with a streak greater than zero. Archived habits are excluded. If you have no active streaks, this section is hidden.
+
+---
+
 ## The Habit Dashboard
 
 Tap the **Habits** tab (checkmark icon) in the navigation bar to open the dashboard. At the top, a **progress bar** shows how many habits you've completed today (e.g. "3 of 5 done today").
@@ -27,7 +53,22 @@ Each habit card shows:
 
 Tap any card to open the **Habit Detail View**, which shows stats and a chart of your completion history.
 
+Below each habit card, a row of **seven dots** shows your completion status for the past 7 days (today on the right). A filled dot means completed; an empty dot means missed or not yet logged. This gives you a quick visual of your recent consistency without opening the detail view.
+
 If you have no habits yet, the dashboard shows **template cards** (Meditate, Exercise, Drink Water, Read, Sleep 8hrs, Journal, No Sugar, Cold Shower). Tap any template to open the creation sheet pre-filled with that habit's name and settings.
+
+---
+
+## Weekly Trends
+
+Every habit card shows a row of **seven completion dots** directly below the habit name — one dot per day, starting 6 days ago and ending today. A filled dot means the habit was completed on that day; an empty dot means it was not.
+
+This trend strip lets you spot patterns at a glance:
+- Three empty dots in a row → a mid-week slump to address
+- Seven filled dots → a perfect week
+- Today's dot is filled as soon as you log the habit
+
+Weekly trend dots are visible in both the dashboard grid view and the Habit Detail View.
 
 ---
 
@@ -35,7 +76,7 @@ If you have no habits yet, the dashboard shows **template cards** (Meditate, Exe
 
 When the dashboard is empty, template cards give you a one-tap starting point. Tap any template card (Meditate, Exercise, Drink Water, Read, Sleep 8hrs, Journal, No Sugar, Cold Shower) to open the creation sheet with the habit name and type pre-filled. Adjust anything you like, then tap **Create**.
 
-Templates are only shown when you have no habits. Once you have at least one habit, use the **+** button to create new ones.
+Templates are only shown when your habit list is **empty**. Once you have at least one habit (active or archived), the template cards are hidden and the **+** button is the only way to create new habits.
 
 ---
 
