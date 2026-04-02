@@ -43,6 +43,76 @@ for try await token in llmService.generate(
 }
 ```
 
+### Token travel path (end-to-end)
+
+```
+llama.cpp C layer
+  llama_sampler_sample()          ← samples next token ID from logits
+  llama_token_to_piece()          ← converts token ID → raw [CChar] bytes
+  decodeUTF8([CChar])             ← buffers incomplete UTF-8 sequences,
+                                     flushes when valid string boundary found
+  continuation.yield(str)         ← emits String into AsyncThrowingStream
+        ↓
+LLMService (actor bridge)
+  for try await token in stream   ← re-yields each fragment upstream
+        ↓
+ChatViewModel.runGenerationLoop()
+  applyStreamToken(token, ...)    ← routes token to think buffer or content
+        ↓
+@Published messages[idx].content  ← triggers SwiftUI diff
+        ↓
+MessageBubbleView / ThinkingDisclosure
+  re-rendered on every token yield
+```
+
+`decodeUTF8` is the only buffering step before the stream: it holds `CChar` bytes in a pending buffer until `String(validatingUTF8:)` succeeds, ensuring multi-byte characters (e.g. emoji, CJK) are never split across yields.
+
+## Stop Conditions
+
+`streamTokens` (in `LlamaActor+Generate.swift`) exits the autoregressive loop on the first matching condition:
+
+| Condition | Check | Behaviour |
+|-----------|-------|-----------|
+| EOS / EOG token | `llama_vocab_is_eog(vocab, newTok)` | Clean stop, stream finishes normally |
+| `maxNewTokens` reached | `currentCursor - startCur >= maxNew` (default 768) | Clean stop |
+| Context window full | `currentCursor >= ctxLimit` | Clean stop (last usable position) |
+| Swift Task cancelled | `Task.isCancelled` checked each iteration | Breaks loop; partial content kept if non-empty |
+| `llama_decode` failure | return value `!= 0` | Throws `LLMError.generateFailed` |
+| Timeout | `withThrowingTaskGroup` race in `streamLLMResponse` | Throws `LLMError.timeout`; partial content shown + notice appended |
+
+After any clean exit `flushPending(continuation:)` is called to emit any remaining buffered UTF-8 bytes before the stream is finished.
+
+## Action Block Detection
+
+Action blocks are **not parsed during streaming** — they are extracted after generation completes, in `finalizeResponse()`. The pipeline is:
+
+```
+Generation stream ends
+        ↓
+finalizeResponse(assistantID:)
+        ↓
+  extractWebSearchQuery()     → if [WEB_SEARCH:{...}] found, re-generate with results
+        ↓
+  executeCalendarActions()    → [CALENDAR_ACTION:{...}]  → EventKit
+        ↓
+  executeNoteActions()        → [NOTE_ACTION:{...}]      → NotesStore
+        ↓
+  executeContactsSearch()     → [CONTACTS_SEARCH:{...}]  → ContactsService
+        ↓
+  executeHabitActions()       → [HABIT_ACTION:{...}]     → HabitStore
+        ↓
+  executeReminderActions()    → [REMINDER_ACTION:{...}]  → EventKit reminders
+        ↓
+messages[idx].content stripped of action tokens
+messages[idx].calendarEventPreviews / notePreviews / … populated
+        ↓
+SwiftUI renders action result cards (CalendarEventCard, NoteCard, …)
+```
+
+Each `execute*` call receives the full final `content` string, scans for its action tag using a regex or string search, decodes the embedded JSON payload, executes the side-effect, and returns a cleaned content string with the raw action token removed.
+
+Web search is special: if a `[WEB_SEARCH:{...}]` block is found, the assistant message is cleared and a **second** full generation pass runs with the search results injected as a user message, subject to the same timeout.
+
 ## Thinking Mode (Qwen3.5 `<think>` Tags)
 
 Qwen3.5 models emit a `<think>...</think>` block before answering. LucidPal handles this live:
@@ -61,6 +131,24 @@ Here's your event — tap confirm.
 | Starts with `<think>` (no close yet) | Set `isThinking = true`, show in ThinkingDisclosure |
 | `</think>` detected                  | Extract thinking text, reset to response mode       |
 | No `<think>` prefix                  | Treat entire output as response                     |
+
+`applyStreamToken` is called on every individual token during streaming. The `rawBuffer` accumulates the full output so far. Think-block detection happens **live** — `isThinking` and `thinkingContent` are updated on each token, so `ThinkingDisclosure` animates in real time while the model is still generating.
+
+If the model emits text before any `<think>` tag (i.e. `rawBuffer` does not start with `<think>` and is not a prefix of it), `thinkDone` is set immediately and all subsequent tokens go directly to `messages[idx].content`.
+
+## Tokenize Path
+
+`LlamaActor+Tokenize.swift` exposes three low-level helpers used exclusively within `LlamaActor`:
+
+| Function | Purpose | Called by |
+|----------|---------|-----------|
+| `tokenize(text:addBOS:parseSpecial:vocab:)` | Converts a prompt string → `[llama_token]` via `llama_tokenize` | `generate()` before prefill |
+| `tokenToPiece(token:vocab:)` | Converts a sampled token ID → raw `[CChar]` bytes via `llama_token_to_piece` | `streamTokens()` each iteration |
+| `decodeUTF8([CChar])` | Assembles valid UTF-8 strings from raw byte sequences, buffering incomplete multi-byte chars | `streamTokens()` after each `tokenToPiece` |
+
+`tokenize` is called once per generation turn to produce the full prompt token array, which is then truncated to `contextSize - maxNewTokens` if needed and passed to `prefill`. It is **not** called for every token during generation — only during the initial prompt encoding step.
+
+For vision (mtmd) input, tokenisation is handled separately by `mtmd_tokenize` which interleaves text tokens with image embedding chunks; the `tokenize` helper is bypassed for that path.
 
 ## Context Window
 
