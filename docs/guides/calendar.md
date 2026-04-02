@@ -159,6 +159,16 @@ For deletions specifically, you can also say _"Hey Siri, undo my last LucidPal a
 
 When you ask LucidPal to find free time, results appear as an **Available Slots** card in the chat. Each row shows the day, date, and time window. Tap any row to open the Calendar app scrolled to that moment so you can create an event manually, or ask LucidPal to schedule something there.
 
+## Event List Card
+
+When a query returns multiple events (e.g. "What's on my calendar this week?"), results appear as a **grouped event list card** — a single card containing all matching events as tappable rows.
+
+- The **header** shows the date or date range and the total event count (e.g. "Today · 3 events" or "Mon, Apr 7 – Wed, Apr 9 · 5 events"). Tapping the header opens the Calendar app at the first event's date.
+- Each **row** shows the event title, time range, calendar name, and location (if set). A colored accent bar on the left helps visually distinguish consecutive events.
+- Tapping any row opens the Calendar app scrolled to that specific event.
+
+This card is distinct from the single-event **preview card** used during create/update flows (which shows a Confirm button). The event list card is read-only and appears only for query results.
+
 ## Event Cards in Detail
 
 ### While a write is in progress
@@ -194,3 +204,25 @@ You can ask LucidPal to fill in your location automatically:
 
 LucidPal resolves your city via on-device reverse geocoding and sets it as the event location. It requests location access the first time — you can manage this in **iOS Settings → Privacy & Security → Location Services → LucidPal**.
 :::
+
+---
+
+## Troubleshooting
+
+### Calendar access denied
+
+If LucidPal cannot read or write calendar events, it has no permission to do so.
+
+**Fix:** Go to **iOS Settings → Privacy & Security → Calendars → LucidPal** and enable access. Then return to the app and repeat your request.
+
+### Event not found
+
+LucidPal uses the calendar event's internal ID to locate events for updates, reschedules, and deletions. If the event was deleted outside the app or its ID changed (e.g. after a calendar sync error), LucidPal will report that the event could not be found.
+
+**Fix:** Check the Calendar app to confirm the event still exists. If it does, try referencing it again with a more specific description (exact title and date).
+
+### Event saved but not opening correctly
+
+In rare cases an event is saved to the calendar but its identifier cannot be retrieved immediately (e.g. due to a sync delay with iCloud or Exchange). The event will still appear in your calendar — the identifier is only needed for deep-linking from the app.
+
+**Fix:** Open the Calendar app manually to verify the event was created. If it is missing, try creating it again.

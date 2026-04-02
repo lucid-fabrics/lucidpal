@@ -41,6 +41,8 @@ const sidebars = {
         'architecture/note-enrichment',
         'architecture/system-prompt',
         'architecture/chat-viewmodel',
+        'architecture/testing',
+        'architecture/ci-cd',
       ],
     },
   ],
