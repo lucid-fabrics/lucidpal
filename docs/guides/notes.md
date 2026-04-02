@@ -130,6 +130,8 @@ Open the note and scroll below the body to find the **AI Insights** section, whi
 - The generated summary
 - Action items rendered as checkboxes
 
+Tap any action item checkbox to send it to LucidPal as a reminder. The app schedules an iOS notification for that item so you get an alert at your chosen time — without leaving the note.
+
 :::note
 Enrichment happens after saving and may take a few seconds. If you open a note immediately after creating it, the AI Insights section may still be loading.
 :::

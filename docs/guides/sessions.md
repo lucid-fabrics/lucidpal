@@ -22,11 +22,11 @@ Below the greeting, LucidPal shows how many calendar events you have today: "3 e
 
 ### Next Event Card
 
-If you have an upcoming event, a tappable card shows its title and how long until it starts (for example, "in 45 min"). Tap the card to ask LucidPal anything about that event.
+If you have an upcoming event, a tappable card shows its title and how long until it starts (for example, "in 45 min"). Tap the card to ask LucidPal anything about that event. See the [Calendar guide](./calendar) for everything you can do with calendar events.
 
 ### Mic button
 
-The large mic button in the centre of the screen starts a voice conversation. Two rings of icons orbit around it — calendar, mic, bolt, grid, and brain — with a subtle 3D depth effect. Tap it to speak your request.
+The large mic button in the centre of the screen starts a voice conversation. Two rings of icons orbit around it — calendar, mic, bolt, grid, and brain — with a subtle 3D depth effect. Tap it to speak your request. See the [Siri & Voice guide](./siri) for tips on voice input.
 
 A short hint below the button changes based on context to suggest what you can ask.
 
@@ -42,7 +42,7 @@ Tap any chip to send that question instantly.
 
 ### New text chat
 
-Tap **New text chat** to open a keyboard-based conversation instead of using voice.
+Tap **New text chat** to open a keyboard-based conversation instead of using voice. From a text session you can also capture [Notes](./notes) and ask about [habits](./habit-tracker) or [documents](./document-summarization).
 
 ### Search empty state
 

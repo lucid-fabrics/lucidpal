@@ -10,12 +10,17 @@ sidebar_position: 1
 
 LucidPal is an on-device AI assistant that understands and manages your iOS calendar through natural language. Every word is processed locally on your iPhone — no data ever leaves the device.
 
-| Feature                  | Description                                                                                                 |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| **100% On-Device**       | All inference runs via llama.cpp on the Neural Engine. No API keys, no subscriptions, no internet required. |
-| **Calendar Integration** | Create, update, delete and query events using plain English. Conflict detection included.                   |
-| **Siri Shortcuts**       | Ten built-in Siri intents let you manage your calendar, notes, contacts, and habits without ever opening the app. |
-| **Multi-Session**        | Full conversation history with named sessions, persisted locally across launches.                           |
+| Feature                       | Description                                                                                                 |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **100% On-Device**            | All inference runs via llama.cpp on the Neural Engine. No API keys, no subscriptions, no internet required. |
+| **Calendar Integration**      | Create, update, delete and query events using plain English. Conflict detection included.                   |
+| **Siri Shortcuts**            | Ten built-in Siri intents let you manage your calendar, notes, contacts, and habits without ever opening the app. |
+| **Multi-Session**             | Full conversation history with named sessions, persisted locally across launches.                           |
+| **Notes**                     | Capture quick thoughts in chat; notes are enriched and stored locally. See the [Notes guide](./guides/notes). |
+| **Habit Tracker**             | Track daily habits and log streaks through natural language. See the [Habits guide](./guides/habit-tracker). |
+| **Document Summarization**    | Summarize PDFs and text files entirely on-device. See the [Document Summarization guide](./guides/document-summarization). |
+| **Web Search**                | Query DuckDuckGo, Brave, or a self-hosted SearXNG instance — results synthesized locally. See the [Web Search guide](./guides/web-search). |
+| **Vision / Photo Analysis**   | Describe images and photos using an optional on-device vision model (Qwen3-VL). See the [Models guide](./guides/models). |
 
 ## First-Run Experience
 

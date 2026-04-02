@@ -12,11 +12,11 @@ Ask LucidPal to search the web and get real-time results without leaving the app
 
 LucidPal can query the web on your behalf and include results in its response. Three search providers are supported — one works out of the box with no configuration required.
 
-| Provider | Setup required | Privacy |
-|---|---|---|
-| DuckDuckGo | None — works immediately | No API key, HTML scrape |
-| Brave Search | Brave API key | Requires free/paid API key |
-| SearXNG | Self-hosted instance URL | Full self-hosted privacy |
+| Provider     | Setup required            | Privacy                     |
+| ------------ | ------------------------- | --------------------------- |
+| DuckDuckGo   | None — works immediately  | No API key, HTML scrape     |
+| Brave Search | Brave API key             | Requires free/paid API key  |
+| SearXNG      | Self-hosted instance URL  | Full self-hosted privacy    |
 
 ---
 
