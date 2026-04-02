@@ -172,6 +172,22 @@ Deleted notes cannot be recovered. There is no trash or undo.
 
 ---
 
+## What the AI Knows About Your Notes
+
+When you chat with the AI, it automatically receives context about your most recent notes so it can reference them without you having to ask.
+
+- The AI sees up to **10 most-recent notes**, ordered by last-modified date.
+- For each note it receives: the note **ID**, **title**, **tags**, and the first **200 characters** of the body.
+- This context is only included when **Internal Notes** is enabled in Settings → AI.
+
+This means if you saved a note earlier in the day, the AI can reference it, update it by ID, or remind you of its contents — all without a search step.
+
+:::note
+The AI does not see the full body of notes beyond the 200-character snippet unless it performs an explicit search action.
+:::
+
+---
+
 <details>
 <summary>What data is stored and where?</summary>
 

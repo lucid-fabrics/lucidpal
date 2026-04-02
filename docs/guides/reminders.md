@@ -65,7 +65,10 @@ If you previously denied permission:
 | Limitation | Detail |
 |------------|--------|
 | Past dates | The AI will reject reminders set in the past |
+| One per request | The AI schedules one reminder per message by default; ask explicitly for multiple in the same turn |
 | Repeating | Recurring reminders are not supported — set each one individually |
+| No cancel via AI | The AI cannot cancel or delete a reminder once scheduled |
+| Dismissed notification | Dismissing a notification has no effect in-app — there is no "completed" state |
 | Apple Reminders app | LucidPal does not read or write to the Apple Reminders app |
 | Calendar events | Use the Calendar feature for timed events — reminders are notification-only |
 
@@ -73,6 +76,6 @@ If you previously denied permission:
 
 ## Tips
 
-- You can set multiple reminders in a single session — just ask one at a time.
+- You can set multiple reminders in a single session — ask explicitly: _"Set two reminders: one at 3 PM and one at 6 PM"_
 - Combine with a note: _"Save a note about my gym plan and remind me tonight at 8 PM to review it"_
-- To cancel a scheduled reminder, go to **Settings → Notifications → LucidPal** and clear pending notifications, or simply dismiss the notification when it fires.
+- To cancel a scheduled reminder, go to **Settings → Notifications → LucidPal** and clear pending notifications.

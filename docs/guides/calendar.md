@@ -8,6 +8,10 @@ Natural language examples for creating, updating, deleting, and querying events.
 
 LucidPal understands plain English. You don't need to learn any special syntax — just describe what you want.
 
+:::note What LucidPal can see
+When calendar access is enabled, LucidPal automatically loads your events from **2 days in the past to 16 days ahead**. This context is what lets it reference existing events by name, detect conflicts, and use precise event IDs for reschedules. Events outside this window are not visible to the AI — if you need to act on something further out, mention the exact title and date.
+:::
+
 ## Creating Events
 
 <details>
@@ -217,9 +221,9 @@ If LucidPal cannot read or write calendar events, it has no permission to do so.
 
 ### Event not found
 
-LucidPal uses the calendar event's internal ID to locate events for updates, reschedules, and deletions. If the event was deleted outside the app or its ID changed (e.g. after a calendar sync error), LucidPal will report that the event could not be found.
+For **reschedule** operations, LucidPal uses the event's internal calendar ID. For **update** and **delete** operations, it searches by title within a 60-day window. If the event was deleted outside the app, renamed, or its ID changed (e.g. after a calendar sync error), LucidPal will report that the event could not be found.
 
-**Fix:** Check the Calendar app to confirm the event still exists. If it does, try referencing it again with a more specific description (exact title and date).
+**Fix:** Check the Calendar app to confirm the event still exists. If it does, try referencing it again with its exact title and — for reschedule — ask LucidPal to find and reschedule it so it can pick up the current ID.
 
 ### Event saved but not opening correctly
 
