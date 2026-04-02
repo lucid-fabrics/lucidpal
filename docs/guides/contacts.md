@@ -16,12 +16,13 @@ LucidPal can search your iPhone's Contacts app and display results directly in c
 
 ## Enabling Contacts Access
 
-The first time you ask the AI about a contact, iOS will prompt you to grant Contacts access. Tap **Allow** to enable the feature.
+Enable the **Contacts** toggle in the **Data Sources** section — either during onboarding or in [**Settings**](./settings). When you flip the toggle on, iOS will show a system permission prompt. Tap **Allow** to grant access.
 
-If you denied access previously:
+If you denied the system prompt:
 
 1. Open **Settings** → **Privacy & Security** → **Contacts**.
 2. Find **LucidPal** and set it to **While Using App**.
+3. Return to LucidPal and re-enable the Contacts toggle in Data Sources.
 
 :::note
 LucidPal only reads contacts in response to an explicit request. It does not scan your contacts in the background.
@@ -31,15 +32,15 @@ LucidPal only reads contacts in response to an explicit request. It does not sca
 
 ## Searching Contacts via Chat
 
-Ask naturally — the AI searches by name, company, or any combination:
+Ask naturally — the AI searches by full or partial name:
 
 > "What's Sarah's phone number?"
 
-> "Find the email for anyone at Acme Corp"
+> "Find the email for John Smith"
 
 > "Show me contacts named Jordan"
 
-The AI displays a **Contact Card** in the chat with the matched contact's name, phone numbers, email addresses, and company — exactly as stored in your Contacts app.
+The AI displays a **Contact Result Card** in the chat with the matched contact's name, phone numbers, email addresses, and company — exactly as stored in your Contacts app. Up to 5 matching contacts are shown at once.
 
 ---
 
@@ -55,15 +56,22 @@ You can also trigger this from the **Shortcuts** app to build automation workflo
 
 ---
 
-## What Is Shown in a Contact Card
+## What Is Shown in a Contact Result Card
 
 | Field | Shown if available |
 |---|---|
 | Full name | Always |
-| Phone numbers | Yes, with labels (mobile, home, work) |
-| Email addresses | Yes, with labels |
+| Phone numbers | Yes — tap to open the Phone dialer |
+| Email addresses | Yes — tap to open Mail |
 | Company / organization | Yes |
 | Notes | No — notes are excluded for privacy |
+
+Phone numbers and email addresses in the card are **tappable**:
+
+- **Phone number** — tapping opens the iOS Phone app dialer directly.
+- **Email address** — tapping opens a new message in the Mail app.
+
+If a contact has multiple numbers or emails, each appears as a separate tappable row.
 
 ---
 
@@ -74,6 +82,6 @@ Contact data is used only to respond to the current query. LucidPal does not sto
 <details>
 <summary>What if a contact has multiple matches?</summary>
 
-When a query matches more than one contact, LucidPal shows all matches as separate Contact Cards in the chat. Ask a follow-up question to narrow down — for example: "The one at Acme Corp" or "The one with a 514 area code".
+When a query matches more than one contact, LucidPal shows all matches as separate Contact Result Cards in the chat. Ask a follow-up question to narrow down — for example: "The one at Acme Corp" or "The one with a 514 area code".
 
 </details>

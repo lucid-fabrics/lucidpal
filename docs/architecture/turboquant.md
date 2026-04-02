@@ -23,11 +23,11 @@ The official llama.cpp doesn't include TurboQuant yet (an upstream PR is open). 
 
 The fork introduces new GGML quantization types:
 
-| GGML type | Bits per element | Use case |
-|-----------|-----------------|----------|
-| `GGML_TYPE_TQ1_0` | 1-bit | Maximum compression — quality loss on models < 8B |
-| `GGML_TYPE_TQ2_0` | 2-bit | Near-lossless on models ≥ 1B |
-| `GGML_TYPE_TURBO4_0` | 4-bit | KV cache compression — active in LucidPal |
+| GGML type | Bits per element | Notes |
+|-----------|-----------------|-------|
+| `GGML_TYPE_TQ1_0` | 1-bit | Maximum weight compression — available in xcframework, not used in LucidPal |
+| `GGML_TYPE_TQ2_0` | 2-bit | Near-lossless weight compression — available in xcframework, not used in LucidPal |
+| `GGML_TYPE_TURBO4_0` | 4-bit | **Active in LucidPal** — used for KV cache (`type_k` and `type_v`) |
 
 All types are compiled into LucidPal's `llama.xcframework` — the quantize, dequantize, and dot-product kernels, including Metal GPU kernels for TURBO2_0/TURBO3_0/TURBO4_0, are present in the binary.
 
@@ -54,14 +54,20 @@ The active type is visible in **Settings → Advanced → KV Cache** (shows `tur
 
 ## Context windows with TURBO4_0 KV cache compression
 
-With `GGML_TYPE_TURBO4_0` KV cache compression active, context window sizes are significantly larger than what device RAM would otherwise allow. LucidPal uses context sizes tuned to leave enough headroom for the model weights:
+`LlamaActor` selects context size at model load time based on device RAM (`ProcessInfo.processInfo.physicalMemory`):
 
-| Device RAM | Model | Context window |
-|-----------|-------|---------------|
-| 2–3 GB (iPhone 12, 13) | Qwen3.5 0.8B | 4K tokens |
-| 3–5 GB (iPhone 13 non-Pro) | Qwen3.5 2B | 8K tokens |
-| 5–7 GB (iPhone 13 Pro, 14, 15) | Qwen3.5 4B | 16K tokens |
-| 7 GB+ (iPhone 15 Pro, 16, 17) | Qwen3.5 4B | 32K tokens |
+| Device RAM | Context window (`n_ctx`) | Batch capacity |
+|-----------|--------------------------|----------------|
+| < 6 GB | 4 096 tokens | 8 192 (shared batch) |
+| ≥ 6 GB | 8 192 tokens | 8 192 (shared batch) |
+
+The constants are defined in `LLMConstants`:
+```swift
+static let smallContextSize: UInt32 = 4096   // < 6 GB RAM
+static let largeContextSize: UInt32 = 8192   // ≥ 6 GB RAM
+static let largeContextRAMThresholdGB = 6
+static let batchCapacity: Int32 = 8192       // shared by both model slots
+```
 
 ---
 
