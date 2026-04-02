@@ -138,6 +138,17 @@ LucidPal exposes four actions to the **Shortcuts** app for automation:
 
 Tap **Open Shortcuts App** to jump directly to the Shortcuts app and build automations.
 
+### Action parameters
+
+| Action | Parameters | Defaults |
+|--------|------------|---------|
+| **Ask LucidPal** | `query` (text) | — |
+| **Create Event** | `eventTitle`, `startTime`, `durationMinutes` | duration: 60 min |
+| **Check Next Meeting** | *(none)* | — |
+| **Find Free Time** | `searchDate`, `durationMinutes` | date: now, duration: 60 min |
+
+Empty or whitespace-only inputs are rejected — the action returns an empty result rather than creating a malformed entry.
+
 See [Siri & Shortcuts](./siri) for step-by-step automation examples.
 
 ---

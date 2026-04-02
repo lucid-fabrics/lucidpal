@@ -21,7 +21,22 @@ LucidPal includes ten built-in Siri shortcuts. You can trigger them with your vo
 | Save Note             | "Save note to LucidPal"              | Saves a titled note to LucidPal's notes store — runs without opening the app                                       |
 | Find Contact          | "Find contact in LucidPal"           | Looks up a contact's phone number and email by name — runs without opening the app                                 |
 | Log Habit             | "Log habit in LucidPal"              | Records a habit entry to LucidPal's habit store — runs without opening the app                                     |
-| Create Event Shortcut | "Create event shortcut in LucidPal"  | Creates a calendar event via a dedicated shortcut intent                                                           |
+| Set Reminder          | "Set reminder in LucidPal"           | Schedules a local notification reminder — runs without opening the app                                             |
+
+---
+
+## Background Shortcuts (Shortcuts App)
+
+Four additional intents run entirely in the background — they never open LucidPal. These appear in **Settings → Shortcuts** and in the Shortcuts app under LucidPal actions.
+
+| Intent                       | What it does                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| Ask LucidPal (Background)    | Saves your question and opens LucidPal with it pre-filled                      |
+| Create Event                 | Creates a calendar event (title, start time, duration, optional location/notes) |
+| Check Next Meeting           | Returns the title, time, and location of your next calendar event              |
+| Find Free Time               | Returns the first available time slot on a given date for a given duration     |
+
+Use these in Shortcuts automations — for example, run **Check Next Meeting** each morning to get a spoken briefing via a personal automation.
 
 ---
 
@@ -31,7 +46,7 @@ On iOS 16.4 and later, shortcuts are suggested automatically after you use Lucid
 
 1. **Open the Shortcuts app** — find it on your Home Screen or search in Spotlight.
 2. **Tap the + button** — create a new shortcut.
-3. **Search for LucidPal** — all ten intents appear in the app actions list.
+3. **Search for LucidPal** — all LucidPal intents appear in the app actions list.
 4. **Add a Siri phrase** — tap **Add to Siri** and record your preferred trigger phrase.
 
 ---
@@ -114,4 +129,4 @@ The card's date badge uses a **red header** for active events and a **grey heade
 - The **Add Calendar Event** shortcut lets you dictate the full event detail in one sentence — Siri passes everything to LucidPal.
 - The **Delete Calendar Event** shortcut also responds to _"Delete a LucidPal event"_ and _"Remove event from LucidPal"_.
 - The **Undo Last Action** shortcut also responds to _"Undo what I just did in LucidPal"_, _"Undo last LucidPal change"_, _"Restore deleted event in LucidPal"_, and _"Undo LucidPal deletion"_.
-- For notification-based reminders (not calendar events), use the chat directly — see the [Reminders guide](./reminders).
+- Use **Set Reminder** for notification-based reminders without opening the app. For conversational reminders via AI, see the [Reminders guide](./reminders).
