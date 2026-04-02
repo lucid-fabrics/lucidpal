@@ -16,12 +16,13 @@ LucidPal can search your iPhone's Contacts app and display results directly in c
 
 ## Enabling Contacts Access
 
-The first time you ask the AI about a contact, iOS will prompt you to grant Contacts access. Tap **Allow** to enable the feature.
+Enable the **Contacts** toggle in the **Data Sources** section — either during onboarding or in [**Settings**](./settings). When you flip the toggle on, iOS will show a system permission prompt. Tap **Allow** to grant access.
 
-If you denied access previously:
+If you denied the system prompt:
 
 1. Open **Settings** → **Privacy & Security** → **Contacts**.
 2. Find **LucidPal** and set it to **While Using App**.
+3. Return to LucidPal and re-enable the Contacts toggle in Data Sources.
 
 :::note
 LucidPal only reads contacts in response to an explicit request. It does not scan your contacts in the background.

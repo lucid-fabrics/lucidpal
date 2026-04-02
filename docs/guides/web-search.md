@@ -22,10 +22,15 @@ LucidPal can query the web on your behalf and include results in its response. T
 
 ## Enabling Web Search
 
-1. Open [**Settings**](./settings) → **Web Search**.
-2. Choose a provider.
-3. If using **Brave Search**, paste your API key.
-4. If using **SearXNG**, enter your instance URL (must be `https://`).
+**Simple mode** (default): Open [**Settings**](./settings) → **Data Sources** and flip the **Web Search** toggle. DuckDuckGo is used automatically — no further configuration required.
+
+**Advanced mode**: Open [**Settings**](./settings) → **Data Sources** → **Web Search** to access the full configuration screen where you can:
+
+1. Choose a provider.
+2. If using **Brave Search**, paste your API key.
+3. If using **SearXNG**, enter your instance URL (must be `https://`).
+
+To switch to Advanced mode, tap the mode selector at the top of Settings.
 
 ---
 
