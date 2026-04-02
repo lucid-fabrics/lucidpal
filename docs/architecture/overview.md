@@ -24,7 +24,7 @@ MVVM layers, dependency injection, and actor isolation in LucidPal.
 │  SystemPromptBuilder  NotesStore    │
 │  NoteEnrichmentService  ContextService│
 │  SuggestedPromptsProvider           │
-│  WebSearchService                   │
+│  WebSearchService  PremiumManager   │
 ├─────────────────────────────────────┤
 │         Models / Domain Types       │  ← Pure data, no UIKit/SwiftUI
 │  ChatMessage  ChatSession           │
@@ -60,6 +60,7 @@ let llmService: LLMService
     private let contactsService = ContactsService()
     private let habitStore = HabitStore()
     private let noteEnrichmentService = NoteEnrichmentService()
+    private let premiumManager = PremiumManager()
     // noteEnrichmentService injected into NotesListViewModel alongside notesStore
 }
 ```
@@ -95,6 +96,7 @@ See [LLM Inference](./llm-inference) for full `LlamaActor` internals, model load
 | `ChatHistoryManagerProtocol`       | `ChatHistoryManager` / `NoOpChatHistoryManager` | —                              |
 | `ModelDownloaderProtocol`          | `ModelDownloader`                               | `MockModelDownloader`          |
 | `AppSettingsProtocol`              | `AppSettings`                                   | `MockAppSettings`              |
+| `UISettingsProtocol`               | `AppSettings` (sub-protocol — `settingsMode`)   | —                              |
 | `PinnedPromptsStoreProtocol`       | `PinnedPromptsStore`                            | —                              |
 | `NotificationServiceProtocol`      | `NotificationService`                           | —                              |
 | `LiveActivityServiceProtocol`      | `LiveActivityService`                           | —                              |
@@ -104,7 +106,7 @@ See [LLM Inference](./llm-inference) for full `LlamaActor` internals, model load
 | `ContextServiceProtocol`           | `ContextService`                                | —                              |
 | `SuggestedPromptsProviderProtocol` | `SuggestedPromptsProvider`                      | —                              |
 
-> **Note:** `NoteEnrichmentService` is a concrete service (no protocol) — it is injected directly into `NotesListViewModel` for async LLM-driven note enrichment.
+> **Note:** `NoteEnrichmentService` and `PremiumManager` are concrete services (no protocol) — `NoteEnrichmentService` is injected into `NotesListViewModel` for async LLM-driven note enrichment; `PremiumManager` is instantiated at the composition root and manages StoreKit subscription state.
 
 **Deep-dive pages for key protocols:**
 

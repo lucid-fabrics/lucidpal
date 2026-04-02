@@ -10,6 +10,23 @@ Open Settings by tapping the **gear icon** in the top-right corner of the main s
 
 ---
 
+## Simple vs Advanced Mode
+
+At the top of Settings, a **segmented picker** lets you switch between two views of the settings screen.
+
+| Mode | What you see |
+|------|-------------|
+| **Simple** | Data Sources, Vision toggle, Text Model, and Notifications — the controls most users need every day |
+| **Advanced** | Everything in Simple, plus: Inference parameters (context window, temperature, max tokens, timeout), Vision model picker, Shortcuts/Siri section, and Debug Logs |
+
+The selected mode is remembered across app launches. New users start in **Simple** mode.
+
+:::tip
+Switch to **Advanced** mode when you want to fine-tune how the AI generates responses or configure a vision model. For everyday use, **Simple** mode is all you need.
+:::
+
+---
+
 ## Data Sources
 
 These toggles control which personal data LucidPal can read and act on. All processing is on-device — nothing leaves your iPhone.
@@ -96,9 +113,9 @@ Controls how the AI generates responses.
 
 Context window options are capped to your device's RAM. The app auto-selects the largest safe value on first launch and after upgrades.
 
-### Advanced
+### Advanced Inference Controls
 
-Expand the **Advanced** disclosure group for fine-grained inference controls.
+These settings are visible in **Advanced** mode only.
 
 | Setting | Range | Default | What it does |
 |---------|-------|---------|--------------|

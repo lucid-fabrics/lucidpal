@@ -40,7 +40,7 @@ LucidPal is an on-device AI assistant that understands and manages your iOS cale
 
 ## First-Run Experience
 
-On first launch, LucidPal walks you through four onboarding screens:
+On first launch, LucidPal walks you through five onboarding screens:
 
 | Step | Screen | What happens |
 | ---- | ------ | ------------ |
@@ -48,8 +48,9 @@ On first launch, LucidPal walks you through four onboarding screens:
 | 2 | **Knows Your Schedule** | Introduction to calendar integration |
 | 3 | **Type or Speak** | Mic and text input introduction |
 | 4 | **Choose Your AI** | Select a text model (required) and an optional vision model, then download |
+| 5 | **Data Sources** | Enable Notes, Habits, Contacts, Calendar, Location, and Web Search. iOS permission prompts for Calendar, Contacts, and Location appear inline so you can grant access in context before entering the app. |
 
-At the end of step 4, LucidPal requests **calendar** and **notification** permissions so the system prompts appear in context, before you enter the app for the first time.
+After step 5, you are taken directly into the app with all selected permissions granted.
 
 ## Device Requirements
 

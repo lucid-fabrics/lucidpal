@@ -23,6 +23,7 @@ const sidebars = {
         'guides/templates-live-activity',
         'guides/productivity-features',
         'guides/settings',
+        'guides/premium',
         'guides/privacy',
         'guides/accessibility',
       ],
