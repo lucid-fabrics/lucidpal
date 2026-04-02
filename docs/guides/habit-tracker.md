@@ -78,6 +78,17 @@ Alternatively, tap the habit card to open the detail view and use the **Log** bu
 
 The AI confirms the log with a brief inline card showing the habit emoji, name, action label (Logged / Created / Stats), current streak, and the logged value.
 
+The AI uses three actions internally:
+
+| Action | JSON format | What it does |
+|--------|-------------|--------------|
+| `log` | `{"action":"log","habit":"name","value":1}` | Records an entry; `value` defaults to 1 |
+| `create` | `{"action":"create","name":"name","unit":"boolean","frequency":"daily","emoji":"🎯"}` | Creates a new habit definition |
+| `query` | `{"action":"query","habit":"name"}` | Returns a 7-day summary and current streak |
+
+Valid units: `boolean` (done/not done), `count` (numeric reps), `duration` (minutes).
+Valid frequencies: `daily`, `weekly`.
+
 ---
 
 ## Asking the AI About Your Habits

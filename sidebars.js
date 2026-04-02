@@ -23,6 +23,7 @@ const sidebars = {
         'guides/reminders',
         'guides/web-search',
         'guides/settings',
+        'guides/accessibility',
       ],
     },
   ],
