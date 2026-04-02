@@ -25,7 +25,6 @@ Every word you type, every calendar event you manage, and every AI response is p
 | Calendar events             | Reading and writing via EventKit      | Never          |
 | Photos / images (optional)  | On-device vision analysis             | Never          |
 | Microphone (optional)       | Speech-to-text recognition            | Never          |
-| Location (optional)         | Reverse geocoding to city name for AI context | Never  |
 | Contacts (optional)         | Looking up contacts via Siri          | Never          |
 | Notifications (optional)    | Reminders and alerts                  | Never          |
 | Device RAM                  | Selecting the right AI model          | Never          |

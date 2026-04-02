@@ -62,16 +62,7 @@ Models that exceed your device's RAM threshold are hidden from the selection lis
 
 ## Switching Models
 
-Go to **Settings** → **AI Model** to switch between models. The new model loads the next time you start a conversation.
-
-The model UI adapts to your [Simple vs Advanced Mode](./settings#simple-vs-advanced-mode) setting:
-
-| Mode | What you see |
-|------|-------------|
-| **Simple** | Text model picker only |
-| **Advanced** | Text model picker + Vision model picker + full Inference controls (temperature, max tokens, timeout, KV cache) |
-
-Switch between Simple and Advanced at the top of the Settings screen via the segmented control.
+Go to [**Settings**](./settings) → **Text Model** to switch between models. The new model loads the next time you start a conversation.
 
 ---
 
