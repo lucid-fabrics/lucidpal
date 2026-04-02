@@ -17,26 +17,27 @@ LucidPal transcribes speech entirely on-device using **WhisperKit** (OpenAI Whis
 3. LucidPal shows a live transcript as it processes your audio.
 4. Tap **Send** to confirm, or **Cancel** to discard.
 
-If **Auto-send** is enabled in Settings, the message sends automatically once transcription completes.
+If **Auto-send** is enabled in [Settings](./settings#inference), the message sends automatically once transcription completes.
 
 ---
 
 ## Auto-Send
 
-Enable **Settings → Voice → Auto-send after speech** to have LucidPal send the transcribed message without requiring you to tap Send.
+Enable [**Settings**](./settings#inference) → **Auto-send after speech** to have LucidPal send the transcribed message without requiring you to tap Send.
 
 ---
 
 ## AirPods Auto-Voice
 
-When AirPods (or compatible wireless headphones) are connected, you can enable **Settings → Voice → Auto-voice with AirPods**. With this on:
+When AirPods (or compatible wireless headphones) are connected, you can enable [**Settings**](./settings#inference) → **AirPods auto-voice**. With this on:
 
-- Opening a chat automatically activates the microphone.
+- The microphone activates automatically as soon as AirPods become the active audio route.
 - An **Auto-listening** banner appears at the top of the screen.
 - A 30-second silence timeout stops recording automatically if no speech is detected.
+- If an audio interruption (e.g. a phone call) ends while AirPods are still connected, auto-voice resumes automatically.
 
 :::note
-Auto-voice only activates when AirPods are the active audio output route. Switching to the iPhone's built-in speaker stops auto-voice.
+Auto-voice only activates when AirPods are the active audio output route. Switching to the iPhone's built-in speaker stops auto-voice immediately.
 :::
 
 ---

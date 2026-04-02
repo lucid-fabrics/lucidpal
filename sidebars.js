@@ -22,6 +22,7 @@ const sidebars = {
         'guides/habit-tracker',
         'guides/reminders',
         'guides/web-search',
+        'guides/settings',
       ],
     },
   ],

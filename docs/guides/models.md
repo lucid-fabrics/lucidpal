@@ -36,7 +36,7 @@ Wi-Fi is strongly recommended. The models are between 0.51 GB and 2.5 GB.
 
 ## Switching Models
 
-Go to **Settings → AI Model** to switch between models. The new model loads the next time you start a conversation.
+Go to [**Settings**](./settings) → **Text Model** to switch between models. The new model loads the next time you start a conversation.
 
 ---
 
@@ -50,7 +50,7 @@ Models are stored in the app's local storage on your device. Deleting the app al
 
 Some models combine text and vision capabilities in a single download. **Qwen3.5 Vision 4B** is one example — it can read and describe images in addition to handling calendar requests, without requiring a separate vision model file.
 
-When you select an integrated model in the onboarding carousel or in **Settings → AI Model**, an **Integrated** badge appears next to its name. The app automatically hides any text-only models of the same tier to avoid confusion — there is no need to download both.
+When you select an integrated model in the onboarding carousel or in [**Settings**](./settings) → **Text Model**, an **Integrated** badge appears next to its name. The app automatically hides any text-only models of the same tier to avoid confusion — there is no need to download both.
 
 If you choose an integrated model:
 
@@ -64,7 +64,7 @@ If you choose an integrated model:
 
 Qwen3.5 models support a **Thinking** mode where the AI reasons through your request before answering. This improves accuracy for complex calendar operations.
 
-Toggle it in **Settings → Thinking Mode**. When enabled, you can tap the **Thinking** disclosure in any assistant reply to see the reasoning steps.
+Toggle it in [**Settings**](./settings) → **Inference → Advanced** (or per-chat via the brain icon in the chat toolbar). When enabled, you can tap the **Thinking** disclosure in any assistant reply to see the reasoning steps.
 
 Thinking mode uses slightly more processing time but produces better results for multi-step calendar requests like:
 

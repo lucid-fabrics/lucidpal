@@ -147,3 +147,13 @@ If a new event overlaps an existing one, LucidPal shows a warning badge on the p
 - **Time zones.** LucidPal uses your device's current time zone.
 - **Relative times.** "In 2 hours", "tomorrow morning", "end of the week" all resolve correctly.
 - **Default calendar.** Events are added to your default calendar unless you specify one. Change it in **Settings → Default Calendar**.
+
+:::tip Use your current location
+You can ask LucidPal to fill in your location automatically:
+
+> "Add a meeting here at 3pm"
+
+> "Create a lunch event at my current location"
+
+LucidPal resolves your city via on-device reverse geocoding and sets it as the event location. It requests location access the first time — you can manage this in **iOS Settings → Privacy & Security → Location Services → LucidPal**.
+:::
