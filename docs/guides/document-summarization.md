@@ -14,8 +14,10 @@ LucidPal can process documents entirely on-device. Attach a PDF or plain-text fi
 
 | Supported format | How text is extracted |
 |---|---|
-| PDF | PDFKit (text layer) + Vision OCR fallback for scans |
+| PDF (`.pdf`) | PDFKit (text layer) + Vision OCR fallback for scans |
 | Plain text (`.txt`) | Read directly |
+| Markdown (`.md`, `.markdown`) | Read directly |
+| Rich Text (`.rtf`) | NSAttributedString parser |
 
 ---
 

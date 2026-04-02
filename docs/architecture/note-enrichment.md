@@ -77,7 +77,7 @@ Rules:
 
 `parseResult(from:)` applies two strategies in order:
 
-1. **Direct decode** — strip whitespace, attempt `JSONDecoder` on the full response string.
+1. **Direct decode** — strip markdown code fences (` ```…``` `) if present, then attempt `JSONDecoder` on the cleaned string.
 2. **Extraction fallback** — locate the outermost `{...}` substring and decode that.
 
 This handles models that wrap responses in markdown code fences (` ```json ... ``` `).

@@ -75,8 +75,8 @@ let historyLimit = ramGB >= 6
 
 | RAM    | Context   | History Limit |
 | ------ | --------- | ------------- |
-| < 4 GB | 4K tokens | 20 messages   |
-| ≥ 4 GB | 8K tokens | 50 messages   |
+| < 6 GB | 4K tokens | 20 messages   |
+| ≥ 6 GB | 8K tokens | 50 messages   |
 
 ## Sampler Configuration
 

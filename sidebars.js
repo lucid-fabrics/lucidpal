@@ -19,6 +19,7 @@ const sidebars = {
         'guides/document-summarization',
         'guides/contacts',
         'guides/habit-tracker',
+        'guides/web-search',
       ],
     },
   ],
