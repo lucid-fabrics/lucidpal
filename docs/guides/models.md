@@ -10,13 +10,14 @@ LucidPal runs an AI model entirely on your device. On first launch, you'll be pr
 
 ## Available Models
 
-| Model        | Download size | Min RAM  | Best for                             |
-| ------------ | ------------- | -------- | ------------------------------------ |
-| Qwen3.5 0.8B | 0.51 GB       | 2 GB RAM | Older iPhones with limited RAM       |
-| Qwen3.5 2B   | 1.2 GB        | 3 GB RAM | iPhone 12 / 13 — recommended default |
-| Qwen3.5 4B   | 2.5 GB        | 5 GB RAM | iPhone 14 Pro / 15 / 16 and newer    |
+| Model              | Download size | Min RAM  | Best for                             |
+| ------------------ | ------------- | -------- | ------------------------------------ |
+| Qwen3.5 0.8B       | 0.51 GB       | 2 GB RAM | Older iPhones with limited RAM       |
+| Qwen3.5 2B         | 1.2 GB        | 3 GB RAM | iPhone 12 / 13 — recommended default |
+| Qwen3.5 4B         | 2.5 GB        | 5 GB RAM | iPhone 14 Pro / 15 / 16 and newer    |
+| Qwen3.5 Vision 4B  | 2.5 GB        | 5 GB RAM | Image understanding + text (integrated) |
 
-All three models run at similar speed relative to their size — the 4B model gives more accurate and nuanced responses.
+All four models run at similar speed relative to their size — the 4B models give more accurate and nuanced responses. The Vision 4B model handles both text and image requests in a single download.
 
 ---
 

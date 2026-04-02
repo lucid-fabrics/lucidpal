@@ -27,13 +27,13 @@ Each habit card shows:
 
 Tap any card to open the **Habit Detail View**, which shows stats and a chart of your completion history.
 
-If you have no habits yet, the dashboard shows **template cards** (Meditate, Exercise, Water, Read, Sleep, Journal, No Sugar, Cold Shower). Tap any template to open the creation sheet pre-filled with that habit's name and settings.
+If you have no habits yet, the dashboard shows **template cards** (Meditate, Exercise, Drink Water, Read, Sleep 8hrs, Journal, No Sugar, Cold Shower). Tap any template to open the creation sheet pre-filled with that habit's name and settings.
 
 ---
 
 ## Starting from a Template
 
-When the dashboard is empty, template cards give you a one-tap starting point. Tap any template card (Meditate, Exercise, Water, Read, Sleep, Journal, No Sugar, Cold Shower) to open the creation sheet with the habit name and type pre-filled. Adjust anything you like, then tap **Create**.
+When the dashboard is empty, template cards give you a one-tap starting point. Tap any template card (Meditate, Exercise, Drink Water, Read, Sleep 8hrs, Journal, No Sugar, Cold Shower) to open the creation sheet with the habit name and type pre-filled. Adjust anything you like, then tap **Create**.
 
 Templates are only shown when you have no habits. Once you have at least one habit, use the **+** button to create new ones.
 

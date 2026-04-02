@@ -43,12 +43,13 @@ Below the pinned carousel, a row of **category chips** lets you filter the note 
 |------|----------|
 | All | Every note |
 | 💡 | Idea |
-| 🛠 | Task |
+| ✅ | Task |
 | 📓 | Journal |
-| 🩺 | Health |
+| 🏥 | Health |
 | 🎯 | Goal |
 | 🧠 | Memory |
 | 💰 | Finance |
+| 📝 | Other |
 
 Categories are assigned automatically by the AI after you save a note. You cannot set them manually.
 

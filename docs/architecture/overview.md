@@ -105,51 +105,124 @@ Sources/
 │   ├── ContentView.swift         ← Root navigation (onboarding → sessions)
 │   └── AppDelegate.swift         ← UIApplicationDelegate (background tasks)
 ├── Models/
+│   ├── CalendarActionModels.swift← Payload and result types
 │   ├── ChatMessage.swift         ← Message struct, CalendarEventPreview
 │   ├── ChatSession.swift         ← Session and SessionMeta types
-│   ├── CalendarActionModels.swift← Payload and result types
+│   ├── ContextItem.swift         ← Attached context items (documents, images)
 │   ├── ConversationTemplate.swift← Template definitions for system prompts
-│   ├── PinnedPrompt.swift        ← Pinned prompt data model
+│   ├── HabitModels.swift         ← Habit and habit-log domain types
 │   ├── LucidPalActivityAttributes.swift ← Live Activity attributes
 │   ├── ModelInfo.swift           ← GGUF model metadata
-│   └── NoteItem.swift            ← Note model with AI metadata fields
+│   ├── NoteItem.swift            ← Note model with AI metadata fields
+│   ├── PinnedPrompt.swift        ← Pinned prompt data model
+│   └── ReminderPreview.swift     ← Reminder preview for display
 ├── Services/
-│   ├── LLMService.swift          ← Model load/unload, streaming
-│   ├── LlamaActor.swift          ← llama.cpp serial actor
-│   ├── CalendarService.swift     ← EventKit abstraction
+│   ├── AirPodsVoiceCoordinator.swift  ← AirPods mic routing coordinator
+│   ├── AudioRouteMonitor.swift        ← AVAudioSession route-change observer
 │   ├── CalendarActionController.swift ← LLM JSON → calendar action
+│   ├── CalendarActionController+Helpers.swift ← Action controller utilities
+│   ├── CalendarError.swift            ← Calendar error types
 │   ├── CalendarFreeSlotEngine.swift   ← Pure slot-finding algorithm
-│   ├── SessionManager.swift      ← Multi-session persistence
-│   ├── HapticService.swift       ← UIImpactFeedbackGenerator wrapper
-│   ├── LiveActivityService.swift ← Live Activity start/update/end
-│   ├── NotificationService.swift ← UNUserNotificationCenter wrapper
-│   ├── PinnedPromptsStore.swift  ← Pinned prompts persistence
-│   ├── ContactsService.swift     ← Contacts framework abstraction
-│   ├── ContactsServiceProtocol.swift ← Protocol for contacts access
-│   ├── HabitStore.swift          ← Habit log persistence (ObservableObject)
-│   ├── HabitStoreProtocol.swift  ← Protocol for habit store
-│   └── NoteEnrichmentService.swift ← Async LLM enrichment for notes
+│   ├── CalendarPromptSection.swift    ← Calendar section of system prompt
+│   ├── CalendarService.swift          ← EventKit abstraction
+│   ├── CalendarServiceProtocol.swift  ← Protocol for calendar access
+│   ├── ChatHistoryManager.swift       ← Message history persistence
+│   ├── ContactsActionController.swift ← LLM JSON → contacts action
+│   ├── ContactsPromptSection.swift    ← Contacts section of system prompt
+│   ├── ContactsService.swift          ← Contacts framework abstraction
+│   ├── ContactsServiceProtocol.swift  ← Protocol for contacts access
+│   ├── ContextService.swift           ← Attached context item management
+│   ├── ContextServiceProtocol.swift   ← Protocol for context service
+│   ├── DebugLogStore.swift            ← In-memory debug log storage
+│   ├── DocumentProcessor.swift        ← PDF/document text extraction
+│   ├── DocumentProcessorProtocol.swift← Protocol for document processing
+│   ├── HabitActionController.swift    ← LLM JSON → habit action
+│   ├── HabitPromptSection.swift       ← Habit section of system prompt
+│   ├── HabitStore.swift               ← Habit log persistence (ObservableObject)
+│   ├── HabitStoreProtocol.swift       ← Protocol for habit store
+│   ├── HapticService.swift            ← UIImpactFeedbackGenerator wrapper
+│   ├── LiveActivityService.swift      ← Live Activity start/update/end
+│   ├── LlamaActor.swift               ← llama.cpp serial actor (base)
+│   ├── LlamaActor+Generate.swift      ← Token generation extension
+│   ├── LlamaActor+Tokenize.swift      ← Tokenization extension
+│   ├── LLMService.swift               ← Model load/unload, streaming
+│   ├── LLMServiceProtocol.swift       ← Protocol for LLM service
+│   ├── LocationService.swift          ← CoreLocation geocoding wrapper
+│   ├── ModelDownloader.swift          ← GGUF download + checksum verification
+│   ├── ModelPageCacheWarmer.swift     ← Prefetch model pages into RAM
+│   ├── NoteActionController.swift     ← LLM JSON → note action
+│   ├── NoteEnrichmentService.swift    ← Async LLM enrichment for notes
+│   ├── NotesPromptSection.swift       ← Notes section of system prompt
+│   ├── NotesStore.swift               ← Notes persistence (ObservableObject)
+│   ├── NotesStoreProtocol.swift       ← Protocol for notes store
+│   ├── NotificationService.swift      ← UNUserNotificationCenter wrapper
+│   ├── PinnedPromptsStore.swift       ← Pinned prompts persistence
+│   ├── PromptSection.swift            ← Base protocol for prompt sections
+│   ├── ReminderActionController.swift ← LLM JSON → reminder action
+│   ├── ReminderPromptSection.swift    ← Reminder section of system prompt
+│   ├── SessionManager.swift           ← Multi-session persistence
+│   ├── SpeechService.swift            ← AVFoundation speech recognition
+│   ├── SpeechServiceProtocol.swift    ← Protocol for speech service
+│   ├── SuggestedPromptsProvider.swift ← Context-aware prompt suggestions
+│   ├── SystemPromptBuilder.swift      ← Assembles full system prompt
+│   ├── VisionImageProcessor.swift     ← Image resize + base64 for vision models
+│   ├── WebSearchService.swift         ← Web search integration
+│   └── WhisperSpeechService.swift     ← On-device Whisper transcription
 ├── ViewModels/
-│   ├── ChatViewModel.swift       ← Core message/stream logic
+│   ├── AppSettings.swift              ← @AppStorage preferences
+│   ├── ChatViewModel.swift            ← Core message/stream logic
 │   ├── ChatViewModel+CalendarConfirmation.swift ← Confirm/cancel/undo
 │   ├── ChatViewModel+MessageHandling.swift ← Send/stream/live-activity
-│   ├── ChatViewModel+Speech.swift ← Voice recording + haptics
 │   ├── ChatViewModel+Persistence.swift ← Save/load message history
 │   ├── ChatViewModel+Publishers.swift  ← Combine subscriptions
-│   ├── SessionListViewModel.swift ← Session CRUD + Siri routing
-│   ├── SettingsViewModel.swift   ← Settings form logic
-│   └── AppSettings.swift         ← @AppStorage preferences
+│   ├── ChatViewModel+Speech.swift     ← Voice recording + haptics
+│   ├── SessionListViewModel.swift     ← Session CRUD + Siri routing
+│   └── SettingsViewModel.swift        ← Settings form logic
 └── Views/
-    ├── ChatView.swift            ← Message list + toolbar
-    ├── ChatView+Banners.swift    ← Template pill banners
-    ├── ChatView+InputBar.swift   ← Pinned prompt chips + input
-    ├── ChatView+Subviews.swift   ← Shared subview builders
-    ├── ChatSessionContainer.swift← Session lifecycle wrapper
-    ├── MessageBubbleView.swift   ← Per-message bubble + long-press
-    ├── SessionListView.swift     ← Session browser
+    ├── BulkDeletionBar.swift          ← Multi-select delete toolbar
+    ├── CalendarActionPill.swift       ← Inline calendar action confirmation
+    ├── CalendarEventCard.swift        ← Event preview card
+    ├── CalendarEventCard+Pending.swift← Pending-confirmation card state
+    ├── CalendarEventCard+Subviews.swift← Event card subview builders
+    ├── CalendarEventListCard.swift    ← List of calendar events card
+    ├── CalendarQueryResultCard.swift  ← Calendar query result display
+    ├── ChatInputBar.swift             ← Text input bar component
+    ├── ChatSessionContainer.swift     ← Session lifecycle wrapper
+    ├── ChatView.swift                 ← Message list + toolbar
+    ├── ChatView+Banners.swift         ← Template pill banners
+    ├── ChatView+InputBar.swift        ← Pinned prompt chips + input
+    ├── ChatView+Subviews.swift        ← Shared subview builders
+    ├── ConflictDetailSheet.swift      ← Scheduling conflict detail sheet
+    ├── ContactResultCard.swift        ← Contact lookup result card
+    ├── CreateEventSheet.swift         ← Manual event creation form
+    ├── DebugLogView.swift             ← In-app debug log viewer
+    ├── DesignConstants.swift          ← Shared design tokens
+    ├── DocumentAttachmentPill.swift   ← Document attachment chip
+    ├── DocumentPickerButton.swift     ← Document picker trigger button
+    ├── HabitCard.swift                ← Habit summary card
+    ├── HabitCreationSheet.swift       ← New habit creation form
+    ├── HabitDashboardView.swift       ← Habit overview dashboard
+    ├── HabitDetailView.swift          ← Single habit detail and log
+    ├── HabitLogSheet.swift            ← Log a habit entry sheet
+    ├── MessageBubbleView.swift        ← Per-message bubble + long-press
+    ├── MessageBubbleView+ImageViewer.swift ← Full-screen image viewer
+    ├── ModelDownloadView.swift        ← Model download progress screen
+    ├── NoteCard.swift                 ← Note summary card
+    ├── NoteEditorView.swift           ← Note editing view
+    ├── NotesListView.swift            ← Notes list browser
+    ├── OnboardingCarouselView.swift   ← First-launch onboarding carousel
+    ├── ReminderCard.swift             ← Reminder result card
+    ├── SessionListView.swift          ← Session browser
     ├── SessionListView+Subviews.swift ← Search bar + row subviews
-    ├── CalendarEventCard.swift   ← Event preview card
-    ├── ThinkingDisclosure.swift  ← Expandable thinking block
-    ├── SettingsView.swift        ← Settings form
-    └── HabitCelebrationOverlay.swift ← Canvas confetti celebration overlay
+    ├── SettingsView.swift             ← Settings form
+    ├── SettingsView+Shortcuts.swift   ← Siri shortcuts settings section
+    ├── SettingsView+VisionSection.swift← Vision model settings section
+    ├── SiriEventCard.swift            ← Siri-triggered event card
+    ├── SuggestedPromptsView.swift     ← Contextual prompt suggestions UI
+    ├── ThinkingDisclosure.swift       ← Expandable thinking block
+    ├── ToastView.swift                ← Ephemeral toast notification
+    ├── UnsupportedDeviceView.swift    ← Low-RAM unsupported device screen
+    ├── View+PremiumShadow.swift       ← Premium shadow view modifier
+    ├── VoiceRecordingOverlay.swift    ← Voice recording in-progress overlay
+    └── WebSearchSettingsView.swift    ← Web search settings section
 ```
