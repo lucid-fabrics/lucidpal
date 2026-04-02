@@ -46,10 +46,13 @@ Templates are only shown when you have no habits. Once you have at least one hab
 
 | Field | Description |
 |---|---|
+| **Emoji** | Single emoji displayed on the card (tap the emoji field to change it) |
 | **Name** | What the habit is (e.g., "Meditate", "Read 20 pages") |
+| **Unit** | **Done/Not** (boolean), **Count** (numeric reps), or **Duration** (minutes) |
 | **Frequency** | **Daily** or **Weekly** |
+| **Daily Target** | Target value for count/duration habits (e.g., 30 min, 10 reps). Not shown for Done/Not habits. |
 
-3. Tap **Create** — the habit appears on your dashboard immediately.
+3. Tap **Save** — the habit appears on your dashboard immediately.
 
 ---
 
@@ -57,10 +60,10 @@ Templates are only shown when you have no habits. Once you have at least one hab
 
 **Manually:**
 
-Tap the **`+` button** in the bottom-right corner of a habit card:
+Tap the **`+` button** on a habit card:
 
-- **Boolean habit** (done / not done) — logs immediately. You'll feel a haptic tap and the ring around the card turns **green**.
-- **Count or duration habit** — opens a sheet where you enter the value, then confirm.
+- **Boolean habit** (done / not done) — logs immediately.
+- **Count or duration habit** — opens the Log Habit sheet, where you use a **stepper** to set the value (count steps by 1 up to 9999; duration steps by 5 minutes up to 600 minutes). You can also add an optional note before tapping **Log**.
 
 If the habit is already logged today, the `+` is replaced by a checkmark.
 
@@ -73,7 +76,7 @@ Alternatively, tap the habit card to open the detail view and use the **Log** bu
 
 > "Mark exercise done"
 
-The AI confirms the log with a brief message.
+The AI confirms the log with a brief inline card showing the habit emoji, name, action label (Logged / Created / Stats), current streak, and the logged value.
 
 ---
 
@@ -124,7 +127,7 @@ A streak counts consecutive days you completed a habit. Missing a day resets the
 
 | Streak indicator | Meaning |
 |---|---|
-| 🔥 flame icon | Active streak (3+ days) |
+| 🔥 flame icon | Active streak |
 | Number | Current consecutive days |
 | — | No active streak |
 

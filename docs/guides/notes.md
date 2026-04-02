@@ -106,7 +106,12 @@ The AI locates the note by searching first, then patches the **title**, **body**
 
 The AI finds the matching note and permanently deletes it. This cannot be undone.
 
-The AI responds with a confirmation card showing the note title and a preview of the content.
+The AI responds with a **confirmation card** in the chat. Each card shows:
+
+- A colour-coded state icon (blue for saved, orange for updated, red for deleted, purple for found)
+- A state label ("Note saved", "Note updated", "Note deleted", or "Note found")
+- The note title
+- A short snippet of the note content (up to two lines)
 
 :::note
 The AI matches your request against note titles and body text. Phrase requests naturally — exact titles are not required.

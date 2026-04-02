@@ -35,6 +35,7 @@ const sidebars = {
         'architecture/overview',
         'architecture/llm-inference',
         'architecture/calendar',
+        'architecture/free-slot-engine',
         'architecture/sessions',
         'architecture/siri',
         'architecture/note-enrichment',

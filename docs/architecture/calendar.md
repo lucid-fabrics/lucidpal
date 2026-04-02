@@ -226,3 +226,5 @@ enum CalendarFreeSlotEngine {
 ```
 
 `CalendarActionController` fetches busy windows from `CalendarService` and passes them to the engine. The engine returns available slots that fit the requested duration.
+
+For a deep-dive into the sweep algorithm, working hours defaults, all-day event handling, and edge cases, see [CalendarFreeSlotEngine](./free-slot-engine.md).
