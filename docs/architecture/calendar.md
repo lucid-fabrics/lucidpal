@@ -191,10 +191,9 @@ CalendarService executes → preview.state = .deleted / .updated / .rescheduled
 
 ```swift
 // Domain type — no EventKit import needed above service layer
-struct CalendarInfo {
-    let id: String
+struct CalendarInfo: Identifiable, Hashable, Sendable {
+    let id: String      // EKCalendar.calendarIdentifier
     let title: String
-    let color: UIColor
 }
 ```
 

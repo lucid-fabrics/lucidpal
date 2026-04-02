@@ -68,9 +68,15 @@ Tap any session to open it. The full message history loads instantly.
 
 ---
 
+## Pinning a Session
+
+Swipe right on any session and tap **Pin** to keep it at the top of the list. Pinned sessions show an orange pin icon in the row. Tap **Unpin** from the same swipe action (or long-press → **Unpin**) to remove the pin.
+
+---
+
 ## Renaming a Session
 
-Long-press any session in the list, then tap **Rename**. Give it a meaningful name like "Dentist scheduling" or "Work meetings March".
+Swipe right on any session and tap **Rename**, or long-press any session and tap **Rename** from the context menu. Give it a meaningful name like "Dentist scheduling" or "Work meetings March".
 
 ---
 

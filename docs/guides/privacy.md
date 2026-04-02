@@ -19,13 +19,15 @@ Every word you type, every calendar event you manage, and every AI response is p
 
 ## What LucidPal Accesses
 
-| Data                  | Used for                         | Leaves device? |
-| --------------------- | -------------------------------- | -------------- |
-| Your messages         | On-device AI inference           | Never          |
-| Calendar events       | Reading and writing via EventKit | Never          |
-| Microphone (optional) | Speech-to-text recognition       | Never          |
-| Contacts (optional)   | Looking up contacts via Siri     | Never          |
-| Device RAM            | Selecting the right AI model     | Never          |
+| Data                        | Used for                              | Leaves device? |
+| --------------------------- | ------------------------------------- | -------------- |
+| Your messages               | On-device AI inference                | Never          |
+| Calendar events             | Reading and writing via EventKit      | Never          |
+| Photos / images (optional)  | On-device vision analysis             | Never          |
+| Microphone (optional)       | Speech-to-text recognition            | Never          |
+| Contacts (optional)         | Looking up contacts via Siri          | Never          |
+| Notifications (optional)    | Reminders and alerts                  | Never          |
+| Device RAM                  | Selecting the right AI model          | Never          |
 
 ---
 
@@ -58,6 +60,22 @@ Your chat sessions are saved locally in the app's private storage on your device
 ## The AI Model
 
 The Qwen3.5 model files are stored locally after download. Once downloaded, LucidPal works completely offline. The model weights are never sent anywhere — all inference runs via **llama.cpp** with Metal GPU acceleration directly on your iPhone's Neural Engine.
+
+---
+
+## Vision and Photo Analysis
+
+If you use the optional vision model, any photos or images you share are processed entirely **on-device** by the vision model. Images are resized and passed to the local model for analysis — they are never uploaded to any server.
+
+To enable vision: select a vision model during onboarding or in **Settings → AI Model**.
+
+---
+
+## lucidpal.app Web Services (Optional)
+
+A separate cloud backend (`lucidpal-api`) powers the **lucidpal.app** website and web app only. It handles account authentication, billing, notes sync, and habits tracking for web users.
+
+**The iOS app does not connect to this backend.** All iOS features (calendar, AI inference, voice) run fully offline. The API is only relevant if you also use the web app at [lucidpal.app](https://lucidpal.app).
 
 ---
 

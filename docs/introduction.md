@@ -17,6 +17,19 @@ LucidPal is an on-device AI assistant that understands and manages your iOS cale
 | **Siri Shortcuts**       | Ten built-in Siri intents let you manage your calendar, notes, contacts, and habits without ever opening the app. |
 | **Multi-Session**        | Full conversation history with named sessions, persisted locally across launches.                           |
 
+## First-Run Experience
+
+On first launch, LucidPal walks you through four onboarding screens:
+
+| Step | Screen | What happens |
+| ---- | ------ | ------------ |
+| 1 | **Your Pocket AI** | Overview of on-device, no-cloud design |
+| 2 | **Knows Your Schedule** | Introduction to calendar integration |
+| 3 | **Type or Speak** | Mic and text input introduction |
+| 4 | **Choose Your AI** | Select a text model (required) and an optional vision model, then download |
+
+At the end of step 4, LucidPal requests **calendar** and **notification** permissions so the system prompts appear in context, before you enter the app for the first time.
+
 ## Models
 
 LucidPal ships with three GGUF model options, automatically selected based on device RAM:
@@ -31,12 +44,13 @@ All three models run natively via [llama.cpp](https://github.com/ggml-org/llama.
 
 ## Tech Stack
 
-| Layer       | Technology                            |
-| ----------- | ------------------------------------- |
-| Language    | Swift 5.10 + SwiftUI                  |
-| LLM Runtime | llama.cpp (C FFI via Swift actor)     |
-| Calendar    | EventKit (wrapped in CalendarService) |
-| Speech      | AVFoundation + SFSpeechRecognizer     |
-| Siri        | AppIntents framework                  |
-| Persistence | Custom JSON session store             |
-| Testing     | XCTest with full mock infrastructure  |
+| Layer        | Technology                              |
+| ------------ | --------------------------------------- |
+| Language     | Swift 5.10 + SwiftUI                    |
+| LLM Runtime  | llama.cpp (C FFI via Swift actor)       |
+| Calendar     | EventKit (wrapped in CalendarService)   |
+| Speech       | AVFoundation + SFSpeechRecognizer       |
+| Vision       | llama.cpp multimodal (optional GGUF)    |
+| Siri         | AppIntents framework                    |
+| Persistence  | Custom JSON session store               |
+| Testing      | XCTest with full mock infrastructure    |
