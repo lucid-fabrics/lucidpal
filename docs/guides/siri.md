@@ -91,6 +91,22 @@ LucidPal looks at what you did most recently — inside the app or via Siri — 
 
 ---
 
+## Event Preview Card
+
+When a Siri shortcut returns a calendar event (e.g. **Add Calendar Event**, **Delete Calendar Event**, **Check My Calendar**), LucidPal displays an **Event Preview Card** in the conversation thread.
+
+| Element | Description |
+|---------|-------------|
+| **Date badge** | A compact tile showing the abbreviated month (e.g. "APR") in a coloured header and the day number below |
+| **Title** | Event name, truncated to one line |
+| **Time range** | Start and end time (e.g. "10:00 AM – 11:00 AM"), or "All day" for all-day events |
+| **Calendar name** | The calendar the event belongs to (e.g. "Work", "Personal"), shown in small text |
+| **Deleted state** | If the event was deleted: title is struck-through, date badge turns grey, card opacity is reduced, and a green checkmark confirms deletion |
+
+The card's date badge uses a **red header** for active events and a **grey header** for deleted events, matching iOS Calendar's visual language.
+
+---
+
 ## Tips
 
 - Shortcuts work on iPhone, iPad, HomePod, AirPods, Apple Watch, and CarPlay.

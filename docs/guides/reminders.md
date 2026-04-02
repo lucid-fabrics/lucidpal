@@ -26,7 +26,22 @@ Speak or type naturally — no special commands needed.
 
 > "Ping me in 2 hours to check the oven"
 
-The AI responds with a confirmation card showing the reminder title, optional notes, and the scheduled time. If the time is ambiguous (e.g. "tomorrow morning") the AI defaults to 9:00 AM in your local timezone.
+The AI responds with a **Reminder Confirmation Card** inline in the chat. If the time is ambiguous (e.g. "tomorrow morning") the AI defaults to 9:00 AM in your local timezone.
+
+### Reminder Confirmation Card
+
+After the AI schedules a reminder, a confirmation card appears directly in the conversation thread. It contains:
+
+| Element | Description |
+|---------|-------------|
+| **Bell icon** | Orange bell on the left side — indicates a reminder (not a calendar event) |
+| **Title** | The reminder text, up to 2 lines |
+| **Relative time** | Countdown to the trigger time (e.g. "in 2 hours") |
+| **Scheduled time** | Exact clock time of the alert |
+| **Notes** | Optional one-line note if extra context was provided |
+| **Green checkmark** | Confirms the reminder was successfully scheduled |
+
+The card has an orange border to visually distinguish it from calendar event cards and text responses.
 
 :::note
 Reminders are delivered as **local push notifications** by iOS — they do not create entries in the Apple Reminders app or your calendar.

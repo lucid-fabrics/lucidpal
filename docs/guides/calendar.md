@@ -137,7 +137,44 @@ Reschedule keeps all other event details — title, location, notes, and attende
 
 ## Conflict Detection
 
-If a new event overlaps an existing one, LucidPal shows a warning badge on the preview card. You can still confirm the event — LucidPal will create it regardless, just like the Calendar app would.
+If a new event overlaps an existing one, LucidPal shows a warning badge on the preview card. An orange triangle appears in the top-right corner of the card.
+
+Tap the warning badge or the card itself to open the **Scheduling Conflict** sheet. The sheet lists each overlapping event — its title, time range, calendar name, and a "Recurring" tag if applicable — then offers three actions:
+
+| Action | What it does |
+|--------|-------------|
+| **Keep Anyway** | Confirms the event as-is, overlap included |
+| **Find Free Slot** | Searches the next 7 days for gaps that fit the event's duration (up to 5 results shown) |
+| **Cancel Event** | Discards the pending event |
+
+When free slots are found, the sheet expands to show each available window. Tap any slot to reschedule the event to that time and confirm in one step.
+
+## Undo
+
+After any calendar write (create, update, reschedule, or delete), an **Undo** button appears on the result card. Tap it during the same session to reverse the action immediately.
+
+For deletions specifically, you can also say _"Hey Siri, undo my last LucidPal action"_ at any time — even after closing the app — to restore the most recently deleted event.
+
+## Free Slot Results Card
+
+When you ask LucidPal to find free time, results appear as an **Available Slots** card in the chat. Each row shows the day, date, and time window. Tap any row to open the Calendar app scrolled to that moment so you can create an event manually, or ask LucidPal to schedule something there.
+
+## Event Cards in Detail
+
+### While a write is in progress
+
+A **"Updating calendar…"** pill with a pulsing calendar icon appears in the chat while LucidPal is saving your event. It is replaced by the result card once the operation completes.
+
+### Pending deletion
+
+When you ask to delete an event and LucidPal needs confirmation, a pending-deletion card appears with the event details and two inline buttons:
+
+- **Keep** — cancels the deletion
+- **Delete** (red) — confirms and removes the event
+
+### Pending update
+
+When you ask to update an event (title, time, location, or reminder), a pending-update card shows the current value crossed out next to the proposed value for each changed field. Two inline buttons let you **Cancel** or **Apply** the change.
 
 ---
 

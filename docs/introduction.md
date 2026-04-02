@@ -35,6 +35,27 @@ On first launch, LucidPal walks you through four onboarding screens:
 
 At the end of step 4, LucidPal requests **calendar** and **notification** permissions so the system prompts appear in context, before you enter the app for the first time.
 
+## Device Requirements
+
+LucidPal runs the AI model entirely on-device and requires **at least 6 GB of RAM**. Devices with less RAM are not supported and will see an informational screen explaining the requirement.
+
+| Device | RAM | Supported |
+|--------|-----|-----------|
+| iPhone 12 Pro / 12 Pro Max | 6 GB | ✅ Yes |
+| iPhone 13 series (all models) | 4–6 GB | ✅ Yes (13 Pro/Pro Max have 6 GB) |
+| iPhone 14 series and later | 6 GB+ | ✅ Yes |
+| iPhone 16 series and later | 8 GB+ | ✅ Yes |
+| iPhone 12 / 12 mini | 4 GB | ❌ No |
+| iPhone 11 and earlier | ≤4 GB | ❌ No |
+
+:::note
+The standard **iPhone 12** and **iPhone 12 mini** have only 4 GB of RAM and are **not supported**, even though they run a compatible iOS version. The iPhone 12 Pro and 12 Pro Max (6 GB) are fully supported.
+:::
+
+The minimum iOS version required is **iOS 16** (for AppIntents/Siri Shortcuts support). iOS 17 or later is recommended.
+
+---
+
 ## Models
 
 LucidPal ships with three GGUF model options, automatically selected based on device RAM:

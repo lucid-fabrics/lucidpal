@@ -18,6 +18,7 @@ struct ChatSessionMeta: Identifiable, Codable {
     let createdAt: Date
     var updatedAt: Date
     var lastMessagePreview: String?   // first 120 chars of last non-system message
+    var isPinned: Bool                // pinned sessions float to the top of the list
 }
 
 // Full session — loaded on demand when opening a chat
@@ -34,7 +35,7 @@ struct ChatSession: Identifiable, Codable {
 }
 ```
 
-The split avoids loading all messages into memory just to render the session list.
+The split avoids loading all messages into memory just to render the session list. `loadIndex()` is called to populate the session list; `loadSession(id:)` is called lazily only when the user opens a specific chat.
 
 ## Storage Layout
 
@@ -72,6 +73,22 @@ func searchMessages(query: String) -> [(meta: ChatSessionMeta, snippet: String)]
 ```
 
 The search is case-insensitive and scans message content across every session. Each result includes a centred snippet (≈60 characters of context around the first match) for display in the session list. The ViewModel layer debounces the query and calls this to power the session list search bar.
+
+## NoOpChatHistoryManager
+
+When `ChatViewModel` operates in session mode (i.e., a `SessionManager` is active), the old single-file `ChatHistoryManager` is replaced by `NoOpChatHistoryManager`:
+
+```swift
+/// No-op history manager — used when ChatViewModel operates in session mode.
+/// Persistence is handled by SessionManager instead.
+final class NoOpChatHistoryManager: ChatHistoryManagerProtocol {
+    func load() -> [ChatMessage] { [] }
+    func save(_ messages: [ChatMessage]) -> Task<Void, Never> { Task {} }
+    func clear() {}
+}
+```
+
+This ensures the legacy `chat_history.json` single-file format is never written when sessions are enabled. The `ChatHistoryManagerProtocol` abstraction lets `ChatViewModel` remain unaware of which backing store is active.
 
 ## Legacy Migration
 

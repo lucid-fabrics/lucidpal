@@ -82,6 +82,31 @@ AppShortcut(
 
 On iOS < 16.4, the intents still work but users must add the shortcuts manually via the Shortcuts app.
 
+## Navigation & Pre-fill Mechanism
+
+After a Siri handoff intent fires, `LucidPalApp` reads the `UserDefaults` key and calls `SessionListViewModel.scheduleSiriQuery(_:)`. This method:
+
+1. Creates a new `ChatSession` and saves it via `SessionManager`.
+2. Stores the query string in `pendingQueryBySessionID[session.id]`.
+3. Sets `siriNavigationMeta = session.meta` — a `@Published ChatSessionMeta?` on `SessionListViewModel`.
+
+`SessionListView` observes `siriNavigationMeta` to navigate to the new session. `ChatSessionContainer` reads `pendingQueryBySessionID[session.id]` and pre-fills the text field (or auto-sends the message), then removes the entry.
+
+The same `pendingQueryBySessionID` mechanism is also used by in-app quick-action chips that want to pre-seed a new session with a fixed prompt.
+
+```swift
+// SessionListViewModel
+@Published var siriNavigationMeta: ChatSessionMeta?
+var pendingQueryBySessionID: [UUID: String] = [:]
+
+func scheduleSiriQuery(_ query: String) {
+    let session = ChatSession.new()
+    sessionManager.save(session)
+    pendingQueryBySessionID[session.id] = query
+    siriNavigationMeta = session.meta
+}
+```
+
 ## SiriContextStore
 
 `SiriContextStore` is a lightweight persistence layer that records the last calendar action taken — whether triggered by Siri or performed inside the app. `UndoLastDeletionIntent` reads from this store to know what to reverse.

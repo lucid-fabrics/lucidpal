@@ -60,10 +60,17 @@ You can also trigger this from the **Shortcuts** app to build automation workflo
 | Field | Shown if available |
 |---|---|
 | Full name | Always |
-| Phone numbers | Yes, with labels (mobile, home, work) |
-| Email addresses | Yes, with labels |
+| Phone numbers | Yes — tap to open the Phone dialer |
+| Email addresses | Yes — tap to open Mail |
 | Company / organization | Yes |
 | Notes | No — notes are excluded for privacy |
+
+Phone numbers and email addresses in the card are **tappable**:
+
+- **Phone number** — tapping opens the iOS Phone app dialer directly.
+- **Email address** — tapping opens a new message in the Mail app.
+
+If a contact has multiple numbers or emails, each appears as a separate tappable row.
 
 ---
 
