@@ -142,4 +142,17 @@ See [Siri & Shortcuts](./siri) for step-by-step automation examples.
 
 ## About
 
-Shows the app version and build number. Tap **Debug Logs** to view internal logs — useful when reporting a bug.
+Shows the app version and build number.
+
+### Debug Logs
+
+Tap **Debug Logs** to open an in-app log viewer that captures real-time events from the AI, voice transcription, calendar, and other subsystems.
+
+| Control | What it does |
+|---------|--------------|
+| **Filter (funnel icon)** | Filter entries by category (LLM, Whisper, Calendar, …) or log level (info / warning / error) |
+| **Search bar** | Full-text search across all log messages |
+| **Copy icon** | Copies the filtered log as plain text — paste into a bug report or email |
+| **Trash icon** | Clears all log entries |
+
+Logs are stored in memory only and are cleared when you quit the app. If you are reporting a bug, reproduce the issue and then tap the copy icon before closing the app.

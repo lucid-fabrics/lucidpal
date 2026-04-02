@@ -99,6 +99,17 @@ actor LlamaActor {
 
 > **Note:** `NoteEnrichmentService` is a concrete service (no protocol) — it is injected directly into `NotesListViewModel` for async LLM-driven note enrichment.
 
+## Model Download Pipeline
+
+The download pipeline involves two services working in sequence:
+
+| Service | Role |
+| ------- | ---- |
+| `ModelDownloader` | Downloads the GGUF file via an iOS background `URLSession`. Uses resume data to avoid restarting interrupted transfers. Verifies the file with a SHA-256 checksum after each download. |
+| `ModelPageCacheWarmer` | After a successful download, prefetches model pages into RAM using `mlock`-style reads. This reduces the cold-start latency the first time `LLMService` loads the model. |
+
+`ModelDownloader` uses session identifier `app.lucidpal.model-download`, which lets iOS reconnect to an in-progress transfer across app launches. `AppDelegate` stores the system's completion handler in `ModelDownloader.backgroundSessionCompletion` so the OS is notified once all background events are processed.
+
 ## File Structure
 
 ```

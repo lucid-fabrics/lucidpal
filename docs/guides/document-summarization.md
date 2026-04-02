@@ -52,7 +52,7 @@ Once a document is attached, the AI has access to its full text for that message
 - **Maximum file size:** Large files are processed page-by-page; very long documents may be truncated to fit within the model's context window.
 - **Scanned PDFs:** LucidPal uses on-device OCR to extract text from image-based PDFs. Accuracy depends on scan quality.
 - **No persistent storage:** Attached documents are processed for the current message only. They are not saved to your notes or any persistent store.
-- **One attachment per message:** Each message supports a single file attachment.
+- **Multiple attachments:** You can attach several files to a single message. Each appears as its own pill above the input bar. Tap **×** on a pill to remove that file before sending.
 :::
 
 ---

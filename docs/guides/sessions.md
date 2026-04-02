@@ -150,6 +150,108 @@ For very long conversations, start a new session to give the AI a clean slate.
 
 ---
 
+## In-Chat Search
+
+Tap the **magnifying glass** icon in the top-right toolbar to open a search bar inside the current conversation. Type any keyword — messages that don't match fade out, leaving only the relevant bubbles visible. Tap the **×** inside the search bar to clear the query, or tap the magnifying glass again to close the bar entirely.
+
+---
+
+## Chat Toolbar Actions
+
+The top-right corner of any open chat shows up to four controls:
+
+| Control | What it does |
+|---|---|
+| **Thinking** pill (brain icon) | Toggles Thinking mode for this session. Highlighted in accent colour when active. See [AI Models → Thinking Mode](./models#thinking-mode). |
+| **Magnifying glass** | Opens the in-chat search bar. |
+| **Share** (box-and-arrow) | Exports the full conversation as plain text. Only appears when the session has messages. |
+| **Clear** | Permanently deletes all messages in the current session (confirmation required). Only appears when the session has messages. |
+
+Tap the **session title** in the navigation bar to rename the session inline — an alert appears with a text field pre-filled with the current name.
+
+---
+
+## Message Bubble Interactions
+
+### Tap — show timestamp
+
+Tap any message bubble to reveal the exact time that message was sent. Tap again to hide it.
+
+### Swipe right — reply
+
+Swipe a bubble to the right to quote it in a reply. A reply preview bar appears above the input field showing the quoted message. Tap **×** in that bar to cancel the quote before sending.
+
+### Long-press — context menu
+
+Long-press any bubble to open the context menu:
+
+| Action | Applies to | What it does |
+|---|---|---|
+| **Copy** | All messages | Copies the message text to the clipboard. |
+| **Share** | All messages | Opens the iOS share sheet with the message text. |
+| **Pin** | User messages only | Pins the text as a reusable prompt chip above the input bar. |
+| **Delete** | All messages | Removes that single message from the session (cannot be undone). |
+
+### Scroll-to-bottom button
+
+When you scroll up through a long conversation, a circular **↓** button appears in the lower-right corner of the message list. Tap it to jump back to the most recent message.
+
+---
+
+## Pinned Prompts
+
+Pinned prompts are user-created shortcuts — different from the AI-generated [Suggested Prompts](#suggested-prompts) shown at the start of a new session.
+
+To pin a prompt: long-press a **user** message bubble → **Pin**.
+
+Pinned prompts appear as horizontal chips above the input bar whenever the text field is empty. Each chip shows the first 30 characters of the saved text. Tap a chip to pre-fill the input bar with that text so you can edit or send it immediately.
+
+To remove a pinned prompt: long-press the chip → **Remove**, or tap the chip to fill the input and edit it instead.
+
+---
+
+## Bulk Calendar Deletion Bar
+
+When LucidPal proposes deleting two or more calendar events at once, a **bulk action bar** appears below the event cards in the assistant reply. It shows how many events are pending deletion and offers two buttons:
+
+- **Delete All** — confirms all pending deletions in one tap.
+- **Keep All** — cancels all pending deletions in one tap.
+
+Individual event cards still have their own confirm/cancel buttons if you want to act on each event separately.
+
+---
+
+## Voice Recording Overlay
+
+When you tap the **mic** button in the input bar, the full chat screen is replaced by a fullscreen **Voice Recording Overlay**. It shows:
+
+- A live transcript of what you are saying (updates in real time).
+- A **spinning indicator** while audio is being transcribed after you stop speaking.
+- A **Confirm** button to accept the transcript and fill the input bar.
+- A **Cancel** button to discard the recording and return to the keyboard.
+
+This overlay is distinct from the home screen mic button, which starts an automatic voice session. The input-bar mic is for dictating a single message inside an existing chat.
+
+---
+
+## Generation Controls
+
+While the AI is generating a response, the send button is replaced by a **stop button** (red circle with a square). Tap it to cancel the current generation immediately. The partially generated text remains in the conversation.
+
+---
+
+## Toasts
+
+Brief toast notifications slide up from the bottom of the chat when a background action completes (for example, after a calendar event is created or a note is saved). They disappear automatically after a few seconds.
+
+---
+
+## Downloading a Model While Chatting
+
+If you try to use the input bar while a model is still downloading, a download progress sheet appears. It shows the model name, a progress bar, and a percentage counter. Tap **Got it** to dismiss the sheet — the download continues in the background and the input bar unlocks automatically when the model is ready.
+
+---
+
 ## Siri Opens a New Session
 
 When you use a Siri shortcut, LucidPal always opens a **new session** for that request. Your existing conversations are not affected.

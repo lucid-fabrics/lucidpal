@@ -29,8 +29,34 @@ All four models run at similar speed relative to their size — the 4B models gi
 4. **Start chatting** — once the download completes, LucidPal loads the model and you're ready to go.
 
 :::note
-Wi-Fi is strongly recommended. The models are between 0.51 GB and 2.5 GB.
+Wi-Fi is required. Downloads are blocked on cellular to protect your data plan. The models are between 0.51 GB and 2.5 GB.
 :::
+
+### Background downloads
+
+LucidPal uses iOS background transfer sessions, so the download continues even when the app is suspended or the screen is locked. If the app is terminated while a download is in progress, iOS resumes the transfer automatically when you reopen the app.
+
+### Resuming interrupted downloads
+
+If your WiFi drops mid-download, LucidPal saves resume data automatically. The next time you tap **Retry**, the download picks up from where it stopped — it does not restart from 0%. If the resume data becomes stale or corrupt, the app detects this and restarts cleanly.
+
+### Integrity check
+
+Every download is verified against a SHA-256 checksum sourced from HuggingFace LFS metadata. If the file is corrupt, LucidPal deletes it and retries automatically (up to 2 times). You will see a **Retry** button if all automatic retries fail.
+
+---
+
+## Recommended Model
+
+The app selects a recommended model based on the physical RAM of your iPhone:
+
+| Device RAM | Recommended model |
+| ---------- | ----------------- |
+| 5 GB or more | Qwen3.5 4B |
+| 3–4 GB | Qwen3.5 2B |
+| Less than 3 GB | Qwen3.5 0.8B |
+
+Models that exceed your device's RAM threshold are hidden from the selection list — only models your device can run are shown.
 
 ---
 
@@ -42,7 +68,19 @@ Go to [**Settings**](./settings) → **Text Model** to switch between models. Th
 
 ## Storage
 
-Models are stored in the app's local storage on your device. Deleting the app also removes the downloaded model file.
+Models are stored in the app's **Documents** folder (`/var/mobile/Containers/Data/Application/.../Documents/`). This folder is accessible via the **Files** app under **On My iPhone → LucidPal**.
+
+Deleting the app also removes all downloaded model files.
+
+### Freeing up space
+
+To delete a downloaded model without uninstalling the app:
+
+1. Go to [**Settings**](./settings) → **Text Model**.
+2. Tap the model you want to remove.
+3. Tap **Delete Model**.
+
+The model file is removed immediately. You can re-download it at any time.
 
 ---
 
