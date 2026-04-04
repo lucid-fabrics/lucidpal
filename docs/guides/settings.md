@@ -142,9 +142,13 @@ Thinking mode is toggled per-chat via the **brain icon** in the chat toolbar. Th
 
 | Setting | What it does |
 |---------|--------------|
-| **Pre-event reminders** | Sends a notification 10 minutes before each calendar event with a tap-to-prepare shortcut |
+| **Pre-event reminders** | Get a notification 10 minutes before each calendar event. Works offline — no internet needed. |
 
-Toggling this on triggers an iOS notification permission prompt if not yet granted.
+Toggling this on triggers an iOS notification permission prompt if not yet granted. Requires calendar access to be enabled.
+
+:::note
+This can also be enabled during initial onboarding on the **Connect Your World** screen.
+:::
 
 ---
 
