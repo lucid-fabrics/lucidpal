@@ -94,7 +94,11 @@ LucidPal sends a local notification **10 minutes before** each upcoming calendar
 
 Tapping the notification opens LucidPal so you can start a preparation chat for that event.
 
-Notifications are scheduled each time the app becomes active, covering events in the **next 24 hours**. All-day events are excluded.
+Notifications are scheduled each time the app becomes active, covering events in the **next hour**. All-day events are excluded.
+
+### Enabling Reminders
+
+You can turn reminders on during **onboarding** (the "Connect Your World" screen — toggle **Reminders**) or later in **Settings → General → Pre-event reminders**.
 
 ### Requirements
 
