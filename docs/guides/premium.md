@@ -45,10 +45,11 @@ Because `isPro` is currently `true` for all users, no paywall or upgrade prompt 
 
 ---
 
-## Future Premium Features
+## Pro-Gated Features
 
-The following capabilities are planned for the paid tier:
+The following capabilities require a Pro (or Lifetime) entitlement:
 
+- Document attachment in agent mode — attach PDFs and text files to agent tasks (`canAttachDocuments` gate)
 - Extended context window sizes
 - Priority model downloads
 - Cloud sync for notes and sessions (opt-in)
@@ -57,3 +58,9 @@ The following capabilities are planned for the paid tier:
 :::tip
 If you are using LucidPal today, you already have access to everything — including features that will become Pro-only in a future version.
 :::
+
+---
+
+## Feature Gates
+
+Feature availability is checked via the `FeatureGate` enum. The `canAttachDocuments` gate guards document attachment in agent mode — it returns `true` for Pro and Lifetime users. Views observe this gate via `PremiumManager` to show or hide the document picker button.
