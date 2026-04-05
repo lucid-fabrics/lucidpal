@@ -18,6 +18,7 @@ const sidebars = {
         'guides/vision-photos',
         'guides/document-summarization',
         'guides/web-search',
+        'guides/agent-mode',
         'guides/siri',
         'guides/widgets-notifications',
         'guides/templates-live-activity',
