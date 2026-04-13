@@ -49,6 +49,7 @@ Because `isPro` is currently `true` for all users, no paywall or upgrade prompt 
 
 The following capabilities require a Pro (or Lifetime) entitlement:
 
+- **Gmail integration** — read your Gmail inbox and send emails directly via Google API (`gmailIntegration` gate). iOS does not allow reading emails through the system Mail app; Gmail's API is the only way to give the AI inbox access. See [Gmail](./gmail).
 - Document attachment in agent mode — attach PDFs and text files to agent tasks (`canAttachDocuments` gate)
 - Extended context window sizes
 - Priority model downloads

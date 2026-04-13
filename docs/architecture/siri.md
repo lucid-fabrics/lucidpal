@@ -30,6 +30,7 @@ LLM generates CALENDAR_ACTION block → CalendarEventPreview shown
 
 | Intent                      | Pattern     | Trigger phrases                                                                                 | Pre-seeded query                | User parameter                 |
 | --------------------------- | ----------- | ----------------------------------------------------------------------------------------------- | ------------------------------- | ------------------------------ |
+| `StartVoiceIntent`          | handoff     | "Talk to LucidPal", "Open LucidPal voice", "Start LucidPal voice", "Listen with LucidPal"      | —                               | — (sets `pendingVoiceStart` flag) |
 | `AskLucidPalIntent`         | handoff     | "Ask LucidPal [question]"                                                                       | User-provided `query`           | `@Parameter query: String`     |
 | `CheckCalendarIntent`       | handoff     | "Check my LucidPal calendar"                                                                    | "What's on my calendar today?"  | —                              |
 | `AddCalendarEventIntent`    | handoff     | "Add [event] to LucidPal"                                                                       | "Add [event] to my calendar"    | `@Parameter event: String`     |
@@ -42,13 +43,35 @@ LLM generates CALENDAR_ACTION block → CalendarEventPreview shown
 
 ## Handoff Key
 
-All intents write to the same `UserDefaults` key:
+Most intents write to `UserDefaults` and are consumed when the scene activates:
+
+| Intent | Key | Consumer |
+|--------|-----|----------|
+| `AskLucidPalIntent` | `pm_siri_pending_query` | `consumePendingSiriQuery()` → `scheduleSiriQuery()` |
+| `AddCalendarEventIntent` | `pm_siri_pending_event` | `consumePendingSiriEvent()` → `scheduleCreateEvent()` |
+| `AgentTaskIntent` | `pm_pending_agent_task` | `consumePendingAgentTask()` → `agentViewModel.submitTask()` |
+| `StartVoiceIntent` | `pm_pending_voice_start` | `consumePendingVoiceStart()` → `scheduleVoiceSession()` |
+
+Keys are cleared immediately after forwarding to prevent replaying on subsequent launches.
+
+### StartVoiceIntent Flow
+
+`StartVoiceIntent` is unique — it opens the app and starts the microphone without requiring a text query:
 
 ```swift
-UserDefaults.standard.set(query, forKey: "pm_siri_pending_query")
-```
+// StartVoiceIntent.perform()
+UserDefaults.standard.set(true, forKey: "pm_pending_voice_start")
 
-`LucidPalApp` reads and clears this key when the scene activates. The query is cleared immediately after forwarding to prevent replaying on subsequent launches.
+// LucidPalApp.consumePendingVoiceStart()
+sessionListViewModel.scheduleVoiceSession()
+
+// SessionListViewModel.scheduleVoiceSession()
+// Creates a new session, sets pendingVoiceSessionMeta
+
+// SessionListView watches pendingVoiceSessionMeta
+// Sets pendingVoiceSessionID = meta.id, pushes onto navigation stack
+// ChatSessionContainer receives startWithVoice: true → mic auto-starts
+```
 
 ## Audio Feedback (`ProvidesDialog`)
 

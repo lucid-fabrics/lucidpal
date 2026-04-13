@@ -16,13 +16,13 @@ At the top of Settings, a **segmented picker** lets you switch between two views
 
 | Mode | What you see |
 |------|-------------|
-| **Simple** | Data Sources (Notes, Habits, Contacts, Calendar, Location, Web Search), Text Model (model picker + Download More), Voice, and General (Notifications, About, Debug Logs) |
-| **Advanced** | Everything in Simple, plus: Vision toggle and vision model picker, full Inference controls (context window, temperature, max tokens, timeout, KV Cache info), and Shortcuts/Siri section |
+| **Simple** | Data Sources, AI Model, Voice, Sync, and App sections |
+| **Advanced** | Everything in Simple, plus: Web Search config, Shortcuts/Siri, and Developer (debug builds) |
 
 The selected mode is remembered across app launches. New users start in **Simple** mode.
 
 :::tip
-Switch to **Advanced** mode when you want to fine-tune how the AI generates responses or configure a vision model. For everyday use, **Simple** mode is all you need.
+Switch to **Advanced** mode to access Web Search configuration and Siri Shortcuts. For everyday use, **Simple** mode is all you need.
 :::
 
 ---
@@ -38,6 +38,8 @@ These toggles control which personal data LucidPal can read and act on. All proc
 | **Contacts** | Contacts Access | LucidPal can look up phone numbers and email addresses from your contacts |
 | **Calendar** | Use calendar in chat | Upcoming events are included in the AI prompt for scheduling and reminders |
 | **Location** | Include city in AI context | Your detected city is added to the AI prompt for location-relevant answers |
+| **Mail** | Mail | Lets the agent compose outgoing emails using your iOS Mail accounts (any provider). **Cannot read your inbox** — iOS does not expose an API for that. |
+| **Gmail** *(Pro)* | Sign in with Google | Connects to Gmail via Google OAuth for inbox reading and sending. Requires Pro. See [Gmail](./gmail). |
 | **Web Search** | *(tap to open sub-screen)* | Configure web search provider and API key — see [Web Search](./web-search) |
 
 ### Calendar
@@ -69,12 +71,6 @@ The city string is included in the system prompt — never stored on any server.
 
 | Setting | What it does |
 |---------|--------------|
-| **Vision** toggle | When on, photo attachments are processed by the vision model. Turn off to force text-only inference and save RAM. |
-
-See [Vision & Photos](./vision-photos) for how to attach and analyze images.
-
----
-
 ## Text Model
 
 Lists all downloaded and available text models for your device. Tap a model to select and load it.
@@ -106,31 +102,13 @@ Lists available vision models (separate from the text model, unless you chose an
 
 ---
 
-## Inference
-
-Controls how the AI generates responses.
+## Voice
 
 | Setting | Default | What it does |
 |---------|---------|--------------|
-| **Start voice on open** | Off | Automatically activates the microphone when you open a new chat |
+| **Start voice on open** | Off | Automatically activates the microphone when you open the **Agent** screen |
 | **AirPods auto-voice** | Off | Starts listening when AirPods connect; stops on silence |
 | **Auto-send after speech** | On | Submits the transcribed message without requiring a tap (hidden when "Start voice on open" is on) |
-| **Context Window** | Device max | Tokens the model keeps in memory — larger = longer conversations, more RAM |
-
-Context window options are capped to your device's RAM. The app auto-selects the largest safe value on first launch and after upgrades.
-
-### Advanced Inference Controls
-
-These settings are visible in **Advanced** mode only.
-
-| Setting | Range | Default | What it does |
-|---------|-------|---------|--------------|
-| **Temperature** | 0.0 – 2.0 | 0.35 | Lower = focused/deterministic; higher = creative/varied |
-| **Max Response Length** | 128 – 2048 tokens | 768 | Cap on how long a single reply can be |
-| **Timeout** | 30 – 300 s | 90 s | Generation is cancelled if it takes longer than this |
-| **KV Cache** | — | Fixed | Shows the quantization type used for the key-value cache (read-only) |
-
-Temperature and context window changes take effect the next time the model loads (i.e., next new chat).
 
 :::tip Thinking Mode
 Thinking mode is toggled per-chat via the **brain icon** in the chat toolbar. The last state is remembered across chats. See [AI Models → Thinking Mode](./models#thinking-mode) for details on which models support it.

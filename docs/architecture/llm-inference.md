@@ -192,7 +192,7 @@ enum ModelType: Sendable {
 
 Each role has its own independent llama.cpp model/context/vocab/sampler pointers. A model can be loaded, unloaded, or swapped per role without affecting the other.
 
-`n_batch` is capped to `LLMConstants.batchCapacity` (8 192) for **all** roles at load time — text, vision, and agent. This ensures the batch size never exceeds the shared batch buffer regardless of which model slot is active.
+`n_batch` is capped to `LLMConstants.batchCapacity` (8 192) for **all** roles at load time. `n_ubatch` is fixed at **512** (the llama.cpp default) — setting it equal to `n_batch` causes the graph scheduler (`ggml_backend_sched_split_graph`) to allocate a hash table proportional to `n_ubatch`, which triggers an OOM abort on device at 8 192.
 
 ### Model loading & unloading lifecycle
 

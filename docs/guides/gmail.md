@@ -8,6 +8,24 @@ LucidPal can read your Gmail inbox so the on-device AI has email context when yo
 
 All processing happens on your iPhone. Email data never leaves the device.
 
+:::info Pro feature
+Gmail integration requires a **Pro** subscription. See [Premium](./premium) for details.
+:::
+
+## Why Gmail and not the Mail app?
+
+iOS does not provide any API to read emails from the system Mail app. Apple's `MessageUI` framework only allows apps to *compose* outgoing emails — there is no way to access your inbox through it, regardless of which email provider you use.
+
+Gmail integration works around this by connecting directly to Google's API with your permission, giving the AI read access to your Gmail inbox without routing any data through a server.
+
+| | Mail toggle | Gmail integration |
+|---|---|---|
+| **Read inbox** | ❌ iOS does not allow it | ✅ Via Google API |
+| **Compose / send** | ✅ Opens native compose sheet | ✅ Sends directly |
+| **Works with non-Gmail accounts** | ✅ Any account in iOS Mail | ❌ Gmail only |
+| **Requires sign-in** | ❌ Uses iOS accounts | ✅ Google OAuth |
+| **Subscription required** | ❌ Free | ✅ Pro |
+
 ## What is shared with the AI
 
 Only the following fields are fetched — full email bodies are **never** retrieved:
