@@ -12,6 +12,7 @@ LucidPal includes ten built-in Siri shortcuts. You can trigger them with your vo
 
 | Shortcut              | Example phrase                       | What it does                                                                                                       |
 | --------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Talk to LucidPal      | "Hey Siri, Talk to LucidPal"         | Opens the app and starts voice input immediately                                                                  |
 | Ask LucidPal          | "Ask LucidPal what's on my schedule" | Opens the app and sends your question                                                                              |
 | Check My Calendar     | "Check my LucidPal calendar"         | Shows today's events                                                                                               |
 | Add Calendar Event    | "Add dentist to LucidPal"            | Starts an event creation                                                                                           |
@@ -64,6 +65,12 @@ Because LucidPal runs entirely on-device, Siri can't process your request direct
 
 ## Examples
 
+**Starting a voice conversation:**
+
+> "Hey Siri, Talk to LucidPal"
+
+LucidPal opens and immediately starts listening. Speak your request naturally — no need to tap anything.
+
 **Checking your day:**
 
 > "Hey Siri, check my LucidPal calendar"
@@ -100,7 +107,10 @@ LucidPal looks at what you did most recently — inside the app or via Siri — 
 
 | Last action                    | What happens                                                |
 | ------------------------------ | ----------------------------------------------------------- |
-| Deleted an event               | LucidPal asks you to confirm, then restores it              |
+| Delete event                   | Restores the deleted event to your calendar                 |
+| Create event                   | Deletes the newly created event                              |
+| Update event                   | Reverts the event to its previous state                      |
+| Save note                      | Deletes the saved note                                       |d an event               | LucidPal asks you to confirm, then restores it              |
 | Created an event               | LucidPal asks you to confirm, then deletes it               |
 | Updated / rescheduled an event | LucidPal informs you that undo of edits isn't supported yet |
 

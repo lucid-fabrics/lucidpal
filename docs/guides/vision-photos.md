@@ -61,36 +61,26 @@ LucidPal offers two ways to get vision capability:
 | **Integrated model** (Qwen3.5 Vision 4B) | One download handles both text chat and image analysis — no second model needed |
 | **Separate vision model** | A dedicated vision GGUF loaded alongside your text model |
 
-**Qwen3.5 Vision 4B** is the recommended choice for most users. It is an *integrated* model — a single 2.5 GB file that covers all text requests (calendar, notes, habits) and all vision requests. There is no need to download anything else.
-
-When a separate text model (e.g. Qwen3.5 2B) is active and a standalone vision model is also downloaded, LucidPal automatically switches to the vision model when it detects an image attachment, then switches back for text-only messages.
+All four catalog models are *integrated* — a single GGUF file covers both text and vision. Vision is enabled automatically once a model is downloaded; there is no toggle to turn on.
 
 :::note
-Integrated models show an **Integrated** badge in Settings. Separate vision models show a **Vision** badge.
+Integrated models show an **Integrated** badge in the Model Catalog. When the mmproj (vision projector) file is not yet downloaded, LucidPal downloads it automatically the first time a model loads.
 :::
 
 ---
 
-## Vision Settings
+## Model Catalog
 
-Go to [**Settings**](./settings) → **Vision** to control vision behaviour.
+Open **Settings → AI Model → Browse Model Catalog** to download or manage models. All listed models support vision:
 
-### Vision Toggle
+| Model | Size | Min RAM |
+|-------|------|---------|
+| Gemma 4 E2B | 1.5 GB | 3 GB |
+| Qwen3.5 2B | 1.3 GB | 3 GB |
+| Qwen3.5 4B | 2.5 GB | 5 GB |
+| Gemma 4 E4B | 5.0 GB | 6 GB |
 
-A single **Vision** toggle (under the Vision section header) enables or disables photo attachment processing:
-
-- **On** — photo attachments trigger the vision model. The paperclip icon is active in chat.
-- **Off** — only text inference runs. Images cannot be attached. Use this if you want to conserve RAM or only use a text model.
-
-### Vision Model Selection
-
-Under [**Settings**](./settings) → **Vision Model**, you can:
-
-- **Select which vision model is active** — tap any downloaded model to make it the active vision model
-- **Download a new vision model** — tap **Download Vision Models** to browse available options
-- **Delete a model** — swipe left on any downloaded model and tap Delete
-
-If you select an integrated model here, it also becomes your active text model — there is no separate text model needed.
+Swipe left on a downloaded model to delete it.
 
 ---
 
@@ -98,7 +88,7 @@ If you select an integrated model here, it also becomes your active text model �
 
 | Limitation | Detail |
 |---|---|
-| **Model must be downloaded first** | Vision only works when a vision or integrated model is downloaded and selected. The toggle is disabled until then. |
+| **Model must be downloaded first** | Vision only works when a model is downloaded. Open Settings → AI Model → Browse Model Catalog to download one. |
 | **RAM requirement** | Qwen3.5 Vision 4B requires ~5 GB of available RAM — iPhone 14 Pro, 15, or 16 series recommended. |
 | **One image per message** | Multiple attachments in a single message are not supported. |
 | **Image size cap** | Images are auto-downscaled so their longest side is at most 896 px (aspect ratio preserved). Very large originals lose no important detail, but microscopic text may not be legible. |

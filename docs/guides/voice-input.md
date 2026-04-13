@@ -20,19 +20,29 @@ LucidPal transcribes speech entirely on-device using **WhisperKit** (OpenAI Whis
 
 The confirm and cancel buttons are hidden during transcription and reappear once the transcript is ready.
 
-If **Auto-send** is enabled in [Settings](./settings#inference), the message sends automatically once transcription completes.
+If **Auto-send** is enabled in [Settings](./settings), the message sends automatically once transcription completes.
 
 ---
 
 ## Auto-Send
 
-Enable [**Settings**](./settings#inference) → **Auto-send after speech** to have LucidPal send the transcribed message without requiring you to tap Send.
+Enable [**Settings**](./settings) → **Auto-send after speech** to have LucidPal send the transcribed message without requiring you to tap Send.
+
+---
+
+## Start Voice on Open (Agent)
+
+Enable [**Settings**](./settings) → **Start voice on open** to have the microphone activate automatically every time you open the **Agent** screen. This is useful if you primarily interact with LucidPal through voice on the Agent tab.
+
+:::note
+This setting applies to the Agent screen only. Chat sessions always require a manual mic tap.
+:::
 
 ---
 
 ## AirPods Auto-Voice
 
-When AirPods (or compatible wireless headphones) are connected, you can enable [**Settings**](./settings#inference) → **AirPods auto-voice**. With this on:
+When AirPods (or compatible wireless headphones) are connected, you can enable [**Settings**](./settings) → **AirPods auto-voice**. With this on:
 
 - The microphone activates automatically as soon as AirPods become the active audio route.
 - An **Auto-listening** banner appears at the top of the screen.
