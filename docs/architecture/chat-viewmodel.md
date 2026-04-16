@@ -114,6 +114,10 @@ func applyStreamToken(
 - Once `</think>` is found: strips block, sets `thinkDone = true`, routes remaining tokens to `content`
 - If no `<think>` prefix: sets `thinkDone = true` immediately on first token
 
+After each token lands in `content`, `stripStopTokens()` removes any trailing EOS marker that llama.cpp may have emitted as text (`<eos>`, `<end_of_turn>`, `<|im_end|>`, `<|eot_id|>`, `</s>`). The function never blanks a non-empty message — if stripping would produce an empty string, the raw token is kept. `finalizeResponse()` applies the same strip as a final cleanup pass before action parsing begins.
+
+The Thinking toolbar toggle is only rendered when `downloadViewModel.selectedModel.supportsThinking` is `true`. This property is `true` only for `ChatTemplate.chatml` models (Qwen3). Gemma 4 uses `ChatTemplate.gemma` and hides the toggle entirely.
+
 ## Calendar Confirmation Lifecycle
 
 Calendar event previews embedded in assistant messages go through a state machine:

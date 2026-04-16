@@ -17,7 +17,30 @@ How LucidPal downloads, verifies, and primes GGUF model files before inference.
 
 ## URLSession Background Download
 
-`ModelDownloader.download(model:)` creates a `URLSessionConfiguration.background` session on every download:
+`ModelDownloader.download(model:)` creates a `URLSessionConfiguration.background` session and then calls `getTasksWithCompletionHandler` to adopt any already-running transfer before creating a new one. This prevents duplicate tasks — and the download-progress oscillation that occurred when the app was resumed mid-download:
+
+```swift
+session.getTasksWithCompletionHandler { [weak self] _, _, downloadTasks in
+    if let existing = downloadTasks.first {
+        // Adopt in-flight task; restore real progress from its counters
+        let received = existing.countOfBytesReceived
+        let expected = existing.countOfBytesExpectedToReceive
+        let adopted = expected > 0 ? max(0.0, min(1.0, Double(received) / Double(expected))) : 0.0
+        Task { @MainActor [weak self] in
+            self?.downloadTask = existing
+            self?.state = .downloading(progress: adopted)
+        }
+        return
+    }
+    // No existing task — start fresh or resume from saved resume data
+    let task = capturedResumeData != nil
+        ? session.downloadTask(withResumeData: capturedResumeData!)
+        : session.downloadTask(with: model.downloadURL)
+    task.resume()
+}
+```
+
+Session configuration:
 
 ```swift
 let config = URLSessionConfiguration.background(withIdentifier: "app.lucidpal.model-download")
@@ -29,7 +52,6 @@ let session = URLSession(configuration: config, delegate: self, delegateQueue: n
 
 - **Session identifier** `app.lucidpal.model-download` is fixed. iOS uses it to reconnect the app to an in-progress transfer across launches or suspensions.
 - `allowsCellularAccess = false` enforces WiFi-only; a cellular disconnection fires `NSURLErrorCancelled` via the system, which is treated as a system cancellation (not a user cancel) and triggers resume-data storage.
-- A second call to `download()` while a session is active is a no-op (guarded by `downloadTask == nil && session == nil`).
 
 ## Progress Tracking
 
@@ -129,8 +151,12 @@ The warmer includes a sandbox containment check — it resolves symlinks on both
 | `isModelLoaded` | `Bool` | Forwarded from `llmService.isLoadedPublisher` |
 | `isModelLoading` | `Bool` | Forwarded from `llmService.isLoadingPublisher` |
 | `selectedModel` | `ModelInfo` | Currently selected model for download/load |
-| `pendingVisionDownload` | `ModelInfo?` | Vision model queued after current text download |
+| `selectedTextModelID` | `String` | ID of the last successfully loaded text model (persisted) |
 | `loadError` / `deleteError` | `String?` | Error messages surfaced to the UI |
+| `deviceRAMGB` | `Int` | Passthrough from `settings.deviceRAMGB` |
+| `hasProChip` | `Bool` | Passthrough from `settings.hasProChip` — used by catalog views to gate Pro-only models |
+
+`isModelSupported(_ model: ModelInfo) -> Bool` returns whether the model's `minimumRAMGB` fits within `settings.deviceRAMGB`. `selectModel()` and `startDownload()` are no-ops for unsupported models.
 
 ### State Transitions
 
