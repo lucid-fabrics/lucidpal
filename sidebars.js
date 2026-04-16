@@ -30,30 +30,6 @@ const sidebars = {
       ],
     },
   ],
-  architecture: [
-    {
-      type: 'category',
-      label: 'Architecture',
-      collapsed: false,
-      items: [
-        'architecture/overview',
-        'architecture/chat-viewmodel',
-        'architecture/sessions',
-        'architecture/calendar',
-        'architecture/llm-inference',
-        'architecture/turboquant',
-        'architecture/system-prompt',
-        'architecture/siri',
-        'architecture/free-slot-engine',
-        'architecture/habit-store',
-        'architecture/notes-store',
-        'architecture/note-enrichment',
-        'architecture/model-download',
-        'architecture/testing',
-        'architecture/ci-cd',
-      ],
-    },
-  ],
 };
 
 module.exports = sidebars;

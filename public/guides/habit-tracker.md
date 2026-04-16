@@ -225,10 +225,3 @@ Open the Habit Detail View, scroll to the bottom, and tap **Delete Habit**. This
 :::warning
 Deleting a habit also deletes all logged completions for that habit. This cannot be undone.
 :::
-
-<details>
-<summary>For developers</summary>
-
-See [architecture/habit-store](../architecture/habit-store) for how habit definitions, completion logs, and streak calculations are persisted on-device.
-
-</details>

@@ -226,10 +226,3 @@ The AI does not see the full body of notes beyond the 200-character snippet unle
 All notes are saved locally on your device in the app's sandboxed storage. They are included in standard iPhone backups (iCloud or iTunes) if backup is enabled. Notes are never sent to any server.
 
 </details>
-
-<details>
-<summary>For developers</summary>
-
-See [architecture/notes-store](../architecture/notes-store) for how notes are persisted, enriched, and queried on-device.
-
-</details>

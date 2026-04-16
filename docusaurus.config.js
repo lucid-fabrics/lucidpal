@@ -28,9 +28,10 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
+          path: 'public',
           sidebarPath: require.resolve('./sidebars.js'),
           routeBasePath: '/',
-          editUrl: 'https://github.com/lucid-fabrics/lucidpal/tree/main/docs/',
+          editUrl: 'https://github.com/lucid-fabrics/lucidpal/tree/main/public/',
         },
         blog: false,
         theme: {
@@ -47,12 +48,6 @@ const config = {
         title: 'LucidPal',
         items: [
           { type: 'docSidebar', sidebarId: 'guides', position: 'left', label: 'Guides' },
-          {
-            type: 'docSidebar',
-            sidebarId: 'architecture',
-            position: 'left',
-            label: 'Architecture',
-          },
           {
             href: 'https://github.com/lucid-fabrics/lucidpal',
             label: 'GitHub',
