@@ -98,10 +98,3 @@ Pinned prompts are saved as a JSON file in the app's Documents directory (`pinne
 :::tip
 Pin prompts like "What's on my calendar today?" or "Find my next free hour" to access your most common queries instantly.
 :::
-
-<details>
-<summary>For developers</summary>
-
-See [architecture/system-prompt](../architecture/system-prompt) for how the AI's context window is assembled — including calendar data, notes, habits, and user preferences — before each inference call.
-
-</details>

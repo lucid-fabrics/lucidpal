@@ -117,10 +117,3 @@ When enabled, you can tap the **Thinking** disclosure in any assistant reply to 
 Thinking mode uses slightly more processing time but produces better results for multi-step calendar requests like:
 
 > "Schedule a 2-hour block every Tuesday this month, but skip the week of March 10th"
-
-<details>
-<summary>For developers</summary>
-
-See [architecture/model-download](../architecture/model-download) for how model selection, background downloads, integrity checks, and resume logic are implemented.
-
-</details>

@@ -230,10 +230,3 @@ For **reschedule** operations, LucidPal uses the event's internal calendar ID. F
 In rare cases an event is saved to the calendar but its identifier cannot be retrieved immediately (e.g. due to a sync delay with iCloud or Exchange). The event will still appear in your calendar — the identifier is only needed for deep-linking from the app.
 
 **Fix:** Open the Calendar app manually to verify the event was created. If it is missing, try creating it again.
-
-<details>
-<summary>For developers</summary>
-
-See [architecture/free-slot-engine](../architecture/free-slot-engine) for how free-slot search and conflict detection are implemented.
-
-</details>
