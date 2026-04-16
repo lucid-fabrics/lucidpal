@@ -10,14 +10,19 @@ LucidPal runs an AI model entirely on your device. On first launch, you'll be pr
 
 ## Available Models
 
-| Model              | Download size | Min RAM  | Best for                             |
-| ------------------ | ------------- | -------- | ------------------------------------ |
-| Qwen3.5 2B Vision  | 1.2 GB        | 3 GB RAM | iPhone 12 / 13 — recommended default |
-| Qwen3.5 4B Vision  | 2.5 GB        | 5 GB RAM | iPhone 14 Pro / 15 / 16 and newer    |
-| Gemma 4 E2B        | 0.9 GB        | 2 GB RAM | Compact model for older devices      |
-| Gemma 4 E4B        | 2.4 GB        | 4 GB RAM | Enhanced reasoning on newer devices  |
+| Model              | Download size | Min RAM  | Best for                                       |
+| ------------------ | ------------- | -------- | ---------------------------------------------- |
+| Qwen3.5 0.8B       | 0.51 GB       | 3 GB RAM | iPhone SE / older devices — fastest, text only |
+| Qwen3.5 2B         | 1.27 GB       | 5 GB RAM | iPhone 12–14 standard — balanced text + vision |
+| Gemma 4 E2B        | 1.5 GB        | 5 GB RAM | iPhone 12–14 standard — strong reasoning       |
+| Qwen3.5 4B         | 2.5 GB        | 6 GB RAM | iPhone 15 Pro and newer                        |
+| Gemma 4 E4B        | 5.0 GB        | 7 GB RAM | iPhone 15 Pro / 16 Pro / 17 Pro only           |
 
-All models run at similar speed relative to their size. The larger models give more accurate and nuanced responses. Vision models handle both text and image requests in a single download.
+All models run at similar speed relative to their size. The larger models give more accurate and nuanced responses. Qwen3.5 2B and 4B are vision-capable — they handle both text and image requests in a single download. Qwen3.5 0.8B and Gemma models are text-only.
+
+:::note
+Models that require more RAM than your device has are shown in the catalog but are **disabled** with an explanation. You cannot download or load them.
+:::
 
 ---
 
@@ -29,8 +34,12 @@ All models run at similar speed relative to their size. The larger models give m
 4. **Start chatting** — once the download completes, LucidPal loads the model and you're ready to go.
 
 :::note
-Wi-Fi is required. Downloads are blocked on cellular to protect your data plan. The models are between 0.51 GB and 2.5 GB.
+Wi-Fi is required. Downloads are blocked on cellular to protect your data plan. The models are between 0.51 GB and 5.0 GB.
 :::
+
+### During a download
+
+While a download is in progress, a full-screen overlay shows the progress ring and model name. Navigation to other tabs is temporarily disabled — tap **Cancel** on the overlay if you want to stop the download.
 
 ### Background downloads
 
@@ -50,13 +59,13 @@ Every download is verified against a SHA-256 checksum sourced from HuggingFace L
 
 The app selects a recommended model based on the physical RAM of your iPhone:
 
-| Device RAM | Recommended model |
-| ---------- | ----------------- |
-| 5 GB or more | Qwen3.5 4B Vision |
-| 3–4 GB | Qwen3.5 2B Vision |
-| Less than 3 GB | Gemma 4 E2B |
+| Device RAM | Chip    | Recommended model |
+| ---------- | ------- | ----------------- |
+| 7 GB+      | Pro     | Gemma 4 E4B       |
+| 5 GB+      | Any     | Gemma 4 E2B       |
+| Less than 5 GB | Any | Qwen3.5 0.8B      |
 
-Models that exceed your device's RAM threshold are hidden from the selection list — only models your device can run are shown.
+Models that require more RAM or a Pro chip than your device has are shown in the catalog but are disabled for download. They remain visible so you can see what is available when upgrading to a newer device.
 
 ---
 
@@ -86,20 +95,24 @@ The model file is removed immediately. You can re-download it at any time.
 
 ## Integrated Vision Models
 
-All available models combine text and vision capabilities in a single download. **Qwen3.5 4B Vision** and **Qwen3.5 2B Vision** can read and describe images in addition to handling calendar requests — no separate vision model file is required. See [Vision & Photos](./vision-photos) for how to attach and analyze images.
+**Qwen3.5 2B** and **Qwen3.5 4B** can read and describe images in addition to handling calendar requests — no separate vision model file is required. See [Vision & Photos](./vision-photos) for how to attach and analyze images.
 
-When you select a model in the onboarding carousel or in [**Settings**](./settings) → **Model**, a **Vision** badge appears next to its name.
+When you select a vision-capable model, a **Vision** badge appears next to its name.
 
 - One file covers everything — text chat, calendar operations, and image understanding.
 - Vision features (such as reading a screenshot of an event invitation) are available immediately after the download completes.
+
+Qwen3.5 0.8B and the Gemma 4 family are text-only models and do not support image input.
 
 ---
 
 ## Thinking Mode
 
-Qwen3.5 models support a **Thinking** mode where the AI reasons through your request before answering. This improves accuracy for complex calendar operations.
+**Qwen3.5** models support a **Thinking** mode where the AI reasons through your request before answering. This improves accuracy for complex calendar operations.
 
-Toggle it per-chat via the brain icon in the chat toolbar. When enabled, you can tap the **Thinking** disclosure in any assistant reply to see the reasoning steps.
+Toggle it per-chat via the brain icon (🧠) in the chat toolbar — this button only appears when a Qwen3.5 model is active. Gemma 4 models do not support Thinking mode and the toggle is hidden when they are loaded.
+
+When enabled, you can tap the **Thinking** disclosure in any assistant reply to see the reasoning steps.
 
 Thinking mode uses slightly more processing time but produces better results for multi-step calendar requests like:
 
