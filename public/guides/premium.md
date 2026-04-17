@@ -82,7 +82,7 @@ Everything in Pro, plus:
 - **Apple Health AI insights** — weekly AI analysis of your health trends and correlations
 - **Smart widgets** — home screen widgets powered by cloud AI, updated every 30 minutes
 - **Full data export** — download all your notes, habits, chat history, and AI memory as Markdown and JSON
-- **API access** — a personal API key to query your data and send AI messages programmatically
+- **API access** — a personal API key to query your data and send AI messages programmatically. See [API Access](./api-access).
 
 ---
 
