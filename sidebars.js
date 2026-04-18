@@ -29,6 +29,16 @@ const sidebars = {
         'guides/accessibility',
       ],
     },
+    {
+      type: 'category',
+      label: 'Legal',
+      collapsed: true,
+      items: [
+        'legal/privacy-policy',
+        'legal/terms-of-service',
+        'legal/eula',
+      ],
+    },
   ],
 };
 
