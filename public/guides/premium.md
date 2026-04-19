@@ -67,7 +67,7 @@ Everything in Starter, plus:
 - **Brave Search** — higher-quality web search results
 - **Document processing** — attach and summarize PDFs in chat
 - **AI note enrichment** — automatic tagging, linking, and one-line summaries added to your notes in the background
-- **Voice Transcription** — real-time voice transcription with speaker diarization and AI-generated summary saved as a note (300 min/month)
+- **Live Notes** — real-time voice transcription with speaker diarization and AI-generated summary saved as a note (300 min/month)
 
 ---
 
@@ -84,7 +84,7 @@ Everything in Pro, plus:
 - **Smart widgets** — home screen widgets powered by cloud AI, updated every 30 minutes
 - **Full data export** — download all your notes, habits, chat history, and AI memory as Markdown and JSON
 - **API access** — a personal API key to query your data and send AI messages programmatically. See [API Access](./api-access).
-- **Voice Transcription** — 1,200 min/month (vs. 300 min on Pro)
+- **Live Notes** — 1,200 min/month (vs. 300 min on Pro)
 
 ---
 

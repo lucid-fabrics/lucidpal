@@ -2,7 +2,7 @@
 sidebar_position: 10
 ---
 
-# Voice Transcription
+# Live Notes
 
 Record meetings, conversations, and ideas — and get an AI-generated summary automatically.
 
@@ -10,13 +10,13 @@ Record meetings, conversations, and ideas — and get an AI-generated summary au
 
 ## Overview
 
-Voice Transcription captures live audio, transcribes it in real time with **speaker diarization** (multiple speakers identified and color-coded), then saves the transcript as a searchable note enriched with an AI summary and action items.
+Live Notes captures live audio, transcribes it in real time with **speaker diarization** (multiple speakers identified and color-coded), then saves the transcript as a searchable note enriched with an AI summary and action items.
 
 This feature requires a **Pro subscription**.
 
 ---
 
-## Accessing Voice Transcription
+## Accessing Live Notes
 
 1. Open the **Notes** tab.
 2. Tap the **waveform mic** button (🎙) in the toolbar (top-right).
@@ -87,7 +87,7 @@ Deepgram's streaming API detects and labels different speakers in real time. Eac
 
 ## Monthly Limits
 
-Voice Transcription tracks usage in **minutes per calendar month**:
+Live Notes tracks usage in **minutes per calendar month**:
 
 | Plan | Monthly limit |
 |------|--------------|
@@ -102,7 +102,7 @@ When the monthly limit is reached, the session endpoint returns an error and the
 
 | Requirement | Details |
 |-------------|---------|
-| **Subscription** | Pro or Ultimate — free tier cannot use Voice Transcription |
+| **Subscription** | Pro or Ultimate — free tier cannot use Live Notes |
 | **Microphone permission** | Required on first use. Enable in **Settings → Privacy & Security → Microphone → LucidPal** |
 | **Internet connection** | Audio streams to Deepgram; summary generated via cloud AI |
 | **Note storage** | Voice notes count toward your 500-note limit |

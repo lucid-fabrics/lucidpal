@@ -109,7 +109,7 @@ Rich formatting is optional. Plain text notes continue to work exactly as before
 
 ---
 
-## Voice Transcription
+## Live Notes
 
 Record a conversation or voice memo directly from the Notes tab and have it saved as a searchable note with an AI-generated summary.
 
@@ -118,10 +118,10 @@ Record a conversation or voice memo directly from the Notes tab and have it save
 3. Speak — the transcript appears in real time with color-coded **speaker bubbles**.
 4. Tap **Stop & Save** when finished.
 
-The transcript is saved as a note, enriched with a title, summary, and extracted action items. See the [Voice Transcription guide](./voice-transcription) for full details.
+The transcript is saved as a note, enriched with a title, summary, and extracted action items. See the [Live Notes guide](./live-notes) for full details.
 
 :::note
-Voice Transcription requires a **Pro subscription**.
+Live Notes requires a **Pro subscription**.
 :::
 
 ---

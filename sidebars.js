@@ -13,7 +13,7 @@ const sidebars = {
         'guides/calendar',
         'guides/contacts',
         'guides/notes',
-        'guides/voice-transcription',
+        'guides/live-notes',
         'guides/habit-tracker',
         'guides/reminders',
         'guides/vision-photos',
