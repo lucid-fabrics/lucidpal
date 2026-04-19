@@ -22,7 +22,9 @@ LucidPal's on-device AI can manage your notes and habits directly from the chat 
 | "Update my shopping list — add oat milk" | Patches the body of the matching note |
 | "Delete my draft ideas note" | Permanently deletes the matching note |
 
-The AI can set **title**, **body**, and **tags** when creating or updating a note. See the [Notes guide](./notes.md) for full details.
+The AI can set **title**, **body**, and **tags** when creating or updating a note. See the [Notes guide](./notes) for full details.
+
+For recording meetings and conversations, use [Voice Transcription](./voice-transcription) (Pro) — it streams live audio with speaker diarization and auto-saves a note with AI summary.
 
 ### Habits
 

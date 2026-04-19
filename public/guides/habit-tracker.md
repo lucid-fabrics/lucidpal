@@ -85,15 +85,39 @@ Templates are only shown when your habit list is **empty**. Once you have at lea
 1. From the Habit Dashboard, tap **+** in the top-right corner.
 2. Fill in the habit details:
 
-| Field | Description |
-|---|---|
-| **Emoji** | Single emoji displayed on the card (tap the emoji field to change it) |
-| **Name** | What the habit is (e.g., "Meditate", "Read 20 pages") |
-| **Unit** | **Done/Not** (boolean), **Count** (numeric reps), or **Duration** (minutes) |
-| **Frequency** | **Daily** or **Weekly** |
-| **Daily Target** | Target value for count/duration habits (e.g., 30 min, 10 reps). Not shown for Done/Not habits. |
+### Emoji and Name
 
-3. Tap **Save** — the habit appears on your dashboard immediately.
+Tap the **emoji circle** to open the emoji picker and choose an icon for your habit. Type your habit name in the text field.
+
+### Track As
+
+Choose how to measure the habit:
+
+| Unit | What it tracks | Example |
+|------|----------------|---------|
+| **Done/Not** | Binary completion | Morning meditation |
+| **Count** | Numeric reps | 10 push-ups |
+| **Duration** | Time spent | 30 minutes reading |
+
+### Repeat
+
+| Frequency | Label in UI | Streak resets when |
+|-----------|-------------|-------------------|
+| **Daily** | Every day | You miss a day |
+| **Weekly** | Once a week | You miss a week |
+
+### Daily Goal
+
+Only shown for Count and Duration habits:
+
+- **Count habits** — stepper increments by 1 per tap.
+- **Duration habits** — **hours/minutes wheel picker**. Swipe up or down on each wheel to set the target (e.g., 1 hr 30 min).
+
+:::note
+The **Add Habit** button is disabled until the form is valid: name must be non-empty, and duration habits require at least 1 minute set.
+:::
+
+3. Tap **Add Habit** — the habit appears on your dashboard immediately.
 
 ---
 
