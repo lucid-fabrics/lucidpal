@@ -83,8 +83,45 @@ Categories are assigned automatically by the AI after you save a note. You canno
 2. Type a title (optional) and your note body.
 3. Tap **Done** in the toolbar — the note appears immediately in the list.
 
+---
+
+## Rich Text Formatting
+
+Notes support rich text formatting. When you create or edit a note, a **formatting toolbar** appears above the keyboard with the following options:
+
+| Button | Format |
+|--------|--------|
+| **B** | Bold |
+| *I* | Italic |
+| U | Underline |
+| S̶ | Strikethrough |
+| Aa | Text style (Title / Heading / Subheading / Body / Monospaced) |
+| • | Bullet list |
+| 1. | Numbered list |
+| — | Dash list |
+| ≡ | Text alignment |
+
+Select any text in the note body and tap a style to apply it. Rich text is stored as RTF data alongside the plain-text body, ensuring WYSIWYG display and full-text search compatibility.
+
 :::tip
-Notes support plain text only. Use line breaks to structure content — the AI can read and summarize multi-line notes without any special formatting.
+Rich formatting is optional. Plain text notes continue to work exactly as before — the formatting toolbar is only visible when editing.
+:::
+
+---
+
+## Voice Transcription
+
+Record a conversation or voice memo directly from the Notes tab and have it saved as a searchable note with an AI-generated summary.
+
+1. Tap the **waveform mic** button (🎙) in the Notes toolbar (top-right).
+2. Grant microphone access if prompted.
+3. Speak — the transcript appears in real time with color-coded **speaker bubbles**.
+4. Tap **Stop & Save** when finished.
+
+The transcript is saved as a note, enriched with a title, summary, and extracted action items. See the [Voice Transcription guide](./voice-transcription) for full details.
+
+:::note
+Voice Transcription requires a **Pro subscription**.
 :::
 
 ---
