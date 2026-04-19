@@ -1,0 +1,20 @@
+when:
+  - event: push
+    branch: main
+  - event: manual
+
+labels:
+  platform: linux
+
+steps:
+  - name: build-and-deploy
+    image: node:22
+    environment:
+      CLOUDFLARE_API_TOKEN:
+        from_secret: CLOUDFLARE_API_TOKEN
+      CLOUDFLARE_ACCOUNT_ID:
+        from_secret: CLOUDFLARE_ACCOUNT_ID
+    commands:
+      - npm install --legacy-peer-deps
+      - npm run build
+      - npx wrangler pages deploy build --project-name lucidpal-docs --branch main
