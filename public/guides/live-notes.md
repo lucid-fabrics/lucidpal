@@ -18,9 +18,28 @@ This feature requires a **Pro subscription**.
 
 ## Accessing Live Notes
 
+### From the Notes tab
 1. Open the **Notes** tab.
 2. Tap the **waveform mic** button (🎙) in the toolbar (top-right).
 3. Grant **microphone access** when prompted.
+
+### From the Agent screen
+Live Notes can also be started by voice or text through the Agent:
+
+1. Open the **Agent** tab.
+2. Say or type a phrase like:
+   - *"Start a Live Notes session"*
+   - *"Live notes"*
+   - *"Transcribe"*
+   - *"Record this meeting"*
+   - *"Record this call"*
+   - *"Start recording"*
+   - *"Capture this meeting"*
+   - *"Meeting notes"*
+   - *"Take a voice note"*
+3. If you have a Pro subscription, the Live Notes sheet opens immediately. If not, an upgrade prompt is shown instead.
+
+The Agent screen also shows a **"Live Notes"** card in the ability drawer for one-tap access.
 
 ---
 
@@ -32,6 +51,7 @@ This feature requires a **Pro subscription**.
 | **Connecting** | Spinner | Establishing the audio stream |
 | **Recording** | Live transcript + amplitude bar | Capturing audio in real time |
 | **Generating summary** | Spinner | Sending transcript to AI |
+| **Reconnecting** | Orange banner + spinner | Briefly lost connection — attempting to reconnect (up to 3 tries at 1s, 2s, 4s intervals) |
 | **Error** | Warning icon + message | Something went wrong — tap Dismiss |
 
 ---
@@ -73,7 +93,7 @@ If no speech was detected, the recording is discarded and the screen returns to 
 | **Body** | Full raw transcript (up to 50,000 characters) |
 | **AI Summary** | Concise AI-generated recap |
 | **Action Items** | Tasks and to-dos extracted from the transcript |
-| **Source** | Marked as voice — note card shows an indigo "From chat" badge |
+| **Source** | Marked as voice — note card shows a mic icon |
 
 Open the saved note to see the **AI Insights** section with the summary and action items. Tap any action item to schedule it as a reminder.
 
