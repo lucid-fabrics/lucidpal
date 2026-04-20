@@ -159,8 +159,8 @@ CalendarService executes → preview.state = .deleted / .updated / .rescheduled
 
 ```swift
 // Domain type — no EventKit import needed above service layer
-struct CalendarInfo {
-    let id: String
+struct CalendarInfo: Identifiable, Hashable, Sendable {
+    let id: String      // EKCalendar.calendarIdentifier
     let title: String
 }
 ```
@@ -191,3 +191,5 @@ enum CalendarFreeSlotEngine {
 ```
 
 `CalendarActionController` fetches busy windows from `CalendarService` and passes them to the engine. The engine returns available slots that fit the requested duration.
+
+For a deep-dive into the sweep algorithm, working hours defaults, all-day event handling, and edge cases, see [CalendarFreeSlotEngine](./free-slot-engine.md).

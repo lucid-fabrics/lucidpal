@@ -12,12 +12,12 @@ LucidPal runs an AI model entirely on your device. On first launch, you'll be pr
 
 | Model              | Download size | Min RAM  | Best for                             |
 | ------------------ | ------------- | -------- | ------------------------------------ |
-| Qwen3.5 2B Vision  | 1.2 GB        | 3 GB RAM | iPhone 12 / 13 — recommended default |
-| Qwen3.5 4B Vision  | 2.5 GB        | 5 GB RAM | iPhone 14 Pro / 15 / 16 and newer    |
-| Gemma 4 E2B        | 0.9 GB        | 2 GB RAM | Compact model for older devices      |
-| Gemma 4 E4B        | 2.4 GB        | 4 GB RAM | Enhanced reasoning on newer devices  |
+| Qwen3.5 0.8B       | 0.51 GB       | 2 GB RAM | Older iPhones with limited RAM       |
+| Qwen3.5 2B         | 1.2 GB        | 3 GB RAM | iPhone 12 / 13 — recommended default |
+| Qwen3.5 4B         | 2.5 GB        | 5 GB RAM | iPhone 14 Pro / 15 / 16 and newer    |
+| Qwen3.5 Vision 4B  | 2.5 GB        | 5 GB RAM | Image understanding + text (integrated) |
 
-All models run at similar speed relative to their size. The larger models give more accurate and nuanced responses. Vision models handle both text and image requests in a single download.
+All four models run at similar speed relative to their size — the 4B models give more accurate and nuanced responses. The Vision 4B model handles both text and image requests in a single download.
 
 ---
 
@@ -52,9 +52,9 @@ The app selects a recommended model based on the physical RAM of your iPhone:
 
 | Device RAM | Recommended model |
 | ---------- | ----------------- |
-| 5 GB or more | Qwen3.5 4B Vision |
-| 3–4 GB | Qwen3.5 2B Vision |
-| Less than 3 GB | Gemma 4 E2B |
+| 5 GB or more | Qwen3.5 4B |
+| 3–4 GB | Qwen3.5 2B |
+| Less than 3 GB | Qwen3.5 0.8B |
 
 Models that exceed your device's RAM threshold are hidden from the selection list — only models your device can run are shown.
 
@@ -62,7 +62,7 @@ Models that exceed your device's RAM threshold are hidden from the selection lis
 
 ## Switching Models
 
-Go to [**Settings**](./settings) → **Model** to switch between models. The new model loads the next time you start a conversation.
+Go to [**Settings**](./settings) → **Text Model** to switch between models. The new model loads the next time you start a conversation.
 
 ---
 
@@ -76,7 +76,7 @@ Deleting the app also removes all downloaded model files.
 
 To delete a downloaded model without uninstalling the app:
 
-1. Go to [**Settings**](./settings) → **Model**.
+1. Go to [**Settings**](./settings) → **Text Model**.
 2. Tap the model you want to remove.
 3. Tap **Delete Model**.
 
@@ -86,12 +86,15 @@ The model file is removed immediately. You can re-download it at any time.
 
 ## Integrated Vision Models
 
-All available models combine text and vision capabilities in a single download. **Qwen3.5 4B Vision** and **Qwen3.5 2B Vision** can read and describe images in addition to handling calendar requests — no separate vision model file is required. See [Vision & Photos](./vision-photos) for how to attach and analyze images.
+Some models combine text and vision capabilities in a single download. **Qwen3.5 Vision 4B** is one example — it can read and describe images in addition to handling calendar requests, without requiring a separate vision model file. See [Vision & Photos](./vision-photos) for how to attach and analyze images.
 
-When you select a model in the onboarding carousel or in [**Settings**](./settings) → **Model**, a **Vision** badge appears next to its name.
+When you select an integrated model in the onboarding carousel or in [**Settings**](./settings) → **Text Model**, an **Integrated** badge appears next to its name. The app automatically hides any text-only models of the same tier to avoid confusion — there is no need to download both.
+
+If you choose an integrated model:
 
 - One file covers everything — text chat, calendar operations, and image understanding.
-- Vision features (such as reading a screenshot of an event invitation) are available immediately after the download completes.
+- You do not need to download a separate vision model.
+- Vision features (such as reading a screenshot of an event invitation) are available immediately after the single download completes.
 
 ---
 
@@ -99,7 +102,7 @@ When you select a model in the onboarding carousel or in [**Settings**](./settin
 
 Qwen3.5 models support a **Thinking** mode where the AI reasons through your request before answering. This improves accuracy for complex calendar operations.
 
-Toggle it per-chat via the brain icon in the chat toolbar. When enabled, you can tap the **Thinking** disclosure in any assistant reply to see the reasoning steps.
+Toggle it in [**Settings**](./settings) → **Inference → Advanced** (or per-chat via the brain icon in the chat toolbar). When enabled, you can tap the **Thinking** disclosure in any assistant reply to see the reasoning steps.
 
 Thinking mode uses slightly more processing time but produces better results for multi-step calendar requests like:
 
