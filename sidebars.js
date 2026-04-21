@@ -15,6 +15,7 @@ const sidebars = {
         'guides/templates-live-activity',
         'guides/productivity-features',
         'guides/cloud-ai',
+        'guides/synthesis',
         'guides/subscriptions',
         'guides/privacy',
       ],
