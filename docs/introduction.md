@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # LucidPal
 
-**On-device AI calendar assistant for iOS — fully private, no cloud, powered by Qwen3.5.**
+**On-device AI calendar assistant for iOS — powered by Qwen3.5, with optional cloud AI via Gemini.**
 
 ## What is LucidPal?
 
@@ -12,7 +12,8 @@ LucidPal is an on-device AI assistant that understands and manages your iOS cale
 
 | Feature                       | Description                                                                                                 |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **100% On-Device**            | All inference runs via llama.cpp on the Neural Engine. No API keys, no subscriptions, no internet required. |
+| **100% On-Device**            | All inference runs via llama.cpp on the Neural Engine. No API keys required for local AI. Optional cloud AI available with subscription. |
+| **Cloud AI**                  | Optional cloud AI powered by Gemini 2.5 Flash. Available for Starter and higher subscribers. Automatically switches to local when offline. |
 | **Calendar Integration**      | Create, update, delete and query events using plain English. Conflict detection included.                   |
 | **Siri Shortcuts**            | Ten built-in Siri intents let you manage your calendar, notes, contacts, and habits without ever opening the app. |
 | **Multi-Session**             | Full conversation history with named sessions, persisted locally across launches.                           |
