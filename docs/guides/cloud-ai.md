@@ -81,7 +81,7 @@ You can override this in **Settings → Inference → Preferred Source**.
 
 ### "Subscription required" error
 
-Cloud AI requires an active paid subscription.
+Cloud AI requires an active paid subscription (Starter, Pro, or Ultimate).
 
 1. Open **Settings → Subscription**
 2. Verify your plan is active
