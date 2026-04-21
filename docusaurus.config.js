@@ -3,15 +3,15 @@ const { themes } = require('prism-react-renderer');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'LucidPal',
+  title: 'PocketMind',
   tagline: 'On-device AI calendar assistant for iOS',
   favicon: 'img/favicon.ico',
 
-  url: 'https://docs.lucidpal.app',
-  baseUrl: '/',
+  url: 'https://lucid-fabrics.github.io',
+  baseUrl: '/pocketmind/',
 
   organizationName: 'lucid-fabrics',
-  projectName: 'lucidpal',
+  projectName: 'pocketmind',
   trailingSlash: false,
 
   onBrokenLinks: 'throw',
@@ -28,10 +28,9 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          path: 'public',
           sidebarPath: require.resolve('./sidebars.js'),
           routeBasePath: '/',
-          editUrl: 'https://github.com/lucid-fabrics/lucidpal/tree/main/public/',
+          editUrl: 'https://github.com/lucid-fabrics/pocketmind/tree/main/docs/',
         },
         blog: false,
         theme: {
@@ -45,11 +44,12 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'LucidPal',
+        title: 'PocketMind',
         items: [
           { type: 'docSidebar', sidebarId: 'guides', position: 'left', label: 'Guides' },
+          { type: 'docSidebar', sidebarId: 'architecture', position: 'left', label: 'Architecture' },
           {
-            href: 'https://github.com/lucid-fabrics/lucidpal',
+            href: 'https://github.com/lucid-fabrics/pocketmind',
             label: 'GitHub',
             position: 'right',
           },
@@ -57,17 +57,7 @@ const config = {
       },
       footer: {
         style: 'dark',
-        links: [
-          {
-            title: 'Legal',
-            items: [
-              { label: 'Privacy Policy', to: '/legal/privacy-policy' },
-              { label: 'Terms of Service', to: '/legal/terms-of-service' },
-              { label: 'EULA', to: '/legal/eula' },
-            ],
-          },
-        ],
-        copyright: `© ${new Date().getFullYear()} LucidPal. Built with Docusaurus.`,
+        copyright: `© ${new Date().getFullYear()} PocketMind. Built with Docusaurus.`,
       },
       prism: {
         theme: themes.github,

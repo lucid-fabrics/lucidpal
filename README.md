@@ -11,6 +11,7 @@
 </p>
 
 <p align="center">
+  <a href="https://ci.lucidpal.app/repos/lucid-fabrics/lucidpal"><img alt="CI" src="https://ci.lucidpal.app/api/badges/lucid-fabrics/lucidpal/status.svg"></a>
   <img alt="iOS" src="https://img.shields.io/badge/iOS-16%2B-111111?logo=apple&logoColor=white">
   <img alt="On-device AI" src="https://img.shields.io/badge/AI-On--Device-34C759?logo=llama&logoColor=white">
   <a href="https://lucid-fabrics.github.io/lucidpal/">
