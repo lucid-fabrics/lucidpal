@@ -248,7 +248,7 @@ This overlay is distinct from the home screen mic button, which starts an automa
 
 ## Generation Controls
 
-While the AI is generating a response, the send button is replaced by a **stop button** (red circle with a square). Tap it to cancel the current generation immediately. The partially generated text remains in the conversation.
+While the AI is generating a response, animated staggered dots appear in the message list as a typing indicator. The send button is replaced by a **stop button** (gray circle with a square). Tap it to cancel the current generation immediately. The partially generated text remains in the conversation.
 
 ---
 
