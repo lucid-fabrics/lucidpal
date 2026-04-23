@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Quickstart
 
-Build and run PocketMind on a physical iPhone in under 5 minutes.
+Build and run LucidPal on a physical iPhone in under 5 minutes.
 
 ## Prerequisites
 
@@ -29,8 +29,8 @@ gem install bundler
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/lucid-fabrics/pocketmind.git
-cd pocketmind/apps/pocketmind-ios
+git clone https://github.com/lucid-fabrics/lucidpal.git
+cd lucidpal/apps/lucidpal-ios
 ```
 
 ### 2. Install Ruby dependencies
@@ -46,13 +46,13 @@ bundle exec fastlane ios device
 ```
 
 This lane:
-1. Runs `xcodegen generate` to regenerate `PocketMind.xcodeproj`
+1. Runs `xcodegen generate` to regenerate `LucidPal.xcodeproj`
 2. Builds with `xcodebuild` for the physical device
 3. Installs via `ios-deploy`
 
 ### 4. Download a model
 
-On first launch, PocketMind shows the **Model Download** screen. Tap **Download** to fetch the recommended Qwen3 model for your device (Wi-Fi recommended).
+On first launch, LucidPal shows the **Model Download** screen. Tap **Download** to fetch the recommended Qwen3 model for your device (Wi-Fi recommended).
 
 ---
 
@@ -61,9 +61,9 @@ On first launch, PocketMind shows the **Model Download** screen. Tap **Download*
 ### Open in Xcode
 
 ```bash
-cd apps/pocketmind-ios
+cd apps/lucidpal-ios
 xcodegen generate
-open PocketMind.xcodeproj
+open LucidPal.xcodeproj
 ```
 
 ### Run Tests

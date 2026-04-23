@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Calendar Integration
 
-How PocketMind translates natural language into EventKit operations.
+How LucidPal translates natural language into EventKit operations.
 
 ## End-to-End Flow
 
