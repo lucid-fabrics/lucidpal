@@ -39,9 +39,15 @@ To grant or revoke access: **iOS Settings → Privacy & Security → Calendars �
 
 ---
 
-## Speech Recognition
+## Speech Recognition & Voice Recording
 
-If you use the microphone button in LucidPal, speech recognition runs **on-device** via Apple's `SFSpeechRecognizer`. Audio is never sent to a server.
+When you speak to the Agent, LucidPal records audio locally using the iOS `AVAudioRecorder` API and transcribes it on-device via **WhisperKit** (a local implementation of OpenAI Whisper). This audio:
+
+- **Stays on-device** — it is never uploaded to any server.
+- **Is discarded after transcription** — the raw audio file is deleted once your speech has been converted to text.
+- **Can be disabled** by revoking microphone permission in your device settings. Note that doing so will prevent voice input in the Agent.
+
+To grant or revoke microphone access: **iOS Settings → Privacy & Security → Microphone → LucidPal**
 
 Microphone access is optional. The app works fully without it.
 

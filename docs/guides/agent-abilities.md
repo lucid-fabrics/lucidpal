@@ -20,9 +20,25 @@ Tap the **Agent** tab (the orb icon at the bottom of the screen) to open the Age
 ### Speaking to the Agent
 
 1. Tap the orb. It expands and pulses — start speaking.
-2. A live transcript appears. You have 3 seconds to review it, or tap to submit immediately.
-3. The Agent queries your connected data sources in real time (you'll see "Checking your calendar…", "Reading emails…", etc.).
-4. The answer appears in a full-screen sheet with structured cards or plain text.
+2. A live audio meter animates in real time as you speak, giving you visual confirmation that your voice is being captured.
+3. A live transcript appears. You have 3 seconds to review it, or tap to submit immediately.
+4. The Agent queries your connected data sources in real time (you'll see "Checking your calendar…", "Reading emails…", etc.).
+5. The answer appears in a sheet with structured cards or plain text. Pull it down to dismiss.
+
+:::note
+The Agent requires **microphone access** to listen. If permission hasn't been granted, you'll see a prompt the first time you tap the orb. You can change this anytime in **Settings → Privacy → Microphone**.
+:::
+
+### Troubleshooting Voice Input
+
+If recording doesn't work, the Agent shows a clear message:
+
+| Message | What it means | What to do |
+|---------|---------------|------------|
+| *Microphone permission not granted.* | LucidPal doesn't have mic access. | Settings → Privacy → Microphone → enable LucidPal. |
+| *Already recording.* | A previous session didn't fully reset. | Wait a moment and try again. |
+| *Still processing your previous message.* | Whisper is still transcribing. | Wait for the current task to finish. |
+| *Nothing was captured. Tap the orb and speak.* | No audio was detected. | Tap the orb and speak clearly at a normal pace. |
 
 ---
 
@@ -159,7 +175,7 @@ You can create entirely custom abilities. Tips for prompts that actually work:
 
 ## Answer Cards
 
-When an ability finishes, the answer appears in a full-screen sheet. Some abilities return **structured cards**:
+When an ability finishes, the answer appears in a sheet. Pull it down to dismiss, or swipe up to expand to full height. Some abilities return **structured cards**:
 
 | Card type | When it appears |
 |-----------|----------------|
@@ -168,7 +184,7 @@ When an ability finishes, the answer appears in a full-screen sheet. Some abilit
 | **Health** | Health ability — metric grid with trend indicators. |
 | **Plain text** | Any other prompt — formatted markdown with copy button. |
 
-The sheet also echoes your original request at the top so the answer is self-contained.
+The sheet echoes your original request at the top so the answer is self-contained without any surrounding context.
 
 ---
 
