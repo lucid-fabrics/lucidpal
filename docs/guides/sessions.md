@@ -233,7 +233,9 @@ Individual event cards still have their own confirm/cancel buttons if you want t
 
 ## Voice Recording Overlay
 
-When you tap the **mic** button in the input bar, the full chat screen is replaced by a fullscreen **Voice Recording Overlay**. It shows:
+The input bar shows a **mic button** on the right side whenever the text field is empty and voice input is available. Once you start typing, the mic automatically transitions to a **send button** — no manual switching needed.
+
+Tap the mic to open a fullscreen **Voice Recording Overlay**. It shows:
 
 - A live transcript of what you are saying (updates in real time).
 - A **spinning indicator** while audio is being transcribed after you stop speaking.
