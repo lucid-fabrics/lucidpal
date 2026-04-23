@@ -73,7 +73,7 @@ Use bookmarks to mark important decisions, questions to revisit, or standout mom
 
 ### Live Transcription
 
-Transcription begins immediately and runs in real-time. While the full transcript is processed after recording ends, key phrases may appear during active recording.
+Transcription begins immediately and runs in real-time. Speaker detection identifies and labels different speakers throughout the conversation. While the full transcript is processed after recording ends, key phrases may appear during active recording.
 
 ---
 
@@ -220,7 +220,7 @@ This ensures you never miss important content during in-person meetings or phone
 
 - **Notes** – Recorded sessions are saved as voice notes, accessible from the Notes tab
 - **Calendar** – Sessions can be linked to calendar events for automatic association
-- **Cloud AI** – AI processing (summaries, chapters, highlights) runs via cloud services
+- **Cloud AI** – AI processing (summaries, chapters, highlights) runs via cloud services and requires Cloud AI credits (see [Cloud AI](./cloud-ai.md)) and requires an active subscription (Starter, Pro, or Ultimate)
 
 ---
 
