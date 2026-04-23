@@ -16,6 +16,7 @@ const sidebars = {
         'guides/agent-abilities',
         'guides/habits',
         'guides/notes',
+        'guides/record-sessions',
         'guides/productivity-features',
         'guides/cloud-ai',
         'guides/synthesis',

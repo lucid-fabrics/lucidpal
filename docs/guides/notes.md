@@ -172,11 +172,11 @@ In Read Mode, tap the **⋯** menu (top-right) and choose **Share** to open the 
 
 ---
 
-## Creating a Note with Your Voice
+## Recording Voice Sessions
 
-Tap the **microphone icon** (top-left of the Notes tab) to open Live Notes. This feature transcribes your voice in real time and saves the transcript as a note. Requires Cloud AI credits.
+Use the **Record tab** (microphone icon in the tab bar) to record meetings, interviews, and conversations. Live transcription, speaker detection, and AI summaries run automatically. Completed sessions appear in the Notes list with a microphone badge.
 
-For details, see [Cloud AI](./cloud-ai.md).
+For full details, see [Record Sessions](./record-sessions.md). Requires Cloud AI credits — see [Cloud AI](./cloud-ai.md).
 
 ---
 
