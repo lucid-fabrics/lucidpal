@@ -13,6 +13,8 @@ const sidebars = {
         'guides/siri',
         'guides/widgets-notifications',
         'guides/templates-live-activity',
+        'guides/agent-abilities',
+        'guides/habits',
         'guides/productivity-features',
         'guides/cloud-ai',
         'guides/synthesis',
