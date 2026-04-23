@@ -15,6 +15,7 @@ const sidebars = {
         'guides/templates-live-activity',
         'guides/agent-abilities',
         'guides/habits',
+        'guides/notes',
         'guides/productivity-features',
         'guides/cloud-ai',
         'guides/synthesis',
