@@ -33,7 +33,7 @@ The AI can set **title**, **body**, and **tags** when creating or updating a not
 | "Create a daily meditation habit" | Creates a new habit definition |
 | "How is my water habit going?" | Returns a 7-day summary and streak |
 
-When creating a habit the AI can set: **name**, **emoji**, **unit** (boolean, count, duration), and **frequency** (daily, weekly). When logging, it can set an optional **value** (defaults to 1 for boolean habits). Querying returns a 7-day summary and current streak.
+When creating a habit the AI can set: **name**, **emoji**, **unit** (boolean, count, duration), **frequency** (daily, weekly), **color** (accent hex), and **chart style** (bar, line, area). When logging, it can set an optional **value** (defaults to 1 for boolean habits). Querying returns a 7-day summary and current streak.
 
 :::tip
 Ask the AI to query a habit before logging to confirm the name it will match against.
