@@ -56,76 +56,53 @@ The Agent doesn't just run a search — it cross-references multiple data source
 
 ## Default Abilities
 
-These 10 abilities are installed by default and appear in the Abilities drawer.
+Five built-in abilities ship with LucidPal:
 
 | Ability | What it does |
 |---------|-------------|
-| **Briefing** | Pulls calendar, overnight health, weather, and unread email. Returns 3 bullets: what you must not miss, any risk or conflict, and whether your body is ready for a demanding day. |
-| **Calendar** | Analyzes today's schedule — most important event, back-to-back conflicts, and best slot for focused work. Not just a list. |
-| **Health** | Compares today's steps, heart rate, and HRV to your 7-day average. Returns one verdict (recovered / neutral / drained) and one action. |
-| **Email** | Triages unread Gmail — skips newsletters and automations, ranks emails that need a human reply by urgency. |
-| **Weather** | Translates today's forecast into decisions: jacket or umbrella, commute impact, any alerts. |
-| **Habits** | Shows which habits are done and which aren't, then prioritizes the incomplete ones by what you can still realistically finish today. |
-| **Plan Day** | Builds a concrete time-blocked schedule across morning, afternoon, and evening — with risk flags where your day is overloaded. |
-| **Traffic** | Checks live traffic to your saved destination and tells you whether to leave now or wait, plus any faster route. |
-| **Notes** | Surfaces the 3 most actionable items from your last 7 days of notes — ideas you didn't follow up on, and anything relevant to today's events. |
-| **Reminder** | Asks what you need reminding about and when, then sets it immediately without back-and-forth. |
+| **Morning Briefing** | Pulls health, weather, today's calendar, and recent emails. Returns a concise briefing: energy level, weather decisions, top events, and urgent emails. |
+| **Meeting Prep** | Finds the next meeting, pulls attendee contacts, searches relevant emails, and does a web search for background context. Returns talking points. |
+| **Day Planner** | Checks health and today's calendar, finds free slots, reviews pending habits. Returns a time-blocked schedule slotted around existing commitments. |
+| **Email Triage** | Fetches recent emails via Gmail, skips newsletters and automations, returns a categorized summary with urgent items first. |
+| **Habit Coach** | Queries all habits and today's completion status, cross-references with health metrics. Returns an assessment with one insight correlating habits and recovery. |
 
 ---
 
 ## Template Library
 
-Beyond the defaults, you can add abilities from the template library. Swipe the drawer all the way up, long-press any ability, tap **Edit Dock**, then **Add** to browse templates organized by category.
+The Abilities drawer can be expanded to reveal additional templates. Swipe the drawer all the way up, long-press any ability, tap **Edit Dock**, then **Add** to browse. Templates are organized by category.
 
 ### Morning
 
 | Template | What it does |
 |----------|-------------|
-| **Briefing** | Same as the default — synthesized morning briefing. |
-| **Weather** | Decision-first forecast. |
-| **Traffic** | Leave-now recommendation. |
-| **Sleep** | Last night's duration, deep sleep %, and HRV vs. 7-day average — one recovery verdict. |
-| **Motivate** | Checks your habits streak and today's calendar, then delivers one personalized sentence to start your day (not a generic quote). |
+| **Briefing** | Concise morning briefing covering health, weather, calendar, and email. |
+| **Weather** | Decision-first forecast — jacket or umbrella, commute impact, alerts. |
+| **Sleep** | Last night's duration, deep sleep %, and HRV vs. 7-day average with a recovery verdict. |
 
 ### Productivity
 
 | Template | What it does |
 |----------|-------------|
-| **Calendar** | Calendar intelligence — insights, not a raw list. |
-| **Plan Day** | Time-blocked schedule with risk flags. |
-| **Notes** | Forgotten tasks and calendar-linked notes. |
+| **Calendar** | Calendar intelligence — most important event, conflicts, best focus slot. |
+| **Day Planner** | Time-blocked schedule with risk flags for overloaded periods. |
+| **Notes** | Surfaces the 3 most actionable items from recent notes. |
 | **Reminder** | Ask once, set immediately. |
-| **Free Time** | Ranks your open calendar gaps by quality and tells you which block to protect for deep work. |
-| **Focus** | Cross-references your next 2 events, incomplete habits, and HRV — delivers one sentence on what to do right now. |
-| **Prep** | Meeting prep: scans recent emails from attendees, your notes on the topic, and last interaction — gives 3 talking points. |
+| **Free Time** | Ranks open calendar gaps by quality and tells you which block to protect. |
 
 ### Health
 
 | Template | What it does |
 |----------|-------------|
-| **Health** | Daily metrics vs. 7-day average with one action. |
-| **Habits** | Realistic completion priority given your calendar. |
-| **Workout** | Recovery-based workout recommendation (type, duration, best time slot). |
-| **Hydrate** | Activity-adjusted hydration goal with a noon check-in reminder. |
-| **Stress** | HRV trend vs. baseline with a context-aware de-stress technique if needed. |
+| **Health** | Today's steps, HRV, heart rate vs. 7-day average — one verdict and one action. |
+| **Habits** | Incomplete habits prioritized by what's realistic to finish today given your calendar. |
 
 ### Communication
 
 | Template | What it does |
 |----------|-------------|
-| **Email** | Ranked email triage — only emails that need a reply. |
-| **Inbox** | 48-hour inbox grouped into: needs reply, informational, safe to archive. |
-| **Reply** | Drafts a send-ready reply to the most urgent unread email. |
-| **Contacts** | Looks up name, phone, email, and recent email threads for anyone you mention. |
-
-### Evening
-
-| Template | What it does |
-|----------|-------------|
-| **Review** | 3-line honest day review using actual numbers — accomplishments, misses, one pattern. |
-| **Tomorrow** | Pulls tomorrow's calendar and deadline emails — gives the most important pre-bed action and your ideal wake time. |
-| **Wind Down** | 20-minute wind-down plan with a screen-off time based on your sleep target. |
-| **Gratitude** | Finds 3 specific highlights from today's data and writes a 3-sentence gratitude entry. |
+| **Email Triage** | Ranked Gmail triage — only emails that need a human reply. |
+| **Contacts** | Looks up name, phone, email for anyone you mention by name. |
 
 ---
 

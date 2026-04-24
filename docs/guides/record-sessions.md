@@ -222,6 +222,26 @@ This ensures you never miss important content during in-person meetings or phone
 - **Calendar** – Sessions can be linked to calendar events for automatic association
 - **Cloud AI** – AI processing (summaries, chapters, highlights) runs via cloud services and requires Cloud AI credits (see [Cloud AI](./cloud-ai.md)) and requires an active subscription (Starter, Pro, or Ultimate)
 
+### Session Configuration
+
+When starting a recording, `SessionConfig` holds:
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `title` | `""` | Optional session title; AI generates one if blank |
+| `template` | `.freeform` | Session template from the 6 types above |
+| `calendarEventId` | `nil` | Linked EKEvent identifier, if any |
+
+### Cloud Storage (NoteAttachments)
+
+Processed recordings include **attachments** (audio files, exported transcripts) stored via Cloudflare R2 when cloud sync is active:
+
+- `NoteAttachment` records: `r2Key`, `mimeType`, `sizeBytes`, `uploadedAt`
+- The `localURL` field caches the file on-device for offline playback
+- Uploads run asynchronously after processing completes
+
+This is separate from the note body itself — the transcript, AI summary, chapters, and highlights are stored in the note JSON; the raw audio and export file go to R2.
+
 ---
 
 ## Tips

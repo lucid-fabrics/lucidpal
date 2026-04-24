@@ -12,14 +12,19 @@ Start chats faster with built-in AI personas, and track generation progress on t
 
 Templates are built-in AI personas that configure LucidPal for a specific task. They appear as **horizontally-scrollable pill buttons** in the empty state — when a session has no messages yet.
 
-| Template        | Icon                     | Best for                              |
-| --------------- | ------------------------ | ------------------------------------- |
-| Writing Coach   | pencil.and.outline       | Drafting, editing, and improving text |
-| Decision Helper | scale.3d                 | Weighing options and making choices   |
-| Meeting Prep    | calendar.badge.checkmark | Briefing before a call or event       |
-| Brainstorm      | lightbulb                | Generating ideas without constraints  |
+| Template | Icon | Best for |
+|----------|------|----------|
+| Writing Coach | pencil.and.outline | Drafting, editing, and improving text |
+| Decision Helper | scale.3d | Weighing options and making choices |
+| Meeting Prep | calendar.badge.checkmark | Briefing before a call or event |
+| Brainstorm | lightbulb | Generating ideas without constraints |
+| Sales Call | briefcase | Prospect calls — objections, commitments, signals |
+| Interview | microphone | Job interviews — candidate responses and strengths |
+| 1:1 | person.2 | One-on-one meetings — feedback, blockers, decisions |
+| Standup | bolt | Daily standups — yesterday, today, blockers |
+| Lecture | book | Classes — key concepts, definitions, formulas |
 
-Tap a pill to activate that persona. LucidPal appends a focused instruction to its system prompt for the session — adjusting tone and approach for the selected mode. You can still send any message — the template just sets the initial context.
+Each template appends a focused instruction to the system prompt for that session, adjusting tone and approach. You can still send any message — the template just sets the initial context.
 
 :::tip
 Start a **Meeting Prep** session before an important call. LucidPal can reference your calendar to pull in the event details automatically.
@@ -63,6 +68,10 @@ While LucidPal is generating a response, a Live Activity tracks progress in real
 - Starts the moment generation begins.
 - Disappears automatically 2 seconds after the response is complete.
 - You can navigate away from LucidPal — the indicator stays visible so you know when to return.
+
+:::note
+Live Activity requires a **Pro or Ultimate** subscription. It is not available on the Free or Starter plans.
+::: 
 
 ### Lock Screen / StandBy
 

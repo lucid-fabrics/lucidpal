@@ -8,36 +8,31 @@ Build and run LucidPal on a physical iPhone in under 5 minutes.
 
 ## Prerequisites
 
-**Mac requirements**
-- macOS 14+ (Sonoma)
-- Xcode 16.0+
-- Ruby 3.2+ (`rbenv` or `rvm` recommended)
-
-**iPhone requirements**
-- iOS 17.0+ (on-device inference requires Neural Engine)
-- Connected via USB or trusted on the same Wi-Fi network
-
-**Tools**
-
-```bash
-brew install xcodegen ios-deploy
-gem install bundler
-```
+| | |
+|---|---|
+| **Mac** | macOS 14+ (Sonoma), Xcode 16.0+ |
+| **iPhone** | Any iPhone with 2 GB+ RAM, iOS 16+ |
+| **iPhone connection** | USB or trusted on same Wi-Fi |
+| **Tools** | `brew install xcodegen ios-deploy`, `gem install bundler` |
 
 ## Setup
 
-### 1. Clone the repo
+### 1. Clone and install
 
 ```bash
-git clone https://github.com/lucid-fabrics/lucidpal.git
+git clone https://github.com/lucid-fabrics/lucidpal
 cd lucidpal/apps/lucidpal-ios
-```
-
-### 2. Install Ruby dependencies
-
-```bash
 bundle install
 ```
+
+### 2. Open in Xcode
+
+```bash
+xcodegen generate
+open LucidPal.xcodeproj
+```
+
+Or use the device lane directly (step 3).
 
 ### 3. Deploy to iPhone
 
@@ -46,25 +41,15 @@ bundle exec fastlane ios device
 ```
 
 This lane:
-1. Runs `xcodegen generate` to regenerate `LucidPal.xcodeproj`
-2. Builds with `xcodebuild` for the physical device
-3. Installs via `ios-deploy`
+1. Regenerates the Xcode project (`xcodegen generate`)
+2. Builds for your connected device (auto-detected via CoreDevice)
+3. Installs via `ios-deploy` (Wi-Fi if USB not connected)
 
-### 4. Download a model
-
-On first launch, LucidPal shows the **Model Download** screen. Tap **Download** to fetch the recommended Qwen3 model for your device (Wi-Fi recommended).
+On first launch, LucidPal prompts you to download an AI model and grant calendar permission. The app works fully offline after the model is downloaded.
 
 ---
 
-## Development Workflow
-
-### Open in Xcode
-
-```bash
-cd apps/lucidpal-ios
-xcodegen generate
-open LucidPal.xcodeproj
-```
+## Development
 
 ### Run Tests
 
@@ -72,7 +57,7 @@ open LucidPal.xcodeproj
 bundle exec fastlane ios tests
 ```
 
-Or directly via Xcode: **Product → Test** (`⌘U`).
+Or in Xcode: **Product → Test** (`⌘U`).
 
 ### Fastlane Lanes
 
@@ -81,7 +66,19 @@ Or directly via Xcode: **Product → Test** (`⌘U`).
 | `device` | `bundle exec fastlane ios device` | Build + install on connected iPhone |
 | `tests` | `bundle exec fastlane ios tests` | Run full test suite |
 | `generate` | `bundle exec fastlane ios generate` | Regenerate Xcode project only |
+| `provision` | `bundle exec fastlane ios provision` | Register App IDs + App Group (one-time only) |
 
-:::note
-The commit-msg git hook enforces a 72-character subject line limit. Commits over the limit are rejected automatically.
-:::
+The commit-msg hook enforces a 72-character subject line limit. Commits over the limit are rejected automatically.
+
+---
+
+## What to Do Next
+
+| Goal | Where to go |
+|------|-------------|
+| Chat with AI | Open LucidPal — tap mic or start typing |
+| Calendar commands | "What's on tomorrow?" or "Add dentist Friday at 10am" |
+| Download a model | First-launch carousel or Settings → Text Model |
+| Voice input | Tap mic button on home screen or chat input bar |
+| Siri shortcuts | Settings → Shortcuts — all intents are pre-configured |
+| Habits / Notes | Tap the tab icons at the bottom of the screen |

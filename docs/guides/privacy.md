@@ -73,7 +73,7 @@ The Qwen3.5 model files are downloaded once from **HuggingFace** (`huggingface.c
 
 If you use the optional vision model, any photos or images you share are processed entirely **on-device** by the vision model. Images are resized and passed to the local model for analysis — they are never uploaded to any server.
 
-To enable vision: select a vision model during onboarding or in [**Settings**](./settings) → **Vision Model**. See the [Vision & Photos guide](./vision-photos) for full details.
+To enable vision: select a vision model during onboarding or in **Settings → Vision Model**. See the [Models guide](./models) for how to download and configure vision models.
 
 ---
 

@@ -17,18 +17,24 @@ MVVM layers, dependency injection, and actor isolation in LucidPal.
 │  ModelDownloadViewModel  Settings   │
 ├─────────────────────────────────────┤
 │           Services (Protocols)      │  ← Injected as any XProtocol
-│  LLMService  CalendarService        │
-│  SessionManager  SpeechService      │
-│  HapticService  ModelDownloader     │
+│  LLMOrchestrator (cloud+local)       │
+│  LLMService (llama.cpp actor)       │
+│  CloudLLMService (Gemini API)        │
+│  CalendarService  SessionManager    │
+│  SpeechService  WhisperSpeechService│
 │  ContactsService  HabitStore        │
-│  SystemPromptBuilder  NotesStore    │
-│  NoteEnrichmentService  ContextService│
-│  SuggestedPromptsProvider           │
-│  WebSearchService  PremiumManager   │
+│  NotesStore  NoteEnrichmentService   │
+│  SystemPromptBuilder  ProactiveAgent│
+│  ImmichService  HealthService       │
+│  LiveActivityService  PremiumManager │
+│  WidgetCloudService  SyncManager     │
+│  WebSearchService  TTSService       │
+│  AirPodsVoiceCoordinator            │
 ├─────────────────────────────────────┤
 │         Models / Domain Types       │  ← Pure data, no UIKit/SwiftUI
 │  ChatMessage  ChatSession           │
-│  CalendarEventPreview  ModelInfo    │
+│  CalendarEventPreview  ModelInfo     │
+│  HabitModels  NoteItem  Ability      │
 └─────────────────────────────────────┘
 ```
 
@@ -85,36 +91,29 @@ See [LLM Inference](./llm-inference) for full `LlamaActor` internals, model load
 
 ## Protocol Inventory
 
-| Protocol                           | Conforming Type                                 | Mock                           |
-| ---------------------------------- | ----------------------------------------------- | ------------------------------ |
-| `LLMServiceProtocol`               | `LLMService`                                    | `MockLLMService`               |
-| `CalendarServiceProtocol`          | `CalendarService`                               | `MockCalendarService`          |
-| `DocumentProcessorProtocol`        | `DocumentProcessor`                             | —                              |
-| `SessionManagerProtocol`           | `SessionManager`                                | `MockSessionManager`           |
-| `SpeechServiceProtocol`            | `SpeechService`                                 | `MockSpeechService`            |
-| `HapticServiceProtocol`            | `HapticService`                                 | `MockHapticService`            |
-| `ChatHistoryManagerProtocol`       | `ChatHistoryManager` / `NoOpChatHistoryManager` | —                              |
-| `ModelDownloaderProtocol`          | `ModelDownloader`                               | `MockModelDownloader`          |
-| `AppSettingsProtocol`              | `AppSettings`                                   | `MockAppSettings`              |
-| `UISettingsProtocol`               | `AppSettings` (sub-protocol — `settingsMode`)   | —                              |
-| `PinnedPromptsStoreProtocol`       | `PinnedPromptsStore`                            | —                              |
-| `NotificationServiceProtocol`      | `NotificationService`                           | —                              |
-| `LiveActivityServiceProtocol`      | `LiveActivityService`                           | —                              |
-| `NotesStoreProtocol`               | `NotesStore`                                    | —                              |
-| `ContactsServiceProtocol`          | `ContactsService`                               | —                              |
-| `HabitStoreProtocol`               | `HabitStore`                                    | —                              |
-| `ContextServiceProtocol`           | `ContextService`                                | —                              |
-| `SuggestedPromptsProviderProtocol` | `SuggestedPromptsProvider`                      | —                              |
+| Protocol | Conforming Type | Mock |
+|---|---|---|
+| `LLMServiceProtocol` | `LLMService` | `MockLLMService` |
+| `CloudLLMServiceProtocol` | `CloudLLMService` | `MockCloudLLMService` |
+| `CalendarServiceProtocol` | `CalendarService` | `MockCalendarService` |
+| `DocumentProcessorProtocol` | `DocumentProcessor` | — |
+| `SessionManagerProtocol` | `SessionManager` | `MockSessionManager` |
+| `SpeechServiceProtocol` | `SpeechService` | `MockSpeechService` |
+| `HapticServiceProtocol` | `HapticService` | `MockHapticService` |
+| `ChatHistoryManagerProtocol` | `ChatHistoryManager` / `NoOpChatHistoryManager` | — |
+| `ModelDownloaderProtocol` | `ModelDownloader` | `MockModelDownloader` |
+| `AppSettingsProtocol` | `AppSettings` | `MockAppSettings` |
+| `PinnedPromptsStoreProtocol` | `PinnedPromptsStore` | — |
+| `NotificationServiceProtocol` | `NotificationService` | — |
+| `LiveActivityServiceProtocol` | `LiveActivityService` | — |
+| `NotesStoreProtocol` | `NotesStore` | — |
+| `ContactsServiceProtocol` | `ContactsService` | — |
+| `HabitStoreProtocol` | `HabitStore` | — |
+| `ContextServiceProtocol` | `ContextService` | — |
+| `SuggestedPromptsProviderProtocol` | `SuggestedPromptsProvider` | — |
+| `PremiumStatusProvider` | `PremiumManager` | — |
 
-> **Note:** `NoteEnrichmentService` and `PremiumManager` are concrete services (no protocol) — `NoteEnrichmentService` is injected into `NotesListViewModel` for async LLM-driven note enrichment; `PremiumManager` is instantiated at the composition root and manages StoreKit subscription state.
-
-**Deep-dive pages for key protocols:**
-
-- `SessionManagerProtocol` → [Sessions](./sessions)
-- `HabitStoreProtocol` → [Habit Store](./habit-store)
-- `NotesStoreProtocol` → [Notes Store](./notes-store)
-- `NoteEnrichmentService` → [Note Enrichment](./note-enrichment)
-- `ContextServiceProtocol` / `SuggestedPromptsProviderProtocol` → [Chat ViewModel](./chat-viewmodel)
+> **Note:** `NoteEnrichmentService` is a concrete service (no protocol) — injected into `NotesListViewModel` for async LLM-driven note enrichment. `PremiumManager` is a concrete service managing StoreKit subscription state.
 
 ## Model Download Pipeline
 
@@ -132,7 +131,7 @@ For the full download state machine, background session handling, and cache warm
 ## Testing and CI/CD
 
 - Unit and integration test patterns → [Testing](./testing)
-- Fastlane lanes, GitHub Actions workflows → [CI/CD](./ci-cd)
+- Woodpecker CI pipelines → `.woodpecker/` directory (NOT GitHub Actions)
 
 ## File Structure
 

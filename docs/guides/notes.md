@@ -27,7 +27,7 @@ Below the filter row, a compact stats bar shows at a glance:
 LucidPal's AI automatically assigns every note a category when you save it. Tap a chip to filter to that category — the chip glows with an orange gradient when active.
 
 | Category | Icon | Typical content |
-|----------|------|----------------|
+|----------|------|-----------------|
 | Idea | 💡 | Creative concepts, brainstorming |
 | Task | ✅ | Actionable to-dos |
 | Journal | 📓 | Personal reflections |
@@ -35,9 +35,21 @@ LucidPal's AI automatically assigns every note a category when you save it. Tap 
 | Goal | 🎯 | Objectives and milestones |
 | Memory | 🧠 | Things to remember |
 | Finance | 💰 | Budgets, expenses |
-| Note | 📝 | Everything else |
+| Other | 📝 | Everything else |
 
 Tap **All** to remove the filter.
+
+### Source Badges
+
+Every note carries a source showing how it entered LucidPal:
+
+| Source | Icon | How it enters |
+|--------|------|--------------|
+| Manual | ✏️ | Created or typed directly in the Notes editor |
+| Conversation | 💬 | Saved from a chat with the AI |
+| Voice | 🎙 | Recorded via the Record tab |
+| Photo | 📷 | Captured from an image (vision AI) |
+| Siri | 📱 | Saved via Siri ("Save a note in LucidPal") |
 
 ### Pinned Notes
 
@@ -152,6 +164,29 @@ When a note is saved, LucidPal's on-device AI analyses the body and may add:
 
 These fields appear automatically — you do not need to do anything to trigger enrichment. The **AI Summary** card appears at the top of the Read view, above the body. The **Action Items** card appears below the body and uses tappable checkboxes.
 
+### Voice Session AI Fields
+
+Notes recorded via the **Record tab** receive additional AI-enriched fields from the transcript analysis:
+
+| Field | What it shows |
+|-------|--------------|
+| **Chapters** | Timestamped segments with titles and AI summaries |
+| **Highlights** | Key moments or statements extracted from the conversation |
+| **Decisions** | Decisions made during the session, with checkmark icons |
+| **Follow-up Draft** | AI-generated email draft ready to copy and send |
+
+Chapters, highlights, decisions, and follow-up draft appear in the note's Read view below the body and action items. They are populated by `NoteEnrichmentService` after the recording is processed — see [Record Sessions](./record-sessions.md) for the full workflow.
+
+### NoteAttachments (Cloud Storage)
+
+Voice notes may include file attachments (audio recordings, exported transcripts). These are stored via **Cloudflare R2** when cloud sync is enabled:
+
+- Each attachment has an `r2Key` pointing to the object in R2 storage and a `localURL` for on-device cache
+- Attachments are uploaded after recording processing completes
+- The Notes list shows attachment size and upload status on the card footer
+
+This enables offline access while keeping the option to sync attachments across devices when connected.
+
 :::note On-device only
 All AI enrichment runs locally on your device using the currently loaded model. No note content is sent to any server. Enrichment requires a model to be loaded.
 :::
@@ -176,7 +211,7 @@ In Read Mode, tap the **⋯** menu (top-right) and choose **Share** to open the 
 
 Use the **Record tab** (microphone icon in the tab bar) to record meetings, interviews, and conversations. Live transcription, speaker detection, and AI summaries run automatically. Completed sessions appear in the Notes list with a microphone badge.
 
-For full details, see [Record Sessions](./record-sessions.md). Requires Cloud AI credits — see [Cloud AI](./cloud-ai.md).
+For full details, see [Record Sessions](./record-sessions.md).
 
 ---
 

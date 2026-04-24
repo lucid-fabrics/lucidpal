@@ -42,7 +42,7 @@ Tap any chip to send that question instantly.
 
 ### New text chat
 
-Tap **New text chat** to open a keyboard-based conversation instead of using voice. From a text session you can also capture [Notes](./notes) and ask about [habits](./habit-tracker) or [documents](./document-summarization).
+Tap **New text chat** to open a keyboard-based conversation instead of using voice. From a text session you can also capture [Notes](./notes) and ask about [habits](./habits) or other topics.
 
 ---
 
@@ -151,12 +151,12 @@ The follow-up works because LucidPal remembers the previous message in the same 
 
 Context is limited based on your device's RAM:
 
-| Device RAM   | Messages kept in context |
-| ------------ | ------------------------ |
-| Under 6 GB   | Last 20 messages         |
-| 6 GB or more | Last 50 messages         |
+| Device RAM | Messages kept in context | Max context |
+|------------|--------------------------|-------------|
+| Under 6 GB | Last 20 messages | 4K tokens |
+| 6 GB or more | Last 50 messages | 8K tokens |
 
-For very long conversations, start a new session to give the AI a clean slate.
+The **LLMOrchestrator** manages inference between cloud and local at runtime — see [Cloud AI](./cloud-ai.md) for how routing works.
 
 ---
 

@@ -4,7 +4,21 @@ sidebar_position: 2
 
 # LLM Inference
 
-How LucidPal streams tokens from llama.cpp to the SwiftUI UI.
+How LucidPal streams tokens from llama.cpp to the SwiftUI UI — and how the LLMOrchestrator decides between cloud and local.
+
+## Architecture: LLMOrchestrator
+
+`LLMOrchestrator` is the single entry point for all LLM generation. It decides at runtime whether to use **cloud (Gemini 2.5 Flash)** or **local (llama.cpp)** based on subscription tier, network connectivity, and user preference:
+
+| User setting | Behavior |
+|---|---|
+| `forceLocal = true` | Always use local — bypasses all cloud logic |
+| Auto (default) + no subscription | Always use local |
+| Auto + Starter/Pro/Ultimate + online | Use cloud by default |
+| Auto + cloud becomes unreachable | Fall back to local after 2s (first connect) or 30s (mid-session reconnect) |
+| Cloud stream fails before yielding any token | Auto-retries with local (one-shot fallback) |
+
+The orchestrator conforms to `LLMServiceProtocol`, so callers (`ChatViewModel`, `AgentViewModel`) are unaware of which backend is active.
 
 ## Flow
 
@@ -13,22 +27,23 @@ User sends message
        ↓
 ChatViewModel.sendMessage()
        ↓
-Build system prompt (calendar context injected — see [System Prompt Builder](./system-prompt))
+Build system prompt (calendar context injected — see System Prompt Builder)
        ↓
-llmService.generate() → AsyncThrowingStream<String>
+LLMOrchestrator.generate() → AsyncThrowingStream<String>
        ↓
-LlamaActor.generate() — serial actor, C FFI
+  Active source = cloud? → CloudLLMService.generate()
+  Active source = local? → LLMService.generate()
        ↓
 Token-by-token via AsyncThrowingStream
        ↓
 applyStreamToken() — think/response split
        ↓
-executeCalendarActions() — extract + execute JSON blocks
+executeCalendarActions() / executeNoteActions() / etc. — extract + execute JSON blocks
        ↓
 Update messages array → SwiftUI re-renders
 ```
 
-## Token Streaming
+## Token Streaming (Local — LlamaActor)
 
 `LLMService.generate()` returns an `AsyncThrowingStream<String, Error>` — each element is one token (~1 word fragment). `ChatViewModel` consumes this stream and applies each token live:
 
@@ -97,11 +112,11 @@ finalizeResponse(assistantID:)
         ↓
   executeNoteActions()        → [NOTE_ACTION:{...}]      → NotesStore
         ↓
-  executeContactsSearch()     → [CONTACTS_SEARCH:{...}]  → ContactsService
+  executeContactsSearch()      → [CONTACTS_SEARCH:{...}]  → ContactsService
         ↓
-  executeHabitActions()       → [HABIT_ACTION:{...}]     → HabitStore
+  executeHabitActions()        → [HABIT_ACTION:{...}]     → HabitStore
         ↓
-  executeReminderActions()    → [REMINDER_ACTION:{...}]  → EventKit reminders
+  executeReminderActions()     → [REMINDER_ACTION:{...}]  → EventKit reminders
         ↓
 messages[idx].content stripped of action tokens
 messages[idx].calendarEventPreviews / notePreviews / … populated
@@ -113,24 +128,24 @@ Each `execute*` call receives the full final `content` string, scans for its act
 
 Web search is special: if a `[WEB_SEARCH:{...}]` block is found, the assistant message is cleared and a **second** full generation pass runs with the search results injected as a user message, subject to the same timeout.
 
-## Thinking Mode (Qwen3.5 `<think>` Tags)
+## Thinking Mode (Qwen3 `<think>` Tags)
 
-Qwen3.5 models emit a `<think>...</think>` block before answering. LucidPal handles this live:
+Qwen3 models emit a `<think>...` block before answering. LucidPal handles this live:
 
 ```
 <think>
 The user wants to create an event...
-</think>
+
 Here's your event — tap confirm.
 ```
 
-`applyStreamToken()` buffers the prefix and splits at `</think>`:
+`applyStreamToken()` buffers the prefix and splits at ``:
 
-| Buffer state                         | Action                                              |
-| ------------------------------------ | --------------------------------------------------- |
+| Buffer state | Action |
+|---|---|
 | Starts with `<think>` (no close yet) | Set `isThinking = true`, show in ThinkingDisclosure |
-| `</think>` detected                  | Extract thinking text, reset to response mode       |
-| No `<think>` prefix                  | Treat entire output as response                     |
+| `` detected | Extract thinking text, reset to response mode |
+| No `<think>` prefix | Treat entire output as response |
 
 `applyStreamToken` is called on every individual token during streaming. The `rawBuffer` accumulates the full output so far. Think-block detection happens **live** — `isThinking` and `thinkingContent` are updated on each token, so `ThinkingDisclosure` animates in real time while the model is still generating.
 
@@ -141,7 +156,7 @@ If the model emits text before any `<think>` tag (i.e. `rawBuffer` does not star
 `LlamaActor+Tokenize.swift` exposes three low-level helpers used exclusively within `LlamaActor`:
 
 | Function | Purpose | Called by |
-|----------|---------|-----------|
+|---|---|---|
 | `tokenize(text:addBOS:parseSpecial:vocab:)` | Converts a prompt string → `[llama_token]` via `llama_tokenize` | `generate()` before prefill |
 | `tokenToPiece(token:vocab:)` | Converts a sampled token ID → raw `[CChar]` bytes via `llama_token_to_piece` | `streamTokens()` each iteration |
 | `decodeUTF8([CChar])` | Assembles valid UTF-8 strings from raw byte sequences, buffering incomplete multi-byte chars | `streamTokens()` after each `tokenToPiece` |
@@ -161,17 +176,17 @@ let historyLimit = ramGB >= 6
     : ChatConstants.smallHistoryLimit   // 20 messages ≈ 2 000 tokens
 ```
 
-| RAM    | Context   | History Limit |
-| ------ | --------- | ------------- |
-| < 6 GB | 4K tokens | 20 messages   |
-| ≥ 6 GB | 8K tokens | 50 messages   |
+| RAM | Context | History Limit |
+| --- | ------- | ------------- |
+| < 6 GB | 4K tokens | 20 messages |
+| ≥ 6 GB | 8K tokens | 50 messages |
 
 ## Sampler Configuration
 
-| Parameter      | Value | Reason                                 |
-| -------------- | ----- | -------------------------------------- |
-| Temperature    | 0.35  | Low — reduces hallucinated JSON fields |
-| Max new tokens | 768   | Prevents runaway generation            |
+| Parameter | Value | Reason |
+|---|---|---|
+| Temperature | 0.35 | Low — reduces hallucinated JSON fields |
+| Max new tokens | 768 | Prevents runaway generation |
 
 The sampler chain uses temperature + random distribution (`llama_sampler_init_dist`). No top-p/top-k sampler is applied.
 
@@ -247,8 +262,10 @@ When a text model also handles vision (e.g. Qwen3.5 Vision 4B integrated), `text
 
 ## Error Handling
 
-| Error                     | Source                                     | Handling                                     |
-| ------------------------- | ------------------------------------------ | -------------------------------------------- |
-| `LLMError.modelNotLoaded` | `LLMService.generate` when model not ready | ChatViewModel shows error banner             |
-| `CancellationError`       | User taps stop button                      | Partial content left visible, no error shown |
-| Any other `Error`         | llama.cpp runtime                          | Displayed in `messages[idx].content`         |
+| Error | Source | Handling |
+|---|---|---|
+| `LLMError.modelNotLoaded` | `LLMService.generate` when model not ready | ChatViewModel shows error banner |
+| `CancellationError` | User taps stop button | Partial content left visible, no error shown |
+| `CloudLLMError.dailyLimitReached` | Cloud credits exhausted | Show banner with upgrade prompt |
+| `CloudLLMError.notAuthenticated` | Auth token expired | Show sign-in banner |
+| Any other `Error` | llama.cpp runtime or cloud service | Displayed in `messages[idx].content` |

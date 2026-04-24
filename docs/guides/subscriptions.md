@@ -4,7 +4,7 @@ sidebar_position: 11
 
 # Subscriptions
 
-LucidPal offers optional paid plans that unlock cloud AI features and higher usage limits.
+LucidPal offers optional paid plans that unlock cloud AI, live activities, smart widgets, and advanced AI features.
 
 ## Plan Tiers
 
@@ -14,8 +14,56 @@ LucidPal offers optional paid plans that unlock cloud AI features and higher usa
 | Cloud AI chat | — | ✓ | ✓ | ✓ |
 | Ability synthesis | — | ✓ | ✓ | ✓ |
 | Cloud AI monthly limit | — | Standard | Higher | Highest |
+| Live Activities (Dynamic Island) | — | — | ✓ | ✓ |
+| Smart Widgets | — | — | ✓ | ✓ |
+| AI Note Enrichment | — | ✓ | ✓ | ✓ |
+| Health AI Insights | — | — | — | ✓ |
+| Proactive AI (morning briefing) | — | — | — | ✓ |
+| Widget cloud refresh | — | — | — | ✓ |
+| API Access | — | — | ✓ | ✓ |
+| Data Export | — | — | ✓ | ✓ |
 
 All calendar, notes, habits, and on-device AI features remain free forever.
+
+---
+
+## Plan Details
+
+### Free
+
+Everything you need to use LucidPal as a local AI assistant:
+- On-device inference with any downloaded model
+- Full calendar, notes, habits, and contacts integration
+- Voice input via WhisperKit
+- Siri shortcuts (11 built-in intents)
+- Home screen widgets (basic)
+
+### Starter ($X.99/month)
+
+For users who want faster cloud responses and AI synthesis:
+- All Free features
+- Cloud AI powered by Gemini 2.5 Flash
+- Ability plan synthesis (Morning Briefing, Meeting Prep, etc.)
+- AI Note Enrichment (auto-summarize and tag notes)
+- Standard monthly cloud AI limit
+
+### Pro ($X.99/month)
+
+For power users who want live context and extended access:
+- All Starter features
+- Live Activities on Dynamic Island during AI generation
+- Smart Widgets with widget cloud refresh
+- API Access (connect LucidPal to external tools)
+- Data Export (export all your data)
+- Higher monthly cloud AI limit
+
+### Ultimate ($X.99/month)
+
+For users who want the full experience:
+- All Pro features
+- Health AI Insights (AI analysis of health metrics)
+- Proactive AI (daily morning briefing notification)
+- Highest monthly cloud AI limit
 
 ---
 
@@ -33,7 +81,7 @@ All calendar, notes, habits, and on-device AI features remain free forever.
 
 Subscriptions are managed through the App Store.
 
-1. Open **Settings → Subscription**
+1. Open **LucidPal → Settings → Subscription**
 2. Tap **Manage Subscription**
 3. Select your plan or cancel
 
@@ -50,7 +98,7 @@ LucidPal cannot process refunds directly. For refund requests, contact Apple Sup
 | After cancellation | Behavior |
 |-------------------|----------|
 | Within billing period | Full access continues |
-| After billing period ends | Cloud AI disabled, on-device AI unaffected |
+| After billing period ends | Cloud AI + premium features disabled; on-device AI unaffected |
 | Subscribing again later | Full cloud access restored immediately |
 
 Your notes, habits, calendar data, and sessions are never deleted.

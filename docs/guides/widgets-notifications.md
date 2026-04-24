@@ -12,11 +12,15 @@ Keep your schedule visible at a glance with Home Screen widgets and smart pre-ev
 
 LucidPal provides three widget sizes. Add them via the iOS widget picker (long-press the Home Screen → **+** → LucidPal).
 
-| Size   | What it shows                                                                                                               |
-| ------ | --------------------------------------------------------------------------------------------------------------------------- |
-| Small  | Countdown to next event (e.g. "45m"), event title, and start time. Shows "Free today" with a chat prompt when no events remain. |
-| Medium | Left panel: next event title, start time, and countdown. Right panel: up to 3 free time slots today (duration + start time). Shows "No gaps today" when the work day is fully booked. |
-| Large  | Full-day header with today's date, up to 4 remaining events (title + time range + countdown badge if within 1 hour), overflow count for additional events, and an "Ask your AI" CTA. Shows "Free day — tap to plan it" when the calendar is empty. |
+| Size | What it shows |
+|------|---------------|
+| **Small** | Countdown to next event, event title, and start time. Shows "Free today" with a chat prompt when no events remain. |
+| **Medium** | Left panel: next event title, start time, countdown. Right panel: up to 3 free time slots today (duration + start time). Shows "No gaps today" when the work day is fully booked. |
+| **Large** | Full-day header with today's date, up to 4 remaining events (title + time range + countdown badge if within 1 hour), overflow count, and an "Ask your AI" CTA. Shows "Free day — tap to plan it" when the calendar is empty. |
+
+:::note
+Smart widget refresh (timeline entries, Smart Stack surfacing) requires a **Pro or Ultimate** subscription. Free and Starter plans show the widget but it does not receive targeted refresh entries. Live Activity in the Dynamic Island also requires Pro+.
+:::
 
 :::tip
 Use the **Medium** widget on your most-visited Home Screen page for an instant overview of what's next and when you're free.

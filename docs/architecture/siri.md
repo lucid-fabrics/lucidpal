@@ -8,49 +8,53 @@ How LucidPal integrates with Siri using the AppIntents framework.
 
 ## Overview
 
-LucidPal registers nine Siri intents via the **AppIntents** framework. Calendar and AI intents use a **handoff pattern**: they store a pending query in `UserDefaults`, tell Siri a brief spoken confirmation, and open the app. The app picks up the pending query when its scene becomes active. The three background-action intents — `SaveNoteIntent`, `FindContactIntent`, and `LogHabitIntent` — run entirely without opening the app (`openAppWhenRun: false`) and write directly to the app's shared document storage.
+LucidPal registers eleven Siri intents via the **AppIntents** framework. Calendar and AI intents use a **handoff pattern**: they store a pending query in `UserDefaults`, tell Siri a brief spoken confirmation, and open the app. The app picks up the pending query when its scene becomes active. Five background-action intents — `SaveNoteIntent`, `FindContactIntent`, `LogHabitIntent`, `SetReminderIntent`, and `DeleteCalendarEventIntent` — run entirely without opening the app (`openAppWhenRun: false`) and write directly to the app's shared document storage.
 
 ```
 User: "Add dentist Friday at 10am to LucidPal"
         ↓
 AddCalendarEventIntent.perform()
         ↓
-UserDefaults["pm_siri_pending_query"] = "Add dentist Friday at 10am to my calendar"
+UserDefaults["pm_siri_pending_event"] = "Add dentist Friday at 10am"
         ↓
 return .result(dialog: "Opening LucidPal to add dentist Friday at 10am.")
         ↓
 App foregrounds → LucidPalApp reads UserDefaults key
         ↓
-SessionListViewModel.handleSiriQuery(_:) → new session → ChatViewModel.sendMessage()
+SessionListViewModel.handleSiriEvent() → CreateEventSheet shown
         ↓
-LLM generates CALENDAR_ACTION block → CalendarEventPreview shown
+User confirms → CalendarService.createEvent() → EKEventStore
 ```
 
 ## Intent Inventory
 
-| Intent                      | Pattern     | Trigger phrases                                                                                 | Pre-seeded query                | User parameter                 |
-| --------------------------- | ----------- | ----------------------------------------------------------------------------------------------- | ------------------------------- | ------------------------------ |
-| `StartVoiceIntent`          | handoff     | "Talk to LucidPal", "Open LucidPal voice", "Start LucidPal voice", "Listen with LucidPal"      | —                               | — (sets `pendingVoiceStart` flag) |
-| `AskLucidPalIntent`         | handoff     | "Ask LucidPal [question]"                                                                       | User-provided `query`           | `@Parameter query: String`     |
-| `CheckCalendarIntent`       | handoff     | "Check my LucidPal calendar"                                                                    | "What's on my calendar today?"  | —                              |
-| `AddCalendarEventIntent`    | handoff     | "Add [event] to LucidPal"                                                                       | "Add [event] to my calendar"    | `@Parameter event: String`     |
-| `FindFreeTimeIntent`        | handoff     | "Find free time in LucidPal"                                                                    | "Find a free 1-hour slot today" | —                              |
-| `DeleteCalendarEventIntent` | handoff     | "Delete [event] in LucidPal"                                                                    | —                               | `@Parameter eventName: String` |
-| `UndoLastDeletionIntent`    | handoff     | "Undo my last LucidPal action", "Undo what I just did in LucidPal", "Undo last LucidPal change" | —                               | —                              |
-| `SaveNoteIntent`            | background  | "Save note to LucidPal", "Add note to LucidPal", "Jot down in LucidPal"                        | —                               | `@Parameter title: String`, `@Parameter content: String` |
-| `FindContactIntent`         | background  | "Find contact in LucidPal", "Look up contact in LucidPal", "Get phone number from LucidPal"    | —                               | `@Parameter name: String`      |
-| `LogHabitIntent`            | background  | "Log habit in LucidPal", "Track habit with LucidPal", "Log my workout in LucidPal"             | —                               | `@Parameter habitName: String`, `@Parameter value: Double` |
+| Intent | Pattern | Trigger phrases | User parameter |
+|---|---|---|---|
+| `StartVoiceIntent` | handoff | "Talk to LucidPal", "Open LucidPal voice", "Start LucidPal voice", "Listen with LucidPal" | — (sets `pendingVoiceStart` flag) |
+| `AskLucidPalIntent` | handoff | "Ask LucidPal [question]" | `@Parameter query: String` |
+| `CheckCalendarIntent` | handoff | "Check my LucidPal calendar", "What's on my LucidPal calendar" | — |
+| `AddCalendarEventIntent` | handoff | "Add [event] to LucidPal" | `@Parameter event: String` |
+| `FindFreeTimeIntent` | handoff | "Find free time in LucidPal" | — |
+| `DeleteCalendarEventIntent` | background | "Delete [event] in LucidPal", "Delete event in LucidPal" | `@Parameter eventName: String` |
+| `UndoLastDeletionIntent` | handoff | "Undo my last LucidPal action", "Undo what I just did in LucidPal" | — |
+| `AgentTaskIntent` | handoff | "Ask LucidPal Agent" | `@Parameter task: String` |
+| `SaveNoteIntent` | background | "Save note to LucidPal", "Add note to LucidPal" | `@Parameter title: String`, `@Parameter content: String` |
+| `FindContactIntent` | background | "Find contact in LucidPal", "Get phone number from LucidPal" | `@Parameter name: String` |
+| `LogHabitIntent` | background | "Log habit in LucidPal", "Log my workout in LucidPal" | `@Parameter habitName: String`, `@Parameter value: Double` |
+| `SetReminderIntent` | background | "Set reminder in LucidPal" | `@Parameter title: String`, `@Parameter body: String?`, `@Parameter at: Date` |
 
-## Handoff Key
+## Handoff Keys
 
 Most intents write to `UserDefaults` and are consumed when the scene activates:
 
-| Intent | Key | Consumer |
-|--------|-----|----------|
-| `AskLucidPalIntent` | `pm_siri_pending_query` | `consumePendingSiriQuery()` → `scheduleSiriQuery()` |
-| `AddCalendarEventIntent` | `pm_siri_pending_event` | `consumePendingSiriEvent()` → `scheduleCreateEvent()` |
-| `AgentTaskIntent` | `pm_pending_agent_task` | `consumePendingAgentTask()` → `agentViewModel.submitTask()` |
-| `StartVoiceIntent` | `pm_pending_voice_start` | `consumePendingVoiceStart()` → `scheduleVoiceSession()` |
+| Key | Intent | Consumer |
+|---|---|---|
+| `pm_siri_pending_query` | `AskLucidPalIntent` | `consumePendingSiriQuery()` → `scheduleSiriQuery()` |
+| `pm_siri_pending_event` | `AddCalendarEventIntent` | `consumePendingSiriEvent()` → `scheduleCreateEvent()` |
+| `pm_pending_agent_task` | `AgentTaskIntent` | `consumePendingAgentTask()` → `agentViewModel.submitTask()` |
+| `pm_pending_voice_start` | `StartVoiceIntent` | `consumePendingVoiceStart()` → `scheduleVoiceSession()` |
+
+`UndoLastDeletionIntent` reads from `SiriContextStore` (a separate `UserDefaults` key) which records the last calendar action with full event data for proper undo.
 
 Keys are cleared immediately after forwarding to prevent replaying on subsequent launches.
 
@@ -95,7 +99,7 @@ AppShortcut(
     intent: CheckCalendarIntent(),
     phrases: [
         "Check my \(.applicationName) calendar",
-        "What's on my \(.applicationName) calendar",
+        "What's on my \(.applicationName) schedule",
         "Show my \(.applicationName) schedule"
     ],
     shortTitle: "Check Calendar",
@@ -114,8 +118,6 @@ After a Siri handoff intent fires, `LucidPalApp` reads the `UserDefaults` key an
 3. Sets `siriNavigationMeta = session.meta` — a `@Published ChatSessionMeta?` on `SessionListViewModel`.
 
 `SessionListView` observes `siriNavigationMeta` to navigate to the new session. `ChatSessionContainer` reads `pendingQueryBySessionID[session.id]` and pre-fills the text field (or auto-sends the message), then removes the entry.
-
-The same `pendingQueryBySessionID` mechanism is also used by in-app quick-action chips that want to pre-seed a new session with a fixed prompt.
 
 ```swift
 // SessionListViewModel
@@ -158,27 +160,27 @@ struct SiriLastAction: Codable {
 
 `SiriContextStore` is a caseless enum with three static methods backed by `UserDefaults` key `"pm_siri_last_action"`. JSON encoding/decoding uses `JSONEncoder` / `JSONDecoder`.
 
-| Method  | Signature                         | Description                                   |
-| ------- | --------------------------------- | --------------------------------------------- |
-| `write` | `write(_ action: SiriLastAction)` | Encodes and persists the action               |
-| `read`  | `read() -> SiriLastAction?`       | Decodes and returns the last action, or `nil` |
-| `clear` | `clear()`                         | Removes the stored value                      |
+| Method | Signature | Description |
+|---|---|---|
+| `write` | `write(_ action: SiriLastAction)` | Encodes and persists the action |
+| `read` | `read() -> SiriLastAction?` | Decodes and returns the last action, or `nil` |
+| `clear` | `clear()` | Removes the stored value |
 
 ### Write sites
 
-| Call site                                              | Action type written                                            |
-| ------------------------------------------------------ | -------------------------------------------------------------- |
-| `CalendarActionController.createEvent()`               | `.created` (after EKEvent is saved)                            |
-| `ChatViewModel+CalendarConfirmation.confirmDeletion()` | `.deleted` (after user confirms delete card)                   |
-| `ChatViewModel+CalendarConfirmation.confirmUpdate()`   | `.updated` or `.rescheduled` (after user confirms update card) |
+| Call site | Action type written |
+|---|---|
+| `CalendarActionController.createEvent()` | `.created` (after EKEvent is saved) |
+| `ChatViewModel+CalendarConfirmation.confirmDeletion()` | `.deleted` (after user confirms delete card) |
+| `ChatViewModel+CalendarConfirmation.confirmUpdate()` | `.updated` or `.rescheduled` (after user confirms update card) |
 
 ### UndoLastDeletionIntent behaviour
 
 `UndoLastDeletionIntent.perform()` reads `SiriContextStore.read()` then branches on `type`:
 
-| Type                        | Behaviour                                                                   |
-| --------------------------- | --------------------------------------------------------------------------- |
-| `.deleted`                  | Recreates the event via `CalendarService`; asks user to confirm first       |
-| `.created`                  | Deletes the event using `eventIdentifier`; asks user to confirm first       |
-| `.updated` / `.rescheduled` | Returns a dialog informing the user that undo of edits is not yet supported |
-| `nil` (nothing stored)      | Returns a dialog stating there is no recent action to undo                  |
+| Type | Behaviour |
+|---|---|
+| `.deleted` | Recreates the event via `CalendarService`; asks user to confirm first |
+| `.created` | Deletes the event using `eventIdentifier`; asks user to confirm first |
+| `.updated` / `.rescheduled` | Returns a dialog informing the user that undo of edits isn't supported yet |
+| `nil` (nothing stored) | Returns a dialog stating there is no recent action to undo |
