@@ -168,16 +168,29 @@ Tap the **magnifying glass** icon in the top-right toolbar to open a search bar 
 
 ## Chat Toolbar Actions
 
-The top-right corner of any open chat shows up to four controls:
+### Navigation bar
+
+The centre of the navigation bar shows the **session title** (tap to rename — an alert appears with the current name pre-filled) and a **model indicator** subtitle below it — the name of the active model, or "LucidPal AI" when cloud mode is on. Tap the model indicator to open the model picker and switch models mid-conversation.
+
+### Top-right controls
 
 | Control | What it does |
 |---|---|
-| **Thinking** pill (brain icon) | Toggles Thinking mode for this session. Highlighted in accent colour when active. See [AI Models → Thinking Mode](./models#thinking-mode). |
+| **Brain icon** | Toggles Thinking mode for this session. Highlighted in accent colour when active. Only appears on models that support Thinking. Requires Pro. See [AI Models → Thinking Mode](./models#thinking-mode). |
 | **Magnifying glass** | Opens the in-chat search bar. |
-| **Share** (box-and-arrow) | Exports the full conversation as plain text. Only appears when the session has messages. |
-| **Clear** | Permanently deletes all messages in the current session (confirmation required). Only appears when the session has messages. |
+| **⋯ menu** | Opens a menu with: **Share** (export full conversation as plain text), **Clear History** (delete all messages — confirmation required), and **Rename**. Share and Clear History only appear when the session has messages. |
 
-Tap the **session title** in the navigation bar to rename the session inline — an alert appears with a text field pre-filled with the current name.
+---
+
+## Message Layout
+
+### Date separators
+
+When messages span more than one day, a **date pill** (e.g. "Yesterday", "Apr 25, 2026") appears between groups to mark the boundary.
+
+### Message grouping
+
+Consecutive messages from the same sender are visually grouped — tighter spacing within the group, wider spacing between groups. This makes it easy to scan back-and-forth exchanges at a glance.
 
 ---
 
