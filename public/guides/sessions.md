@@ -180,6 +180,23 @@ The centre of the navigation bar shows the **session title** (tap to rename — 
 | **Magnifying glass** | Opens the in-chat search bar. |
 | **⋯ menu** | Opens a menu with: **Share** (export full conversation as plain text), **Clear History** (delete all messages — confirmation required), and **Rename**. Share and Clear History only appear when the session has messages. |
 
+### Export format
+
+The exported text includes:
+
+```
+# <session title>
+<today's date>
+
+[You]
+<your message>
+
+[AI]
+<AI response>
+```
+
+System messages are excluded. The standard iOS share sheet opens, so you can send it to Messages, Mail, Notes, copy it to clipboard, AirDrop it, or save it anywhere iOS supports.
+
 ---
 
 ## Message Layout
