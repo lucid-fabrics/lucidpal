@@ -4,117 +4,133 @@ sidebar_position: 10
 
 # Live Notes
 
-Record meetings, conversations, and ideas — and get an AI-generated summary automatically.
+Record meetings, conversations, and interviews — and get a rich AI-generated summary automatically.
 
 ---
 
 ## Overview
 
-Live Notes captures live audio, transcribes it in real time with **speaker diarization** (multiple speakers identified and color-coded), then saves the transcript as a searchable note enriched with an AI summary and action items.
+Live Notes captures live audio, transcribes it in real time with **speaker diarization** (multiple speakers identified and color-coded), then saves the transcript as a searchable note enriched with an AI-generated summary, action items, decisions, deadlines, chapters, and more.
 
-This feature requires a **Pro subscription**.
+Free users get a trial balance of recording time. A **Pro subscription** removes the limit.
 
 ---
 
 ## Accessing Live Notes
 
-### From the Notes tab
-1. Open the **Notes** tab.
-2. Tap the **waveform mic** button (🎙) in the toolbar (top-right).
-3. Grant **microphone access** when prompted.
+Open the **Live Notes** tab (microphone icon in the tab bar). From there you can view past sessions and start a new one.
 
-### From the Agent screen
-Live Notes can also be started by voice or text through the Agent:
+---
 
-1. Open the **Agent** tab.
-2. Say or type a phrase like:
-   - *"Start a Live Notes session"*
-   - *"Live notes"*
-   - *"Transcribe"*
-   - *"Record this meeting"*
-   - *"Record this call"*
-   - *"Start recording"*
-   - *"Capture this meeting"*
-   - *"Meeting notes"*
-   - *"Take a voice note"*
-3. If you have a Pro subscription, the Live Notes sheet opens immediately. If not, an upgrade prompt is shown instead.
+## Starting a Session
 
-The Agent screen also shows a **"Live Notes"** card in the ability drawer for one-tap access.
+Tap the **mic+** button (top-right) or **Start New Session**. A setup sheet appears before recording begins.
+
+### Session Setup
+
+| Setting | Description |
+|---------|-------------|
+| **Session title** | Optional name (e.g. "Q3 Planning", "Product Interview") |
+| **Template** | Choose a template to help the AI focus its summary (Meeting, Interview, Brainstorm, Freeform, etc.) |
+| **Link calendar event** | Optionally associate the session with an upcoming calendar event (shows your next 7 days) |
+
+Tap **Start Recording** when ready.
+
+---
+
+## Free Trial
+
+Non-Pro users receive a free trial balance of recording time:
+
+- The remaining balance is shown as a countdown pill on the main screen and inside the recording session.
+- The pill turns **orange** when under 6 minutes remain.
+- When the budget is exhausted, recording stops automatically and an upgrade prompt is shown.
+- Tap the balance pill at any time to see upgrade options.
 
 ---
 
 ## Recording States
 
-| State | Indicator | What it means |
-|-------|-----------|---------------|
-| **Ready** | Microphone icon | Waiting to connect |
-| **Connecting** | Spinner | Establishing the audio stream |
-| **Recording** | Live transcript + amplitude bar | Capturing audio in real time |
-| **Generating summary** | Spinner | Sending transcript to AI |
-| **Reconnecting** | Orange banner + spinner | Briefly lost connection — attempting to reconnect (up to 3 tries at 1s, 2s, 4s intervals) |
-| **Error** | Warning icon + message | Something went wrong — tap Dismiss |
+| State | What it means |
+|-------|---------------|
+| **Connecting** | Establishing the AI audio stream |
+| **Recording** | Capturing and transcribing audio in real time |
+| **Reconnecting** | Briefly lost connection — retrying automatically |
+| **Generating Summary** | Session ended — AI is processing the transcript |
+| **Error** | Something went wrong — tap Dismiss |
 
 ---
 
 ## Live Transcript View
 
-While recording, the screen shows:
+While recording, the screen shows a scrolling transcript in a **chat bubble** layout:
 
-- **Speaker bubbles** — each speaker gets a color-coded bubble. Speaker labels ("Speaker 1", "Speaker 2", etc.) appear above each segment.
-- **Partial transcript** — the current spoken phrase appears at the bottom of the transcript in real time.
-- **Mic amplitude bar** — a visual waveform shows your current audio input level.
+- **Speaker bubbles** — each speaker gets a color-coded bubble (indigo, teal, orange, pink), alternating left/right.
+- **Speaker labels** — appear above each bubble ("Speaker 1", "Speaker 2", etc.).
+- **Rename a speaker** — tap any speaker label to assign a real name. The name applies to all their segments immediately.
+- **Partial transcript** — the current phrase appears at the bottom in real time as you speak (italic, pulsing dot).
+- **Mic amplitude orb** — the animated orb at the bottom pulses with your audio input level.
+- **Elapsed timer** — a red pulsing dot and `MM:SS` counter in the toolbar shows recording time.
+- **Live word count** — the toolbar shows how many words have been captured so far.
 
 The transcript scrolls automatically to keep the latest content visible.
 
 ---
 
-## Stopping and Saving
+## Controls During Recording
 
-Tap **Stop & Save** to end the recording. LucidPal:
-
-1. Stops audio capture.
-2. Sends the full transcript to the AI.
-3. Generates a title, summary, and action items.
-4. Saves everything as a note.
-
-The note title is auto-generated from the content (or "Voice Note" if no title can be derived). You can rename it later in the note editor.
-
-:::note
-If no speech was detected, the recording is discarded and the screen returns to idle — nothing is saved.
-:::
+| Control | Action |
+|---------|--------|
+| **Pause** | Pauses transcription without ending the session |
+| **Resume** | Continues after a pause |
+| **Bookmark (🏴)** | Flags the current moment with a timestamp — badge shows count |
+| **Stop & Save** | Ends the session and triggers AI summarization |
+| **Cancel** | Discards the recording (confirmation required) |
 
 ---
 
-## What Gets Saved
+## AI Summary
 
-| Field | Source |
-|-------|--------|
-| **Title** | AI-generated from transcript content, or "Voice Note" |
-| **Body** | Full raw transcript (up to 50,000 characters) |
-| **AI Summary** | Concise AI-generated recap |
+After tapping **Stop & Save**, LucidPal sends the full transcript to AI and generates a structured summary. The session card and detail view show:
+
+| Section | What it contains |
+|---------|-----------------|
+| **Summary** | Concise narrative recap of the session |
+| **Highlights** | Key moments worth remembering |
+| **Chapters** | Timestamped segments with title and summary — tap to expand |
+| **Decisions** | Explicit decisions made during the conversation |
 | **Action Items** | Tasks and to-dos extracted from the transcript |
-| **Source** | Marked as voice — note card shows a mic icon |
-
-Open the saved note to see the **AI Insights** section with the summary and action items. Tap any action item to schedule it as a reminder.
-
----
-
-## Speaker Diarization
-
-Deepgram's streaming API detects and labels different speakers in real time. Each speaker is assigned a consistent color (indigo, teal, orange, pink) throughout the transcript. Speaker labels update automatically as new voices are detected.
+| **Deadlines** | Time-bound commitments mentioned |
+| **Open Questions** | Unresolved questions from the session |
+| **Follow-up Draft** | Auto-drafted follow-up message — tap **Copy** to use it |
+| **Bookmarks** | Flagged moments with their timestamps |
+| **Transcript** | Full raw transcript (collapsed by default — tap Expand) |
 
 ---
 
-## Monthly Limits
+## Action Items → Calendar
 
-Live Notes tracks usage in **minutes per calendar month**:
+Each action item in the session detail has a **calendar+ button**. Tap it to open a pre-filled event creation sheet. Once added, the button shows a green checkmark.
 
-| Plan | Monthly limit |
-|------|--------------|
-| Pro | 300 minutes (~5 hours) |
-| Ultimate | 1,200 minutes (~20 hours) |
+---
 
-When the monthly limit is reached, the session endpoint returns an error and the recording cannot start until the next calendar month. Your remaining minutes are not shown in-app — plan accordingly.
+## Session List
+
+Past sessions appear as cards showing:
+
+- Template badge and icon
+- Session title
+- Duration and word count
+- Bookmark count (if any)
+- AI summary preview (first two lines)
+
+**Swipe left** to delete a session. **Swipe right** to pin or unpin it.
+
+---
+
+## Sharing
+
+Tap the **share icon** (top-right of session detail) to export the full session as plain text — includes summary, all AI sections, and the raw transcript.
 
 ---
 
@@ -122,9 +138,6 @@ When the monthly limit is reached, the session endpoint returns an error and the
 
 | Requirement | Details |
 |-------------|---------|
-| **Subscription** | Pro or Ultimate — free tier cannot use Live Notes |
 | **Microphone permission** | Required on first use. Enable in **Settings → Privacy & Security → Microphone → LucidPal** |
-| **Internet connection** | Audio streams to Deepgram; summary generated via cloud AI |
-| **Note storage** | Voice notes count toward your 500-note limit |
-
-See the [Notes guide](./notes) for details on note storage limits.
+| **Internet connection** | Audio is streamed to AI for transcription and summarization |
+| **Pro subscription** | Removes the free trial time limit |
