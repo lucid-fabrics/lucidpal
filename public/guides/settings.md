@@ -10,6 +10,18 @@ Open Settings by tapping the **gear icon** in the top-right corner of the main s
 
 ---
 
+## Search Settings
+
+Tap the **magnifying glass** icon in the top-right corner of Settings to search across all settings by name or description.
+
+Start typing — results appear instantly. Tap any result to jump directly to that setting.
+
+:::tip
+Use search to quickly find settings without scrolling through sections. Try "sync", "export", or "Gmail" to jump straight to what you need.
+:::
+
+---
+
 ## Simple vs Advanced Mode
 
 At the top of Settings, a **segmented picker** lets you switch between two views of the settings screen.

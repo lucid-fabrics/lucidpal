@@ -12,10 +12,10 @@ LucidPal is free to use with full on-device AI. Paid plans unlock cloud AI, sync
 
 | Plan | Price | What it adds |
 |------|-------|-------------|
-| **Free** | $0 | Full on-device AI, calendar, habits, notes, health, voice, vision |
+| **Free** | $0 | Full on-device AI, calendar, habits, notes, health, voice, vision, data export |
 | **Starter** | $9.99/mo or $59.99/yr | 100 cloud AI credits/month, daily briefing, cloud sync |
 | **Pro** | $19.99/mo or $119.99/yr | 500 credits, Gmail, Exchange, Immich, attachments, Brave Search, PDF processing |
-| **Ultimate** | $29.99/mo or $179.99/yr | Unlimited credits, AI Memory, proactive alerts, health insights, smart widgets, data export, API access |
+| **Ultimate** | $29.99/mo or $179.99/yr | Unlimited credits, AI Memory, proactive alerts, health insights, smart widgets, API access |
 
 ---
 
@@ -33,6 +33,7 @@ The Free tier uses your iPhone's hardware — nothing we run, nothing we charge 
 - DuckDuckGo web search
 - Siri Shortcuts, Live Activities
 - Unlimited local chat history
+- **Data export** — download all your notes, habits, and chat history as Markdown and JSON
 
 :::tip
 If a feature uses only your phone's built-in frameworks (calendar, health, camera), it will always be free.
@@ -82,7 +83,6 @@ Everything in Pro, plus:
 - **Proactive AI** — push alerts before you ask: traffic warnings, meeting prep, habit nudges, weather alerts, and focus suggestions
 - **Apple Health AI insights** — weekly AI analysis of your health trends and correlations
 - **Smart widgets** — home screen widgets powered by cloud AI, updated every 30 minutes
-- **Full data export** — download all your notes, habits, chat history, and AI memory as Markdown and JSON
 - **API access** — a personal API key to query your data and send AI messages programmatically. See [API Access](./api-access).
 - **Live Notes** — 1,200 min/month (vs. 300 min on Pro)
 
