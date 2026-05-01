@@ -8,10 +8,6 @@ LucidPal can connect to your Microsoft Exchange or Outlook account so the on-dev
 
 All processing happens on your iPhone. Email and calendar data never leaves the device.
 
-:::info Pro feature
-Microsoft Exchange integration requires a **Pro** subscription. See [Premium](./premium) for details.
-:::
-
 ## What is supported
 
 | Capability | Supported |

@@ -23,7 +23,7 @@ LucidPal can process documents entirely on-device. Attach a PDF or plain-text fi
 
 ## Attaching a Document
 
-Document attachment works in both **chat sessions** and **agent tasks** — see [In Agent Mode](#in-agent-mode) below for the agent-specific flow and Pro requirement.
+Document attachment works in both **chat sessions** and **agent tasks** — see [In Agent Mode](#in-agent-mode) below for the agent-specific flow.
 
 1. Open any chat session.
 2. Tap the **paperclip** icon next to the input bar.
@@ -61,10 +61,6 @@ Once a document is attached, the AI has access to its full text for that message
 
 ## In Agent Mode
 
-:::note
-Attaching documents in [Agent Mode](./agent-mode.md) requires a **Pro** plan.
-:::
-
 The doc icon in the Agent Mode input bar opens the same system document picker. Key differences from chat:
 
 | | Chat | Agent Mode |
@@ -73,7 +69,6 @@ The doc icon in the Agent Mode input bar opens the same system document picker. 
 | Max files per submission | Unlimited (one per tap) | 3 files |
 | Characters extracted per file | 8,000 | 8,000 |
 | Attachments cleared after send | Yes | Yes |
-| Plan required | Free | Pro |
 
 The agent can combine document content with tool calls in the same task. For example:
 

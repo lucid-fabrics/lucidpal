@@ -120,9 +120,6 @@ Record a conversation or voice memo directly from the Notes tab and have it save
 
 The transcript is saved as a note, enriched with a title, summary, and extracted action items. See the [Live Notes guide](./live-notes) for full details.
 
-:::note
-Live Notes requires a **Pro subscription**.
-:::
 
 ---
 

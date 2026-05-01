@@ -87,19 +87,11 @@ A **transcript confirmation bar** appears after transcription with a 3-second co
 
 ### Continuous Voice Loop
 
-:::note
-Continuous voice loop is a **Pro** feature.
-:::
-
 With continuous loop enabled, the microphone reopens automatically after the agent finishes speaking its response (TTS). This lets you issue follow-up tasks hands-free without tapping the mic again.
 
 ---
 
 ## Spoken Responses (TTS)
-
-:::note
-Spoken responses are a **Pro** feature.
-:::
 
 When TTS is enabled, the agent reads its final answer aloud using on-device text-to-speech. A speaker icon in the response header indicates playback is active. Tap it to stop.
 

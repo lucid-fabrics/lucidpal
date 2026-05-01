@@ -176,7 +176,7 @@ The centre of the navigation bar shows the **session title** (tap to rename — 
 
 | Control | What it does |
 |---|---|
-| **Brain icon** | Toggles Thinking mode for this session. Highlighted in accent colour when active. Only appears on models that support Thinking. Requires Pro. See [AI Models → Thinking Mode](./models#thinking-mode). |
+| **Brain icon** | Toggles Thinking mode for this session. Highlighted in accent colour when active. Only appears on models that support Thinking. See [AI Models → Thinking Mode](./models#thinking-mode). |
 | **Magnifying glass** | Opens the in-chat search bar. |
 | **⋯ menu** | Opens a menu with: **Share** (export full conversation as plain text), **Clear History** (delete all messages — confirmation required), and **Rename**. Share and Clear History only appear when the session has messages. |
 
