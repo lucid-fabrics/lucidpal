@@ -12,7 +12,7 @@ Record meetings, conversations, and interviews — and get a rich AI-generated s
 
 Live Notes captures live audio, transcribes it in real time with **speaker diarization** (multiple speakers identified and color-coded), then saves the transcript as a searchable note enriched with an AI-generated summary, action items, decisions, deadlines, chapters, and more.
 
-Free users get a trial balance of recording time. A **Pro subscription** removes the limit.
+Some recording time is available for free. Connect a paid plan to remove the limit.
 
 ---
 
@@ -38,13 +38,12 @@ Tap **Start Recording** when ready.
 
 ---
 
-## Free Trial
+## Recording Time
 
-Non-Pro users receive a free trial balance of recording time:
+A free balance of recording time is included. When it runs out, recording stops automatically and an upgrade prompt appears.
 
 - The remaining balance is shown as a countdown pill on the main screen and inside the recording session.
 - The pill turns **orange** when under 6 minutes remain.
-- When the budget is exhausted, recording stops automatically and an upgrade prompt is shown.
 - Tap the balance pill at any time to see upgrade options.
 
 ---
@@ -140,4 +139,4 @@ Tap the **share icon** (top-right of session detail) to export the full session 
 |-------------|---------|
 | **Microphone permission** | Required on first use. Enable in **Settings → Privacy & Security → Microphone → LucidPal** |
 | **Internet connection** | Audio is streamed to AI for transcription and summarization |
-| **Pro subscription** | Removes the free trial time limit |
+| **Paid plan** | Removes the recording time limit |

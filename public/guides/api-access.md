@@ -4,11 +4,7 @@ sidebar_position: 21
 
 # API Access
 
-LucidPal Ultimate gives you a personal API key so you can query your own data and send AI messages from scripts, automations, or any tool that can make HTTP requests.
-
-:::info Ultimate feature
-API access requires an **Ultimate** subscription. See [Premium](./premium) for details.
-:::
+LucidPal gives you a personal API key so you can query your own data and send AI messages from scripts, automations, or any tool that can make HTTP requests.
 
 ## What you can do with it
 
@@ -88,7 +84,7 @@ curl https://api.lucidpal.app/v1/habits \
 
 ### POST /v1/ai/chat
 
-Send a message to the AI and get a response. Uses your Ultimate AI credits.
+Send a message to the AI and get a response.
 
 ```bash
 curl https://api.lucidpal.app/v1/ai/chat \

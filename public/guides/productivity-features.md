@@ -24,7 +24,7 @@ LucidPal's on-device AI can manage your notes and habits directly from the chat 
 
 The AI can set **title**, **body**, and **tags** when creating or updating a note. See the [Notes guide](./notes) for full details.
 
-For recording meetings and conversations, use [Live Notes](./live-notes) (Pro) — it streams live audio with speaker diarization and auto-saves a note with AI summary.
+For recording meetings and conversations, use [Live Notes](./live-notes) — it streams live audio with speaker diarization and auto-saves a note with AI summary.
 
 ### Habits
 

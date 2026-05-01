@@ -51,8 +51,8 @@ These toggles control which personal data LucidPal can read and act on. All proc
 | **Calendar** | Use calendar in chat | Upcoming events are included in the AI prompt for scheduling and reminders |
 | **Location** | Include city in AI context | Your detected city is added to the AI prompt for location-relevant answers |
 | **Mail** | Mail | Lets the agent compose outgoing emails using your iOS Mail accounts (any provider). **Cannot read your inbox** — iOS does not expose an API for that. |
-| **Gmail** *(Pro)* | Sign in with Google | Connects to Gmail via Google OAuth for inbox reading and sending. Requires Pro. See [Gmail](./gmail). |
-| **Microsoft Exchange** *(Pro)* | Connect | Connects to your Microsoft 365 or Outlook account via OAuth for email reading and Exchange calendar sync. Requires Pro. See [Microsoft Exchange](./microsoft-exchange). |
+| **Gmail** | Sign in with Google | Connects to Gmail via Google OAuth for inbox reading and sending. See [Gmail](./gmail). |
+| **Microsoft Exchange** | Connect | Connects to your Microsoft 365 or Outlook account via OAuth for email reading and Exchange calendar sync. See [Microsoft Exchange](./microsoft-exchange). |
 | **Web Search** | *(tap to open sub-screen)* | Configure web search provider and API key — see [Web Search](./web-search) |
 
 ### Calendar
