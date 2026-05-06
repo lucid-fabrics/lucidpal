@@ -112,3 +112,26 @@ Notifications are scheduled locally on your device. They do not require an inter
 ### Adjusting or disabling
 
 Toggle pre-event reminders on or off in **LucidPal → Settings → Notifications**. You can also disable them in **iOS Settings → Notifications → LucidPal**, or revoke calendar access in **iOS Settings → Privacy & Security → Calendars**.
+
+---
+
+## Trial & Re-engagement Notifications
+
+During and after your free trial, LucidPal sends up to four notifications to help you get the most out of the app. These are optional — you can disable them at any time in iOS Settings.
+
+### What you'll receive
+
+| When | Notification | Tap to open |
+| --- | --- | --- |
+| Day 2 of trial | **"Your AI is still waiting"** — a gentle prompt if you haven't tried anything yet | AI assistant, ready to help |
+| Day 5 of trial | **"2 days of AI left"** — a reminder that your cloud AI trial is ending soon | Upgrade screen |
+| Day 7 of trial | **"Your cloud AI trial ended"** — a clear summary of what changed | Upgrade screen |
+| 30 days after onboarding | **"LucidPal can prep you for this week"** — a re-engagement prompt tied to your upcoming calendar | AI assistant |
+
+:::note
+All of these notifications are scheduled locally on your device at trial start. They do not require an internet connection and no personal data is sent to trigger them.
+:::
+
+### Disabling trial notifications
+
+Go to **iOS Settings → Notifications → LucidPal** and turn off notifications. This disables all LucidPal notifications, including pre-event reminders.

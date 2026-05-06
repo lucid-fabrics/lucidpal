@@ -29,6 +29,41 @@ Tap the **Agent** tab (the orb icon at the bottom of the screen) to open the Age
 The Agent requires **microphone access** to listen. If permission hasn't been granted, you'll see a prompt the first time you tap the orb. You can change this anytime in **Settings → Privacy → Microphone**.
 :::
 
+### Idle State — Context Strip
+
+When the Agent isn't actively listening, the screen shows your **Context Strip** — a live snapshot of your day. Each section is designed to get you into a relevant conversation with one tap.
+
+#### Proactive Nudge
+
+A sparkle icon with a short message at the top. The nudge surfaces time-sensitive information automatically, such as:
+
+- *"Meeting starting in 8 min"*
+- *"Back-to-back meetings 10:00–11:30"*
+- *"5 emails — a few may need replies"*
+
+No interaction needed — it appears whenever something in your calendar or inbox is worth your attention.
+
+#### Today at a Glance Tiles
+
+Below the nudge, tiles show live snapshots from your connected integrations. Each tile displays:
+
+| Field | What it shows |
+|-------|---------------|
+| **Label** | What the tile is tracking (e.g., "Next event") |
+| **Value** | The current or next relevant item |
+| **Sub** | Supporting detail (e.g., "in 45 min", "1 hr open") |
+
+**Tap any tile** to send that context directly to the Agent as a prompt — no typing required.
+
+#### Quick Chips
+
+Four tap-to-run shortcuts at the bottom of the idle screen:
+
+- **What's on today?** — Asks the Agent to summarize your calendar.
+- **When am I free?** — Finds your next open block.
+- **Check emails** — Summarizes your recent inbox.
+- **Schedule event** — Opens a conversation to help you block time.
+
 ### Troubleshooting Voice Input
 
 If recording doesn't work, the Agent shows a clear message:
@@ -88,7 +123,7 @@ The Abilities drawer can be expanded to reveal additional templates. Swipe the d
 | **Day Planner** | Time-blocked schedule with risk flags for overloaded periods. |
 | **Notes** | Surfaces the 3 most actionable items from recent notes. |
 | **Reminder** | Ask once, set immediately. |
-| **Free Time** | Ranks open calendar gaps by quality and tells you which block to protect. |
+| **Free Time** | Finds open slots, tells you when you're free, and which block to protect. |
 
 ### Health
 
