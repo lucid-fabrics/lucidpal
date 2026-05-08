@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Siri Shortcuts
 
-Eleven built-in Siri intents let you manage your calendar, notes, contacts, habits, and reminders — without opening the app.
+Ten built-in Siri intents let you manage your calendar, notes, contacts, and reminders — without opening the app.
 
 ## Available Shortcuts
 
@@ -19,7 +19,6 @@ Eleven built-in Siri intents let you manage your calendar, notes, contacts, habi
 | **Undo Last Action** | "Undo my last LucidPal action" | Reverses the most recent calendar action (create, delete, update, or reschedule) — whether done via Siri or inside the app |
 | **Save Note** | "Save note to LucidPal" | Saves a titled note — runs without opening the app |
 | **Find Contact** | "Find contact in LucidPal" | Looks up a contact's phone and email — runs without opening the app |
-| **Log Habit** | "Log habit in LucidPal" | Records a habit entry — runs without opening the app |
 | **Set Reminder** | "Set reminder in LucidPal" | Schedules a local notification — runs without opening the app |
 
 ---
@@ -32,7 +31,6 @@ Five intents run entirely in the background — they never open LucidPal:
 |--------|-------------|
 | Save Note | Saves a titled note — runs without opening the app |
 | Find Contact | Looks up a contact's phone and email — runs without opening the app |
-| Log Habit | Records a habit entry — runs without opening the app |
 | Set Reminder | Schedules a local notification — runs without opening the app |
 | Delete Calendar Event | Searches for an event and deletes it after confirmation — runs without opening the app |
 

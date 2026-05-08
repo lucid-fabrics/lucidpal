@@ -10,7 +10,7 @@ Export conversations, search messages, pin your most-used prompts, and let the A
 
 ## AI Actions from Chat
 
-LucidPal's on-device AI can manage your notes and habits directly from the chat — no need to navigate to another screen. Speak or type naturally; the AI figures out what to do.
+LucidPal's on-device AI can manage your notes directly from the chat — no need to navigate to another screen. Speak or type naturally; the AI figures out what to do.
 
 ### Notes
 
@@ -23,21 +23,6 @@ LucidPal's on-device AI can manage your notes and habits directly from the chat 
 | "Delete my draft ideas note" | Permanently deletes the matching note |
 
 The AI can set **title**, **body**, and **tags** when creating or updating a note. See the [Notes guide](./notes.md) for full details.
-
-### Habits
-
-| Request | What happens |
-|---------|-------------|
-| "Log my run for today" | Records an entry for a matching habit |
-| "I did 20 push-ups" | Logs 20 against a push-ups habit |
-| "Create a daily meditation habit" | Creates a new habit definition |
-| "How is my water habit going?" | Returns a 7-day summary and streak |
-
-When creating a habit the AI can set: **name**, **emoji**, **color** (accent hex), **type** (done/count/duration), **frequency** (daily/weekly), and **target** (for count/duration types). See the [Habits guide](./habits.md) for full details.
-
-:::tip
-Ask the AI to query a habit before logging to confirm the name it will match against.
-:::
 
 ---
 
@@ -102,6 +87,6 @@ Pin prompts like "What's on my calendar today?" or "Find my next free hour" to a
 <details>
 <summary>For developers</summary>
 
-See [architecture/system-prompt](../architecture/system-prompt) for how the AI's context window is assembled — including calendar data, notes, habits, and user preferences — before each inference call.
+See [architecture/system-prompt](../architecture/system-prompt) for how the AI's context window is assembled — including calendar data, notes, and user preferences — before each inference call.
 
 </details>

@@ -23,7 +23,7 @@ LucidPal offers optional paid plans that unlock cloud AI, live activities, smart
 | API Access | — | — | ✓ | ✓ |
 | Data Export | — | — | ✓ | ✓ |
 
-All calendar, notes, habits, and on-device AI features remain free forever.
+All calendar, notes, and on-device AI features remain free forever.
 
 ---
 
@@ -33,7 +33,7 @@ All calendar, notes, habits, and on-device AI features remain free forever.
 
 Everything you need to use LucidPal as a local AI assistant:
 - On-device inference with any downloaded model
-- Full calendar, notes, habits, and contacts integration
+- Full calendar, notes, and contacts integration
 - Voice input via WhisperKit
 - Siri shortcuts (11 built-in intents)
 - Home screen widgets (basic)
@@ -101,7 +101,7 @@ LucidPal cannot process refunds directly. For refund requests, contact Apple Sup
 | After billing period ends | Cloud AI + premium features disabled; on-device AI unaffected |
 | Subscribing again later | Full cloud access restored immediately |
 
-Your notes, habits, calendar data, and sessions are never deleted.
+Your notes, calendar data, and sessions are never deleted.
 
 ---
 
