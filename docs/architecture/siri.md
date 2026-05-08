@@ -8,7 +8,7 @@ How LucidPal integrates with Siri using the AppIntents framework.
 
 ## Overview
 
-LucidPal registers eleven Siri intents via the **AppIntents** framework. Calendar and AI intents use a **handoff pattern**: they store a pending query in `UserDefaults`, tell Siri a brief spoken confirmation, and open the app. The app picks up the pending query when its scene becomes active. Five background-action intents — `SaveNoteIntent`, `FindContactIntent`, `LogHabitIntent`, `SetReminderIntent`, and `DeleteCalendarEventIntent` — run entirely without opening the app (`openAppWhenRun: false`) and write directly to the app's shared document storage.
+LucidPal registers ten Siri intents via the **AppIntents** framework. Calendar and AI intents use a **handoff pattern**: they store a pending query in `UserDefaults`, tell Siri a brief spoken confirmation, and open the app. The app picks up the pending query when its scene becomes active. Four background-action intents — `SaveNoteIntent`, `FindContactIntent`, `SetReminderIntent`, and `DeleteCalendarEventIntent` — run entirely without opening the app (`openAppWhenRun: false`) and write directly to the app's shared document storage.
 
 ```
 User: "Add dentist Friday at 10am to LucidPal"
@@ -40,7 +40,6 @@ User confirms → CalendarService.createEvent() → EKEventStore
 | `AgentTaskIntent` | handoff | "Ask LucidPal Agent" | `@Parameter task: String` |
 | `SaveNoteIntent` | background | "Save note to LucidPal", "Add note to LucidPal" | `@Parameter title: String`, `@Parameter content: String` |
 | `FindContactIntent` | background | "Find contact in LucidPal", "Get phone number from LucidPal" | `@Parameter name: String` |
-| `LogHabitIntent` | background | "Log habit in LucidPal", "Log my workout in LucidPal" | `@Parameter habitName: String`, `@Parameter value: Double` |
 | `SetReminderIntent` | background | "Set reminder in LucidPal" | `@Parameter title: String`, `@Parameter body: String?`, `@Parameter at: Date` |
 
 ## Handoff Keys

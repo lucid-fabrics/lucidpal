@@ -95,9 +95,9 @@ The Brave API key is stored only on your device (iOS Keychain via `UserDefaults`
 
 ## lucidpal.app Web Services (Optional)
 
-A separate cloud backend (`lucidpal-api`) powers the **lucidpal.app** website and web app only. It handles account authentication, billing, notes sync, and habits tracking for web users.
+A separate cloud backend (`lucidpal-api`) powers optional cloud AI features. It handles account authentication and billing for subscribers.
 
-**The iOS app does not connect to this backend.** All iOS features (calendar, AI inference, voice) run fully offline. The API is only relevant if you also use the web app at [lucidpal.app](https://lucidpal.app).
+**All core iOS features run fully offline.** Calendar management, on-device AI inference, and voice input never connect to any server. Cloud AI requests (when enabled) are routed through the LucidPal backend — your conversation content is never stored server-side.
 
 ---
 

@@ -42,7 +42,7 @@ Tap any chip to send that question instantly.
 
 ### New text chat
 
-Tap **New text chat** to open a keyboard-based conversation instead of using voice. From a text session you can also capture [Notes](./notes) and ask about [habits](./habits) or other topics.
+Tap **New text chat** to open a keyboard-based conversation instead of using voice. From a text session you can also capture [Notes](./notes) or ask about any topic.
 
 ---
 

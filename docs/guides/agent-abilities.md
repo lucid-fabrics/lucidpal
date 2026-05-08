@@ -97,9 +97,8 @@ Five built-in abilities ship with LucidPal:
 |---------|-------------|
 | **Morning Briefing** | Pulls health, weather, today's calendar, and recent emails. Returns a concise briefing: energy level, weather decisions, top events, and urgent emails. |
 | **Meeting Prep** | Finds the next meeting, pulls attendee contacts, searches relevant emails, and does a web search for background context. Returns talking points. |
-| **Day Planner** | Checks health and today's calendar, finds free slots, reviews pending habits. Returns a time-blocked schedule slotted around existing commitments. |
+| **Day Planner** | Checks health and today's calendar, finds free slots. Returns a time-blocked schedule slotted around existing commitments. |
 | **Email Triage** | Fetches recent emails via Gmail, skips newsletters and automations, returns a categorized summary with urgent items first. |
-| **Habit Coach** | Queries all habits and today's completion status, cross-references with health metrics. Returns an assessment with one insight correlating habits and recovery. |
 
 ---
 
@@ -130,7 +129,6 @@ The Abilities drawer can be expanded to reveal additional templates. Swipe the d
 | Template | What it does |
 |----------|-------------|
 | **Health** | Today's steps, HRV, heart rate vs. 7-day average — one verdict and one action. |
-| **Habits** | Incomplete habits prioritized by what's realistic to finish today given your calendar. |
 
 ### Communication
 
@@ -226,5 +224,5 @@ The **Briefing** ability is the fastest way to see if everything is working — 
 :::
 
 :::note
-Abilities that use cloud synthesis (email, Gmail reply) require an active Starter or higher subscription. On-device abilities (calendar, health, habits, notes, reminders) work with a local model and no subscription.
+Abilities that use cloud synthesis (email, Gmail reply) require an active Starter or higher subscription. On-device abilities (calendar, health, notes, reminders) work with a local model and no subscription.
 :::

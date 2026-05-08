@@ -64,7 +64,6 @@ let llmService: LLMService
     private let calendarService = CalendarService()
     private let hapticService = HapticService()
     private let contactsService = ContactsService()
-    private let habitStore = HabitStore()
     private let noteEnrichmentService = NoteEnrichmentService()
     private let premiumManager = PremiumManager()
     // noteEnrichmentService injected into NotesListViewModel alongside notesStore
@@ -147,7 +146,6 @@ Sources/
 │   ├── ChatSession.swift         ← Session and SessionMeta types
 │   ├── ContextItem.swift         ← Attached context items (documents, images)
 │   ├── ConversationTemplate.swift← Template definitions for system prompts
-│   ├── HabitModels.swift         ← Habit and habit-log domain types
 │   ├── LucidPalActivityAttributes.swift ← Live Activity attributes
 │   ├── ModelInfo.swift           ← GGUF model metadata
 │   ├── NoteItem.swift            ← Note model with AI metadata fields
@@ -173,10 +171,6 @@ Sources/
 │   ├── DebugLogStore.swift            ← In-memory debug log storage
 │   ├── DocumentProcessor.swift        ← PDF/document text extraction
 │   ├── DocumentProcessorProtocol.swift← Protocol for document processing
-│   ├── HabitActionController.swift    ← LLM JSON → habit action
-│   ├── HabitPromptSection.swift       ← Habit section of system prompt
-│   ├── HabitStore.swift               ← Habit log persistence (ObservableObject)
-│   ├── HabitStoreProtocol.swift       ← Protocol for habit store
 │   ├── HapticService.swift            ← UIImpactFeedbackGenerator wrapper
 │   ├── LiveActivityService.swift      ← Live Activity start/update/end
 │   ├── LlamaActor.swift               ← llama.cpp serial actor (base)
@@ -242,11 +236,6 @@ Sources/
     ├── DesignConstants.swift          ← Shared design tokens
     ├── DocumentAttachmentPill.swift   ← Document attachment chip
     ├── DocumentPickerButton.swift     ← Document picker trigger button
-    ├── HabitCard.swift                ← Habit summary card
-    ├── HabitCreationSheet.swift       ← New habit creation form
-    ├── HabitDashboardView.swift       ← Habit overview dashboard
-    ├── HabitDetailView.swift          ← Single habit detail and log
-    ├── HabitLogSheet.swift            ← Log a habit entry sheet
     ├── MessageBubbleView.swift        ← Per-message bubble + long-press
     ├── MessageBubbleView+ImageViewer.swift ← Full-screen image viewer
     ├── ModelDownloadView.swift        ← Model download progress screen

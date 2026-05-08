@@ -15,10 +15,9 @@ LucidPal is an on-device AI assistant that understands and manages your iOS cale
 | **100% On-Device**            | All inference runs via llama.cpp on the Neural Engine. No API keys required for local AI. Optional cloud AI available with subscription. |
 | **Cloud AI**                  | Optional cloud AI powered by Gemini 2.5 Flash. Available for Starter and higher subscribers. Automatically switches to local when offline. |
 | **Calendar Integration**      | Create, update, delete, reschedule, and query events using plain English. Conflict detection included.                   |
-| **Siri Shortcuts**            | Eleven built-in Siri intents let you manage your calendar, notes, contacts, and habits without ever opening the app. |
+| **Siri Shortcuts**            | Ten built-in Siri intents let you manage your calendar, notes, contacts, and reminders without ever opening the app. |
 | **Multi-Session**             | Full conversation history with named sessions, persisted locally across launches.                           |
 | **Notes**                     | Capture quick thoughts in chat; notes are enriched and stored locally. See the [Notes guide](./guides/notes). |
-| **Habit Tracker**             | Track daily habits and log streaks through natural language. See the [Habits guide](./guides/habits). |
 | **Vision / Photo Analysis**   | Describe images and photos using an optional on-device vision model. See the [Models guide](./guides/models). |
 | **Proactive AI**              | Daily morning briefing notification via background refresh. Tap to launch Agent Mode.                       |
 | **Premium Tiers**             | Starter, Pro, and Ultimate plans with cloud AI credits, live activities, smart widgets, and more.          |
@@ -28,7 +27,7 @@ LucidPal is an on-device AI assistant that understands and manages your iOS cale
 | **Reminders**                 | Set one-off reminders through natural language — synced to the iOS Reminders app. |
 | **Web Search**                | Query DuckDuckGo, Brave, or a self-hosted SearXNG instance — results synthesized locally. |
 | **Conversation Templates**    | Built-in AI personas (Writing Coach, Decision Helper, Meeting Prep, Brainstorm) for focused sessions.       |
-| **Productivity Features**     | AI actions for notes and habits from chat, conversation export, full-text message search, and pinned prompts. |
+| **Productivity Features**     | AI actions for notes from chat, conversation export, full-text message search, and pinned prompts. |
 | **Settings**                  | Full reference for every setting in the app. See the Settings section within the app. |
 | **Privacy**                   | Full explanation of the on-device architecture and what data never leaves your phone. See the [Privacy guide](./guides/privacy). |
 | **Models**                    | How to download, switch, and manage GGUF models from the app. See the [Models guide](./guides/models). |
@@ -50,7 +49,7 @@ On first launch, LucidPal walks you through five onboarding screens:
 | 2 | **Knows Your Schedule** | Introduction to calendar integration |
 | 3 | **Type or Speak** | Mic and text input introduction |
 | 4 | **Choose Your AI** | Select a text model (required) and an optional vision model, then download |
-| 5 | **Data Sources** | Enable Notes, Habits, Contacts, Calendar, Location, and Web Search. iOS permission prompts for Calendar, Contacts, and Location appear inline so you can grant access in context before entering the app. |
+| 5 | **Data Sources** | Enable Notes, Contacts, Calendar, Location, and Web Search. iOS permission prompts for Calendar, Contacts, and Location appear inline so you can grant access in context before entering the app. |
 
 After step 5, you are taken directly into the app with all selected permissions granted.
 

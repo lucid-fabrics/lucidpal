@@ -14,7 +14,6 @@ const sidebars = {
         'guides/widgets-notifications',
         'guides/templates-live-activity',
         'guides/agent-abilities',
-        'guides/habits',
         'guides/notes',
         'guides/record-sessions',
         'guides/productivity-features',
